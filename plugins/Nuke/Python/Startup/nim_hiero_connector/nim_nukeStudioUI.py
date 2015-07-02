@@ -70,8 +70,17 @@ def openDialog():
 		# Get Server OS Path from server ID
 		serverOsPathInfo = nimAPI.get_serverOSPath( verInfo[0]['serverID'], platform.system() )
 		P.info("Server OS Path: %s" % serverOsPathInfo)
-		serverOSPath = serverOsPathInfo[0]['serverOSPath']
-		nimHieroConnector.g_nim_serverOSPath = serverOSPath
+		if serverOsPathInfo:
+			serverOSPath = serverOsPathInfo[0]['serverOSPath']
+			nimHieroConnector.g_nim_serverOSPath = serverOSPath
+			nimHieroConnector.g_nim_serverID = verInfo[0]['serverID']
+		else:
+			print "Server OS path not returned from NIM"
+			# Show warning
+			msgBox = QMessageBox()
+			msgBox.setTextFormat(Qt.RichText)
+			result = msgBox.information(None, "Warning", "Could not open project. Server OS path not returned from NIM.", QMessageBox.Ok)
+			return
 
 		projectPath = os.path.join(verOsPath['path'], verInfo[0]['filename'])
 		projectPath = projectPath.replace('\\','/')
@@ -381,25 +390,6 @@ class NimNS_openDialog(QDialog):
 		tag_jobID = None
 		tag_showID = None
 
-		#nimConnect = nimHieroConnector.NimHieroConnector()
-		
-		# Check Sequence for existing showID
-		'''
-		for trackItem in selection:
-			sequence = trackItem.parentSequence()
-			nim_sequence_tag = nimConnect.getNimTag(sequence)
-			if(nim_sequence_tag != False):
-				tag_showID = nim_sequence_tag.metadata().value("tag.showID")
-				print "NIM: Sequence showID=%s" % tag_showID
-				if(tag_showID != ''):
-					showInfo = nimAPI.get_showInfo(tag_showID)
-					if len(showInfo)>0:
-						for showInfoDetails in showInfo:
-							tag_jobID = showInfoDetails['jobID']
-							print "NIM: Sequence jobID=%s" % tag_jobID
-			break
-		'''
-
 		layout = QVBoxLayout()
 		formLayout = QFormLayout()
 		groupBox = QGroupBox()
@@ -407,8 +397,6 @@ class NimNS_openDialog(QDialog):
 		groupBox.setLayout(groupLayout)
 
 		
-
-
 		# JOBS: List box for job selection
 		horizontalLayout0 = QHBoxLayout()
 		horizontalLayout0.setSpacing(-1)
@@ -461,6 +449,7 @@ class NimNS_openDialog(QDialog):
 		groupLayout.setLayout(1, QFormLayout.SpanningRole, horizontalLayout1)
 
 		# SHOWS: Add dictionary in ordered list
+		'''
 		showIndex = 0
 		showIter = 0
 		if len(self.nim_shows)>0:
@@ -477,9 +466,9 @@ class NimNS_openDialog(QDialog):
 
 			if self.pref_show != '':
 				self.nim_showChooser.setCurrentIndex(showIndex)
-
+		'''
 		self.nim_showChooser.currentIndexChanged.connect(self.nim_showChanged)
-		self.nim_showChanged()
+		#self.nim_showChanged()
 		
 		
 		# TASKS: List box for server selection
@@ -518,7 +507,6 @@ class NimNS_openDialog(QDialog):
 			if self.pref_task != '':
 				#print "self.pref_task=",self.pref_task
 				self.nim_taskChooser.setCurrentIndex(taskIndex)
-
 		self.nim_taskChooser.currentIndexChanged.connect(self.nim_taskChanged)
 		self.nim_taskChanged()
 		
@@ -539,6 +527,7 @@ class NimNS_openDialog(QDialog):
 		groupLayout.setLayout(3, QFormLayout.SpanningRole, horizontalLayout3)
 
 		# BASENAMES: Add dictionary in ordered list
+		'''
 		basenameIndex = 0
 		basenameIter = 0
 		if len(self.nim_basenames)>0:
@@ -555,9 +544,9 @@ class NimNS_openDialog(QDialog):
 
 			if self.pref_basename != '':
 				self.nim_basenameChooser.setCurrentRow(basenameIndex)
-
+		'''
 		self.nim_basenameChooser.currentItemChanged.connect(self.nim_basenameChanged)
-		self.nim_basenameChanged()
+		#self.nim_basenameChanged()
 
 
 		# VERSIONS: List box for server selection
@@ -576,6 +565,7 @@ class NimNS_openDialog(QDialog):
 		groupLayout.setLayout(4, QFormLayout.SpanningRole, horizontalLayout4)
 
 		# VERSIONS: Add dictionary in ordered list
+		'''
 		versionIndex = 0
 		versionIter=0
 		if len(self.nim_versions)>0:
@@ -590,9 +580,9 @@ class NimNS_openDialog(QDialog):
 
 			if self.pref_version != '':
 				self.nim_versionChooser.setCurrentRow(versionIndex)
-
+		'''
 		self.nim_versionChooser.currentItemChanged.connect(self.nim_versionChanged)
-		self.nim_versionChanged()
+		#self.nim_versionChanged()
 
 		# Add the standard ok/cancel buttons, default to ok.
 		self._buttonbox = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
@@ -676,7 +666,7 @@ class NimNS_openDialog(QDialog):
 
 
 	def nim_updateShow(self):
-		self.nim_shows = {}
+		self.nim_shows = []
 		self.nim_shows = nimAPI.get_shows(self.nim_jobID)
 		#print self.nim_shows
 
