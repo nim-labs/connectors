@@ -1,0 +1,6 @@
+﻿Enabled=True
+DraftPool=draft
+DraftGroup=draft
+DraftLimit=10
+PriorityOffset=0
+OutputFolder=Draft

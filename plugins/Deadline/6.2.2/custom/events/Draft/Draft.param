@@ -1,0 +1,56 @@
+[Enabled]
+Type=boolean
+Category=Options
+CategoryOrder=0
+Index=0
+Label=Enabled
+Default=false
+Description=If this event plugin is enabled.
+
+[DraftPool]
+Type=string
+Category=Options
+CategoryOrder=0
+Index=1
+Label=Draft Pool
+Default=
+Description=The Group to which the Draft jobs will be submitted.  If blank, the original job's Group will be re-used.
+
+[DraftGroup]
+Type=string
+Category=Options
+CategoryOrder=0
+Index=2
+Label=Draft Group
+Default=
+Description=The Pool to which the Draft jobs will be submitted.  If blank, the original job's Pool will be re-used.
+
+[DraftLimit]
+Type=string
+Category=Options
+CategoryOrder=0
+Index=3
+Label=Draft Limit
+Default=
+Description=The Limit to which the Draft jobs will be submitted.  If blank, no Limit will be used.
+
+[PriorityOffset]
+Type=integer
+Minimum=-100
+Maximum=100
+Increment=1
+Category=Options
+CategoryOrder=0
+Index=4
+Label=Priority Offset
+Default=0
+Description=This offset will be added to the original job's priority, in order to determine the Draft job's priority.
+
+[OutputFolder]
+Type=string
+Category=Options
+CategoryOrder=0
+Index=5
+Label=Draft Output Folder
+Default=Draft
+Description=The folder in which to put the Draft output, relative to the Draft input folder.

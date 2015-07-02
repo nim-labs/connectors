@@ -1,0 +1,46 @@
+/* ****************************************************************************
+#
+# Filename: Maya/n_nimTools.mel
+# Version:  v0.7.3.150625
+#
+# Copyright (c) 2015 NIM Labs LLC
+# All rights reserved.
+#
+# Use of this software is subject to the terms of the NIM Labs license
+# agreement provided at the time of installation or download, or which
+# otherwise accompanies this software in either electronic or hard copy form.
+# *************************************************************************** */
+
+global proc string nim_getJsonValue(string $data, string $key)
+{
+    if (`size($data)` > 0)
+    {    //REMOVE {} at start and end of JSON
+        $data = substring($data, 2, (`size($data)`-1) );
+        print ("Data: "+$data+"\n");
+    }
+    else
+    {
+        return "None";
+    }
+    
+    //REMOVE ALL ' FROM string
+    $data = substituteAllString($data,"'","");
+    print ("Data: "+$data+"\n");
+    $array1 = stringToStringArray($data,",");
+    print ($array1);
+    
+    for ($subArray in $array1)
+    {
+        $array2 = stringToStringArray($subArray,": ");
+        
+        print("ARRAY: "+$array2[0]+"-"+$array2[1]+"\n");
+        if ($array2[0] == $key)
+        {
+            string $found = $array2[1];
+            return $found;
+        }
+            
+   }
+   return "None";
+}
+

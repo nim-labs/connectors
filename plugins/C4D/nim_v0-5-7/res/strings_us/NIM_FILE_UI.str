@@ -1,0 +1,26 @@
+// C4D-DialogResource
+
+DIALOGSTRINGS NIM_FILE_UI
+{
+    NIM_FILE_UI_NAME "nim_fileUI";
+    
+    NIM_BTN_OPEN "Open";
+    NIM_BTN_SAVE "Save As";
+    NIM_BTN_LOAD "Import";
+    NIM_BTN_PUB "Publish";
+    
+    NIM_TXT_JOB "Job :";
+    NIM_TXT_SERVER "Server :";
+    NIM_TXT_ASSET "Asset :";
+    NIM_TXT_SHOW "Show :";
+    NIM_TXT_SHOT "Shot :";
+    NIM_TXT_FILTER "Filter :";
+    NIM_TXT_TASK "Task :";
+    NIM_TXT_BASE "Basename :";
+    NIM_TXT_VER "Version :";
+    NIM_TXT_VER_FILEPATH "Filepath :";
+    NIM_TXT_VER_USER "User :";
+    NIM_TXT_VER_DATE "Date :";
+    NIM_TXT_VER_COMMENT "Comment :";
+  
+}

@@ -1,0 +1,74 @@
+#! C:/Program Files/Nuke8.0v5/nuke-8.0.v5.dll -nx
+version 8.0 v5
+Gizmo {
+ addUserKnob {20 User l "WriteNIM DPX"}
+ addUserKnob {26 outputFileText l Filename -STARTLINE T "NIM filename"}
+ addUserKnob {41 nimCompTag l "Render Tag" T WriteNIM_DPX.nimCompTag}
+ addUserKnob {41 nimFilename l INVISIBLE +INVISIBLE T WriteNIM_DPX.nimFilename}
+ addUserKnob {22 refreshFilename l "Refresh Filename" t "This is just a check to visualize the output filename.  The output filename will always be correct.  This button just refreshed the display label incase the file was versioned up or the tag changed while the preference pane was open." T "nuke.thisNode()\['outputFileText'].setValue(nuke.thisNode()\['nimFilename'].value()+'.####.dpx')" +STARTLINE}
+ addUserKnob {52 pythonFilenameScript T "nuke.thisNode()\['outputFileText'].setValue(nuke.thisNode()\['nimFilename'].value()+'.####.dpx')" +STARTLINE}
+ addUserKnob {26 "" +STARTLINE}
+ addUserKnob {41 channels T WriteNIM_DPX.channels}
+ addUserKnob {41 frame_mode l frame T WriteNIM_DPX.frame_mode}
+ addUserKnob {41 frame l "" -STARTLINE T WriteNIM_DPX.frame}
+ addUserKnob {41 colorspace T WriteNIM_DPX.colorspace}
+ addUserKnob {41 premultiplied T WriteNIM_DPX.premultiplied}
+ addUserKnob {41 raw l "raw data" T WriteNIM_DPX.raw}
+ addUserKnob {41 views T WriteNIM_DPX.views}
+ addUserKnob {26 "" l "dpx Options"}
+ addUserKnob {41 datatype T WriteNIM_DPX.datatype}
+ addUserKnob {41 fill T WriteNIM_DPX.fill}
+ addUserKnob {41 bigEndian l "big endian" T WriteNIM_DPX.bigEndian}
+ addUserKnob {41 timecode l "time code" T WriteNIM_DPX.timecode}
+ addUserKnob {41 edge_code l "edge code" T WriteNIM_DPX.edge_code}
+ addUserKnob {41 transfer T WriteNIM_DPX.transfer}
+ addUserKnob {26 ""}
+ addUserKnob {41 render_order l "render order" T WriteNIM_DPX.render_order}
+ addUserKnob {41 Render T WriteNIM_DPX.Render}
+ addUserKnob {41 first l "frame range" T WriteNIM_DPX.first}
+ addUserKnob {41 last l "" -STARTLINE T WriteNIM_DPX.last}
+ addUserKnob {41 use_limit l "limit to range" T WriteNIM_DPX.use_limit}
+ addUserKnob {26 "" l " "}
+ addUserKnob {41 reading l "read file" T WriteNIM_DPX.reading}
+ addUserKnob {41 checkHashOnRead l "check file matches input" T WriteNIM_DPX.checkHashOnRead}
+ addUserKnob {41 on_error l "missing frames" T WriteNIM_DPX.on_error}
+ addUserKnob {41 reload l Reload T WriteNIM_DPX.reload}
+ addUserKnob {20 "" l Python}
+ addUserKnob {41 beforeRender l "before render" T WriteNIM_DPX.beforeRender}
+ addUserKnob {41 beforeFrameRender l "before each frame" T WriteNIM_DPX.beforeFrameRender}
+ addUserKnob {41 afterFrameRender l "after each frame" T WriteNIM_DPX.afterFrameRender}
+ addUserKnob {41 afterRender l "after render" T WriteNIM_DPX.afterRender}
+ addUserKnob {41 renderProgress l "render progress" T WriteNIM_DPX.renderProgress}
+ addUserKnob {41 disable_1 l INVISIBLE +INVISIBLE T WriteNIM_PNG.disable}
+}
+ Input {
+  inputs 0
+  name Input1
+  xpos 272
+  ypos 104
+ }
+ Write {
+  file "\[ value nimPath ]/\[value nimFolder]/\[value nimFilename].####.dpx"
+  file_type dpx
+  checkHashOnRead false
+  version 1
+  beforeRender "import nim_tools; nim_tools.CheckOutputPath();"
+  name WriteNIM_DPX
+  xpos 272
+  ypos 144
+  disable {{parent.disable}}
+  addUserKnob {20 User}
+  addUserKnob {1 nimCompTag l "Render Tag" t "A tag to append to the current filename"}
+  addUserKnob {1 nimPath l "NIM Path"}
+  nimPath "\[ value root.nim_compPath ]"
+  addUserKnob {1 nimFolder l "NIM Folder"}
+  nimFolder "\[value root.nim_basename]_v\[format %02d \[value root.nim_version]]\[ if \{ !\[string equal \[string trim \[value nimCompTag] \" \"] \"\"] \} \{return _\[string trim \[value nimCompTag] \" \"]\} ]"
+  addUserKnob {1 nimFilename l "NIM Filename"}
+  nimFilename "\[value root.nim_basename]_v\[format %02d \[value root.nim_version]]\[ if \{ !\[string equal \[string trim \[value nimCompTag] \" \"] \"\"] \} \{return _\[string trim \[value nimCompTag] \" \"]\} ]"
+ }
+ Output {
+  name Output1
+  xpos 272
+  ypos 244
+ }
+end_group

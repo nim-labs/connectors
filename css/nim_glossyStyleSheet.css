@@ -1,0 +1,66 @@
+QFrame {
+ border: 1px solid white;
+ border-radius: 3px;
+ background: qradialgradient(
+   cx: 0.5, cy: -1.8,
+   fx: 0.5, fy: 0,
+   radius: 2, 
+   stop: 0 #9aa9be,
+   stop: 1 #293859);
+  font: bold;
+}
+ 
+QLabel {
+ background: transparent;
+ color: white;
+}
+ 
+QPushButton {
+ color: #white; 
+ border: 1px solid black;
+ border-radius: 3px;
+ padding: 1px;
+ background: qlineargradient(
+   x1:0, y1:0, x2:0, y2:1,
+   stop:0 #bec1d2,
+   stop: 0.4 #717990, 
+   stop: 0.5 #5c637d
+   stop:1 #68778e
+ );
+ min-height: 36px;
+}
+ 
+QPushButton:pressed {
+background: qlineargradient(
+  x1:0, y1:0, x2:0, y2:1,
+  stop:0 #68778e,
+  stop: 0.4 #5c637d
+  stop: 0.5 #717990,
+  stop:1 #bec1d2
+ );
+ color: black;
+}
+ 
+QLineEdit {
+ background: qlineargradient(
+  x1:0, y1:0, x2:0, y2:1,
+  stop:0 gray,
+  stop: 0.2 white
+  stop:1 white
+ );
+ border-radius: 1px;
+ border: 1px solid black;
+ min-height: 24px;
+ color: black;
+}
+ 
+QCheckBox {
+     color:  white;
+ }
+ 
+QCheckBox::indicator {  
+     position: absolute;
+     height: 27px;
+     width: 64px;
+ }
+ 
