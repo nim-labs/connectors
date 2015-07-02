@@ -58,7 +58,8 @@ def openDialog():
 	dialog = NimNS_openDialog()
 	if dialog.exec_():
 		P.info("Open Project")
-		versionID = nimHieroConnector.g_nim_versionID
+		#versionID = nimHieroConnector.g_nim_versionID
+		versionID = dialog.nim_versionID
 		verInfo = nimAPI.get_verInfo(versionID)
 		nim_OS = platform.system()
 		verOsPath = nimAPI.get_osPath(versionID, nim_OS)
@@ -72,8 +73,8 @@ def openDialog():
 		P.info("Server OS Path: %s" % serverOsPathInfo)
 		if serverOsPathInfo:
 			serverOSPath = serverOsPathInfo[0]['serverOSPath']
-			nimHieroConnector.g_nim_serverOSPath = serverOSPath
-			nimHieroConnector.g_nim_serverID = verInfo[0]['serverID']
+			#nimHieroConnector.g_nim_serverOSPath = serverOSPath
+			#nimHieroConnector.g_nim_serverID = verInfo[0]['serverID']
 		else:
 			print "Server OS path not returned from NIM"
 			# Show warning
@@ -88,6 +89,19 @@ def openDialog():
 		try:
 			hiero.core.openProject(projectPath)
 			project = hiero.core.projects()[-1]
+
+			print "Storing NIM Globals"
+			nimHieroConnector.g_nim_jobID = dialog.nim_jobID
+			nimHieroConnector.g_nim_serverID = dialog.nim_serverID
+			#nimHieroConnector.g_nim_serverOSPath = dialog.nim_serverOSPath
+			nimHieroConnector.g_nim_serverOSPath = serverOSPath
+			nimHieroConnector.g_nim_serverID = verInfo[0]['serverID']
+			nimHieroConnector.g_nim_showID = dialog.nim_showID
+			nimHieroConnector.g_nim_showFolder = dialog.nim_showFolder
+			nimHieroConnector.g_nim_taskID = dialog.nim_taskID
+			nimHieroConnector.g_nim_taskFolder = dialog.nim_taskFolder
+			nimHieroConnector.g_nim_basename = dialog.nim_basename
+			nimHieroConnector.g_nim_versionID = dialog.nim_versionID
 		except:
 			print "Could not open project.", sys.exc_info()[0]
 			# Show warning
@@ -250,10 +264,21 @@ def saveDialog():
 							path=projectOutputPath, ext=ext, version=basenameVersion,
 							comment=dialog.nim_comment, serverID=dialog.nim_serverID )
 
-		#get returned fileID and store in global
+		#get returned fileID and store globals
 		if nimResult:
-			print "save_file Result: %s" % nimResult
+			print "Save File Result: %s" % nimResult
+			print "Storing NIM Globals..."
 			nimHieroConnector.g_nim_versionID = nimResult
+			nimHieroConnector.g_nim_jobID = dialog.nim_jobID
+			nimHieroConnector.g_nim_serverID = dialog.nim_serverID
+			nimHieroConnector.g_nim_serverOSPath = dialog.nim_serverOSPath
+			nimHieroConnector.g_nim_showID = dialog.nim_showID
+			nimHieroConnector.g_nim_showFolder = dialog.nim_showRootFolder
+			nimHieroConnector.g_nim_taskID = dialog.nim_taskID
+			nimHieroConnector.g_nim_taskFolder = dialog.nim_taskFolder
+			nimHieroConnector.g_nim_basename = projectBasename
+			nimHieroConnector.g_nim_versionID = dialog.nim_versionID
+			print "Complete"
 	return
 
 def versionDialog():
@@ -615,7 +640,7 @@ class NimNS_openDialog(QDialog):
 		self.nim_jobPaths = nimAPI.get_paths('job', self.nim_jobID)
 
 		##set jobID global
-		nimHieroConnector.g_nim_jobID = self.nim_jobID
+		#--nimHieroConnector.g_nim_jobID = self.nim_jobID
 
 		#self.nim_updateServer()
 		self.nim_updateShow()
@@ -648,7 +673,7 @@ class NimNS_openDialog(QDialog):
 			serverID = self.nim_serverDict[serverName]
 
 			self.nim_serverID = serverID
-			nimHieroConnector.g_nim_serverID = serverID
+			#--nimHieroConnector.g_nim_serverID = self.nim_serverID
 
 			#print "Setting serverID=",serverID
 
@@ -658,7 +683,7 @@ class NimNS_openDialog(QDialog):
 					self.nim_serverOSPath = serverInfo[0]['serverOSPath']
 					print "NIM: serverOSPath=%s" % self.nim_serverOSPath
 					#set nim global
-					nimHieroConnector.g_nim_serverOSPath = self.nim_serverOSPath
+					#--nimHieroConnector.g_nim_serverOSPath = self.nim_serverOSPath
 				else:
 					print "NIM: No Server Found"
 			else:
@@ -694,14 +719,14 @@ class NimNS_openDialog(QDialog):
 
 			##set showID global
 			self.nim_showID = showID
-			nimHieroConnector.g_nim_showID = showID
+			#--nimHieroConnector.g_nim_showID = self.nim_showID
 
 			self.nim_showPaths = nimAPI.get_paths('show', showID)
 			if self.nim_showPaths:
 				if len(self.nim_showPaths)>0:
 					#print "NIM: showPaths=", self.nim_showPaths
 					self.nim_showFolder = self.nim_showPaths['root']
-					nimHieroConnector.g_nim_showFolder = self.nim_showFolder
+					#--nimHieroConnector.g_nim_showFolder = self.nim_showFolder
 				else:
 					print "NIM: No Show Paths Found"
 			else:
@@ -739,10 +764,10 @@ class NimNS_openDialog(QDialog):
 				taskFolder = self.nim_taskFolderDict[taskID]
 
 				self.nim_taskID = taskID
-				nimHieroConnector.g_nim_taskID = taskID
+				#--nimHieroConnector.g_nim_taskID = self.nim_taskID
 
 				self.nim_taskFolder = taskFolder
-				nimHieroConnector.g_nim_taskFolder = taskFolder
+				#--nimHieroConnector.g_nim_taskFolder = self.nim_taskFolder
 
 				print "Setting taskID=%s" % taskID
 				print "Setting taskFolder=%s" % taskFolder
@@ -779,7 +804,7 @@ class NimNS_openDialog(QDialog):
 			if basename:
 				print "NIM: basename=%s" % basename
 				self.nim_basename = basename
-				nimHieroConnector.g_nim_basename = basename
+				#--nimHieroConnector.g_nim_basename = self.nim_basename
 
 				print "Setting basename=%s" % basename
 				self.nim_updateVersion()
@@ -824,7 +849,7 @@ class NimNS_openDialog(QDialog):
 
 				##set versionID global
 				self.nim_versionID = versionID
-				nimHieroConnector.g_nim_versionID = versionID
+				#--nimHieroConnector.g_nim_versionID = self.nim_versionID
 
 				'''
 				self.nim_versionPaths = nimAPI.get_paths('version', versionID)
@@ -1244,7 +1269,7 @@ class NimNS_saveDialog(QDialog):
 		self.nim_jobPaths = nimAPI.get_paths('job', self.nim_jobID)
 
 		##set jobID global
-		nimHieroConnector.g_nim_jobID = self.nim_jobID
+		#--nimHieroConnector.g_nim_jobID = self.nim_jobID
 
 		#update dropdowns
 		self.nim_updateServer()
@@ -1279,7 +1304,7 @@ class NimNS_saveDialog(QDialog):
 			serverID = self.nim_serverDict[serverName]
 
 			self.nim_serverID = serverID
-			nimHieroConnector.g_nim_serverID = serverID
+			#--nimHieroConnector.g_nim_serverID = self.nim_serverID
 
 			#print "Setting serverID=",serverID
 
@@ -1289,7 +1314,7 @@ class NimNS_saveDialog(QDialog):
 					self.nim_serverOSPath = serverInfo[0]['serverOSPath']
 					print "NIM: serverOSPath=%s" % self.nim_serverOSPath
 					#set nim global
-					nimHieroConnector.g_nim_serverOSPath = self.nim_serverOSPath
+					#--nimHieroConnector.g_nim_serverOSPath = self.nim_serverOSPath
 				else:
 					print "NIM: No Server Found"
 			else:
@@ -1328,7 +1353,7 @@ class NimNS_saveDialog(QDialog):
 
 			##set showID global
 			self.nim_showID = showID
-			nimHieroConnector.g_nim_showID = showID
+			#--nimHieroConnector.g_nim_showID = self.nim_showID
 
 			self.nim_showNameClean = self.nim_showFolderDict[showID]
 
@@ -1342,7 +1367,7 @@ class NimNS_saveDialog(QDialog):
 
 					#set vars
 					self.nim_showRootFolder = self.nim_showPaths['root']
-					nimHieroConnector.g_nim_showFolder = self.nim_showRootFolder
+					#--nimHieroConnector.g_nim_showFolder = self.nim_showRootFolder
 				else:
 					print "NIM: No Show Paths Found"
 			else:
@@ -1382,10 +1407,10 @@ class NimNS_saveDialog(QDialog):
 				
 				#set vars
 				self.nim_taskID = taskID
-				nimHieroConnector.g_nim_taskID = taskID
+				#--nimHieroConnector.g_nim_taskID = self.nim_taskID
 
 				self.nim_taskFolder = taskFolder
-				nimHieroConnector.g_nim_taskFolder = taskFolder
+				#--nimHieroConnector.g_nim_taskFolder = self.nim_taskFolder
 
 				print "Setting taskID=%s" % taskID
 				print "Setting taskFolder=%s" % taskFolder
@@ -1426,7 +1451,7 @@ class NimNS_saveDialog(QDialog):
 				
 				#set vars
 				self.nim_basename = basename
-				nimHieroConnector.g_nim_basename = basename
+				#--nimHieroConnector.g_nim_basename = self.nim_basename
 
 				print "Setting basename=%s" % basename
 				self.nim_updateVersion()
@@ -1474,7 +1499,7 @@ class NimNS_saveDialog(QDialog):
 
 				##set versionID global
 				self.nim_versionID = versionID
-				nimHieroConnector.g_nim_versionID = versionID
+				#--nimHieroConnector.g_nim_versionID = self.nim_versionID
 
 
 	def nim_tagChanged(self):
