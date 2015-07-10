@@ -12,10 +12,6 @@
 # ************************************************************************** */
 
 
-// Declare global constants
-const nimSettingsKey = 'NIM Settings',
-	userIdKey = s2t('userID');
-
 // Declare global variables
 var os, userID;
 
@@ -83,24 +79,16 @@ function getOperatingSystem() {
 // to all usernames and full_names in database; if match, save userID to prefs and return it; if not found, return false;
 // passes 'buttonsToDisable' along to 'changeUserDialog' if no user is selected
 function getUserID(buttonsToDisable) {
-	var savedUserID,
+	var prefUser = getPref('NIM', 'User'),
 		envUser,
 		allUsers = nimAPI({ q: 'getUsers' }),
 		allUsersLength = allUsers.length,
-		guessedUserID = null,
-		nimSettings;
+		guessedUserID = null;
 
-	try { nimSettings = app.getCustomOptions(nimSettingsKey); }
-	catch (e) { nimSettings = null; }
-
-	if (nimSettings) {
-		try { savedUserID = nimSettings.getInteger(userIdKey); }
-		catch (e) { savedUserID = null; }
-		if (savedUserID) {
-			for (var x = 0; x < allUsersLength; x++) {
-				if (allUsers[x].ID == savedUserID)
-					return savedUserID;
-			}
+	if (prefUser) {
+		for (var x = 0; x < allUsersLength; x++) {
+			if (allUsers[x].username == prefUser)
+				return allUsers[x].ID;
 		}
 	}
 
@@ -111,11 +99,7 @@ function getUserID(buttonsToDisable) {
 		for (var x = 0; x < allUsersLength; x++) {
 			if (envUser == allUsers[x].username.toLowerCase() || envUser == allUsers[x].full_name.toLowerCase()) {
 				guessedUserID = allUsers[x].ID;
-				
-				if (!nimSettings) nimSettings = new ActionDescriptor();
-				nimSettings.putInteger(userIdKey, guessedUserID);
-				app.putCustomOptions(nimSettingsKey, nimSettings, true);
-
+				setPref('NIM', 'User', envUser);
 				alert('NIM has detected that you might be ' + allUsers[x].full_name + '; if not, manually select your username via the "Change Users" menu item.');
 				return guessedUserID;
 			}
@@ -133,13 +117,14 @@ function commentDialog(callback) {
 		commentGroup = commentDialog.add('group', undefined),
 		commentLabel = commentGroup.add('statictext', undefined, 'Comment: '),
 		commentInput = commentGroup.add('edittext', [0, 0, 250, 20]),
+		addElementCheckbox = commentGroup.add('checkbox', undefined, 'Add Element'),
 		buttonGroup = commentDialog.add('group', undefined),
 		confirmButton = buttonGroup.add('button', undefined, 'OK'),
 		cancelButton = buttonGroup.add('button', undefined, 'Cancel'),
 		comment;
 
 	confirmButton.onClick = function() {
-		callback(commentInput.text);
+		callback(commentInput.text, addElementCheckbox.value);
 		commentDialog.close();
 	}
 
@@ -194,10 +179,9 @@ function changeUserDialog(buttonsToDisable) {
 			noUserSelected();
 			return;
 		}
-		var nimSettings = new ActionDescriptor();
-		userID = allUsers[changeUserDropdown.selection.index].ID;
-		nimSettings.putInteger(userIdKey, userID);
-		app.putCustomOptions(nimSettingsKey, nimSettings, true);
+		var newUser = allUsers[changeUserDropdown.selection.index];
+		userID = newUser.ID;
+		setPref('NIM', 'User', newUser.username);
 		userSelected();
 		changeUserDialog.close();
 	}
@@ -363,8 +347,8 @@ function setPref(prefPrefix, prefName, prefValue) {
 }
 
 
-// Saves a file and writes it to NIM API; className = 'ASSET' or 'SHOW', classID = assetID or showID
-function saveFile(classID, className, serverID, serverPath, taskID, taskFolder, basename, comment, publish) {
+// Saves a file and writes it to NIM API; className = 'ASSET' or 'SHOT', classID = assetID or shotID
+function saveFile(classID, className, serverID, serverPath, taskID, taskFolder, basename, comment, publish, addElement) {
 	var vNum = 1,
 		path = serverPath,
 		folder,
@@ -462,6 +446,9 @@ function saveFile(classID, className, serverID, serverPath, taskID, taskFolder, 
 		filesCreated++;
 	}
 
+	if (addElement)
+		nimAPI({ q: 'addElement', parent: className.toLowerCase(), parentID: classID, typeID: taskID, path: path, name: newFileName, isPublished: (publish == 1 ? 'True' : 'False') });
+
 	if (publish) {
 		nimAPI({ q: 'publishSymlink', fileID: newFileID });
 		if (confirm('Project published. Revert to working version?')) {
@@ -477,5 +464,6 @@ function saveFile(classID, className, serverID, serverPath, taskID, taskFolder, 
 			}
 		}
 	}
+
 	return true;
 }

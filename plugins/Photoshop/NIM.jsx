@@ -11,8 +11,6 @@
 # otherwise accompanies this software in either electronic or hard copy form.
 # *************************************************************************** */
 
-var menuClosed = false;
-
 // Shorter way of calling app.stringIDToTypeID
 function s2t(stringID) {
   return app.stringIDToTypeID(stringID);
@@ -295,7 +293,8 @@ if (testSocket) {
 		nimPrefs = getScriptsPathAndAPIFromPrefs(),
 		remoteScripts,
 		nimAPIHost,
-		nimAPIURL;
+		nimAPIURL,
+		menuClosed = false;
 
 	if (nimPrefs.error)
 		prefsDialog(nimPrefs, this);

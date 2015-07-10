@@ -52,9 +52,9 @@ function buildMenuUI(thisObj) {
 			alert("Error: This file doesn't have any NIM metadata; please save it through the NIM menu before attempting to version up.");
 			return;
 		}
-		commentDialog(function(comment) {
+		commentDialog(function(comment, addElement) {
 			if (comment === false) return;
-			if (saveFile(metadata.classID, metadata.className, metadata.serverID, metadata.serverPath, metadata.taskID, metadata.taskFolder, metadata.basename, comment, false))
+			if (saveFile(metadata.classID, metadata.className, metadata.serverID, metadata.serverPath, metadata.taskID, metadata.taskFolder, metadata.basename, comment, false, addElement))
 				alert('New version saved.');
 			else
 				alert('Error: Version up failed!');
@@ -73,9 +73,9 @@ function buildMenuUI(thisObj) {
 			alert("Error: This file doesn't have any NIM metadata; please save it through the NIM menu before attempting to publish.");
 			return;
 		}
-		commentDialog(function(comment) {
+		commentDialog(function(comment, addElement) {
 			if (comment === false) return;
-			if (!saveFile(metadata.classID, metadata.className, metadata.serverID, metadata.serverPath, metadata.taskID, metadata.taskFolder, metadata.basename, comment, true))
+			if (!saveFile(metadata.classID, metadata.className, metadata.serverID, metadata.serverPath, metadata.taskID, metadata.taskFolder, metadata.basename, comment, true, addElement))
 				alert('Error: Publish failed!');
 		});
 	}

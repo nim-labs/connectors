@@ -12,69 +12,69 @@
 # *************************************************************************** */
 
 function buildMenuUI(thisObj) {
-    var nimMenuPanel = (thisObj instanceof Panel) ? thisObj : new Window('palette', 'NIM', undefined),
-        nimPanel = null,
-        openButton = nimMenuPanel.add('button', undefined, 'Open'),
-        importButton = nimMenuPanel.add('button', undefined, 'Import'),
-        saveAsButton = nimMenuPanel.add('button', undefined, 'Save As'),
-        versionUpButton = nimMenuPanel.add('button', undefined, 'Version Up'),
-        publishButton = nimMenuPanel.add('button', undefined, 'Publish'),
-        changeUserButton = nimMenuPanel.add('button', undefined, 'Change User'),
-        primaryButtons = [openButton, importButton, saveAsButton, versionUpButton, publishButton],
-        foundUserID = false;
+	var nimMenuPanel = (thisObj instanceof Panel) ? thisObj : new Window('palette', 'NIM', undefined),
+		nimPanel = null,
+		openButton = nimMenuPanel.add('button', undefined, 'Open'),
+		importButton = nimMenuPanel.add('button', undefined, 'Import'),
+		saveAsButton = nimMenuPanel.add('button', undefined, 'Save As'),
+		versionUpButton = nimMenuPanel.add('button', undefined, 'Version Up'),
+		publishButton = nimMenuPanel.add('button', undefined, 'Publish'),
+		changeUserButton = nimMenuPanel.add('button', undefined, 'Change User'),
+		primaryButtons = [openButton, importButton, saveAsButton, versionUpButton, publishButton],
+		foundUserID = false;
 
-    openButton.onClick = function() {
-        nimPanel = buildPanelUI(userID, 'open');
-    }
+	openButton.onClick = function() {
+		nimPanel = buildPanelUI(userID, 'open');
+	}
 
-    importButton.onClick = function() {
-        nimPanel = buildPanelUI(userID, 'import');
-    }
+	importButton.onClick = function() {
+		nimPanel = buildPanelUI(userID, 'import');
+	}
 
-    saveAsButton.onClick = function() {
-        nimPanel = buildPanelUI(userID, 'saveAs');
-    }
+	saveAsButton.onClick = function() {
+		nimPanel = buildPanelUI(userID, 'saveAs');
+	}
 
-    versionUpButton.onClick = function() {
-        var metadata = getNimMetadata(),
-            comment;
-        if (!metadata.classID) {
-            alert("Error: This file doesn't have any NIM metadata; please save it through the NIM menu before attempting to version up.");
-            return;
-        }
-        commentDialog(function(comment) {
-            if (comment === false) return;
-            if (saveFile(metadata.classID, metadata.className, metadata.serverID, metadata.serverPath, metadata.taskID, metadata.taskFolder, metadata.basename, comment, false))
-                alert('New version saved.');
-            else
-                alert('Error: Version up failed!');
-        });
-    }
+	versionUpButton.onClick = function() {
+		var metadata = getNimMetadata(),
+			comment;
+		if (!metadata.classID) {
+			alert("Error: This file doesn't have any NIM metadata; please save it through the NIM menu before attempting to version up.");
+			return;
+		}
+		commentDialog(function(comment) {
+			if (comment === false) return;
+			if (saveFile(metadata.classID, metadata.className, metadata.serverID, metadata.serverPath, metadata.taskID, metadata.taskFolder, metadata.basename, comment, false))
+				alert('New version saved.');
+			else
+				alert('Error: Version up failed!');
+		});
+	}
 
-    publishButton.onClick = function() {
-        var metadata = getNimMetadata(),
-            comment;
-        if (!metadata.classID) {
-            alert("Error: This file doesn't have any NIM metadata; please save it through the NIM menu before attempting to publish.");
-            return;
-        }
-        commentDialog(function(comment) {
-            if (comment === false) return;
-            if (!saveFile(metadata.classID, metadata.className, metadata.serverID, metadata.serverPath, metadata.taskID, metadata.taskFolder, metadata.basename, comment, true))
-                alert('Error: Publish failed!');
-        });
-    }
+	publishButton.onClick = function() {
+		var metadata = getNimMetadata(),
+			comment;
+		if (!metadata.classID) {
+			alert("Error: This file doesn't have any NIM metadata; please save it through the NIM menu before attempting to publish.");
+			return;
+		}
+		commentDialog(function(comment) {
+			if (comment === false) return;
+			if (!saveFile(metadata.classID, metadata.className, metadata.serverID, metadata.serverPath, metadata.taskID, metadata.taskFolder, metadata.basename, comment, true))
+				alert('Error: Publish failed!');
+		});
+	}
 
-    changeUserButton.onClick = function() {
-        changeUserDialog(primaryButtons);
-    }
+	changeUserButton.onClick = function() {
+		changeUserDialog(primaryButtons);
+	}
 
-    nimMenuPanel.layout.layout(true);
+	nimMenuPanel.layout.layout(true);
 
-    os = getOperatingSystem();
-    foundUserID = getUserID(primaryButtons);
-    if (foundUserID)
-        userID = foundUserID;
+	os = getOperatingSystem();
+	foundUserID = getUserID(primaryButtons);
+	if (foundUserID)
+		userID = foundUserID;
 
-    return nimMenuPanel;
+	return nimMenuPanel;
 }

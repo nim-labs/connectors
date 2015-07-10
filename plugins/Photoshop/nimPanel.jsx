@@ -170,6 +170,7 @@ function buildPanelUI(userID, action) {
 		commentLabel = commentGroup.add('statictext', undefined, 'Comment: '),
 		commentText,
 		commentInput,
+		addElementCheckbox,
 		allDropdowns = [jobDropdown, serverDropdown, assetDropdown, showDropdown, shotDropdown, taskDropdown, filterDropdown],
 		allDropdownsLength = allDropdowns.length,
 		buttonGroup = nimPanel.add('group', undefined),
@@ -195,6 +196,7 @@ function buildPanelUI(userID, action) {
 	confirmButton.enabled = false;
 
 	nimPanel.alignChildren = 'fill';
+	versionInfo.alignChildren = 'right';
 	jobTaskInfo.alignChildren = 'fill';
 	taskInfo.alignChildren = 'right';
 	basenameGroup.alignChildren = 'top';
@@ -250,6 +252,7 @@ function buildPanelUI(userID, action) {
 		userText = null;
 		dateText = null;
 		commentInput = commentGroup.add('edittext', [0, 0, 550, 20]);
+		addElementCheckbox = versionInfo.add('checkbox', undefined, 'Add Element');
 		confirmButton.text = 'Save As';
 	}
 
@@ -556,7 +559,7 @@ function buildPanelUI(userID, action) {
 			else if (tagInput.text)
 				newFileBasename += '_' + tagInput.text.replace(/ /g, '_');
 
-			if (saveFile(classID, className, serverID, serverPath, taskID, taskFolder, newFileBasename, commentInput.text, false))
+			if (saveFile(classID, className, serverID, serverPath, taskID, taskFolder, newFileBasename, commentInput.text, false, addElementCheckbox.value))
 				alert('Save successful.');
 			else
 				alert('Error: Save failed!');
