@@ -447,7 +447,7 @@ function saveFile(classID, className, serverID, serverPath, taskID, taskFolder, 
 	}
 
 	if (addElement)
-		nimAPI({ q: 'addElement', parent: className.toLowerCase(), parentID: classID, typeID: taskID, path: path, name: newFileName, isPublished: (publish == 1 ? 'True' : 'False') });
+		nimAPI({ q: 'addElement', parent: className.toLowerCase(), parentID: classID, userID: userID, typeID: taskID, path: path, name: newFileName, isPublished: (publish == 1 ? 'True' : 'False') });
 
 	if (publish) {
 		nimAPI({ q: 'publishSymlink', fileID: newFileID });
