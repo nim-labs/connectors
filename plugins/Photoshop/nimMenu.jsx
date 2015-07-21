@@ -20,6 +20,7 @@ function buildMenuUI(thisObj) {
 		versionUpButton = nimMenuPanel.add('button', undefined, 'Version Up'),
 		publishButton = nimMenuPanel.add('button', undefined, 'Publish'),
 		changeUserButton = nimMenuPanel.add('button', undefined, 'Change User'),
+		closeButton = nimMenuPanel.add('button', undefined, 'Close'),
 		primaryButtons = [openButton, /*importButton,*/ saveAsButton, versionUpButton, publishButton],
 		foundUserID = false;
 
@@ -82,6 +83,11 @@ function buildMenuUI(thisObj) {
 
 	changeUserButton.onClick = function() {
 		changeUserDialog(primaryButtons);
+	}
+
+	closeButton.onClick = function() {
+		menuClosed = true;
+		nimMenuPanel.close();
 	}
 
 	nimMenuPanel.onClose = function() {
