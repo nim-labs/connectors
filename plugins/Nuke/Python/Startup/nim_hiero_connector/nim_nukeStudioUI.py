@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: Nuke/Python/Startup/nim_hiero_connector/nim_nukeStudioUI.py
-# Version:  v0.8.1.150702
+# Version:  v0.8.1.150721
 #
 # Copyright (c) 2015 NIM Labs LLC
 # All rights reserved.
@@ -102,6 +102,15 @@ def openDialog():
 			nimHieroConnector.g_nim_taskFolder = dialog.nim_taskFolder
 			nimHieroConnector.g_nim_basename = dialog.nim_basename
 			nimHieroConnector.g_nim_versionID = dialog.nim_versionID
+
+			print "Saving Preferences"
+			nimPrefs.update( 'Job', 'Nuke', dialog.nim_jobChooser.currentText() )
+			nimPrefs.update( 'ServerPath', 'Nuke', serverOSPath )
+			nimPrefs.update( 'Show', 'Nuke', dialog.nim_showChooser.currentText() )
+			nimPrefs.update( 'Task', 'Nuke', dialog.nim_taskChooser.currentText() )
+			nimPrefs.update( 'Basename', 'Nuke', dialog.nim_basename )
+			nimPrefs.update( 'Version', 'Nuke', dialog.nim_versionChooser.currentItem().text() )
+
 		except:
 			print "Could not open project.", sys.exc_info()[0]
 			# Show warning
@@ -278,7 +287,14 @@ def saveDialog():
 			nimHieroConnector.g_nim_taskFolder = dialog.nim_taskFolder
 			nimHieroConnector.g_nim_basename = projectBasename
 			nimHieroConnector.g_nim_versionID = dialog.nim_versionID
-			print "Complete"
+			
+			print "Saving Preferences"
+			nimPrefs.update( 'Job', 'Nuke', dialog.nim_jobChooser.currentText() )
+			nimPrefs.update( 'ServerPath', 'Nuke', serverOSPath )
+			nimPrefs.update( 'Show', 'Nuke', dialog.nim_showChooser.currentText() )
+			nimPrefs.update( 'Task', 'Nuke', dialog.nim_taskChooser.currentText() )
+			nimPrefs.update( 'Basename', 'Nuke', projectBasename )
+			nimPrefs.update( 'Version', 'Nuke', projectVersion )
 	return
 
 def versionDialog():
@@ -339,8 +355,13 @@ def versionDialog():
 
 		#get returned fileID and store in global
 		if nimResult:
-			print "save_file Result: %s" % nimResult
+			print "Save File Result: %s" % nimResult
+			print "Storing NIM Globals..."
 			nimHieroConnector.g_nim_versionID = nimResult
+			
+			print "Saving Preferences"
+			nimPrefs.update( 'Version', 'Nuke', projectVersion )
+
 		return
 
 
@@ -431,13 +452,11 @@ class NimNS_openDialog(QDialog):
 		self.nimJobLabel.setFixedWidth(64)
 		self.nimJobLabel.setText("Job:")
 		horizontalLayout0.addWidget(self.nimJobLabel)
-		#self.nim_jobChooser = QComboBox()
 		self.nim_jobChooser.setToolTip("Choose the job you wish to export shots to.")
 		horizontalLayout0.addWidget(self.nim_jobChooser)
 		horizontalLayout0.setStretch(1, 40)
 		groupLayout.setLayout(0, QFormLayout.SpanningRole, horizontalLayout0)
-		#self.setLayout(groupLayout)
-		#layout.addWidget(groupBox)
+
 
 		# JOBS: Add dictionary in ordered list
 		jobIndex = 0
@@ -445,18 +464,22 @@ class NimNS_openDialog(QDialog):
 		if len(self.nim_jobs)>0:
 			for key, value in sorted(self.nim_jobs.items(), reverse=True):
 				self.nim_jobChooser.addItem(key)
-				if nimHieroConnector.g_nim_jobID == value:
-					#print "Found matching jobID, job=", key
-					self.pref_job = key
-					jobIndex = jobIter
+				if nimHieroConnector.g_nim_jobID:
+					if nimHieroConnector.g_nim_jobID == value:
+						print "Found matching jobID, job=", key
+						self.pref_job = key
+						jobIndex = jobIter
+				else:
+					if self.pref_job == key:
+						print "Found matching Job Name, job=", key
+						jobIndex = jobIter
 				jobIter += 1
 
 			if self.pref_job != '':
 				self.nim_jobChooser.setCurrentIndex(jobIndex)
 
 		self.nim_jobChooser.currentIndexChanged.connect(self.nim_jobChanged)
-		#layout.addWidget(self.nim_jobChooser)
-		self.nim_jobChanged() #trigger job changed to load choosers
+
 
 		# SHOWS: List box for show selection
 		horizontalLayout1 = QHBoxLayout()
@@ -467,33 +490,12 @@ class NimNS_openDialog(QDialog):
 		self.nimShowLabel.setFixedWidth(64)
 		self.nimShowLabel.setText("Show:")
 		horizontalLayout1.addWidget(self.nimShowLabel)
-		#self.nim_showChooser = QComboBox()
 		self.nim_showChooser.setToolTip("Choose the show you wish to export shots to.")
 		horizontalLayout1.addWidget(self.nim_showChooser)
 		horizontalLayout1.setStretch(1, 40)
 		groupLayout.setLayout(1, QFormLayout.SpanningRole, horizontalLayout1)
-
-		# SHOWS: Add dictionary in ordered list
-		'''
-		showIndex = 0
-		showIter = 0
-		if len(self.nim_shows)>0:
-			for show in self.nim_shows:
-				self.nim_showDict[show['showname']] = show['ID']
-		  
-			for key, value in sorted(self.nim_showDict.items(), reverse=False):
-				self.nim_showChooser.addItem(key)
-				if nimHieroConnector.g_nim_showID == value:
-					#print "Found matching showID, show=", key
-					self.pref_show == key
-					showIndex = showIter
-				showIter += 1
-
-			if self.pref_show != '':
-				self.nim_showChooser.setCurrentIndex(showIndex)
-		'''
 		self.nim_showChooser.currentIndexChanged.connect(self.nim_showChanged)
-		#self.nim_showChanged()
+
 		
 		
 		# TASKS: List box for server selection
@@ -505,15 +507,14 @@ class NimNS_openDialog(QDialog):
 		self.nimTaskLabel.setFixedWidth(64)
 		self.nimTaskLabel.setText("Task:")
 		horizontalLayout2.addWidget(self.nimTaskLabel)
-		#self.nim_taskChooser = QComboBox()
 		self.nim_taskChooser.setToolTip("Choose the task for the project.")
 		horizontalLayout2.addWidget(self.nim_taskChooser)
 		horizontalLayout2.setStretch(1, 40)
 		groupLayout.setLayout(2, QFormLayout.SpanningRole, horizontalLayout2)
 
 		# TASKS: Add dictionary in ordered list
-		taskIndex = 0
-		taskIter=0
+		taskIndex=1
+		taskIter=1
 		if len(self.nim_tasks)>0:
 			self.nim_taskChooser.addItem("Select...")
 			for task in self.nim_tasks:
@@ -521,19 +522,23 @@ class NimNS_openDialog(QDialog):
 				self.nim_taskFolderDict[task['ID']] = task['folder']
 			for key, value in sorted(self.nim_taskDict.items(), reverse=False):
 				self.nim_taskChooser.addItem(key)
-				if nimHieroConnector.g_nim_taskID == value:
-					self.pref_task = key
-					taskIndex = taskIter
-					#print "Found matching taskID, task=", key
-					#print "taskIndex=",taskIndex
-
+				if nimHieroConnector.g_nim_taskID:
+					if nimHieroConnector.g_nim_taskID == value:
+						self.pref_task = key
+						taskIndex = taskIter
+						print "Found matching taskID, task=", key
+						print "taskIndex=",taskIndex
+				else:
+					if self.pref_task == key:
+						print "Found matching Task Name, task=", key
+						taskIndex = taskIter
 				taskIter +=1
 
 			if self.pref_task != '':
-				#print "self.pref_task=",self.pref_task
+				print "self.pref_task=",self.pref_task
 				self.nim_taskChooser.setCurrentIndex(taskIndex)
 		self.nim_taskChooser.currentIndexChanged.connect(self.nim_taskChanged)
-		self.nim_taskChanged()
+
 		
 
 		# BASENAMES: List box for basename selection
@@ -550,28 +555,8 @@ class NimNS_openDialog(QDialog):
 		horizontalLayout3.addWidget(self.nim_basenameChooser)
 		horizontalLayout3.setStretch(1, 40)
 		groupLayout.setLayout(3, QFormLayout.SpanningRole, horizontalLayout3)
-
-		# BASENAMES: Add dictionary in ordered list
-		'''
-		basenameIndex = 0
-		basenameIter = 0
-		if len(self.nim_basenames)>0:
-			for basename in self.nim_basenames:
-				item = QListWidgetItem( self.nim_basenameChooser )
-				item.setText( basename['basename'] )
-				#item.setFlags( Qt.ItemIsSelectable | Qt.ItemIsEditable | Qt.ItemIsEnabled )
-				if nimHieroConnector.g_nim_basename == basename:
-					#print "Found matching basename, basename=", basename
-					self.nim_basenameChooser.setCurrentItem( item )
-					self.pref_basename == basename
-					basenameIndex = basenameIter
-				basenameIter += 1
-
-			if self.pref_basename != '':
-				self.nim_basenameChooser.setCurrentRow(basenameIndex)
-		'''
 		self.nim_basenameChooser.currentItemChanged.connect(self.nim_basenameChanged)
-		#self.nim_basenameChanged()
+
 
 
 		# VERSIONS: List box for server selection
@@ -583,31 +568,11 @@ class NimNS_openDialog(QDialog):
 		self.nimVersionLabel.setFixedWidth(64)
 		self.nimVersionLabel.setText("Version:")
 		horizontalLayout4.addWidget(self.nimVersionLabel)
-		#self.nim_versionChooser = QListWidget()
 		self.nim_versionChooser.setToolTip("Choose the version of the project.")
 		horizontalLayout4.addWidget(self.nim_versionChooser)
 		horizontalLayout4.setStretch(1, 40)
 		groupLayout.setLayout(4, QFormLayout.SpanningRole, horizontalLayout4)
-
-		# VERSIONS: Add dictionary in ordered list
-		'''
-		versionIndex = 0
-		versionIter=0
-		if len(self.nim_versions)>0:
-			for version in self.nim_versions:
-				self.nim_versionDict[version['filename']] = version['fileID']
-			for key, value in sorted(self.nim_versionDict.items(), reverse=True):
-				self.nim_versionChooser.addItem(key)
-				if nimHieroConnector.g_nim_versionID == value:
-					self.pref_version = key
-					versionIndex = versionIter
-				versionIter +=1
-
-			if self.pref_version != '':
-				self.nim_versionChooser.setCurrentRow(versionIndex)
-		'''
 		self.nim_versionChooser.currentItemChanged.connect(self.nim_versionChanged)
-		#self.nim_versionChanged()
 
 		# Add the standard ok/cancel buttons, default to ok.
 		self._buttonbox = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
@@ -616,7 +581,6 @@ class NimNS_openDialog(QDialog):
 		self._buttonbox.button(QDialogButtonBox.StandardButton.Ok).setToolTip("Executes exports on selection for each selected preset")
 		self._buttonbox.accepted.connect(self.acceptTest)
 		self._buttonbox.rejected.connect(self.reject)
-		#layout.addWidget(self._buttonbox)
 		horizontalLayout9 = QHBoxLayout()
 		horizontalLayout9.setSpacing(-1)
 		horizontalLayout9.setSizeConstraint(QLayout.SetDefaultConstraint)
@@ -630,6 +594,8 @@ class NimNS_openDialog(QDialog):
 		#self.setLayout(layout)
 		self.setLayout(groupLayout)
 		layout.addWidget(groupBox)
+
+		self.nim_jobChanged() #trigger job changed to load choosers
 
 
 	def nim_jobChanged(self):
@@ -695,6 +661,8 @@ class NimNS_openDialog(QDialog):
 		self.nim_shows = nimAPI.get_shows(self.nim_jobID)
 		#print self.nim_shows
 
+		showIndex = 0
+		showIter = 0
 		self.nim_showDict = {}
 		try:
 			self.nim_showChooser.clear()
@@ -704,41 +672,61 @@ class NimNS_openDialog(QDialog):
 						self.nim_showDict[show['showname']] = show['ID']
 					for key, value in sorted(self.nim_showDict.items(), reverse=False):
 						self.nim_showChooser.addItem(key)
+						if nimHieroConnector.g_nim_showID:
+							if nimHieroConnector.g_nim_showID == value:
+								print "Found matching showID, show=", key
+								self.pref_show == key
+								showIndex = showIter
+						else:
+							if self.pref_show == key:
+								print "Found matching Show Name, show=", key
+								showIndex = showIter
+						showIter += 1
+
+					if self.pref_show != '':
+						self.nim_showChooser.setCurrentIndex(showIndex)
 		except:
 			pass
 
 
 	def nim_showChanged(self):
 		'''Action when job is selected'''
-		#print "SHOW CHANGED"
+		print "SHOW CHANGED"
 		showname = self.nim_showChooser.currentText()
 		if showname:
 			print "NIM: show=%s" % showname
 
 			showID = self.nim_showDict[showname]
 
-			##set showID global
+			##set showID
 			self.nim_showID = showID
-			#--nimHieroConnector.g_nim_showID = self.nim_showID
 
 			self.nim_showPaths = nimAPI.get_paths('show', showID)
 			if self.nim_showPaths:
 				if len(self.nim_showPaths)>0:
 					#print "NIM: showPaths=", self.nim_showPaths
 					self.nim_showFolder = self.nim_showPaths['root']
-					#--nimHieroConnector.g_nim_showFolder = self.nim_showFolder
 				else:
 					print "NIM: No Show Paths Found"
 			else:
 				print "NIM: No Data Returned"
 
+			#Clear Lists
+			self.nim_basenameChooser.clear()
+			self.nim_versionChooser.clear()
+
+			#Load Lists
+			self.nim_updateTask()
+
 
 	def nim_updateTask(self):
 		self.nim_tasks = {}
-		self.nim_tasks = nimAPI.get_tasks()
+		self.nim_tasks = nimAPI.get_tasks(app='HIERO', userType='all')
 
 		self.nim_taskDict = {}
 		self.nim_taskFolderDict = {}
+		taskIter=1
+		taskIndex=1
 		try:
 			self.nim_taskChooser.clear()
 			if self.nim_taskChooser:
@@ -749,6 +737,21 @@ class NimNS_openDialog(QDialog):
 						self.nim_taskFolderDict[task['ID']] = task['folder']
 					for key, value in sorted(self.nim_taskDict.items(), reverse=False):
 						self.nim_taskChooser.addItem(key)
+						if nimHieroConnector.g_nim_taskID:
+							if nimHieroConnector.g_nim_taskID == value:
+								self.pref_task = key
+								taskIndex = taskIter
+								print "Found matching taskID, task=", key
+								print "taskIndex=",taskIndex
+						else:
+							if self.pref_task == key:
+								print "Found matching Task Name, task=", key
+								taskIndex = taskIter
+						taskIter +=1
+
+					if self.pref_task != '':
+						print "self.pref_task=",self.pref_task
+						self.nim_taskChooser.setCurrentIndex(taskIndex)
 		except:
 			pass
 
@@ -764,10 +767,7 @@ class NimNS_openDialog(QDialog):
 				taskFolder = self.nim_taskFolderDict[taskID]
 
 				self.nim_taskID = taskID
-				#--nimHieroConnector.g_nim_taskID = self.nim_taskID
-
 				self.nim_taskFolder = taskFolder
-				#--nimHieroConnector.g_nim_taskFolder = self.nim_taskFolder
 
 				print "Setting taskID=%s" % taskID
 				print "Setting taskFolder=%s" % taskFolder
@@ -782,15 +782,35 @@ class NimNS_openDialog(QDialog):
 		self.nim_basenames = nimAPI.get_bases(showID=self.nim_showID, taskID=self.nim_taskID)
 
 		print "Basenames: %s" % self.nim_basenames
+
+		baseIter=0
+		baseIndex=0
 		try:
 			self.nim_basenameChooser.clear()
 			if self.nim_basenameChooser:
 				if len(self.nim_basenames)>0:
 					for basename in self.nim_basenames:
-						print basename['basename']
+						print "Basename: ",basename['basename']
 						item=QListWidgetItem( self.nim_basenameChooser )
 						item.setText( basename['basename'] )
 						#item.setFlags( Qt.ItemIsSelectable | Qt.ItemIsEditable | Qt.ItemIsEnabled )
+					
+						if nimHieroConnector.g_nim_basename:
+							if nimHieroConnector.g_nim_basename == basename['basename']:
+								self.pref_basename = basename['basename']
+								baseIndex = baseIter
+								print "Found matching basename in globals, basename=", basename['basename']
+						else:
+							if self.pref_basename == basename['basename']:
+								baseIndex = baseIter
+								print "Found matching basename in prefs, basename=", basename['basename']
+						baseIter +=1
+
+					if self.pref_basename != '':
+						print "selecting basename: ",self.pref_basename
+						self.nim_basenameChooser.setCurrentRow(baseIndex)
+					
+
 		except:
 			print "Failed to update Basenames"
 			pass
@@ -816,6 +836,8 @@ class NimNS_openDialog(QDialog):
 		print "Versions: %s" % self.nim_versions
 
 		self.nim_versionDict = {}
+		verIndex=0
+		verIter=0
 		try:
 			self.nim_versionChooser.clear()
 			print "Versions Cleared"
@@ -824,13 +846,27 @@ class NimNS_openDialog(QDialog):
 					print "Versions Found" 
 					for version in self.nim_versions:
 						self.nim_versionDict[version['filename']] = version['fileID']
-						#print "Version: %s" % version
 						
 					for key, value in sorted(self.nim_versionDict.items(), reverse=True):
-						#print "Key: %s" % key
 						item=QListWidgetItem( self.nim_versionChooser )
 						item.setText( key )
 						#item.setFlags( Qt.ItemIsSelectable | Qt.ItemIsEditable | Qt.ItemIsEnabled )
+
+						if nimHieroConnector.g_nim_versionID:
+							if nimHieroConnector.g_nim_versionID == value:
+								self.pref_version = key
+								verIndex = verIter
+								print "Found matching versionID, version=", key
+						else:
+							if self.pref_version == key:
+								verIndex = verIter
+								print "Found matching version, version=", key
+						verIter +=1
+
+					if self.pref_version != '':
+						print "selecting version: ",self.pref_version
+						print "verIndex: ",verIndex
+						self.nim_versionChooser.setCurrentRow(verIndex)
 					
 		except:
 			print "Failed to update Versions"
@@ -839,7 +875,7 @@ class NimNS_openDialog(QDialog):
 
 	def nim_versionChanged(self):
 		'''Action when job is selected'''
-		#print "SHOW CHANGED"
+		#print "VERSION CHANGED"
 		if self.nim_versionChooser.currentItem():
 			versionname = self.nim_versionChooser.currentItem().text()
 			if versionname:
@@ -847,9 +883,8 @@ class NimNS_openDialog(QDialog):
 
 				versionID = self.nim_versionDict[versionname]
 
-				##set versionID global
+				##set versionID
 				self.nim_versionID = versionID
-				#--nimHieroConnector.g_nim_versionID = self.nim_versionID
 
 				'''
 				self.nim_versionPaths = nimAPI.get_paths('version', versionID)
@@ -872,11 +907,6 @@ class NimNS_saveDialog(QDialog):
 	def __init__(self, currentProject=''):
 		super(NimNS_saveDialog, self).__init__()
 		'''NIM NukeStudio Project Management UI'''
-
-		'''TODO:
-			Need to query UI and get active project.
-			Display in UI what project is being saved 
-		'''
 
 		self.app=nimFile.get_app()
 		self.prefs=nimPrefs.read()
@@ -991,13 +1021,10 @@ class NimNS_saveDialog(QDialog):
 		self.nimJobLabel.setFixedWidth(64)
 		self.nimJobLabel.setText("Job:")
 		horizontalLayout0.addWidget(self.nimJobLabel)
-		#self.nim_jobChooser = QComboBox()
 		self.nim_jobChooser.setToolTip("Choose the job you wish to export shots to.")
 		horizontalLayout0.addWidget(self.nim_jobChooser)
 		horizontalLayout0.setStretch(1, 40)
 		groupLayout.setLayout(1, QFormLayout.SpanningRole, horizontalLayout0)
-		#self.setLayout(groupLayout)
-		#layout.addWidget(groupBox)
 
 		# JOBS: Add dictionary in ordered list
 		jobIndex = 0
@@ -1005,19 +1032,21 @@ class NimNS_saveDialog(QDialog):
 		if len(self.nim_jobs)>0:
 			for key, value in sorted(self.nim_jobs.items(), reverse=True):
 				self.nim_jobChooser.addItem(key)
-				if nimHieroConnector.g_nim_jobID == value:
-					#print "Found matching jobID, job=", key
-					self.pref_job = key
-					jobIndex = jobIter
+				if nimHieroConnector.g_nim_jobID:
+					if nimHieroConnector.g_nim_jobID == value:
+						print "Found matching jobID, job=", key
+						self.pref_job = key
+						jobIndex = jobIter
+				else:
+					if self.pref_job == key:
+						print "Found matching Job Name, job=", key
+						jobIndex = jobIter
 				jobIter += 1
 
 			if self.pref_job != '':
 				self.nim_jobChooser.setCurrentIndex(jobIndex)
 
 		self.nim_jobChooser.currentIndexChanged.connect(self.nim_jobChanged)
-		#layout.addWidget(self.nim_jobChooser)
-		self.nim_jobChanged() #trigger job changed to load choosers
-
 		
 		# SERVERS: List box for server selection
 		horizontalLayout1 = QHBoxLayout()
@@ -1033,28 +1062,7 @@ class NimNS_saveDialog(QDialog):
 		horizontalLayout1.addWidget(self.nim_serverChooser)
 		horizontalLayout1.setStretch(1, 40)
 		groupLayout.setLayout(2, QFormLayout.SpanningRole, horizontalLayout1)
-
-		# SERVERS: Add dictionary in ordered list
-		serverIndex = 0
-		serverIter=0
-		if len(self.nim_servers)>0:
-			for server in self.nim_servers:
-				self.nim_serverDict[server['server']] = server['ID']
-
-			for key, value in sorted(self.nim_serverDict.items(), reverse=False):
-				self.nim_serverChooser.addItem(key)
-				if nimHieroConnector.g_nim_serverID == value:
-					self.pref_server = key
-					serverIndex = serverIter
-				serverIter +=1
-
-			if self.pref_server != '':
-				#print "self.pref_server=",self.pref_server
-				self.nim_serverChooser.setCurrentIndex(serverIndex)
-
 		self.nim_serverChooser.currentIndexChanged.connect(self.nim_serverChanged)
-		self.nim_serverChanged()
-
 
 		# SHOWS: List box for show selection
 		horizontalLayout2 = QHBoxLayout()
@@ -1065,33 +1073,11 @@ class NimNS_saveDialog(QDialog):
 		self.nimShowLabel.setFixedWidth(64)
 		self.nimShowLabel.setText("Show:")
 		horizontalLayout2.addWidget(self.nimShowLabel)
-		#self.nim_showChooser = QComboBox()
 		self.nim_showChooser.setToolTip("Choose the show you wish to export shots to.")
 		horizontalLayout2.addWidget(self.nim_showChooser)
 		horizontalLayout2.setStretch(1, 40)
 		groupLayout.setLayout(3, QFormLayout.SpanningRole, horizontalLayout2)
-
-		# SHOWS: Add dictionary in ordered list
-		showIndex = 0
-		showIter = 0
-		if len(self.nim_shows)>0:
-			for show in self.nim_shows:
-				self.nim_showDict[show['showname']] = show['ID']
-				self.nim_showFolderDict[show['ID']] = show['folder']
-			for key, value in sorted(self.nim_showDict.items(), reverse=False):
-				self.nim_showChooser.addItem(key)
-				if nimHieroConnector.g_nim_showID == value:
-					#print "Found matching showID, show=", key
-					self.pref_show == key
-					showIndex = showIter
-				showIter += 1
-
-			if self.pref_show != '':
-				self.nim_showChooser.setCurrentIndex(showIndex)
-
 		self.nim_showChooser.currentIndexChanged.connect(self.nim_showChanged)
-		self.nim_showChanged()
-		
 		
 		# TASKS: List box for server selection
 		horizontalLayout3 = QHBoxLayout()
@@ -1102,7 +1088,6 @@ class NimNS_saveDialog(QDialog):
 		self.nimTaskLabel.setFixedWidth(64)
 		self.nimTaskLabel.setText("Task:")
 		horizontalLayout3.addWidget(self.nimTaskLabel)
-		#self.nim_taskChooser = QComboBox()
 		self.nim_taskChooser.setToolTip("Choose the task for the project.")
 		horizontalLayout3.addWidget(self.nim_taskChooser)
 		horizontalLayout3.setStretch(1, 40)
@@ -1118,12 +1103,16 @@ class NimNS_saveDialog(QDialog):
 				self.nim_taskFolderDict[task['ID']] = task['folder']
 			for key, value in sorted(self.nim_taskDict.items(), reverse=False):
 				self.nim_taskChooser.addItem(key)
-				if nimHieroConnector.g_nim_taskID == value:
-					self.pref_task = key
-					taskIndex = taskIter
-					#print "Found matching taskID, task=", key
-					#print "taskIndex=",taskIndex
-
+				if nimHieroConnector.g_nim_taskID:
+					if nimHieroConnector.g_nim_taskID == value:
+						self.pref_task = key
+						taskIndex = taskIter
+						print "Found matching taskID, task=", key
+						print "taskIndex=",taskIndex
+				else:
+					if self.pref_task == key:
+						print "Found matching Task Name, task=", key
+						taskIndex = taskIter
 				taskIter +=1
 
 			if self.pref_task != '':
@@ -1131,7 +1120,6 @@ class NimNS_saveDialog(QDialog):
 				self.nim_taskChooser.setCurrentIndex(taskIndex)
 
 		self.nim_taskChooser.currentIndexChanged.connect(self.nim_taskChanged)
-		self.nim_taskChanged()
 		
 
 		# BASENAMES: List box for basename selection
@@ -1143,32 +1131,12 @@ class NimNS_saveDialog(QDialog):
 		self.nimBasenameLabel.setFixedWidth(64)
 		self.nimBasenameLabel.setText("Basename:")
 		horizontalLayout4.addWidget(self.nimBasenameLabel)
-		#self.nim_basenameChooser = QListWidget()
 		self.nim_basenameChooser.setToolTip("Choose the basename of the project.")
 		horizontalLayout4.addWidget(self.nim_basenameChooser)
 		horizontalLayout4.setStretch(1, 40)
 		groupLayout.setLayout(5, QFormLayout.SpanningRole, horizontalLayout4)
-
-		# BASENAMES: Add dictionary in ordered list
-		basenameIndex = 0
-		basenameIter = 0
-		if len(self.nim_basenames)>0:
-			for basename in self.nim_basenames:
-				item = QListWidgetItem( self.nim_basenameChooser )
-				item.setText( basename['basename'] )
-				#item.setFlags( Qt.ItemIsSelectable | Qt.ItemIsEditable | Qt.ItemIsEnabled )
-				if nimHieroConnector.g_nim_basename == basename:
-					#print "Found matching basename, basename=", basename
-					self.nim_basenameChooser.setCurrentItem( item )
-					self.pref_basename == basename
-					basenameIndex = basenameIter
-				basenameIter += 1
-
-			if self.pref_basename != '':
-				self.nim_basenameChooser.setCurrentRow(basenameIndex)
-
 		self.nim_basenameChooser.currentItemChanged.connect(self.nim_basenameChanged)
-		self.nim_basenameChanged()
+
 
 		# TAG: List box for tag entry
 		horizontalLayout5 = QHBoxLayout()
@@ -1179,7 +1147,6 @@ class NimNS_saveDialog(QDialog):
 		self.nimTagLabel.setFixedWidth(64)
 		self.nimTagLabel.setText("Tag:")
 		horizontalLayout5.addWidget(self.nimTagLabel)
-		#self.nim_tagEdit = QLineEdit()
 		self.nim_tagEdit.setToolTip("Enter a unique tag.")
 		horizontalLayout5.addWidget(self.nim_tagEdit)
 		horizontalLayout5.setStretch(1, 40)
@@ -1196,30 +1163,12 @@ class NimNS_saveDialog(QDialog):
 		self.nimVersionLabel.setFixedWidth(64)
 		self.nimVersionLabel.setText("Version:")
 		horizontalLayout6.addWidget(self.nimVersionLabel)
-		#self.nim_versionChooser = QListWidget()
 		self.nim_versionChooser.setToolTip("Current versions of the project.")
 		horizontalLayout6.addWidget(self.nim_versionChooser)
 		horizontalLayout6.setStretch(1, 40)
 		groupLayout.setLayout(7, QFormLayout.SpanningRole, horizontalLayout6)
-
-		# VERSIONS: Add dictionary in ordered list
-		versionIndex = 0
-		versionIter=0
-		if len(self.nim_versions)>0:
-			for version in self.nim_versions:
-				self.nim_versionDict[version['filename']] = version['fileID']
-			for key, value in sorted(self.nim_versionDict.items(), reverse=True):
-				self.nim_versionChooser.addItem(key)
-				if nimHieroConnector.g_nim_versionID == value:
-					self.pref_version = key
-					versionIndex = versionIter
-				versionIter +=1
-
-			if self.pref_version != '':
-				self.nim_versionChooser.setCurrentRow(versionIndex)
-
 		self.nim_versionChooser.currentItemChanged.connect(self.nim_versionChanged)
-		self.nim_versionChanged()
+
 
 		# COMMENT: List box for comment entry
 		horizontalLayout7 = QHBoxLayout()
@@ -1230,12 +1179,10 @@ class NimNS_saveDialog(QDialog):
 		self.nimCommentLabel.setFixedWidth(64)
 		self.nimCommentLabel.setText("Comment:")
 		horizontalLayout7.addWidget(self.nimCommentLabel)
-		#self.nim_commentEdit = QLineEdit()
 		self.nim_commentEdit.setToolTip("Enter a unique comment.")
 		horizontalLayout7.addWidget(self.nim_commentEdit)
 		horizontalLayout7.setStretch(1, 40)
 		groupLayout.setLayout(8, QFormLayout.SpanningRole, horizontalLayout7)
-
 		self.nim_commentEdit.textEdited.connect(self.nim_commentChanged)
 
 		# Add the standard ok/cancel buttons, default to ok.
@@ -1245,7 +1192,6 @@ class NimNS_saveDialog(QDialog):
 		self._buttonbox.button(QDialogButtonBox.StandardButton.Ok).setToolTip("Executes exports on selection for each selected preset")
 		self._buttonbox.accepted.connect(self.acceptTest)
 		self._buttonbox.rejected.connect(self.reject)
-		#layout.addWidget(self._buttonbox)
 		horizontalLayout8 = QHBoxLayout()
 		horizontalLayout8.setSpacing(-1)
 		horizontalLayout8.setSizeConstraint(QLayout.SetDefaultConstraint)
@@ -1260,6 +1206,8 @@ class NimNS_saveDialog(QDialog):
 		self.setLayout(groupLayout)
 		layout.addWidget(groupBox)
 
+		self.nim_jobChanged() #trigger job changed to load choosers
+
 
 	def nim_jobChanged(self):
 		'''Action when job is selected'''
@@ -1267,9 +1215,6 @@ class NimNS_saveDialog(QDialog):
 		job = self.nim_jobChooser.currentText()
 		self.nim_jobID = self.nim_jobs[job]
 		self.nim_jobPaths = nimAPI.get_paths('job', self.nim_jobID)
-
-		##set jobID global
-		#--nimHieroConnector.g_nim_jobID = self.nim_jobID
 
 		#update dropdowns
 		self.nim_updateServer()
@@ -1302,19 +1247,13 @@ class NimNS_saveDialog(QDialog):
 			print "NIM: server=%s" % serverName
 		
 			serverID = self.nim_serverDict[serverName]
-
 			self.nim_serverID = serverID
-			#--nimHieroConnector.g_nim_serverID = self.nim_serverID
-
-			#print "Setting serverID=",serverID
 
 			serverInfo = nimAPI.get_serverOSPath(serverID, self.nim_OS)
 			if serverInfo:
 				if len(serverInfo)>0:
 					self.nim_serverOSPath = serverInfo[0]['serverOSPath']
 					print "NIM: serverOSPath=%s" % self.nim_serverOSPath
-					#set nim global
-					#--nimHieroConnector.g_nim_serverOSPath = self.nim_serverOSPath
 				else:
 					print "NIM: No Server Found"
 			else:
@@ -1327,6 +1266,8 @@ class NimNS_saveDialog(QDialog):
 		self.nim_showRootFolder = ''
 		#print self.nim_shows
 
+		showIndex = 0
+		showIter = 0
 		self.nim_showDict = {}
 		self.nim_showFolderDict = {}
 		try:
@@ -1338,6 +1279,19 @@ class NimNS_saveDialog(QDialog):
 						self.nim_showFolderDict[show['ID']] = show['folder']
 					for key, value in sorted(self.nim_showDict.items(), reverse=False):
 						self.nim_showChooser.addItem(key)
+						if nimHieroConnector.g_nim_showID:
+							if nimHieroConnector.g_nim_showID == value:
+								print "Found matching showID, show=", key
+								self.pref_show == key
+								showIndex = showIter
+						else:
+							if self.pref_show == key:
+								print "Found matching Show Name, show=", key
+								showIndex = showIter
+						showIter += 1
+
+					if self.pref_show != '':
+						self.nim_showChooser.setCurrentIndex(showIndex)
 		except:
 			pass
 
@@ -1351,10 +1305,8 @@ class NimNS_saveDialog(QDialog):
 
 			showID = self.nim_showDict[showname]
 
-			##set showID global
+			##set showID 
 			self.nim_showID = showID
-			#--nimHieroConnector.g_nim_showID = self.nim_showID
-
 			self.nim_showNameClean = self.nim_showFolderDict[showID]
 
 			self.nim_showPaths = nimAPI.get_paths('show', showID)
@@ -1367,20 +1319,28 @@ class NimNS_saveDialog(QDialog):
 
 					#set vars
 					self.nim_showRootFolder = self.nim_showPaths['root']
-					#--nimHieroConnector.g_nim_showFolder = self.nim_showRootFolder
 				else:
 					print "NIM: No Show Paths Found"
 			else:
 				print "NIM: No Data Returned"
 
+			#Clear Lists
+			self.nim_basenameChooser.clear()
+			self.nim_versionChooser.clear()
+
+			#Update Lists
+			self.nim_updateTask()
+
 
 	def nim_updateTask(self):
 		self.nim_tasks = {}
-		self.nim_tasks = nimAPI.get_tasks()
+		self.nim_tasks = nimAPI.get_tasks(app='HIERO', userType='all')
 		self.nim_taskID = 0
 		self.nim_taskFolder = ''
 		self.nim_taskDict = {}
 		self.nim_taskFolderDict = {}
+		taskIter=1
+		taskIndex=1
 		try:
 			self.nim_taskChooser.clear()
 			if self.nim_taskChooser:
@@ -1391,6 +1351,21 @@ class NimNS_saveDialog(QDialog):
 						self.nim_taskFolderDict[task['ID']] = task['folder']
 					for key, value in sorted(self.nim_taskDict.items(), reverse=False):
 						self.nim_taskChooser.addItem(key)
+						if nimHieroConnector.g_nim_taskID:
+							if nimHieroConnector.g_nim_taskID == value:
+								self.pref_task = key
+								taskIndex = taskIter
+								print "Found matching taskID, task=", key
+								print "taskIndex=",taskIndex
+						else:
+							if self.pref_task == key:
+								print "Found matching Task Name, task=", key
+								taskIndex = taskIter
+						taskIter +=1
+
+					if self.pref_task != '':
+						print "self.pref_task=",self.pref_task
+						self.nim_taskChooser.setCurrentIndex(taskIndex)
 		except:
 			pass
 
@@ -1407,10 +1382,7 @@ class NimNS_saveDialog(QDialog):
 				
 				#set vars
 				self.nim_taskID = taskID
-				#--nimHieroConnector.g_nim_taskID = self.nim_taskID
-
 				self.nim_taskFolder = taskFolder
-				#--nimHieroConnector.g_nim_taskFolder = self.nim_taskFolder
 
 				print "Setting taskID=%s" % taskID
 				print "Setting taskFolder=%s" % taskFolder
@@ -1426,16 +1398,37 @@ class NimNS_saveDialog(QDialog):
 		self.nim_basenames = {}
 		self.nim_basenames = nimAPI.get_bases(showID=self.nim_showID, taskID=self.nim_taskID)
 
-		print "Basenames: %s" % self.nim_basenames
+		#print "Basenames: %s" % self.nim_basenames
+
+		baseIter=0
+		baseIndex=0
 		try:
 			self.nim_basenameChooser.clear()
 			if self.nim_basenameChooser:
 				if len(self.nim_basenames)>0:
 					for basename in self.nim_basenames:
-						print basename['basename']
+						#print basename['basename']
 						item=QListWidgetItem( self.nim_basenameChooser )
 						item.setText( basename['basename'] )
 						#item.setFlags( Qt.ItemIsSelectable | Qt.ItemIsEditable | Qt.ItemIsEnabled )
+
+						'''
+						if nimHieroConnector.g_nim_basename:
+							if nimHieroConnector.g_nim_basename == basename['basename']:
+								self.pref_basename = basename['basename']
+								baseIndex = baseIter
+								print "Found matching basename in globals, basename=", basename['basename']
+						else:
+							if self.pref_basename == basename['basename']:
+								baseIndex = baseIter
+								print "Found matching basename in prefs, basename=", basename['basename']
+						baseIter +=1
+						'''
+					'''
+					if self.pref_basename != '':
+						print "selecting basename: ",self.pref_basename
+						self.nim_basenameChooser.setCurrentRow(baseIndex)
+					'''
 		except:
 			print "Failed to update Basenames"
 			pass
@@ -1447,11 +1440,8 @@ class NimNS_saveDialog(QDialog):
 		if self.nim_basenameChooser.currentItem():
 			basename = self.nim_basenameChooser.currentItem().text()
 			if basename:
-				print "NIM: basename=%s" % basename
-				
 				#set vars
 				self.nim_basename = basename
-				#--nimHieroConnector.g_nim_basename = self.nim_basename
 
 				print "Setting basename=%s" % basename
 				self.nim_updateVersion()
@@ -1464,20 +1454,20 @@ class NimNS_saveDialog(QDialog):
 		self.nim_versionDict = {}
 		self.nim_versions = {}
 		self.nim_versions = nimAPI.get_vers(showID=self.nim_showID, basename=self.nim_basename)
-		print "Versions: %s" % self.nim_versions
+		#print "Versions: %s" % self.nim_versions
 
 		try:
 			self.nim_versionChooser.clear()
-			print "Versions Cleared"
+			#print "Versions Cleared"
 			if self.nim_versionChooser:
 				if len(self.nim_versions)>0:
 					print "Versions Found" 
 					for version in self.nim_versions:
 						self.nim_versionDict[version['filename']] = version['fileID']
-						print "Version: %s" % version
+						#print "Version: %s" % version
 						
 					for key, value in sorted(self.nim_versionDict.items(), reverse=True):
-						print "Key: %s" % key
+						#print "Key: %s" % key
 						item=QListWidgetItem( self.nim_versionChooser )
 						item.setText( key )
 						item.setFlags( Qt.NoItemFlags )
@@ -1494,12 +1484,9 @@ class NimNS_saveDialog(QDialog):
 			versionname = self.nim_versionChooser.currentItem().text()
 			if versionname:
 				print "NIM: version=%s" % versionname
-
+				#set versionID
 				versionID = self.nim_versionDict[versionname]
-
-				##set versionID global
 				self.nim_versionID = versionID
-				#--nimHieroConnector.g_nim_versionID = self.nim_versionID
 
 
 	def nim_tagChanged(self):
@@ -1524,11 +1511,6 @@ class NimNS_versionDialog(QDialog):
 		super(NimNS_versionDialog, self).__init__()
 		'''NIM NukeStudio Project Management UI'''
 
-		'''TODO:
-			Need to query UI and get active project.
-			Display in UI what project is being saved 
-		'''
-	
 		self.nim_userID = nimAPI.get_userID()
 		print "NIM: userID=%s" % self.nim_userID
 
