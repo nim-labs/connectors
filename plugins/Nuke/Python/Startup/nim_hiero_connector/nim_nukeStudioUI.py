@@ -73,8 +73,6 @@ def openDialog():
 		P.info("Server OS Path: %s" % serverOsPathInfo)
 		if serverOsPathInfo:
 			serverOSPath = serverOsPathInfo[0]['serverOSPath']
-			#nimHieroConnector.g_nim_serverOSPath = serverOSPath
-			#nimHieroConnector.g_nim_serverID = verInfo[0]['serverID']
 		else:
 			print "Server OS path not returned from NIM"
 			# Show warning
@@ -93,7 +91,6 @@ def openDialog():
 			print "Storing NIM Globals"
 			nimHieroConnector.g_nim_jobID = dialog.nim_jobID
 			nimHieroConnector.g_nim_serverID = dialog.nim_serverID
-			#nimHieroConnector.g_nim_serverOSPath = dialog.nim_serverOSPath
 			nimHieroConnector.g_nim_serverOSPath = serverOSPath
 			nimHieroConnector.g_nim_serverID = verInfo[0]['serverID']
 			nimHieroConnector.g_nim_showID = dialog.nim_showID
@@ -116,7 +113,7 @@ def openDialog():
 			# Show warning
 			msgBox = QMessageBox()
 			msgBox.setTextFormat(Qt.RichText)
-			result = msgBox.information(None, "Warning", "Could not open project. Check to see if the file exists.", QMessageBox.Ok)
+			result = msgBox.information(None, "Warning", "Could not open project. Check to see if the file exists or if project is already open.", QMessageBox.Ok)
 
 def saveDialog():
 	'''Open the NIM SaveAs Project Dialog'''
