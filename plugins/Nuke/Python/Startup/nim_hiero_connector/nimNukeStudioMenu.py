@@ -59,6 +59,7 @@ def nimProjectReloadScripts():
 		import nim_core.nim_api as nimAPI
 		import nim_core.nim_file as nimFile
 		import nimHieroConnector as nimHC
+		#import nimHieroExport as nimHExport
 		import nim_nukeStudioUI as nimNS_UI
 		import nimProcessorUI
 		import nimShotProcessor
@@ -67,6 +68,7 @@ def nimProjectReloadScripts():
 		reload(nimAPI)
 		reload(nimFile)
 		reload(nimHC)
+		#reload(nimHExport)
 		reload(nimNS_UI)
 		reload(nimProcessorUI)
 		reload(nimShotProcessor)

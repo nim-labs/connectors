@@ -137,16 +137,6 @@ class NimHieroExport(QAction):
 			horizontalLayout.addWidget(self.nim_jobChooser)
 			horizontalLayout.setStretch(1, 40)
 			groupLayout.setLayout(0, QFormLayout.SpanningRole, horizontalLayout)
-			#self.setLayout(groupLayout)
-			#layout.addWidget(groupBox)
-
-			'''
-			self.nimJobLabel = QLabel()
-			self.nimJobLabel.setText("Job:")
-			layout.addWidget(self.nimJobLabel)
-			self.nim_jobChooser = QComboBox()
-			self.nim_jobChooser.setToolTip("Choose the job you wish to export shots to.")
-			'''
 
 			# JOBS: Add dictionary in ordered list
 			jobIndex = 0
@@ -154,29 +144,25 @@ class NimHieroExport(QAction):
 			if len(self.nim_jobs)>0:
 				for key, value in sorted(self.nim_jobs.items(), reverse=True):
 					self.nim_jobChooser.addItem(key)
-					if nimHieroConnector.g_nim_jobID == value:
-						#print "Found matching jobID, job=", key
-						self.pref_job = key
-						jobIndex = jobIter
+					if nimHieroConnector.g_nim_jobID:
+						if nimHieroConnector.g_nim_jobID == value:
+							print "Found matching jobID, job=", key
+							self.pref_job = key
+							jobIndex = jobIter
+					else:
+						if self.pref_job == key:
+							print "Found matching Job Name, job=", key
+							jobIndex = jobIter
 					jobIter += 1
 
 				if self.pref_job != '':
 					self.nim_jobChooser.setCurrentIndex(jobIndex)
 
 			self.nim_jobChooser.currentIndexChanged.connect(self.nim_jobChanged)
-			#layout.addWidget(self.nim_jobChooser)
-			self.nim_jobChanged() #trigger job changed to load choosers
+			#self.nim_jobChanged() #trigger job changed to load choosers
 
-
+			'''
 			# SERVERS: List box for server selection
-			'''
-			self.nimServerLabel = QLabel()
-			self.nimServerLabel.setText("Server:")
-			layout.addWidget(self.nimServerLabel)
-			self.nim_serverChooser = QComboBox()
-			self.nim_serverChooser.setToolTip("Choose the server you wish to export shots to.")
-			layout.addWidget(self.nim_serverChooser)
-			'''
 			horizontalLayout2 = QHBoxLayout()
 			horizontalLayout2.setSpacing(-1)
 			horizontalLayout2.setSizeConstraint(QLayout.SetDefaultConstraint)
@@ -214,16 +200,9 @@ class NimHieroExport(QAction):
 
 			self.nim_serverChooser.currentIndexChanged.connect(self.nim_serverChanged)
 			self.nim_serverChanged()
+			'''
 
 			# SHOWS: List box for show selection
-			'''
-			self.nimShowLabel = QLabel()
-			self.nimShowLabel.setText("Show:")
-			layout.addWidget(self.nimShowLabel)
-			self.nim_showChooser = QComboBox()
-			self.nim_showChooser.setToolTip("Choose the show you wish to export shots to.")
-			layout.addWidget(self.nim_showChooser)
-			'''
 			horizontalLayout3 = QHBoxLayout()
 			horizontalLayout3.setSpacing(-1)
 			horizontalLayout3.setSizeConstraint(QLayout.SetDefaultConstraint)
@@ -236,29 +215,9 @@ class NimHieroExport(QAction):
 			self.nim_showChooser.setToolTip("Choose the show you wish to export shots to.")
 			horizontalLayout3.addWidget(self.nim_showChooser)
 			horizontalLayout3.setStretch(1, 40)
-			groupLayout.setLayout(2, QFormLayout.SpanningRole, horizontalLayout3)
-
-			# SHOWS: Add dictionary in ordered list
-			showIndex = 0
-			showIter = 0
-			if len(self.nim_shows)>0:
-				for show in self.nim_shows:
-					self.nim_showDict[show['showname']] = show['ID']
-			  
-				for key, value in sorted(self.nim_showDict.items(), reverse=False):
-					self.nim_showChooser.addItem(key)
-					if nimHieroConnector.g_nim_showID == value:
-						#print "Found matching showID, show=", key
-						self.pref_show == key
-						showIndex = showIter
-					showIter += 1
-
-				if self.pref_show != '':
-					self.nim_showChooser.setCurrentIndex(showIndex)
-
+			groupLayout.setLayout(1, QFormLayout.SpanningRole, horizontalLayout3)
 			self.nim_showChooser.currentIndexChanged.connect(self.nim_showChanged)
-			self.nim_showChanged()
-			
+		
 
 			# Add the standard ok/cancel buttons, default to ok.
 			self._buttonbox = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
@@ -267,7 +226,6 @@ class NimHieroExport(QAction):
 			self._buttonbox.button(QDialogButtonBox.StandardButton.Ok).setToolTip("Executes exports on selection for each selected preset")
 			self._buttonbox.accepted.connect(self.acceptTest)
 			self._buttonbox.rejected.connect(self.reject)
-			#layout.addWidget(self._buttonbox)
 			horizontalLayout4 = QHBoxLayout()
 			horizontalLayout4.setSpacing(-1)
 			horizontalLayout4.setSizeConstraint(QLayout.SetDefaultConstraint)
@@ -276,11 +234,12 @@ class NimHieroExport(QAction):
 			horizontalLayout4.addItem(spacerItem4)
 			horizontalLayout4.addWidget(self._buttonbox)
 			horizontalLayout4.setStretch(1, 40)
-			groupLayout.setLayout(3, QFormLayout.SpanningRole, horizontalLayout4)
+			groupLayout.setLayout(2, QFormLayout.SpanningRole, horizontalLayout4)
 
-			#self.setLayout(layout)
 			self.setLayout(groupLayout)
 			layout.addWidget(groupBox)
+
+			self.nim_jobChanged() #trigger job changed to load choosers
 
 
 		def nim_jobChanged(self):
@@ -290,17 +249,15 @@ class NimHieroExport(QAction):
 			self.nim_jobID = self.nim_jobs[job]
 			self.nim_jobPaths = nimAPI.get_paths('job', self.nim_jobID)
 
-			##set jobID global
-			nimHieroConnector.g_nim_jobID = self.nim_jobID
-
-			self.nim_updateServer()
+			#self.nim_updateServer()
 			self.nim_updateShow()
 			
 
 		def nim_updateServer(self):
 			self.nim_servers = {}
 			self.nim_servers = nimAPI.get_jobServers(self.nim_jobID)
-
+			self.nim_serverID = ''
+			self.nim_serverOSPath = ''
 			self.nim_serverDict = {}
 			try:
 				self.nim_serverChooser.clear()
@@ -320,21 +277,14 @@ class NimHieroExport(QAction):
 			serverName = self.nim_serverChooser.currentText()
 			if serverName:
 				print "NIM: server=%s" % serverName
-			
 				serverID = self.nim_serverDict[serverName]
-
 				self.nim_serverID = serverID
-				nimHieroConnector.g_nim_serverID = serverID
-
-				#print "Setting serverID=",serverID
 
 				serverInfo = nimAPI.get_serverOSPath(serverID, self.nim_OS)
 				if serverInfo:
 					if len(serverInfo)>0:
 						self.nim_serverOSPath = serverInfo[0]['serverOSPath']
 						print "NIM: serverOSPath=%s" % self.nim_serverOSPath
-						#set nim global
-						nimHieroConnector.g_nim_serverOSPath = self.nim_serverOSPath
 					else:
 						print "NIM: No Server Found"
 				else:
@@ -346,6 +296,8 @@ class NimHieroExport(QAction):
 			self.nim_shows = nimAPI.get_shows(self.nim_jobID)
 			#print self.nim_shows
 
+			showIndex = 0
+			showIter = 0
 			self.nim_showDict = {}
 			try:
 				self.nim_showChooser.clear()
@@ -355,6 +307,19 @@ class NimHieroExport(QAction):
 							self.nim_showDict[show['showname']] = show['ID']
 						for key, value in sorted(self.nim_showDict.items(), reverse=False):
 							self.nim_showChooser.addItem(key)
+							if nimHieroConnector.g_nim_showID:
+								if nimHieroConnector.g_nim_showID == value:
+									print "Found matching showID, show=", key
+									self.pref_show == key
+									showIndex = showIter
+							else:
+								if self.pref_show == key:
+									print "Found matching Show Name, show=", key
+									showIndex = showIter
+							showIter += 1
+
+						if self.pref_show != '':
+							self.nim_showChooser.setCurrentIndex(showIndex)
 			except:
 				pass
 
@@ -368,16 +333,14 @@ class NimHieroExport(QAction):
 
 				showID = self.nim_showDict[showname]
 
-				##set showID global
+				##set showID
 				self.nim_showID = showID
-				nimHieroConnector.g_nim_showID = showID
 
 				self.nim_showPaths = nimAPI.get_paths('show', showID)
 				if self.nim_showPaths:
 					if len(self.nim_showPaths)>0:
 						#print "NIM: showPaths=", self.nim_showPaths
 						self.nim_showFolder = self.nim_showPaths['root']
-						nimHieroConnector.g_nim_showFolder = self.nim_showFolder
 					else:
 						print "NIM: No Show Paths Found"
 				else:
@@ -417,14 +380,24 @@ class NimHieroExport(QAction):
 			updateThumbnail = True
 			
 			#global g_nim_showID
-			#nim_showID = g_nim_showID
 			nim_showID = dialog.nim_showID
+
+			#Update Globals
+			nimHieroConnector.g_nim_jobID = dialog.nim_jobID
+			nimHieroConnector.g_nim_showID = dialog.nim_showID
+			nimHieroConnector.g_nim_showFolder = dialog.nim_showFolder
+			#nimHieroConnector.g_nim_serverID = dialog.nim_serverID
+			#nimHieroConnector.g_nim_serverOSPath = dialog.nim_serverOSPath
+
+			#Saving Preferences
+			nimPrefs.update( 'Job', 'Nuke', dialog.nim_jobChooser.currentText() )
+			nimPrefs.update( 'Show', 'Nuke', dialog.nim_showChooser.currentText() )
+
 
 			nimConnect = nimHieroConnector.NimHieroConnector()
 
 			if nim_showID != None:
 				for trackItem in selection:
-
 					#check for existing NIM data on trackItem
 					name = trackItem.name()
 					nim_tag = nimConnect.getNimTag(trackItem)
@@ -451,8 +424,14 @@ class NimHieroExport(QAction):
 								success = nimConnect.updateShotIcon(trackItem)
 								if success == False:
 									print 'NIM: Failed to upload icon'
+				msgBox = QMessageBox()
+				msgBox.setTextFormat(Qt.RichText)
+				result = msgBox.information(None, "Update Shots", "The selected shots have been updated in NIM.", QMessageBox.Ok)
 			else:
 				print "NIM: No shows found"
+				msgBox = QMessageBox()
+				msgBox.setTextFormat(Qt.RichText)
+				result = msgBox.information(None, "Warning", "No shows found. Nothing to update.", QMessageBox.Ok)
 				
 
 		def eventHandler(self, event):
