@@ -33,7 +33,10 @@ M = hiero.ui.menuBar()
 nimMainMenu = M.addMenu('NIM') 
 
 # NIM Project Menu --------------------------------------------------------------------
-nimProjectMenu = nimMainMenu.addMenu('Project')
+if nuke.env[ 'studio' ]:
+	nimProjectMenu = nimMainMenu.addMenu('Project')
+else:
+	nimProjectMenu = nimMainMenu
 
 # Create a new QAction
 nimProjectOpenAction = QAction('Open',nimProjectMenu)
@@ -102,80 +105,81 @@ nimProjectMenu.insertAction(None, nimProjectReloadScriptsAction)
 
 
 # NIM Comp Menu -----------------------------------------------------------------------
-nimCompMenu = nimMainMenu.addMenu('Comp')
+if nuke.env[ 'studio' ]:
+	nimCompMenu = nimMainMenu.addMenu('Comp')
 
-# Create a new QAction
-nimCompOpenAction = QAction('Open',nimCompMenu)
-nimCompImportAction = QAction('Import',nimCompMenu) 
-nimCompSaveAsAction = QAction('Save As',nimCompMenu) 
-nimCompExportSelectedAction = QAction('Export Selected',nimCompMenu) 
-nimCompVersionUpAction = QAction('Version Up',nimCompMenu) 
-nimCompPublishAction = QAction('Publish',nimCompMenu)
+	# Create a new QAction
+	nimCompOpenAction = QAction('Open',nimCompMenu)
+	nimCompImportAction = QAction('Import',nimCompMenu) 
+	nimCompSaveAsAction = QAction('Save As',nimCompMenu) 
+	nimCompExportSelectedAction = QAction('Export Selected',nimCompMenu) 
+	nimCompVersionUpAction = QAction('Version Up',nimCompMenu) 
+	nimCompPublishAction = QAction('Publish',nimCompMenu)
 
-def nimCompOpen(): nimUI.mk("FILE")
-def nimCompImport(): nimUI.mk("LOAD", _import=True)
-def nimCompSaveAs(): nimUI.mk("SAVE")
-def nimCompExportSelected(): nimUI.mk("SAVE", _export=True)
-def nimCompVersionUp(): nimAPI.versionUp()
-def nimCompPublish(): nimUI.mk("PUB")
+	def nimCompOpen(): nimUI.mk("FILE")
+	def nimCompImport(): nimUI.mk("LOAD", _import=True)
+	def nimCompSaveAs(): nimUI.mk("SAVE")
+	def nimCompExportSelected(): nimUI.mk("SAVE", _export=True)
+	def nimCompVersionUp(): nimAPI.versionUp()
+	def nimCompPublish(): nimUI.mk("PUB")
 
-# Set the QAction to trigger the launchNuke method 
-nimCompOpenAction.triggered.connect(nimCompOpen)
-nimCompImportAction.triggered.connect(nimCompImport) 
-nimCompSaveAsAction.triggered.connect(nimCompSaveAs) 
-nimCompExportSelectedAction.triggered.connect(nimCompExportSelected)
-nimCompVersionUpAction.triggered.connect(nimCompVersionUp) 
-nimCompPublishAction.triggered.connect(nimCompPublish) 
+	# Set the QAction to trigger the launchNuke method 
+	nimCompOpenAction.triggered.connect(nimCompOpen)
+	nimCompImportAction.triggered.connect(nimCompImport) 
+	nimCompSaveAsAction.triggered.connect(nimCompSaveAs) 
+	nimCompExportSelectedAction.triggered.connect(nimCompExportSelected)
+	nimCompVersionUpAction.triggered.connect(nimCompVersionUp) 
+	nimCompPublishAction.triggered.connect(nimCompPublish) 
 
-# Add the Action to your Nuke Menu
-nimCompMenu.insertAction(None, nimCompOpenAction)
-nimCompMenu.insertAction(None, nimCompImportAction)
-nimCompMenu.insertAction(None, nimCompSaveAsAction)
-nimCompMenu.insertAction(None, nimCompExportSelectedAction)
-nimCompMenu.insertAction(None, nimCompVersionUpAction)
-nimCompMenu.insertAction(None, nimCompPublishAction)
+	# Add the Action to your Nuke Menu
+	nimCompMenu.insertAction(None, nimCompOpenAction)
+	nimCompMenu.insertAction(None, nimCompImportAction)
+	nimCompMenu.insertAction(None, nimCompSaveAsAction)
+	nimCompMenu.insertAction(None, nimCompExportSelectedAction)
+	nimCompMenu.insertAction(None, nimCompVersionUpAction)
+	nimCompMenu.insertAction(None, nimCompPublishAction)
 
-nimCompMenu.addSeparator()
+	nimCompMenu.addSeparator()
 
-nimCompWriteMenu = nimCompMenu.addMenu('NIM Write')
-nimCreateWriteJPGAction = QAction('JPG', nimCompWriteMenu)
-nimCreateWritePNGAction = QAction('PNG', nimCompWriteMenu)
-nimCreateWriteEXRAction = QAction('EXR', nimCompWriteMenu)
-nimCreateWriteDPXAction = QAction('DPX', nimCompWriteMenu)
-nimCreateWriteTIFAction = QAction('TIF', nimCompWriteMenu)
-nimCreateWriteMOVAction = QAction('MOV', nimCompWriteMenu)
+	nimCompWriteMenu = nimCompMenu.addMenu('NIM Write')
+	nimCreateWriteJPGAction = QAction('JPG', nimCompWriteMenu)
+	nimCreateWritePNGAction = QAction('PNG', nimCompWriteMenu)
+	nimCreateWriteEXRAction = QAction('EXR', nimCompWriteMenu)
+	nimCreateWriteDPXAction = QAction('DPX', nimCompWriteMenu)
+	nimCreateWriteTIFAction = QAction('TIF', nimCompWriteMenu)
+	nimCreateWriteMOVAction = QAction('MOV', nimCompWriteMenu)
 
-nimCompReloadScriptsAction = QAction('Reload Scripts',nimCompMenu) 
+	nimCompReloadScriptsAction = QAction('Reload Scripts',nimCompMenu) 
 
-def nimCreateWriteJPG(): nuke.createNode( 'WriteNIM_JPG' )
-def nimCreateWritePNG(): nuke.createNode( 'WriteNIM_PNG' )
-def nimCreateWriteEXR(): nuke.createNode( 'WriteNIM_EXR' )
-def nimCreateWriteDPX(): nuke.createNode( 'WriteNIM_DPX' )
-def nimCreateWriteTIF(): nuke.createNode( 'WriteNIM_TIF' )
-def nimCreateWriteMOV(): nuke.createNode( 'WriteNIM_MOV' )
+	def nimCreateWriteJPG(): nuke.createNode( 'WriteNIM_JPG' )
+	def nimCreateWritePNG(): nuke.createNode( 'WriteNIM_PNG' )
+	def nimCreateWriteEXR(): nuke.createNode( 'WriteNIM_EXR' )
+	def nimCreateWriteDPX(): nuke.createNode( 'WriteNIM_DPX' )
+	def nimCreateWriteTIF(): nuke.createNode( 'WriteNIM_TIF' )
+	def nimCreateWriteMOV(): nuke.createNode( 'WriteNIM_MOV' )
 
-def nimReloadCompScripts(): nimFile.scripts_reload()
+	def nimReloadCompScripts(): nimFile.scripts_reload()
 
-# Set the QAction to trigger the launchNuke method 
-nimCreateWriteJPGAction.triggered.connect(nimCreateWriteJPG) 
-nimCreateWritePNGAction.triggered.connect(nimCreateWritePNG) 
-nimCreateWriteEXRAction.triggered.connect(nimCreateWriteEXR) 
-nimCreateWriteDPXAction.triggered.connect(nimCreateWriteDPX) 
-nimCreateWriteTIFAction.triggered.connect(nimCreateWriteTIF) 
-nimCreateWriteMOVAction.triggered.connect(nimCreateWriteMOV) 
+	# Set the QAction to trigger the launchNuke method 
+	nimCreateWriteJPGAction.triggered.connect(nimCreateWriteJPG) 
+	nimCreateWritePNGAction.triggered.connect(nimCreateWritePNG) 
+	nimCreateWriteEXRAction.triggered.connect(nimCreateWriteEXR) 
+	nimCreateWriteDPXAction.triggered.connect(nimCreateWriteDPX) 
+	nimCreateWriteTIFAction.triggered.connect(nimCreateWriteTIF) 
+	nimCreateWriteMOVAction.triggered.connect(nimCreateWriteMOV) 
 
-nimCompReloadScriptsAction.triggered.connect(nimReloadCompScripts) 
+	nimCompReloadScriptsAction.triggered.connect(nimReloadCompScripts) 
 
-# Add the Action to your Nuke Menu
-nimCompWriteMenu.insertAction(None, nimCreateWriteJPGAction)
-nimCompWriteMenu.insertAction(None, nimCreateWritePNGAction)
-nimCompWriteMenu.insertAction(None, nimCreateWriteEXRAction)
-nimCompWriteMenu.insertAction(None, nimCreateWriteDPXAction)
-nimCompWriteMenu.insertAction(None, nimCreateWriteTIFAction)
-nimCompWriteMenu.insertAction(None, nimCreateWriteMOVAction)
+	# Add the Action to your Nuke Menu
+	nimCompWriteMenu.insertAction(None, nimCreateWriteJPGAction)
+	nimCompWriteMenu.insertAction(None, nimCreateWritePNGAction)
+	nimCompWriteMenu.insertAction(None, nimCreateWriteEXRAction)
+	nimCompWriteMenu.insertAction(None, nimCreateWriteDPXAction)
+	nimCompWriteMenu.insertAction(None, nimCreateWriteTIFAction)
+	nimCompWriteMenu.insertAction(None, nimCreateWriteMOVAction)
 
-nimCompMenu.addSeparator()
+	nimCompMenu.addSeparator()
 
-nimCompMenu.insertAction(None, nimCompReloadScriptsAction)
+	nimCompMenu.insertAction(None, nimCompReloadScriptsAction)
 
 # END NIM Comp Menu --------------------------------------------------------------------

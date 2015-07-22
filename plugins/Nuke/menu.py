@@ -20,7 +20,15 @@ import nim_core.nim_prefs as Prefs
 Prefs.mk_default( notify_success=True )
 
 try:
-	if not nuke.env[ 'studio' ]:
+	isNuke = False
+	if nuke.env['NukeVersionRelease'] > 6:
+		if not nuke.env[ 'studio' ] and not nuke.env['hiero']:
+			isNuke = True
+	else:
+		if not nuke.env[ 'studio' ]:
+			isNuke = True
+			
+	if isNuke:
 		m=nuke.menu('Nuke')
 		nimRootMenu=m.addMenu("NIM")
 
