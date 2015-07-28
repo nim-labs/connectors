@@ -1,12 +1,11 @@
-'''
 # NIM NukeStudio Connector
 try:
 	import sys
 	import hiero.core
 	
-	sys.path.append('I:/VAULT/modules/nim_dev')
-	sys.path.append('I:/VAULT/modules/nim_dev/plugins/Nuke/Python/Startup/nim_hiero_connector')
-	hiero.core.addPluginPath('I:/VAULT/modules/nim_dev/plugins/Nuke/Python/Startup/nim_hiero_connector')
+	sys.path.append('[NIM_CONNECTOR_ROOT]')
+	sys.path.append('[NIM_CONNECTOR_ROOT]/plugins/Nuke/Python/Startup/nim_hiero_connector')
+	hiero.core.addPluginPath('[NIM_CONNECTOR_ROOT]/plugins/Nuke/Python/Startup/nim_hiero_connector')
 	
 	from nimNukeStudioMenu import *
 	from nimHieroConnector import *
@@ -17,4 +16,3 @@ try:
 except:
 	pass
 # END NIM NukeStudio Connector
-'''

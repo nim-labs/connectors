@@ -514,7 +514,7 @@ class NimProcessorUIBase(IProcessorUI):
     
     self.nimPublishElementLabel = QtGui.QLabel()
     self.nimPublishElementLabel.setFixedWidth(260)
-    self.nimPublishElementLabel.setText("Publish Transcoded Images to NIM Elements:")
+    self.nimPublishElementLabel.setText("Publish Transcoded Images as NIM Elements:")
     nim_horizontalLayout4.addWidget(self.nimPublishElementLabel)
     self.nim_publishElementCheckbox = QtGui.QCheckBox()
     self.nim_publishElementCheckbox.setToolTip("Choose to publish the elements to the associated NIM shots.")
@@ -565,7 +565,7 @@ class NimProcessorUIBase(IProcessorUI):
     nim_horizontalLayout7.setObjectName("nim_HorizontalLayout7")
     self.nimPublishCompLabel = QtGui.QLabel()
     self.nimPublishCompLabel.setFixedWidth(260)
-    self.nimPublishCompLabel.setText("Publish Nuke Project Files to NIM Comps:")
+    self.nimPublishCompLabel.setText("Publish Nuke Project Files as NIM Files:")
     nim_horizontalLayout7.addWidget(self.nimPublishCompLabel)
     self.nim_publishCompCheckbox = QtGui.QCheckBox()
     self.nim_publishCompCheckbox.setToolTip("Choose to publish the nuke projects to the associated NIM shots.")
@@ -583,7 +583,7 @@ class NimProcessorUIBase(IProcessorUI):
     self.nimTaskTypeLabel.setText("Task:")
     nim_horizontalLayout7.addWidget(self.nimTaskTypeLabel)
     self.nim_taskTypeChooser = QtGui.QComboBox()
-    self.nim_taskTypeChooser.setToolTip("Choose the task you wish to assign to nuke comps.")
+    self.nim_taskTypeChooser.setToolTip("Choose the task you wish to assign to the exported nuke project files.")
     self.nim_taskTypeChooser.setFixedWidth(160)
     nim_horizontalLayout7.addWidget(self.nim_taskTypeChooser)
     
