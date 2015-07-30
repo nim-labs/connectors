@@ -415,7 +415,7 @@ function buildPanelUI(userID, action) {
 		if (showPub)
 			basenames = nimAPI({ q: 'getBasenameAllPub', task_type_ID: taskID, itemID: classID, 'class': className });
 		else
-			basenames = nimAPI({ q: 'getBasenames', task_type_ID: taskID, ID: classID, 'class': className });
+			basenames = nimAPI({ q: 'getBasenamesInfo', task_type_ID: taskID, ID: classID, 'class': className });
 		populateListbox(basenameListbox, basenames, 'basename');
 		populateListbox(versionListbox, [], '');
 		if (serverID) {
