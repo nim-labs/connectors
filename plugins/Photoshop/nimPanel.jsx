@@ -132,6 +132,7 @@ function buildPanelUI(userID, action) {
 		taskFolder = '',
 		showPub = 0,
 		basename = '',
+		maxVersion = 0,
 		filepath = '',
 		jobTaskInfo = nimPanel.add('group', undefined),
 		jobInfo = jobTaskInfo.add('panel', undefined, 'Job Info'),
@@ -170,6 +171,7 @@ function buildPanelUI(userID, action) {
 		commentLabel = commentGroup.add('statictext', undefined, 'Comment: '),
 		commentText,
 		commentInput,
+		fileTypeDropdown,
 		addElementCheckbox,
 		allDropdowns = [jobDropdown, serverDropdown, assetDropdown, showDropdown, shotDropdown, taskDropdown, filterDropdown],
 		allDropdownsLength = allDropdowns.length,
@@ -252,6 +254,8 @@ function buildPanelUI(userID, action) {
 		userText = null;
 		dateText = null;
 		commentInput = commentGroup.add('edittext', [0, 0, 550, 20]);
+		fileTypeDropdown = versionInfo.add('dropdownlist', undefined, '', { items: ['Photoshop (.psd)', 'BMP', 'DCS1 (.eps)', 'DCS2 (.eps)', 'EPS', 'GIF', 'JPEG (.jpg)', 'PDF', 'Pixar (.pxr)', 'PNG', 'RAW', 'Targa (.tga)', 'TIFF (.tif)'] }),
+		fileTypeDropdown.selection = 0;
 		addElementCheckbox = versionInfo.add('checkbox', undefined, 'Add Element');
 		confirmButton.text = 'Save As';
 	}
@@ -390,6 +394,7 @@ function buildPanelUI(userID, action) {
 			taskID = 0;
 			taskFolder = '';
 			basename = '';
+			maxVersion = 0;
 			populateListbox(basenameListbox, [], '');
 			populateListbox(versionListbox, [], '');
 			clearVersionInfo();
@@ -443,6 +448,7 @@ function buildPanelUI(userID, action) {
 				basenames = nimAPI({ q: 'getBasenames', task_type_ID: taskID, ID: classID, 'class': className });
 			}
 			basename = '';
+			maxVersion = 0;
 			populateListbox(basenameListbox, basenames, 'basename');
 			populateListbox(versionListbox, [], '');
 			clearVersionInfo();
@@ -453,6 +459,7 @@ function buildPanelUI(userID, action) {
 	basenameListbox.onChange = function() {
 		if (!this.selection) {
 			basename = '';
+			maxVersion = 0;
 			populateListbox(versionListbox, [], '');
 			clearVersionInfo();
 			if (action != 'saveAs') confirmButton.enabled = false;
@@ -468,6 +475,7 @@ function buildPanelUI(userID, action) {
 			className = 'SHOT';
 		}
 		basename = basenames[this.selection.index].basename;
+		maxVersion = basenames[this.selection.index].maxVersion;
 		versions = nimAPI({ q: 'getVersions', itemID: classID, type: className, basename: basename, pub: showPub });
 		populateListbox(versionListbox, versions, ['filename', 'note']);
 		if (serverID && action == 'saveAs')
@@ -543,7 +551,8 @@ function buildPanelUI(userID, action) {
 				return;
 			}
 			var newFileBasename = '',
-				classID, className;
+				classID, className, saveOptions, extension;
+
 			if (assetID) {
 				classID = assetID;
 				className = 'ASSET';
@@ -554,12 +563,68 @@ function buildPanelUI(userID, action) {
 				className = 'SHOT';
 				newFileBasename = shotName + '_' + taskFolder;
 			}
+
 			if (basenameListbox.selection)
 				newFileBasename = basename;
 			else if (tagInput.text)
 				newFileBasename += '_' + tagInput.text.replace(/ /g, '_');
 
-			if (saveFile(classID, className, serverID, serverPath, taskID, taskFolder, newFileBasename, commentInput.text, false, addElementCheckbox.value))
+			if (fileTypeDropdown.selection == 0) {
+				saveOptions = new PhotoshopSaveOptions();
+				extension = 'psd';
+			}
+			else if (fileTypeDropdown.selection == 1) {
+				saveOptions = new BMPSaveOptions();
+				extension = 'bmp';
+			}
+			else if (fileTypeDropdown.selection == 2) {
+				saveOptions = new DCS1_SaveOptions();
+				extension = 'eps';
+			}
+			else if (fileTypeDropdown.selection == 3) {
+				saveOptions = new DCS2_SaveOptions();
+				extension = 'eps';
+			}
+			else if (fileTypeDropdown.selection == 4) {
+				saveOptions = new EPSSaveOptions();
+				extension = 'eps';
+			}
+			else if (fileTypeDropdown.selection == 5) {
+				saveOptions = new GIFSaveOptions();
+				extension = 'gif';
+			}
+			else if (fileTypeDropdown.selection == 6) {
+				saveOptions = new JPEGSaveOptions();
+				extension = 'jpg';
+			}
+			else if (fileTypeDropdown.selection == 7) {
+				saveOptions = new PDFSaveOptions();
+				extension = 'pdf';
+			}
+			else if (fileTypeDropdown.selection == 8) {
+				saveOptions = new PixarSaveOptions();
+				extension = 'pxr';
+			}
+			else if (fileTypeDropdown.selection == 9) {
+				saveOptions = new PNGSaveOptions();
+				extension = 'png';
+			}
+			else if (fileTypeDropdown.selection == 10) {
+				saveOptions = new RawSaveOptions();
+				extension = 'raw';
+			}
+			else if (fileTypeDropdown.selection == 11) {
+				saveOptions = new TargaSaveOptions();
+				extension = 'pxr';
+			}
+			else if (fileTypeDropdown.selection == 12) {
+				saveOptions = new TiffSaveOptions();
+				extension = 'tif';
+			}
+
+			var thisVersion = parseInt(maxVersion) + 1;
+
+			if (saveFile(classID, className, serverID, serverPath, taskID, taskFolder, newFileBasename, commentInput.text, false, addElementCheckbox.value, saveOptions, extension, thisVersion))
 				alert('Save successful.');
 			else
 				alert('Error: Save failed!');

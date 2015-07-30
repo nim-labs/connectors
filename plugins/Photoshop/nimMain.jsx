@@ -348,9 +348,8 @@ function setPref(prefPrefix, prefName, prefValue) {
 
 
 // Saves a file and writes it to NIM API; className = 'ASSET' or 'SHOT', classID = assetID or shotID
-function saveFile(classID, className, serverID, serverPath, taskID, taskFolder, basename, comment, publish, addElement) {
-	var vNum = 1,
-		path = serverPath,
+function saveFile(classID, className, serverID, serverPath, taskID, taskFolder, basename, comment, publish, addElement, saveOptions, extension, version) {
+	var path = serverPath,
 		folder,
 		newFile,
 		itemPaths,
@@ -399,20 +398,24 @@ function saveFile(classID, className, serverID, serverPath, taskID, taskFolder, 
 			return false;
 		}
 	}
-	newFileName = basename + '_v01.psd';
+
+	if (parseInt(version) < 10) version = '0' + parseInt(version);
+
+	newFileName = basename + '_v' + version + '.' + extension;
 	fullFilePath = path + newFileName;
 	newFile = new File(fullFilePath);
 
 	while (newFile.exists) {
-		vNum++;
-		newFileName = basename + '_v' + (vNum < 10 ? '0' : '') + vNum + '.psd';
+		version = parseInt(version) + 1;
+		if (parseInt(version) < 10) version = '0' + parseInt(version);
+		newFileName = basename + '_v' + version + '.' + extension;
 		fullFilePath = path + newFileName;
 		newFile = new File(fullFilePath);
 	}
 
 	while (filesCreated == 0 || (publish && filesCreated == 1)) {
 		try {
-			activeDocument.saveAs(newFile);
+			activeDocument.saveAs(newFile, saveOptions, true, Extension.LOWERCASE);
 		}
 		catch (e) {
 			alert(e);
@@ -428,8 +431,8 @@ function saveFile(classID, className, serverID, serverPath, taskID, taskFolder, 
 			basename: basename,
 			filename: newFileName,
 			filepath: path,
-			ext: '.psd',
-			version: vNum,
+			ext: '.' + extension,
+			version: version,
 			note: comment,
 			serverID: serverID,
 			isPub: isPub,
@@ -439,7 +442,8 @@ function saveFile(classID, className, serverID, serverPath, taskID, taskFolder, 
 			isPub = 1;
 			isWork = 0;
 			workingFilePath = fullFilePath;
-			newFileName = basename + '_v' + (vNum < 10 ? '0' : '') + vNum + '_PUB.psd';
+			if (parseInt(version) < 10) version = '0' + parseInt(version);
+			newFileName = basename + '_v' + version + '_PUB.' + extension;
 			fullFilePath = path + newFileName;
 			newFile = new File(fullFilePath);
 		}

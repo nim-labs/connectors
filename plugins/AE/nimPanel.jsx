@@ -132,6 +132,7 @@ function buildPanelUI(userID, action) {
 		taskFolder = '',
 		showPub = 0,
 		basename = '',
+		maxVersion = 0,
 		filepath = '',
 		jobTaskInfo = nimPanel.add('group', undefined),
 		jobInfo = jobTaskInfo.add('panel', undefined, 'Job Info'),
@@ -383,6 +384,7 @@ function buildPanelUI(userID, action) {
 			taskID = 0;
 			taskFolder = '';
 			basename = '';
+			maxVersion = 0;
 			populateListbox(basenameListbox, [], '');
 			populateListbox(versionListbox, [], '');
 			clearVersionInfo();
@@ -436,6 +438,7 @@ function buildPanelUI(userID, action) {
 				basenames = nimAPI({ q: 'getBasenames', task_type_ID: taskID, ID: classID, 'class': className });
 			}
 			basename = '';
+			maxVersion = 0;
 			populateListbox(basenameListbox, basenames, 'basename');
 			populateListbox(versionListbox, [], '');
 			clearVersionInfo();
@@ -446,6 +449,7 @@ function buildPanelUI(userID, action) {
 	basenameListbox.onChange = function() {
 		if (!this.selection) {
 			basename = '';
+			maxVersion = 0;
 			populateListbox(versionListbox, [], '');
 			clearVersionInfo();
 			if (action != 'saveAs') confirmButton.enabled = false;
@@ -461,6 +465,7 @@ function buildPanelUI(userID, action) {
 			className = 'SHOT';
 		}
 		basename = basenames[this.selection.index].basename;
+		maxVersion = basenames[this.selection.index].maxVersion;
 		versions = nimAPI({ q: 'getVersions', itemID: classID, type: className, basename: basename, pub: showPub });
 		populateListbox(versionListbox, versions, ['filename', 'note']);
 		if (serverID && action == 'saveAs')
@@ -552,7 +557,9 @@ function buildPanelUI(userID, action) {
 			else if (tagInput.text)
 				newFileBasename += '_' + tagInput.text.replace(/ /g, '_');
 
-			if (saveFile(classID, className, serverID, serverPath, taskID, taskFolder, newFileBasename, commentInput.text, false))
+			var thisVersion = parseInt(maxVersion) + 1;
+
+			if (saveFile(classID, className, serverID, serverPath, taskID, taskFolder, newFileBasename, commentInput.text, false, thisVersion))
 				alert('Save successful.');
 			else
 				alert('Error: Save failed!');
