@@ -180,7 +180,7 @@ function buildPanelUI(userID, action) {
 		cancelButton = buttonGroup.add('button', undefined, 'Cancel');
 
 	jobDropdown.title = 'Job: ';
-	serverDropdown.title = 'Server: ';
+	//serverDropdown.title = 'Server: ';
 	assetDropdown.title = 'Asset: ';
 	showDropdown.title = 'Show: ';
 	shotDropdown.title = 'Shot: ';
@@ -230,7 +230,7 @@ function buildPanelUI(userID, action) {
 	if (action == 'open' /*|| action == 'import'*/) {
 		commentText = commentGroup.add('statictext', [0, 0, 550, 20], '');
 		jobInfo.remove(serverDropdown);
-		serverDropdown = null;
+		serverDropdown = null;	
 		/*if (action == 'open')*/ confirmButton.text = 'Open File';
 		/*
 		else if (action == 'import') {
@@ -289,6 +289,7 @@ function buildPanelUI(userID, action) {
 	}
 
 	if (serverDropdown) {
+		serverDropdown.title = 'Server: ';
 		serverDropdown.onChange = function() {
 			if (!this.selection || !this.selection.index) {
 				serverID = 0;
