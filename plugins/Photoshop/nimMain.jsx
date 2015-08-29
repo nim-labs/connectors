@@ -76,9 +76,8 @@ function getOperatingSystem() {
 
 
 // Looks first in preferences for userID; if not found, compares username (taken from "USER" environment variable)
-// to all usernames and full_names in database; if match, save userID to prefs and return it; if not found, return false;
-// passes 'buttonsToDisable' along to 'changeUserDialog' if no user is selected
-function getUserID(buttonsToDisable) {
+// to all usernames and full_names in database; if match, save userID to prefs and return it; if not found, return false
+function getUserID() {
 	var prefUser = getPref('NIM', 'User'),
 		envUser,
 		allUsers = nimAPI({ q: 'getUsers' }),
@@ -106,7 +105,7 @@ function getUserID(buttonsToDisable) {
 		}
 	}
 
-	changeUserDialog(buttonsToDisable);
+	changeUserDialog();
 	return false;
 }
 
@@ -137,19 +136,13 @@ function commentDialog(callback) {
 
 // Prompts the user to select a username from a dropdown of all users;
 // if passed an array of buttons, will disable them if no user has been selected
-function changeUserDialog(buttonsToDisable) {
+function changeUserDialog() {
 	function noUserSelected() {
-		var buttonsToDisableLength = buttonsToDisable.length;
 		alert("You'll need to select a user before you can use NIM.");
-		for (var x = 0; x < buttonsToDisableLength; x++)
-			buttonsToDisable[x].enabled = false;
 	}
 
 	function userSelected() {
-		var buttonsToDisableLength = buttonsToDisable.length;
 		alert('User changed to: ' + changeUserDropdown.selection.text);
-		for (var x = 0; x < buttonsToDisableLength; x++)
-			buttonsToDisable[x].enabled = true;
 	}
 
 	var allUsers = nimAPI({ q: 'getUsers' }),
@@ -471,3 +464,8 @@ function saveFile(classID, className, serverID, serverPath, taskID, taskFolder, 
 
 	return true;
 }
+
+os = getOperatingSystem();
+var foundUserID = getUserID();
+if (foundUserID)
+	userID = foundUserID;
