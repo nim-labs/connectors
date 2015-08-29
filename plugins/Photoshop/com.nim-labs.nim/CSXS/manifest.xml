@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <ExtensionManifest ExtensionBundleId="com.nim-labs.nim" ExtensionBundleName="NIM" ExtensionBundleVersion="1.0" Version="6.0">
   <ExtensionList>
-    <Extension Id="com.nim-labs.nim.photoshop" Version="1.0"/>
+    <Extension Id="com.nim-labs.nim.menu" Version="1.0"/>
   </ExtensionList>
   <ExecutionEnvironment>
     <HostList>
@@ -15,7 +15,7 @@
     </RequiredRuntimeList>
   </ExecutionEnvironment>
   <DispatchInfoList>
-    <Extension Id="com.nim-labs.nim.photoshop">
+    <Extension Id="com.nim-labs.nim.menu">
       <DispatchInfo>
         <Resources>
           <MainPath>./index.html</MainPath>
