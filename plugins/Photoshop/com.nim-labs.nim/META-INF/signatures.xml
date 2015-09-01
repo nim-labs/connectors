@@ -8,15 +8,15 @@
 <Transform Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"/>
 </Transforms>
 <DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
-<DigestValue>niB4np2NbFPHNbbR7htd81LCui+/YsI48QHX/bReTxI=</DigestValue>
+<DigestValue>rfkUqPmlqf9lxLDWP9jjahkEjiyuQd/Zqe0P0UIKzXU=</DigestValue>
 </Reference>
 </SignedInfo>
-<SignatureValue Id="PackageSignatureValue">gTYBzf0MsXN+z6GBL9GmHgtF60ZA9iv0GaG595GOdvuowFTbU5p/fidWzHjlg6lE
-O6QfbiEIFDi/9n+tJIx/M3b+zl/ddO35iRerSHnVFmok4SJ62IHvKVOEXNGSClgH
-GNc82xts0lMI5cQ579xErG+Hmgcaymhqm2qb5hhihAfRKNT21y69ZqvCYFG7ViS/
-D3kXyjiifqsw7qF3JCAVvvShOVnSx4Y3F3EpIqIsA8GRnm28NupFHyWkp6E0Z5wj
-qspyk4p5jwquDMd7XSaiBl4lactoEa48pJr3BszbOaDWT9YdZYyzFR4/ZH5vH5Ov
-MRQYdKYLRfC/MlXexi73Lw==</SignatureValue>
+<SignatureValue Id="PackageSignatureValue">I8VkNRR7QiWjrLgDEHhJPJpvIj7fQC/eU/99jTzS5R43Otu9l6p8RDqeTHYs9Mmt
+Aoouc6HbsA7gSDcwWsgU2gZBWd9PQZ9rgvphTMOTFnxDqleZS5/uFQKj1/qimJqD
+ns2rhN7pL75uMIdIaAnP5V2rRVG1QlTtwG+VDJFdzHlHob2R5nk+GvpaHGQi8bsZ
+azGEtmixdFY7QRmgl9n1J7NG/HxkNbYWnH0Cq8XGO0hkNg3hQ5hrM+iepj3J8ICB
+dYOKJHVb38b+gz3Ed0oHYD6CLVB5kOD6siNfLI6CwmvCB8KDEYFa1A7n5PPe81JK
+c42v5+f9tEWqZYTvO9OeiQ==</SignatureValue>
 
 <KeyInfo>
 <X509Data>
@@ -41,7 +41,7 @@ UuduVZjk3Q/C5ohM+TtEBg9Bt6VOOS/DVCXvixbx49U=
 </KeyInfo>
 <Object>
 <Manifest Id="PackageContents">
-<Reference URI="mimetype"><DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/><DigestValue>b07Onu9cTlGK1WpvgtFOlfk+Tl0HscuNIt6GZtesPX8=</DigestValue></Reference><Reference URI="CSXS/manifest.xml"><DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/><DigestValue>lZ5rUGAvoPEokFsMV/ItJABQNKPhAf1EkwEy3CtL4Ps=</DigestValue></Reference><Reference URI="index.html"><DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/><DigestValue>Fj18T2YgoA1rGSB70W12Vdatq+9zRbugolHu0sdmFQs=</DigestValue></Reference><Reference URI="js/CSInterface.js"><DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/><DigestValue>A4fwFtvIfd7GDrjBuCLyXic+uKOVidL5SWIUYM1zTs0=</DigestValue></Reference><Reference URI="js/main.js"><DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/><DigestValue>fD574aA4kHtmm1VpME0N3KaiLj1vERpXG78AgK6VV5g=</DigestValue></Reference><Reference URI="jsx/nim_changeUser.jsx"><DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/><DigestValue>mxp1gbKTHMwWa1GjLnVSxZd6YbpYT8J+LZOyqBH3B8o=</DigestValue></Reference><Reference URI="jsx/nim_open.jsx"><DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/><DigestValue>MeLDBacStFj2HqVgkH+b3tiJXxS9/ir9kbbXAOqcwBA=</DigestValue></Reference><Reference URI="jsx/nim_publish.jsx"><DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/><DigestValue>IPPiPRTFEUoRe2I4jXbbJg8p4QCe1d4TecaylAtsJp0=</DigestValue></Reference><Reference URI="jsx/nim_saveAs.jsx"><DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/><DigestValue>Nd9MqRTuoFYT1USVvSvP+YdsQK6Zk2ywPNtcmPBPkyE=</DigestValue></Reference><Reference URI="jsx/nim_versionUp.jsx"><DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/><DigestValue>/dqHrScrLrxKATNx7eDsIk4yI96kZIz2PgW3hrGk1fI=</DigestValue></Reference></Manifest>
+<Reference URI="mimetype"><DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/><DigestValue>b07Onu9cTlGK1WpvgtFOlfk+Tl0HscuNIt6GZtesPX8=</DigestValue></Reference><Reference URI="CSXS/manifest.xml"><DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/><DigestValue>WOxWOjMoxasakmGWo/ylYNEx20KLrZO+nLytClrl7iE=</DigestValue></Reference><Reference URI="index.html"><DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/><DigestValue>b9XD3A2feAbsnn8LpJcgwUtM3WOv64Snu/TjSZxLcCQ=</DigestValue></Reference><Reference URI="js/CSInterface.js"><DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/><DigestValue>A4fwFtvIfd7GDrjBuCLyXic+uKOVidL5SWIUYM1zTs0=</DigestValue></Reference><Reference URI="js/main.js"><DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/><DigestValue>fD574aA4kHtmm1VpME0N3KaiLj1vERpXG78AgK6VV5g=</DigestValue></Reference><Reference URI="jsx/nim_changeUser.jsx"><DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/><DigestValue>mxp1gbKTHMwWa1GjLnVSxZd6YbpYT8J+LZOyqBH3B8o=</DigestValue></Reference><Reference URI="jsx/nim_open.jsx"><DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/><DigestValue>MeLDBacStFj2HqVgkH+b3tiJXxS9/ir9kbbXAOqcwBA=</DigestValue></Reference><Reference URI="jsx/nim_publish.jsx"><DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/><DigestValue>IPPiPRTFEUoRe2I4jXbbJg8p4QCe1d4TecaylAtsJp0=</DigestValue></Reference><Reference URI="jsx/nim_saveAs.jsx"><DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/><DigestValue>Nd9MqRTuoFYT1USVvSvP+YdsQK6Zk2ywPNtcmPBPkyE=</DigestValue></Reference><Reference URI="jsx/nim_versionUp.jsx"><DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/><DigestValue>/dqHrScrLrxKATNx7eDsIk4yI96kZIz2PgW3hrGk1fI=</DigestValue></Reference></Manifest>
 </Object>
 </Signature>
 </signatures>
