@@ -31,7 +31,7 @@ except :
 #  Variables :
 WIN=''
 startTime=''
-version='v0.5.7'
+version='v1.0.0'
 winTitle='NIM_'+version
 _os=platform.system().lower()
 _osCap=platform.system()
@@ -1659,7 +1659,7 @@ class GUI(QtGui.QMainWindow) :
             if work :
                 P.info( '    Valid WORK tasks/basenames...' )
                 for key in work.keys() : P.info( '      %s - %s' % (key, ', '.join( work[key]) ) )
-            else : P.info( '    NO valid WORK tasks/bsaenames.' )
+            else : P.info( '    NO valid WORK tasks/basenames.' )
             if pub :
                 P.info( '    Valid PUBLISHED tasks/basenames...' )
                 for key in pub.keys() : P.info( '      %s - %s' % (key, ', '.join( pub[key]) ) )
@@ -1789,15 +1789,31 @@ class GUI(QtGui.QMainWindow) :
         from urlparse import urlparse
         parsed_uri = urlparse( self.prefs['NIM_URL'] )
         nim_domain = '{uri.scheme}://{uri.netloc}/'.format(uri=parsed_uri)
-        print( 'NIM Domain: %s' % nim_domain);
+        print( 'NIM Domain: %s' % nim_domain)
+
+        try :
+            img_loc=nim_domain+img[0]['img_link']
+            img_dir=os.path.dirname( img_loc )+'/'
+            print('img_loc: %s' % img_loc)
+            print('img_dir: %s' % img_dir)
+        except :
+            #Failed to build img path
+            print('Failed to build icon path')
+            img_loc=''
+            print('Using default img: %s' % img_loc)
 
         #  Ensure the Thumbnail exists :
+        '''
+        #REMOVED: Directory verification to failed due to security on folder browsing
         if _type and img and len(img) :
             if img[0]['img_link'] :
                 httpSrch=re.search( '^http[s]?://', nim_domain )
                 if httpSrch :
                     img_loc=nim_domain+img[0]['img_link']
                     img_dir=os.path.dirname( img_loc )+'/'
+                    print('img_loc: %s' % img_loc)
+                    print('img_dir: %s' % img_dir)
+                    
                     if img_loc and img_dir :
                         #  Ensure that the image directory exists :
                         try :
@@ -1813,9 +1829,14 @@ class GUI(QtGui.QMainWindow) :
                             P.debug( '%s image URL directory doesn\'t exist : "%s".' % \
                                 (_type.upper(), img_loc) )
                             img_loc=''
+        '''
         
+        print ('type: %s' % _type)
+        print ('set: %s' % _set)
+
         #  Set Shot/Asset image :
         if _type and img_loc :
+            print("set image")
             _data=urllib.urlopen( img_loc ).read()
             self.nim.pix( _type ).loadFromData( _data )
             self.nim.set_pic( elem=_type, widget=self.nim.pix( _type ).scaled( \
@@ -1826,6 +1847,7 @@ class GUI(QtGui.QMainWindow) :
         
         #  Set default image :
         if _type and not _set :
+            print("default image")
             self.nim.set_pic( elem=_type, widget=QtGui.QPixmap().fromImage( \
                 QtGui.QImage( self.pref_imgDefault ) ) )
             self.nim.pix( _type ).fromImage( QtGui.QImage( self.pref_imgDefault ) )
@@ -1834,6 +1856,17 @@ class GUI(QtGui.QMainWindow) :
             self.nim.label( _type ).setPixmap( self.nim.pix( _type ) )
             P.debug( '%s image URL set to default : "%s"' % (_type.upper(), self.pref_imgDefault) )
         
+        if not _type and not _set :
+            print("default image")
+            _type = 'shot'
+            self.nim.set_pic( elem=_type, widget=QtGui.QPixmap().fromImage( \
+                QtGui.QImage( self.pref_imgDefault ) ) )
+            self.nim.pix( _type ).fromImage( QtGui.QImage( self.pref_imgDefault ) )
+            self.nim.set_pic( elem=_type, widget=self.nim.pix( _type ).scaled( \
+                self.img_size, self.img_size, QtCore.Qt.KeepAspectRatio ) )
+            self.nim.label( _type ).setPixmap( self.nim.pix( _type ) )
+            P.debug( '%s image URL set to default : "%s"' % (_type.upper(), self.pref_imgDefault) )
+
         return
     
     
@@ -1893,6 +1926,7 @@ class GUI(QtGui.QMainWindow) :
         self.nim.Input('asset').activated.connect( lambda: self.update_elem('asset') )
         self.nim.Input('asset').activated.connect( self.update_img )
         self.nim.Input('show').activated.connect( lambda: self.update_elem('show') )
+        self.nim.Input('show').activated.connect( self.update_img )
         self.nim.Input('shot').activated.connect( lambda: self.update_elem('shot') )
         self.nim.Input('shot').activated.connect( self.update_img )
         self.nim.Input('filter').activated.connect( lambda: self.update_elem('filter') )
