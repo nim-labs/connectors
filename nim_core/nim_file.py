@@ -217,7 +217,7 @@ def os_filePath( path='', nim=None ) :
             path=server+fp_noServer
             filePath=path.replace('\\', '/')
             return filePath
-        elif _os.lower() in ['linux2'] :
+        elif _os.lower() in ['linux2', 'linux'] :
             server=serverDict[0]['path']
             path=server+fp_noServer
             filePath=path.replace('\\', '/')
