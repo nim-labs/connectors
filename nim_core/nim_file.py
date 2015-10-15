@@ -23,7 +23,7 @@ import nim as Nim
 
 
 #  Variables :
-version='v0.6.1'
+version='v0.6.5'
 winTitle='NIM_'+version
 _os=platform.system().lower()
 #  Compiled REGEX Searches :
