@@ -134,6 +134,7 @@ function buildPanelUI(userID, action) {
 		basename = '',
 		maxVersion = 0,
 		filepath = '',
+		fileID = 0,
 		jobTaskInfo = nimPanel.add('group', undefined),
 		jobInfo = jobTaskInfo.add('panel', undefined, 'Job Info'),
 		jobDropdown = jobInfo.add('dropdownlist', undefined, '', { items: ['None'] }),
@@ -154,7 +155,8 @@ function buildPanelUI(userID, action) {
 		tagGroup,
 		tagLabel,
 		tagInput,
-		versionInfo = nimPanel.add('panel', undefined, 'Version Info'),
+		outputFiles = nimPanel.add('tabbedpanel'),
+		versionInfo = outputFiles.add('tab', undefined, 'Version Info'),
 		versionGroup = versionInfo.add('group', undefined),
 		versionListboxLabel = versionGroup.add('statictext', undefined, 'Versions: '),
 		versionListbox = versionGroup.add('listbox', [0, 0, 550, 250], 'Versions'),
@@ -172,7 +174,19 @@ function buildPanelUI(userID, action) {
 		commentText,
 		commentInput,
 		fileTypeDropdown,
-		addElementCheckbox,
+		elementsToAdd,
+		elementSelectionGroup,
+		elementButtonGroup,
+		elementFileTypeDropdown,
+		elementAddButton,
+		elementEditButton,
+		elementDeleteButton,
+		elementListboxGroup,
+		elementListboxLabel,
+		elementListbox,
+		elementDetailsDialog,
+		elementDetailsPanel,
+		elementExports,
 		allDropdowns = [jobDropdown, serverDropdown, assetDropdown, showDropdown, shotDropdown, taskDropdown, filterDropdown],
 		allDropdownsLength = allDropdowns.length,
 		buttonGroup = nimPanel.add('group', undefined),
@@ -185,7 +199,7 @@ function buildPanelUI(userID, action) {
 	showDropdown.title = 'Show: ';
 	shotDropdown.title = 'Shot: ';
 	taskDropdown.title = 'Task: ';
-	filterDropdown.title = 'Filter: ';
+	//filterDropdown.title = 'Filter: ';
 
 	serverDropdown.enabled = false;
 	assetDropdown.enabled = false;
@@ -254,10 +268,65 @@ function buildPanelUI(userID, action) {
 		userText = null;
 		dateText = null;
 		commentInput = commentGroup.add('edittext', [0, 0, 550, 20]);
-		fileTypeDropdown = versionInfo.add('dropdownlist', undefined, '', { items: ['Photoshop (.psd)', 'BMP', 'DCS1 (.eps)', 'DCS2 (.eps)', 'EPS', 'GIF', 'JPEG (.jpg)', 'PDF', 'Pixar (.pxr)', 'PNG', 'RAW', 'Targa (.tga)', 'TIFF (.tif)'] }),
-		fileTypeDropdown.selection = 0;
-		addElementCheckbox = versionInfo.add('checkbox', undefined, 'Add Element');
+		elementsToAdd = outputFiles.add('tab', [0, 0, 687, 250], 'Export Elements');
+		elementsToAdd.orientation = 'row';
+		elementsToAdd.alignChildren = 'fill';
+		outputFiles.selection = versionInfo;
+		elementSelectionGroup = elementsToAdd.add('group', undefined);
+		elementSelectionGroup.orientation = 'column';
+		elementSelectionGroup.alignChildren = 'left';
+		elementButtonGroup = elementSelectionGroup.add('group', undefined);
+		elementFileTypeDropdown = elementButtonGroup.add('dropdownlist', undefined, '', { items: ['Photoshop (.psd)', 'EPS', 'GIF', 'JPEG (.jpg)', 'PNG', 'RAW', 'Targa (.tga)', 'TIFF (.tif)'] });
+		elementFileTypeDropdown.selection = 0;
+		elementAddButton = elementButtonGroup.add('button', undefined, 'Add Element');
+		fileID = getMetadata('fileID');
+		elementExports = nimAPI({ q: 'getElementExports', fileID: fileID || 0 }) || [];
+
+		elementListboxGroup = elementSelectionGroup.add('group', undefined);
+		elementListboxGroup.alignChildren = 'top';
+		elementListboxLabel = elementListboxGroup.add('statictext', undefined, 'Elements: ');
+		elementListbox = elementListboxGroup.add('listbox', [0, 0, 250, 236], 'Elements');
+
+		elementDetailsGroup = elementsToAdd.add('group', undefined);
+		elementDetailsGroup.orientation = 'column';
+		elementDetailsGroup.alignChildren = 'fill';
+		elementDetailsGroup.margins = [10, 0, 0, 10];
+
+		elementDetailsButtonGroup = elementDetailsGroup.add('group', undefined);
+
+		elementEditButton = elementDetailsButtonGroup.add('button', undefined, 'Edit Element');
+		elementDeleteButton = elementDetailsButtonGroup.add('button', undefined, 'Delete Element');
+		elementEditButton.enabled = false;
+		elementDeleteButton.enabled = false;
+
+		elementDetailsPanel = elementDetailsGroup.add('panel', [0, 0, 345, 255], 'Element Details');
+		elementDetailsPanel.margins = [10, 0, 0, 10];
+
 		confirmButton.text = 'Save As';
+
+		var elementExportsLength = elementExports.length;
+
+		for (var x = 0; x < elementExportsLength; x++) {
+			var thisExtension = elementExports[x].extension,
+				thisExtensionName = thisExtension;
+			if (thisExtension == 'psd')
+				thisExtensionName = 'Photoshop (.psd)';
+			else if (thisExtension == 'eps')
+				thisExtensionName = 'EPS';
+			else if (thisExtension == 'gif')
+				thisExtensionName = 'GIF';
+			else if (thisExtension == 'jpg')
+				thisExtensionName = 'JPEG (.jpg)';
+			else if (thisExtension == 'png')
+				thisExtensionName = 'PNG';
+			else if (thisExtension == 'raw')
+				thisExtensionName = 'RAW';
+			else if (thisExtension == 'tga')
+				thisExtensionName = 'Targa (.tga)';
+			else if (thisExtension == 'tif')
+				thisExtensionName = 'TIFF (.tif)';
+			elementListbox.add('item', thisExtensionName);
+		}
 	}
 
 
@@ -428,6 +497,7 @@ function buildPanelUI(userID, action) {
 	}
 
 	if (filterDropdown) {
+		filterDropdown.title = 'Filter: ';
 		filterDropdown.onChange = function() {
 			var classID, className;
 			if (assetID) {
@@ -529,6 +599,89 @@ function buildPanelUI(userID, action) {
 		confirmButton.enabled = true;
 	}
 
+	if (elementsToAdd) {
+		elementFileTypeDropdown.onChange = function() {
+			if (this.selection == 0) {
+				/*
+				var allElementDetailPanelsLength = allElementDetailPanels.length;
+				for (var x = 0; x < allElementDetailPanelsLength; x++) {
+					//allElementDetailPanels[x].hide();
+				}
+				pngPanel.show();
+				*/
+			}
+		}
+
+		elementAddButton.onClick = function() {
+			elementListbox.add('item', elementFileTypeDropdown.selection.text);
+
+			var thisExtension = 'psd';
+			if (elementFileTypeDropdown.selection.index == 1)
+				thisExtension = 'eps';
+			else if (elementFileTypeDropdown.selection.index == 2)
+				thisExtension = 'gif';
+			else if (elementFileTypeDropdown.selection.index == 3)
+				thisExtension = 'jpg';
+			else if (elementFileTypeDropdown.selection.index == 4)
+				thisExtension = 'png';
+			else if (elementFileTypeDropdown.selection.index == 5)
+				thisExtension = 'raw';
+			else if (elementFileTypeDropdown.selection.index == 6)
+				thisExtension = 'tga';
+			else if (elementFileTypeDropdown.selection.index == 7)
+				thisExtension = 'tif';
+
+			// Add this item to the elementExports array
+			elementExports.push({
+				extension: thisExtension
+			});
+		}
+
+		elementEditButton.onClick = function() {
+			elementDetailsDialog = new Window('dialog', 'Element Details', undefined);
+			
+			var elementDetailsPanelButtonGroup = elementDetailsDialog.add('group', undefined),
+				elementDetailsOkButton = elementDetailsPanelButtonGroup.add('button', undefined, 'OK'),
+				elementDetailsCancelButton = elementDetailsPanelButtonGroup.add('button', undefined, 'Cancel');
+			
+			elementDetailsOkButton.onClick = function() {
+
+				// TODO: modify elementExports array to reflect changes
+
+				elementDetailsDialog.close();
+			}
+
+			elementDetailsCancelButton.onClick = function() {
+				elementDetailsDialog.close();
+			}
+
+			elementDetailsDialog.show();
+		}
+
+		elementDeleteButton.onClick = function() {
+
+			var indexToRemove = elementListbox.selection.index;
+			
+			// Remove this item from the elementExports array
+			elementExports.splice(indexToRemove, 1);
+
+			elementListbox.remove(elementListbox.selection);
+			elementEditButton.enabled = false;
+			elementDeleteButton.enabled = false;
+		}
+
+		elementListbox.onChange = function() {
+			if (this.selection) {
+				elementEditButton.enabled = true;
+				elementDeleteButton.enabled = true;
+			}
+			else {
+				elementEditButton.enabled = false;
+				elementDeleteButton.enabled = false;
+			}
+		}
+	}
+
 	confirmButton.onClick = function() {
 		if (action == 'open') {
 			if (!filepath) {
@@ -569,63 +722,47 @@ function buildPanelUI(userID, action) {
 				newFileBasename = basename;
 			else if (tagInput.text)
 				newFileBasename += '_' + tagInput.text.replace(/ /g, '_');
-
+/*
 			if (fileTypeDropdown.selection == 0) {
 				saveOptions = new PhotoshopSaveOptions();
 				extension = 'psd';
 			}
 			else if (fileTypeDropdown.selection == 1) {
-				saveOptions = new BMPSaveOptions();
-				extension = 'bmp';
-			}
-			else if (fileTypeDropdown.selection == 2) {
-				saveOptions = new DCS1_SaveOptions();
-				extension = 'eps';
-			}
-			else if (fileTypeDropdown.selection == 3) {
-				saveOptions = new DCS2_SaveOptions();
-				extension = 'eps';
-			}
-			else if (fileTypeDropdown.selection == 4) {
 				saveOptions = new EPSSaveOptions();
 				extension = 'eps';
 			}
-			else if (fileTypeDropdown.selection == 5) {
+			else if (fileTypeDropdown.selection == 2) {
 				saveOptions = new GIFSaveOptions();
 				extension = 'gif';
 			}
-			else if (fileTypeDropdown.selection == 6) {
+			else if (fileTypeDropdown.selection == 3) {
 				saveOptions = new JPEGSaveOptions();
 				extension = 'jpg';
 			}
-			else if (fileTypeDropdown.selection == 7) {
-				saveOptions = new PDFSaveOptions();
-				extension = 'pdf';
-			}
-			else if (fileTypeDropdown.selection == 8) {
-				saveOptions = new PixarSaveOptions();
-				extension = 'pxr';
-			}
-			else if (fileTypeDropdown.selection == 9) {
+			else if (fileTypeDropdown.selection == 4) {
 				saveOptions = new PNGSaveOptions();
 				extension = 'png';
 			}
-			else if (fileTypeDropdown.selection == 10) {
+			else if (fileTypeDropdown.selection == 5) {
 				saveOptions = new RawSaveOptions();
 				extension = 'raw';
 			}
-			else if (fileTypeDropdown.selection == 11) {
+			else if (fileTypeDropdown.selection == 6) {
 				saveOptions = new TargaSaveOptions();
-				extension = 'pxr';
+				extension = 'tga';
 			}
-			else if (fileTypeDropdown.selection == 12) {
+			else if (fileTypeDropdown.selection == 7) {
 				saveOptions = new TiffSaveOptions();
 				extension = 'tif';
 			}
+*/
+
+			saveOptions = new PhotoshopSaveOptions();
+			extension = 'psd';
 
 			var thisVersion = parseInt(maxVersion) + 1;
 
-			if (saveFile(classID, className, serverID, serverPath, taskID, taskFolder, newFileBasename, commentInput.text, false, addElementCheckbox.value, saveOptions, extension, thisVersion))
+			if (saveFile(classID, className, serverID, serverPath, taskID, taskFolder, newFileBasename, commentInput.text, false, elementExports, saveOptions, extension, thisVersion))
 				alert('Save successful.');
 			else
 				alert('Error: Save failed!');

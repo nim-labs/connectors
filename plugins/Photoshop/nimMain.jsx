@@ -30,13 +30,44 @@ function nimAPI(query) {
 		jsonData = null,
 		jsonObject = null;
 
+	function buildQueryString(value, string) {
+		if (!string) string = '';
+		var newString = string;
+/*
+		if (value.constructor === Array) {
+			var valueLength = value.length;
+			for (var x = 0; x < valueLength; x++)
+				string += '[' + x + ']' + buildQueryString(value[x], string);
+		}
+		else
+*/
+		if (typeof value == 'object') {
+			for (var key in value) {
+				newString += '[' + key + ']' + buildQueryString(value[key]) + '&' + string;
+			}
+			newString = newString.slice(0, -(1 + string.length));
+//alert(newString);
+		}
+		else newString += '=' + encodeURIComponent(value);
+		
+		return newString;
+	}
+
 	// Access NIM
 	if (conn.open(nimAPIHost + ':80')) {
-		for (var parameter in query)
-			queryArray.push(parameter + '=' + encodeURIComponent(query[parameter]));
+		for (var parameter in query) {
+			queryArray.push(buildQueryString(query[parameter], parameter));
+		}
+
 		if (queryArray.length)
 			queryString = '?' + queryArray.join('&');
 		else return false;
+
+/*
+		if (query.q == 'setElementExports') {
+			alert(queryString);
+		}
+*/
 
 		// send a HTTP GET request
 		conn.write ('GET ' + nimAPIURL + queryString + ' HTTP/1.0\n\n');
@@ -80,7 +111,7 @@ function getOperatingSystem() {
 function getUserID() {
 	var prefUser = getPref('NIM', 'User'),
 		envUser,
-		allUsers = nimAPI({ q: 'getUsers' }),
+		allUsers = nimAPI({ q: 'getUsers' }) || [],
 		allUsersLength = allUsers.length,
 		guessedUserID = null;
 
@@ -145,7 +176,7 @@ function changeUserDialog() {
 		alert('User changed to: ' + changeUserDropdown.selection.text);
 	}
 
-	var allUsers = nimAPI({ q: 'getUsers' }),
+	var allUsers = nimAPI({ q: 'getUsers' }) || [],
 		allUsersLength = allUsers.length,
 		allUsernames = [],
 		currentUserIndex = null,
@@ -260,6 +291,36 @@ function setNimMetadata(data) {
 }
 
 
+// Sets NIM fileID in file metadata
+function setNimFileIdMetadata(fileID) {
+	var proj = app.project,
+		metaData, schemaNS;
+ 
+	if (ExternalObject.AdobeXMPScript == undefined)
+		ExternalObject.AdobeXMPScript = new ExternalObject('lib:AdobeXMPScript');
+
+	try { metaData = new XMPMeta(activeDocument.xmpMetadata.rawData); }
+	catch(e) {
+		alert('Error: Cannot set metadata when no file is open!');
+		return;
+	}
+
+	schemaNS = XMPMeta.getNamespaceURI("NIM");
+	if (schemaNS == "" || schemaNS == undefined) {
+		XMPMeta.registerNamespace("NIM", "NIM");
+		schemaNS = XMPMeta.getNamespaceURI("NIM");
+	}
+	try {
+		metaData.setProperty(schemaNS, "NIM:fileID", fileID);
+	} catch(err) {
+		alert(err.toString());
+		return false;
+	}
+	activeDocument.xmpMetadata.rawData = metaData.serialize();
+	return true;
+}
+
+
 // Gets a preference value from the NIM preferences file
 function getPref(prefPrefix, prefName) {
 	var nimPrefsFile = new File(nimPrefsPath),
@@ -341,7 +402,7 @@ function setPref(prefPrefix, prefName, prefValue) {
 
 
 // Saves a file and writes it to NIM API; className = 'ASSET' or 'SHOT', classID = assetID or shotID
-function saveFile(classID, className, serverID, serverPath, taskID, taskFolder, basename, comment, publish, addElement, saveOptions, extension, version) {
+function saveFile(classID, className, serverID, serverPath, taskID, taskFolder, basename, comment, publish, elementExports, saveOptions, extension, version) {
 	var path = serverPath,
 		folder,
 		newFile,
@@ -407,13 +468,8 @@ function saveFile(classID, className, serverID, serverPath, taskID, taskFolder, 
 	}
 
 	while (filesCreated == 0 || (publish && filesCreated == 1)) {
-		try {
-			activeDocument.saveAs(newFile, saveOptions, true, Extension.LOWERCASE);
-		}
-		catch (e) {
-			alert(e);
-			return false;
-		}
+
+		// Add file to files table in NIM and get new fileID
 		newFileID = nimAPI({
 			q: 'addFile',
 			itemID: classID,
@@ -431,6 +487,23 @@ function saveFile(classID, className, serverID, serverPath, taskID, taskFolder, 
 			isPub: isPub,
 			isWork: isWork
 		});
+
+		// Save this file's new fileID to its metadata
+		setNimFileIdMetadata(newFileID);
+
+		// Actually save the file
+		try {
+			activeDocument.saveAs(newFile, saveOptions, true, Extension.LOWERCASE);
+		}
+		catch (e) {
+			alert(e);
+			return false;
+		}
+
+		// Save this file's element export options
+		nimAPI({ q: 'setElementExports', exports: elementExports });
+
+		// If publishing, prepare to save another version
 		if (publish && filesCreated == 0) {
 			isPub = 1;
 			isWork = 0;
@@ -443,8 +516,12 @@ function saveFile(classID, className, serverID, serverPath, taskID, taskFolder, 
 		filesCreated++;
 	}
 
-	if (addElement)
+	var elementExportsLength = elementExports.length;
+
+	for (var x = 0; x < elementExportsLength; x++) {
+		var newElementName = basename + '_v' + version + '.' + elementExports[x].extension;
 		nimAPI({ q: 'addElement', parent: className.toLowerCase(), parentID: classID, userID: userID, typeID: taskID, path: path, name: newFileName, isPublished: (publish == 1 ? 'True' : 'False') });
+	}
 
 	if (publish) {
 		nimAPI({ q: 'publishSymlink', fileID: newFileID });
