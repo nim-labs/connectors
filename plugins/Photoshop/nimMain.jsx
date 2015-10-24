@@ -414,7 +414,8 @@ function saveFile(classID, className, serverID, serverPath, taskID, taskFolder, 
 		metadataSet,
 		newFileID,
 		filesCreated = 0,
-		workingFilePath = '';
+		workingFilePath = '',
+		elementExportsLength = elementExports.length;
 
 	metadataSet = setNimMetadata({
 		classID: classID,
@@ -501,7 +502,7 @@ function saveFile(classID, className, serverID, serverPath, taskID, taskFolder, 
 		}
 
 		// Save this file's element export options
-		nimAPI({ q: 'setElementExports', exports: elementExports });
+		nimAPI({ q: 'setElementExports', fileID: newFileID, exports: elementExports });
 
 		// If publishing, prepare to save another version
 		if (publish && filesCreated == 0) {
@@ -516,11 +517,19 @@ function saveFile(classID, className, serverID, serverPath, taskID, taskFolder, 
 		filesCreated++;
 	}
 
-	var elementExportsLength = elementExports.length;
-
+	// Save all the element exports
 	for (var x = 0; x < elementExportsLength; x++) {
 		var newElementName = basename + '_v' + version + '.' + elementExports[x].extension;
 		nimAPI({ q: 'addElement', parent: className.toLowerCase(), parentID: classID, userID: userID, typeID: taskID, path: path, name: newFileName, isPublished: (publish == 1 ? 'True' : 'False') });
+		/*
+		try {
+			activeDocument.saveAs(newFile, saveOptions, true, Extension.LOWERCASE);
+		}
+		catch (e) {
+			alert(e);
+			return false;
+		}
+		*/
 	}
 
 	if (publish) {

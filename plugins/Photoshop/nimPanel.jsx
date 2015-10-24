@@ -633,20 +633,97 @@ function buildPanelUI(userID, action) {
 
 			// Add this item to the elementExports array
 			elementExports.push({
-				extension: thisExtension
+				extension: thisExtension,
+				jpgQuality: 12,
+				jpgFormat: 0,
+				jpgScans: 3
 			});
 		}
 
 		elementEditButton.onClick = function() {
+
+			var thisElement = elementExports[elementListbox.selection.index];
+
 			elementDetailsDialog = new Window('dialog', 'Element Details', undefined);
-			
-			var elementDetailsPanelButtonGroup = elementDetailsDialog.add('group', undefined),
-				elementDetailsOkButton = elementDetailsPanelButtonGroup.add('button', undefined, 'OK'),
-				elementDetailsCancelButton = elementDetailsPanelButtonGroup.add('button', undefined, 'Cancel');
-			
+			elementDetailsDialog.alignChildren = 'fill';		
+
+			if (elementListbox.selection.text == 'JPEG (.jpg)') {
+				var imageOptions = elementDetailsDialog.add('panel', undefined, 'Image Options'),
+					formatOptions = elementDetailsDialog.add('panel', undefined, 'Format Options'),
+					qualityGroup = imageOptions.add('group', undefined),
+					qualityLabel = qualityGroup.add('statictext', undefined, 'Quality:'),
+					qualityTextbox = qualityGroup.add('edittext', undefined, thisElement.jpgQuality),
+					qualitySlider = qualityGroup.add('slider', [0, 0, 170, 13], thisElement.jpgQuality, 0, 12),
+					baselineFormatRadio = formatOptions.add('radiobutton', undefined, 'Baseline ("Standard")'),
+					optimizedFormatRadio = formatOptions.add('radiobutton', undefined, 'Baseline Optimized'),
+					progressiveFormatRadio = formatOptions.add('radiobutton', undefined, 'Progressive'),
+					scansGroup = formatOptions.add('group', undefined),
+					scansLabel = scansGroup.add('statictext', undefined, 'Scans:'),
+					scansDropdown = scansGroup.add('dropdownlist', undefined, '', { items: ['1', '2', '3'] });
+
+				qualityGroup.orientation = 'row';
+
+				qualityGroup.alignChildren = 'left';
+				formatOptions.alignChildren = 'left';
+
+				scansDropdown.selection = thisElement.jpgScans - 1;
+				scansDropdown.enabled = false;
+
+				if (thisElement.jpgFormat == 0)
+					baselineFormatRadio.value = true;
+				else if (thisElement.jpgFormat == 1)
+					optimizedFormatRadio.value = true;
+				else if (thisElement.jpgFormat == 2) {
+					progressiveFormatRadio = true;
+					scansDropdown.enabled = true;
+				}
+
+				qualityTextbox.onChanging = function() {
+					qualitySlider.value = Math.floor(qualityTextbox.text);
+				}
+
+				qualitySlider.onChanging = function() {
+					qualityTextbox.text = Math.floor(qualitySlider.value);
+				}
+
+				baselineFormatRadio.onClick = function() {
+					scansDropdown.enabled = false;
+				}
+
+				optimizedFormatRadio.onClick = function() {
+					scansDropdown.enabled = false;
+				}
+
+				progressiveFormatRadio.onClick = function() {
+					scansDropdown.enabled = true;
+				}
+			}
+
+			//else if () {
+				// ... every other file type
+			//}
+
+			var elementDetailsDialogButtonGroup = elementDetailsDialog.add('group', undefined),
+				elementDetailsOkButton = elementDetailsDialogButtonGroup.add('button', undefined, 'OK'),
+				elementDetailsCancelButton = elementDetailsDialogButtonGroup.add('button', undefined, 'Cancel');
+
+
 			elementDetailsOkButton.onClick = function() {
 
-				// TODO: modify elementExports array to reflect changes
+				if (thisElement.extension == 'jpg') {
+					thisElement.jpgQuality = Math.floor(qualitySlider.value);
+					if (baselineFormatRadio.value == true)
+						thisElement.jpgFormat = 0;
+					else if (optimizedFormatRadio.value == true)
+						thisElement.jpgFormat = 1;
+					else if (progressiveFormatRadio == true)
+						thisElement.jpgFormat = 2;
+					thisElement.jpgScans = scansDropdown.selection.text;
+				}
+
+				//else if () {
+					// ... every other file type
+				//}
 
 				elementDetailsDialog.close();
 			}
