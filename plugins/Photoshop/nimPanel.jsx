@@ -11,7 +11,7 @@
 # otherwise accompanies this software in either electronic or hard copy form.
 # *************************************************************************** */
 
-function buildPanelUI(userID, action) {
+function buildPanelUI(userID, action, metadata) {
 
 	// Populates a dropdown with the strings stored under the nameField key in the objects
 	// contained in dataArray; defaultMessage will be the first dropdown item if items exist
@@ -87,7 +87,7 @@ function buildPanelUI(userID, action) {
 	// Sets initial dropdown or listbox ('container') selection to item with 'property' equal to 'value' within 'array'
 	// (of objects that initially populated dropdown or listbox)
 	function setInitialSelection(property, value, array, container) {
-		if (value) {
+		if (property && value && array && container) {
 			var arrayLength = array.length;
 			for (var x = 0; x < arrayLength; x++) {
 				if (array[x][property] == value) {
@@ -170,6 +170,7 @@ function buildPanelUI(userID, action) {
 		dateLabel = dateGroup.add('statictext', undefined, 'Date: '),
 		dateText = dateGroup.add('statictext', [0, 0, 550, 20], ''),
 		commentGroup = versionInfo.add('group', undefined),
+		alternateCommentGroup = nimPanel.add('group', undefined),
 		commentLabel = commentGroup.add('statictext', undefined, 'Comment: '),
 		commentText,
 		commentInput,
@@ -223,6 +224,7 @@ function buildPanelUI(userID, action) {
 	userGroup.alignment = 'right';
 	dateGroup.alignment = 'right';
 	commentGroup.alignment = 'right';
+	alternateCommentGroup.alignment = 'right';
 	buttonGroup.alignment = 'right';
 
 	populateDropdown(jobDropdown, jobs, ['number', 'jobname'], 'Select a job...');
@@ -255,7 +257,7 @@ function buildPanelUI(userID, action) {
 		}
 		*/
 	}
-	else if (action == 'saveAs') {
+	else if (action == 'saveAs' || action == 'versionUp' || action == 'publish') {
 		taskInfo.remove(filterDropdown);
 		filterDropdown = null;
 		tagGroup = taskInfo.add('group', undefined);
@@ -267,16 +269,14 @@ function buildPanelUI(userID, action) {
 		pathText = null;
 		userText = null;
 		dateText = null;
-		commentInput = commentGroup.add('edittext', [0, 0, 550, 20]);
-		elementsToAdd = outputFiles.add('tab', [0, 0, 687, 250], 'Export Elements');
+		elementsToAdd = outputFiles.add('tab', [0, 0, 687, 295], 'Export Elements');
 		elementsToAdd.orientation = 'row';
 		elementsToAdd.alignChildren = 'fill';
-		outputFiles.selection = versionInfo;
 		elementSelectionGroup = elementsToAdd.add('group', undefined);
 		elementSelectionGroup.orientation = 'column';
 		elementSelectionGroup.alignChildren = 'left';
 		elementButtonGroup = elementSelectionGroup.add('group', undefined);
-		elementFileTypeDropdown = elementButtonGroup.add('dropdownlist', undefined, '', { items: ['Photoshop (.psd)', 'EPS', 'GIF', 'JPEG (.jpg)', 'PNG', 'RAW', 'Targa (.tga)', 'TIFF (.tif)'] });
+		elementFileTypeDropdown = elementButtonGroup.add('dropdownlist', undefined, '', { items: ['Photoshop (.psd)', 'EPS', 'JPEG (.jpg)', 'PNG', 'RAW', 'Targa (.tga)', 'TIFF (.tif)'] });
 		elementFileTypeDropdown.selection = 0;
 		elementAddButton = elementButtonGroup.add('button', undefined, 'Add Element');
 		fileID = getMetadata('fileID');
@@ -302,8 +302,6 @@ function buildPanelUI(userID, action) {
 		elementDetailsPanel = elementDetailsGroup.add('panel', [0, 0, 345, 255], 'Element Details');
 		elementDetailsPanel.margins = [10, 0, 0, 10];
 
-		confirmButton.text = 'Save As';
-
 		var elementExportsLength = elementExports.length;
 
 		for (var x = 0; x < elementExportsLength; x++) {
@@ -313,8 +311,6 @@ function buildPanelUI(userID, action) {
 				thisExtensionName = 'Photoshop (.psd)';
 			else if (thisExtension == 'eps')
 				thisExtensionName = 'EPS';
-			else if (thisExtension == 'gif')
-				thisExtensionName = 'GIF';
 			else if (thisExtension == 'jpg')
 				thisExtensionName = 'JPEG (.jpg)';
 			else if (thisExtension == 'png')
@@ -327,33 +323,61 @@ function buildPanelUI(userID, action) {
 				thisExtensionName = 'TIFF (.tif)';
 			elementListbox.add('item', thisExtensionName);
 		}
+
+		if (action == 'versionUp' || action == 'publish') {
+			nimPanel.remove(jobTaskInfo);
+			outputFiles.remove(versionInfo);
+			jobDropdown = null;
+			serverDropdown = null;
+			showDropdown = null;
+			assetDropdown = null;
+			shotDropdown = null;
+			taskDropdown = null;
+			basenameListbox = null;
+			versionListbox = null;
+			tagInput = null;
+			commentGroup = alternateCommentGroup,
+			commentLabel = commentGroup.add('statictext', undefined, 'Comment: ');
+			outputFiles.selection = elementsToAdd;
+			if (action == 'versionUp')
+				confirmButton.text = 'Version Up';
+			else if (action == 'publish')
+				confirmButton.text = 'Publish';
+		}
+		else if (action == 'saveAs') {
+			outputFiles.selection = versionInfo;
+			confirmButton.text = 'Save As';
+		}
+
+		commentInput = commentGroup.add('edittext', [0, 0, 550, 20]);
 	}
 
-
 	// Add events to elements
-	jobDropdown.onChange = function() {
-		if (!this.selection || !this.selection.index) {
-			jobID = 0;
-			if (serverDropdown) {
-				populateDropdown(serverDropdown, [], '', '');
-				serverDropdown.enabled = false;
+	if (jobDropdown) {
+		jobDropdown.onChange = function() {
+			if (!this.selection || !this.selection.index) {
+				jobID = 0;
+				if (serverDropdown) {
+					populateDropdown(serverDropdown, [], '', '');
+					serverDropdown.enabled = false;
+				}
+				populateDropdown(assetDropdown, [], '', '');
+				populateDropdown(showDropdown, [], '', '');
+				return;
 			}
-			populateDropdown(assetDropdown, [], '', '');
-			populateDropdown(showDropdown, [], '', '');
-			return;
-		}
-		jobID = jobs[this.selection.index].ID;
-		assets = nimAPI({ q: 'getAssets', ID: jobID });
-		shows = nimAPI({ q: 'getShows', ID: jobID });
-		populateDropdown(assetDropdown, assets, 'name', 'Select an asset...');
-		populateDropdown(showDropdown, shows, 'showname', 'Select a show...');
-		if (serverDropdown) {
-			servers = nimAPI({ q: 'getJobServers', ID: jobID });
-			populateDropdown(serverDropdown, servers, 'server', 'Select a server...');
-			if (serverDropdown.items.length == 1)
-				serverDropdown.enabled = false;
-			else
-				serverDropdown.enabled = true;
+			jobID = jobs[this.selection.index].ID;
+			assets = nimAPI({ q: 'getAssets', ID: jobID });
+			shows = nimAPI({ q: 'getShows', ID: jobID });
+			populateDropdown(assetDropdown, assets, 'name', 'Select an asset...');
+			populateDropdown(showDropdown, shows, 'showname', 'Select a show...');
+			if (serverDropdown) {
+				servers = nimAPI({ q: 'getJobServers', ID: jobID });
+				populateDropdown(serverDropdown, servers, 'server', 'Select a server...');
+				if (serverDropdown.items.length == 1)
+					serverDropdown.enabled = false;
+				else
+					serverDropdown.enabled = true;
+			}
 		}
 	}
 
@@ -378,39 +402,43 @@ function buildPanelUI(userID, action) {
 		}
 	}
 
-	showDropdown.onChange = function() {
-		if (!this.selection || !this.selection.index) {
-			showID = 0;
-			populateDropdown(shotDropdown, [], '', '');
-			return;
+	if (showDropdown) {
+		showDropdown.onChange = function() {
+			if (!this.selection || !this.selection.index) {
+				showID = 0;
+				populateDropdown(shotDropdown, [], '', '');
+				return;
+			}
+			showID = shows[this.selection.index].ID;
+			shots = nimAPI({ q: 'getShots', ID: showID });
+			populateDropdown(shotDropdown, shots, 'name', 'Select a shot...');
+			//if (assetMasterButton)
+			//	assetMasterButton.enabled = false;
 		}
-		showID = shows[this.selection.index].ID;
-		shots = nimAPI({ q: 'getShots', ID: showID });
-		populateDropdown(shotDropdown, shots, 'name', 'Select a shot...');
-		//if (assetMasterButton)
-		//	assetMasterButton.enabled = false;
 	}
 
-	assetDropdown.onChange = function() {
-		if (!this.selection || !this.selection.index) {
-			assetID = 0;
-			assetName = '';
-			if (!shotID) {
-				populateDropdown(taskDropdown, [], '', '');
-				if (filterDropdown) filterDropdown.enabled = false;
+	if (assetDropdown) {
+		assetDropdown.onChange = function() {
+			if (!this.selection || !this.selection.index) {
+				assetID = 0;
+				assetName = '';
+				if (!shotID) {
+					populateDropdown(taskDropdown, [], '', '');
+					if (filterDropdown) filterDropdown.enabled = false;
+				}
+				return;
 			}
-			return;
+			shotID = 0;
+			shotName = '';
+			shotDropdown.selection = 0;
+			assetID = assets[this.selection.index].ID;
+			assetName = assets[this.selection.index].name;
+			populateDropdown(taskDropdown, tasks, 'name', 'Select a task...');
+			if (filterDropdown)
+				filterDropdown.enabled = true;
+			//if (assetMasterButton)
+			//	assetMasterButton.enabled = true;
 		}
-		shotID = 0;
-		shotName = '';
-		shotDropdown.selection = 0;
-		assetID = assets[this.selection.index].ID;
-		assetName = assets[this.selection.index].name;
-		populateDropdown(taskDropdown, tasks, 'name', 'Select a task...');
-		if (filterDropdown)
-			filterDropdown.enabled = true;
-		//if (assetMasterButton)
-		//	assetMasterButton.enabled = true;
 	}
 
 	/*
@@ -439,61 +467,65 @@ function buildPanelUI(userID, action) {
 	}
 	*/
 
-	shotDropdown.onChange = function() {
-		if (!this.selection || !this.selection.index) {
-			shotID = 0;
-			shotName = '';
-			if (!assetID) {
-				populateDropdown(taskDropdown, [], '', '');
-				if (filterDropdown) filterDropdown.enabled = false;
+	if (shotDropdown) {
+		shotDropdown.onChange = function() {
+			if (!this.selection || !this.selection.index) {
+				shotID = 0;
+				shotName = '';
+				if (!assetID) {
+					populateDropdown(taskDropdown, [], '', '');
+					if (filterDropdown) filterDropdown.enabled = false;
+				}
+				return;
 			}
-			return;
+			assetID = 0;
+			assetName = '';
+			assetDropdown.selection = 0;
+			shotID = shots[this.selection.index].ID;
+			shotName = shots[this.selection.index].name;
+			populateDropdown(taskDropdown, tasks, 'name', 'Select a task...');
+			if (filterDropdown)
+				filterDropdown.enabled = true;
 		}
-		assetID = 0;
-		assetName = '';
-		assetDropdown.selection = 0;
-		shotID = shots[this.selection.index].ID;
-		shotName = shots[this.selection.index].name;
-		populateDropdown(taskDropdown, tasks, 'name', 'Select a task...');
-		if (filterDropdown)
-			filterDropdown.enabled = true;
 	}
 
-	taskDropdown.onChange = function() {
-		if (!this.selection || !this.selection.index) {
-			taskID = 0;
-			taskFolder = '';
-			basename = '';
-			maxVersion = 0;
-			populateListbox(basenameListbox, [], '');
+	if (taskDropdown) {
+		taskDropdown.onChange = function() {
+			if (!this.selection || !this.selection.index) {
+				taskID = 0;
+				taskFolder = '';
+				basename = '';
+				maxVersion = 0;
+				populateListbox(basenameListbox, [], '');
+				populateListbox(versionListbox, [], '');
+				clearVersionInfo();
+				confirmButton.enabled = false;
+				return;
+			}
+			var classID, className;
+			if (assetID) {
+				classID = assetID;
+				className = 'ASSET';
+			}
+			else if (shotID) {
+				classID = shotID;
+				className = 'SHOT';
+			}
+			taskID = tasks[this.selection.index].ID;
+			taskFolder = tasks[this.selection.index].folder;
+			if (showPub)
+				basenames = nimAPI({ q: 'getBasenameAllPub', task_type_ID: taskID, itemID: classID, 'class': className });
+			else
+				basenames = nimAPI({ q: 'getBasenamesInfo', task_type_ID: taskID, ID: classID, 'class': className });
+			populateListbox(basenameListbox, basenames, 'basename');
 			populateListbox(versionListbox, [], '');
-			clearVersionInfo();
-			confirmButton.enabled = false;
-			return;
+			if (serverID) {
+				if (tagInput && tagInput.text)
+					basenameListbox.enabled = false;
+				confirmButton.enabled = true;
+			}
+			else confirmButton.enabled = false;
 		}
-		var classID, className;
-		if (assetID) {
-			classID = assetID;
-			className = 'ASSET';
-		}
-		else if (shotID) {
-			classID = shotID;
-			className = 'SHOT';
-		}
-		taskID = tasks[this.selection.index].ID;
-		taskFolder = tasks[this.selection.index].folder;
-		if (showPub)
-			basenames = nimAPI({ q: 'getBasenameAllPub', task_type_ID: taskID, itemID: classID, 'class': className });
-		else
-			basenames = nimAPI({ q: 'getBasenamesInfo', task_type_ID: taskID, ID: classID, 'class': className });
-		populateListbox(basenameListbox, basenames, 'basename');
-		populateListbox(versionListbox, [], '');
-		if (serverID) {
-			if (tagInput && tagInput.text)
-				basenameListbox.enabled = false;
-			confirmButton.enabled = true;
-		}
-		else confirmButton.enabled = false;
 	}
 
 	if (filterDropdown) {
@@ -527,41 +559,43 @@ function buildPanelUI(userID, action) {
 		}
 	}
 
-	basenameListbox.onChange = function() {
-		if (!this.selection) {
-			basename = '';
-			maxVersion = 0;
-			populateListbox(versionListbox, [], '');
-			clearVersionInfo();
-			if (action != 'saveAs') confirmButton.enabled = false;
-			return;
-		}
-		var classID, className;
-		if (assetID) {
-			classID = assetID;
-			className = 'ASSET';
-		}
-		else if (shotID) {
-			classID = shotID;
-			className = 'SHOT';
-		}
-		basename = basenames[this.selection.index].basename;
-		maxVersion = basenames[this.selection.index].maxVersion;
-		versions = nimAPI({ q: 'getVersions', itemID: classID, type: className, basename: basename, pub: showPub });
-		populateListbox(versionListbox, versions, ['filename', 'note']);
-		if (serverID && action == 'saveAs')
-			versionListbox.enabled = false;
-		// Select published version if published filter is on
-		else if (filterDropdown && showPub) {
-			var publishedFile = basenames[this.selection.index],
-				publishedFileName = publishedFile.filename,
-				versionListboxChildren = versionListbox.children,
-				versionListboxChildrenLength = versionListboxChildren.length;
-			for (var x = 0; x < versionListboxChildrenLength; x++) {
-				if (versionListboxChildren[x].text.indexOf(publishedFileName) != -1) {
-					versionListbox.selection = versionListboxChildren[x];
-					versionListbox.selection.text += ' (PUBLISHED)';
-					break;
+	if (basenameListbox) {
+		basenameListbox.onChange = function() {
+			if (!this.selection) {
+				basename = '';
+				maxVersion = 0;
+				populateListbox(versionListbox, [], '');
+				clearVersionInfo();
+				if (action != 'saveAs') confirmButton.enabled = false;
+				return;
+			}
+			var classID, className;
+			if (assetID) {
+				classID = assetID;
+				className = 'ASSET';
+			}
+			else if (shotID) {
+				classID = shotID;
+				className = 'SHOT';
+			}
+			basename = basenames[this.selection.index].basename;
+			maxVersion = basenames[this.selection.index].maxVersion;
+			versions = nimAPI({ q: 'getVersions', itemID: classID, type: className, basename: basename, pub: showPub });
+			populateListbox(versionListbox, versions, ['filename', 'note']);
+			if (serverID && action == 'saveAs')
+				versionListbox.enabled = false;
+			// Select published version if published filter is on
+			else if (filterDropdown && showPub) {
+				var publishedFile = basenames[this.selection.index],
+					publishedFileName = publishedFile.filename,
+					versionListboxChildren = versionListbox.children,
+					versionListboxChildrenLength = versionListboxChildren.length;
+				for (var x = 0; x < versionListboxChildrenLength; x++) {
+					if (versionListboxChildren[x].text.indexOf(publishedFileName) != -1) {
+						versionListbox.selection = versionListboxChildren[x];
+						versionListbox.selection.text += ' (PUBLISHED)';
+						break;
+					}
 				}
 			}
 		}
@@ -578,25 +612,27 @@ function buildPanelUI(userID, action) {
 		}
 	}
 
-	versionListbox.onChange = function() {
-		if (!this.selection) {
-			clearVersionInfo();
-			confirmButton.enabled = false;
-			return;
+	if (versionListbox) {
+		versionListbox.onChange = function() {
+			if (!this.selection) {
+				clearVersionInfo();
+				confirmButton.enabled = false;
+				return;
+			}
+			var thisVersion = versions[this.selection.index],
+				thisFilepath,
+				filepathObj = nimAPI({ q: 'getOSPath', fileID: thisVersion.fileID, os: os });
+			if (filepathObj == 0)
+				thisFilepath = thisVersion.filepath;
+			else
+				thisFilepath = filepathObj.path;
+			filepath = thisFilepath + thisVersion.filename;
+			pathText.text = thisFilepath;
+			userText.text = thisVersion.username;
+			dateText.text = thisVersion.date;
+			if (commentText) commentText.text = thisVersion.note;
+			confirmButton.enabled = true;
 		}
-		var thisVersion = versions[this.selection.index],
-			thisFilepath,
-			filepathObj = nimAPI({ q: 'getOSPath', fileID: thisVersion.fileID, os: os });
-		if (filepathObj == 0)
-			thisFilepath = thisVersion.filepath;
-		else
-			thisFilepath = filepathObj.path;
-		filepath = thisFilepath + thisVersion.filename;
-		pathText.text = thisFilepath;
-		userText.text = thisVersion.username;
-		dateText.text = thisVersion.date;
-		if (commentText) commentText.text = thisVersion.note;
-		confirmButton.enabled = true;
 	}
 
 	if (elementsToAdd) {
@@ -616,38 +652,69 @@ function buildPanelUI(userID, action) {
 			elementListbox.add('item', elementFileTypeDropdown.selection.text);
 
 			var thisExtension = 'psd';
+
 			if (elementFileTypeDropdown.selection.index == 1)
 				thisExtension = 'eps';
 			else if (elementFileTypeDropdown.selection.index == 2)
-				thisExtension = 'gif';
-			else if (elementFileTypeDropdown.selection.index == 3)
 				thisExtension = 'jpg';
-			else if (elementFileTypeDropdown.selection.index == 4)
+			else if (elementFileTypeDropdown.selection.index == 3)
 				thisExtension = 'png';
-			else if (elementFileTypeDropdown.selection.index == 5)
+			else if (elementFileTypeDropdown.selection.index == 4)
 				thisExtension = 'raw';
-			else if (elementFileTypeDropdown.selection.index == 6)
+			else if (elementFileTypeDropdown.selection.index == 5)
 				thisExtension = 'tga';
-			else if (elementFileTypeDropdown.selection.index == 7)
+			else if (elementFileTypeDropdown.selection.index == 6)
 				thisExtension = 'tif';
 
 			// Add this item to the elementExports array
 			elementExports.push({
 				extension: thisExtension,
+				epsHalftone: 0,
+				epsTransferFunction: 0,
+				epsPostScriptColor: 0,
+				epsVectorData: 0,
+				epsInterpolation: 0,
 				jpgQuality: 12,
 				jpgFormat: 0,
-				jpgScans: 3
+				jpgScans: 3,
+				pngCompression: 0,
+				pngInterlaced: 0
 			});
 		}
 
 		elementEditButton.onClick = function() {
 
-			var thisElement = elementExports[elementListbox.selection.index];
+			var thisElement = elementExports[elementListbox.selection.index],
+				thisElementText = elementListbox.selection.text;
 
 			elementDetailsDialog = new Window('dialog', 'Element Details', undefined);
 			elementDetailsDialog.alignChildren = 'fill';		
 
-			if (elementListbox.selection.text == 'JPEG (.jpg)') {
+			if (thisElementText == 'EPS') {
+				var previewGroup = elementDetailsDialog.add('group', undefined),
+					previewLabel = previewGroup.add('statictext', undefined, 'Preview:'),
+					previewDropdown = previewGroup.add('dropdownlist', undefined, '', { items: ['None', 'TIFF (1 bit/pixel)', 'TIFF (8 bits/pixel)'] }),
+					encodingGroup = elementDetailsDialog.add('group', undefined),
+					encodingLabel = encodingGroup.add('statictext', undefined, 'Encoding:'),
+					encodingDropdown = encodingGroup.add('dropdownlist', undefined, '', { items: ['ASCII', 'ASCII85', 'Binary', 'JPEG (low quality)', 'JPEG (medium quality)', 'JPEG (high quality)', 'JPEG (maximum quality)'] }),
+					halftoneCheckbox = elementDetailsDialog.add('checkbox', undefined, 'Include Halftone Screen'),
+					transferFunctionCheckbox = elementDetailsDialog.add('checkbox', undefined, 'Include Transfer Function'),
+					postScriptColorCheckbox = elementDetailsDialog.add('checkbox', undefined, 'PostScript Color Management'),
+					vectorDataCheckbox = elementDetailsDialog.add('checkbox', undefined, 'Include Vector Data'),
+					interpolationCheckbox = elementDetailsDialog.add('checkbox', undefined, 'Image Interpolation');
+
+				elementDetailsDialog.text = 'EPS Options';
+
+				previewDropdown.selection = thisElement.epsPreview;
+				encodingDropdown.selection = thisElement.epsEncoding;
+
+				halftoneCheckbox.value = (thisElement.epsHalftone == 0 ? false : true);
+				transferFunctionCheckbox.value = (thisElement.epsTransferFunction == 0 ? false : true);
+				postScriptColorCheckbox.value = (thisElement.epsPostScriptColor == 0 ? false : true);
+				vectorDataCheckbox.value = (thisElement.epsVectorData == 0 ? false : true);
+				interpolationCheckbox.value = (thisElement.epsInterpolation == 0 ? false : true);
+			}
+			else if (thisElementText == 'JPEG (.jpg)') {
 				var imageOptions = elementDetailsDialog.add('panel', undefined, 'Image Options'),
 					formatOptions = elementDetailsDialog.add('panel', undefined, 'Format Options'),
 					qualityGroup = imageOptions.add('group', undefined),
@@ -661,12 +728,14 @@ function buildPanelUI(userID, action) {
 					scansLabel = scansGroup.add('statictext', undefined, 'Scans:'),
 					scansDropdown = scansGroup.add('dropdownlist', undefined, '', { items: ['1', '2', '3'] });
 
+				elementDetailsDialog.text = 'JPEG Options';
+
 				qualityGroup.orientation = 'row';
 
 				qualityGroup.alignChildren = 'left';
 				formatOptions.alignChildren = 'left';
 
-				scansDropdown.selection = thisElement.jpgScans - 1;
+				scansDropdown.selection = thisElement.jpgScans;
 				scansDropdown.enabled = false;
 
 				if (thisElement.jpgFormat == 0)
@@ -698,6 +767,32 @@ function buildPanelUI(userID, action) {
 					scansDropdown.enabled = true;
 				}
 			}
+			else if (thisElementText == 'PNG') {
+				var compressionPanel = elementDetailsDialog.add('panel', undefined, 'Compression'),
+					interlacePanel = elementDetailsDialog.add('panel', undefined, 'Interlace'),
+					compressionRadio1 = compressionPanel.add('radiobutton', undefined, 'None / Fast'),
+					compressionRadio2 = compressionPanel.add('radiobutton', undefined, 'Smallest / Slow'),
+					interlaceRadio1 = interlacePanel.add('radiobutton', undefined, 'None'),
+					interlaceRadio2 = interlacePanel.add('radiobutton', undefined, 'Interlaced');
+
+				elementDetailsDialog.text = 'PNG Options';
+
+				compressionPanel.alignChildren = 'left';
+				interlacePanel.alignChildren = 'left';
+
+				if (thisElement.pngCompression == 0)
+					compressionRadio1.value = true;
+				else if (thisElement.pngCompression == 1)
+					compressionRadio2.value = true;
+
+				if (thisElement.pngInterlaced == 0)
+					interlaceRadio1.value = true;
+				else if (thisElement.pngInterlaced == 1)
+					interlaceRadio2.value = true;
+			}
+			else if (thisElementText == 'Targa (.tga)') {
+				
+			}
 
 			//else if () {
 				// ... every other file type
@@ -709,8 +804,18 @@ function buildPanelUI(userID, action) {
 
 
 			elementDetailsOkButton.onClick = function() {
+				var thisExtension = thisElement.extension;
 
-				if (thisElement.extension == 'jpg') {
+				if (thisExtension == 'eps') {
+					thisElement.epsPreview = previewDropdown.selection.index;
+					thisElement.epsEncoding = encodingDropdown.selection.index;
+					thisElement.epsHalftone = (halftoneCheckbox.value == true ? 1 : 0);
+					thisElement.epsTransferFunction = (transferFunctionCheckbox.value == true ? 1 : 0);
+					thisElement.epsPostScriptColor = (postScriptColorCheckbox.value == true ? 1 : 0);
+					thisElement.epsVectorData = (vectorDataCheckbox.value == true ? 1 : 0);
+					thisElement.epsInterpolation = (interpolationCheckbox.value == true ? 1 : 0);
+				}
+				else if (thisExtension == 'jpg') {
 					thisElement.jpgQuality = Math.floor(qualitySlider.value);
 					if (baselineFormatRadio.value == true)
 						thisElement.jpgFormat = 0;
@@ -718,7 +823,11 @@ function buildPanelUI(userID, action) {
 						thisElement.jpgFormat = 1;
 					else if (progressiveFormatRadio == true)
 						thisElement.jpgFormat = 2;
-					thisElement.jpgScans = scansDropdown.selection.text;
+					thisElement.jpgScans = scansDropdown.selection.index;
+				}
+				else if (thisExtension == 'png') {
+					thisElement.pngCompression = (compressionRadio1.value == true ? 0 : 1);
+					thisElement.pngInterlaced = (interlaceRadio1.value == true ? 0 : 1);
 				}
 
 				//else if () {
@@ -808,10 +917,6 @@ function buildPanelUI(userID, action) {
 				saveOptions = new EPSSaveOptions();
 				extension = 'eps';
 			}
-			else if (fileTypeDropdown.selection == 2) {
-				saveOptions = new GIFSaveOptions();
-				extension = 'gif';
-			}
 			else if (fileTypeDropdown.selection == 3) {
 				saveOptions = new JPEGSaveOptions();
 				extension = 'jpg';
@@ -871,36 +976,57 @@ function buildPanelUI(userID, action) {
 		nimPanel.close();
 	}
 
-	// Set starting values based on NIM preferences file
-	jobID = parseInt(getPref('Photoshop', 'jobID')) || 0;
-	setInitialSelection('ID', jobID, jobs, jobDropdown);
+	if (action == 'open' || action == 'saveAs') {
 
-	if (serverDropdown) {
-		serverID = parseInt(getPref('Photoshop', 'serverID')) || 0;
-		setInitialSelection('ID', serverID, servers, serverDropdown);
+		// Set starting values based on NIM preferences file
+		jobID = parseInt(getPref('Photoshop', 'jobID')) || 0;
+		setInitialSelection('ID', jobID, jobs, jobDropdown);
+
+		if (serverDropdown) {
+			serverID = parseInt(getPref('Photoshop', 'serverID')) || 0;
+			setInitialSelection('ID', serverID, servers, serverDropdown);
+		}
+
+		assetID = parseInt(getPref('Photoshop', 'assetID')) || 0;
+		setInitialSelection('ID', assetID, assets, assetDropdown);
+
+		showID = parseInt(getPref('Photoshop', 'showID')) || 0;
+		setInitialSelection('ID', showID, shows, showDropdown);
+
+		shotID = parseInt(getPref('Photoshop', 'shotID')) || 0;
+		setInitialSelection('ID', shotID, shots, shotDropdown);
+		if (shotID) jobTabPanel.selection = shotsTab;
+
+		taskID = parseInt(getPref('Photoshop', 'taskID')) || 0;
+		setInitialSelection('ID', taskID, tasks, taskDropdown);
+
+		if (filterDropdown) {
+			showPub = parseInt(getPref('Photoshop', 'showPub')) || 0;
+			filterDropdown.selection = showPub;
+			filterDropdown.onChange();
+		}
+
+		basename = getPref('Photoshop', 'basename');
+		setInitialSelection('basename', basename, basenames, basenameListbox);
 	}
-
-	assetID = parseInt(getPref('Photoshop', 'assetID')) || 0;
-	setInitialSelection('ID', assetID, assets, assetDropdown);
-
-	showID = parseInt(getPref('Photoshop', 'showID')) || 0;
-	setInitialSelection('ID', showID, shows, showDropdown);
-
-	shotID = parseInt(getPref('Photoshop', 'shotID')) || 0;
-	setInitialSelection('ID', shotID, shots, shotDropdown);
-	if (shotID) jobTabPanel.selection = shotsTab;
-
-	taskID = parseInt(getPref('Photoshop', 'taskID')) || 0;
-	setInitialSelection('ID', taskID, tasks, taskDropdown);
-
-	if (filterDropdown) {
-		showPub = parseInt(getPref('Photoshop', 'showPub')) || 0;
-		filterDropdown.selection = showPub;
-		filterDropdown.onChange();
+	else {
+		var className = metadata.className;
+		if (className == 'ASSET') {
+			assetID = metadata.classID;
+			shotID = 0;
+		}
+		else if (className == 'SHOT') {
+			assetID = 0;
+			shotID = metadata.classID;
+		}
+		jobID = 0;
+		showID = 0;
+		serverID = metadata.serverID;
+		serverPath = metadata.serverPath;
+		taskID = metadata.taskID;
+		taskFolder = metadata.taskFolder;
+		basename = metadata.basename;
 	}
-
-	basename = getPref('Photoshop', 'basename');
-	setInitialSelection('basename', basename, basenames, basenameListbox);
 
 	nimPanel.show();
 	return nimPanel;

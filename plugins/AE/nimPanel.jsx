@@ -87,7 +87,7 @@ function buildPanelUI(userID, action) {
 	// Sets initial dropdown or listbox ('container') selection to item with 'property' equal to 'value' within 'array'
 	// (of objects that initially populated dropdown or listbox)
 	function setInitialSelection(property, value, array, container) {
-		if (value) {
+		if (property && value && array && container) {
 			var arrayLength = array.length;
 			for (var x = 0; x < arrayLength; x++) {
 				if (array[x][property] == value) {
