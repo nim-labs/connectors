@@ -519,8 +519,24 @@ function saveFile(classID, className, serverID, serverPath, taskID, taskFolder, 
 
 	// Save all the element exports
 	for (var x = 0; x < elementExportsLength; x++) {
-		var newElementName = basename + '_v' + version + '.' + elementExports[x].extension;
-		nimAPI({ q: 'addElement', parent: className.toLowerCase(), parentID: classID, userID: userID, typeID: taskID, path: path, name: newFileName, isPublished: (publish == 1 ? 'True' : 'False') });
+		var elementVersion = x + 1,
+			elementExtension = elementExports[x].extension,
+			elementSaveOptions;
+		if (elementVersion < 10) elementVersion = '0' + x;
+		var newElementName = basename + '_v' + version + '_' + elementVersion + '.' + elementExtension;
+		nimAPI({ q: 'addElement', parent: className.toLowerCase(), parentID: classID, userID: userID, typeID: taskID, path: path, name: newElementName, isPublished: (publish == 1 ? 'True' : 'False') });
+		
+		if (elementExtension == 'eps') {
+			elementSaveOptions = new EPSSaveOptions({
+
+			});
+		}
+		else if (elementExtension == 'jpg') {
+			elementSaveOptions = new JPEGSaveOptions({
+				
+			});
+		}
+
 		/*
 		try {
 			activeDocument.saveAs(newFile, saveOptions, true, Extension.LOWERCASE);

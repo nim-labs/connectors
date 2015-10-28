@@ -187,6 +187,14 @@ function buildPanelUI(userID, action, metadata) {
 		elementListbox,
 		elementDetailsDialog,
 		elementDetailsPanel,
+		elementDetailsText1,
+		elementDetailsText2,
+		elementDetailsText3,
+		elementDetailsText4,
+		elementDetailsText5,
+		elementDetailsText6,
+		elementDetailsText7,
+		elementDetailsText8,
 		elementExports,
 		allDropdowns = [jobDropdown, serverDropdown, assetDropdown, showDropdown, shotDropdown, taskDropdown, filterDropdown],
 		allDropdownsLength = allDropdowns.length,
@@ -276,7 +284,7 @@ function buildPanelUI(userID, action, metadata) {
 		elementSelectionGroup.orientation = 'column';
 		elementSelectionGroup.alignChildren = 'left';
 		elementButtonGroup = elementSelectionGroup.add('group', undefined);
-		elementFileTypeDropdown = elementButtonGroup.add('dropdownlist', undefined, '', { items: ['Photoshop (.psd)', 'EPS', 'JPEG (.jpg)', 'PNG', 'RAW', 'Targa (.tga)', 'TIFF (.tif)'] });
+		elementFileTypeDropdown = elementButtonGroup.add('dropdownlist', undefined, '', { items: ['Photoshop (.psd)', 'EPS', 'JPEG (.jpg)', 'PNG', 'Targa (.tga)', 'TIFF (.tif)'] });
 		elementFileTypeDropdown.selection = 0;
 		elementAddButton = elementButtonGroup.add('button', undefined, 'Add Element');
 		fileID = getMetadata('fileID');
@@ -299,8 +307,18 @@ function buildPanelUI(userID, action, metadata) {
 		elementEditButton.enabled = false;
 		elementDeleteButton.enabled = false;
 
-		elementDetailsPanel = elementDetailsGroup.add('panel', [0, 0, 345, 255], 'Element Details');
-		elementDetailsPanel.margins = [10, 0, 0, 10];
+		elementDetailsPanel = elementDetailsGroup.add('panel', [0, 0, 345, 236], 'Element Details');
+		elementDetailsPanel.margins = [15, 10, 0, 10];
+		elementDetailsPanel.alignChildren = 'fill';
+
+		elementDetailsText1 = elementDetailsPanel.add('statictext', undefined, '');
+		elementDetailsText2 = elementDetailsPanel.add('statictext', undefined, '');
+		elementDetailsText3 = elementDetailsPanel.add('statictext', undefined, '');
+		elementDetailsText4 = elementDetailsPanel.add('statictext', undefined, '');
+		elementDetailsText5 = elementDetailsPanel.add('statictext', undefined, '');
+		elementDetailsText6 = elementDetailsPanel.add('statictext', undefined, '');
+		elementDetailsText7 = elementDetailsPanel.add('statictext', undefined, '');
+		elementDetailsText8 = elementDetailsPanel.add('statictext', undefined, '');
 
 		var elementExportsLength = elementExports.length;
 
@@ -315,8 +333,6 @@ function buildPanelUI(userID, action, metadata) {
 				thisExtensionName = 'JPEG (.jpg)';
 			else if (thisExtension == 'png')
 				thisExtensionName = 'PNG';
-			else if (thisExtension == 'raw')
-				thisExtensionName = 'RAW';
 			else if (thisExtension == 'tga')
 				thisExtensionName = 'Targa (.tga)';
 			else if (thisExtension == 'tif')
@@ -637,15 +653,6 @@ function buildPanelUI(userID, action, metadata) {
 
 	if (elementsToAdd) {
 		elementFileTypeDropdown.onChange = function() {
-			if (this.selection == 0) {
-				/*
-				var allElementDetailPanelsLength = allElementDetailPanels.length;
-				for (var x = 0; x < allElementDetailPanelsLength; x++) {
-					//allElementDetailPanels[x].hide();
-				}
-				pngPanel.show();
-				*/
-			}
 		}
 
 		elementAddButton.onClick = function() {
@@ -660,10 +667,8 @@ function buildPanelUI(userID, action, metadata) {
 			else if (elementFileTypeDropdown.selection.index == 3)
 				thisExtension = 'png';
 			else if (elementFileTypeDropdown.selection.index == 4)
-				thisExtension = 'raw';
-			else if (elementFileTypeDropdown.selection.index == 5)
 				thisExtension = 'tga';
-			else if (elementFileTypeDropdown.selection.index == 6)
+			else if (elementFileTypeDropdown.selection.index == 5)
 				thisExtension = 'tif';
 
 			// Add this item to the elementExports array
@@ -674,11 +679,19 @@ function buildPanelUI(userID, action, metadata) {
 				epsPostScriptColor: 0,
 				epsVectorData: 0,
 				epsInterpolation: 0,
-				jpgQuality: 12,
+				jpgQuality: 3,
 				jpgFormat: 0,
-				jpgScans: 3,
+				jpgScans: 0,
 				pngCompression: 0,
-				pngInterlaced: 0
+				pngInterlaced: 0,
+				tgaResolution: 1,
+				tgaCompress: 1,
+				tifImageCompression: 0,
+				tifSaveImagePyramid: 0,
+				tifSaveTransparency: 0,
+				tifPixelOrder: 0,
+				tifByteOrder: 0,
+				tifLayerCompression: 0
 			});
 		}
 
@@ -726,7 +739,7 @@ function buildPanelUI(userID, action, metadata) {
 					progressiveFormatRadio = formatOptions.add('radiobutton', undefined, 'Progressive'),
 					scansGroup = formatOptions.add('group', undefined),
 					scansLabel = scansGroup.add('statictext', undefined, 'Scans:'),
-					scansDropdown = scansGroup.add('dropdownlist', undefined, '', { items: ['1', '2', '3'] });
+					scansDropdown = scansGroup.add('dropdownlist', undefined, '', { items: ['3', '4', '5'] });
 
 				elementDetailsDialog.text = 'JPEG Options';
 
@@ -743,7 +756,7 @@ function buildPanelUI(userID, action, metadata) {
 				else if (thisElement.jpgFormat == 1)
 					optimizedFormatRadio.value = true;
 				else if (thisElement.jpgFormat == 2) {
-					progressiveFormatRadio = true;
+					progressiveFormatRadio.value = true;
 					scansDropdown.enabled = true;
 				}
 
@@ -791,12 +804,133 @@ function buildPanelUI(userID, action, metadata) {
 					interlaceRadio2.value = true;
 			}
 			else if (thisElementText == 'Targa (.tga)') {
-				
+				var resolutionPanel = elementDetailsDialog.add('panel', undefined, 'Resolution'),
+					resolutionRadio1 = resolutionPanel.add('radiobutton', undefined, '16 bits/pixel'),
+					resolutionRadio2 = resolutionPanel.add('radiobutton', undefined, '24 bits/pixel'),
+					resolutionRadio3 = resolutionPanel.add('radiobutton', undefined, '32 bits/pixel'),
+					compressCheckbox = elementDetailsDialog.add('checkbox', undefined, 'Compress (RLE)');
+
+				elementDetailsDialog.text = 'Targa Options';
+
+				resolutionPanel.alignChildren = 'left';
+
+				if (thisElement.tgaResolution == 0)
+					resolutionRadio1.value = true;
+				else if (thisElement.tgaResolution == 1)
+					resolutionRadio2.value = true;
+				else if (thisElement.tgaResolution == 2)
+					resolutionRadio3.value = true;
+
+				compressCheckbox.value = (thisElement.tgaCompress == 0 ? false : true);
+			}
+			else if (thisElementText == 'TIFF (.tif)') {
+				var twoColumnGroup = elementDetailsDialog.add('group', undefined),
+					column1 = twoColumnGroup.add('group', undefined),
+					column2 = twoColumnGroup.add('group', undefined),
+					imageCompressionPanel = column1.add('panel', undefined, 'Image Compression'),
+					imageCompressionRadio1 = imageCompressionPanel.add('radiobutton', undefined, 'None'),
+					imageCompressionRadio2 = imageCompressionPanel.add('radiobutton', undefined, 'LZW'),
+					imageCompressionRadio3 = imageCompressionPanel.add('radiobutton', undefined, 'ZIP'),
+					imageCompressionRadio4 = imageCompressionPanel.add('radiobutton', undefined, 'JPEG'),
+					qualityGroup = imageCompressionPanel.add('group', undefined),
+					qualityLabel = qualityGroup.add('statictext', undefined, 'Quality:'),
+					qualityTextbox = qualityGroup.add('edittext', undefined, thisElement.jpgQuality),
+					qualitySlider = imageCompressionPanel.add('slider', [0, 0, 170, 13], thisElement.jpgQuality, 0, 12),
+					saveImagePyramidCheckbox = column1.add('checkbox', undefined, 'Save Image Pyramid'),
+					saveTransparencyCheckbox = column1.add('checkbox', undefined, 'Save Transparency'),
+					pixelOrderPanel = column2.add('panel', undefined, 'Pixel Order'),
+					pixelOrderRadio1 = pixelOrderPanel.add('radiobutton', undefined, 'Interleaved (RGBRGB)'),
+					pixelOrderRadio2 = pixelOrderPanel.add('radiobutton', undefined, 'Per Channel (RRGGBB)'),
+					byteOrderPanel = column2.add('panel', undefined, 'Byte Order'),
+					byteOrderRadio1 = byteOrderPanel.add('radiobutton', undefined, 'IBM PC'),
+					byteOrderRadio2 = byteOrderPanel.add('radiobutton', undefined, 'Macintosh'),
+					layerCompressionPanel = column2.add('panel', undefined, 'Layer Compression'),
+					layerCompressionRadio1 = layerCompressionPanel.add('radiobutton', undefined, 'RLE (faster saves, bigger files)'),
+					layerCompressionRadio2 = layerCompressionPanel.add('radiobutton', undefined, 'ZIP (slower saves, smaller files)'),
+					layerCompressionRadio3 = layerCompressionPanel.add('radiobutton', undefined, 'Discard Layers and Save a Copy');
+
+				elementDetailsDialog.text = 'TIFF Options';
+
+				twoColumnGroup.alignChildren = 'fill';
+				column1.orientation = 'column';
+				column1.alignChildren = 'fill';
+				column2.orientation = 'column';
+				column2.alignChildren = 'fill';
+				imageCompressionPanel.alignChildren = 'left';
+				pixelOrderPanel.alignChildren = 'left';
+				byteOrderPanel.alignChildren = 'left';
+				layerCompressionPanel.alignChildren = 'left';
+
+				qualityLabel.enabled = false;
+				qualityTextbox.enabled = false;
+				qualitySlider.enabled = false;
+
+				if (thisElement.tifImageCompression == 0)
+					imageCompressionRadio1.value = true;
+				else if (thisElement.tifImageCompression == 1)
+					imageCompressionRadio2.value = true;
+				else if (thisElement.tifImageCompression == 2)
+					imageCompressionRadio3.value = true;
+				else if (thisElement.tifImageCompression == 3) {
+					imageCompressionRadio4.value = true;
+					qualityLabel.enabled = true;
+					qualityTextbox.enabled = true;
+					qualitySlider.enabled = true;
+				}
+
+				saveImagePyramidCheckbox.value = (thisElement.tifSaveImagePyramid == 0 ? false : true);
+				saveTransparencyCheckbox.value = (thisElement.tifSaveTransparency == 0 ? false : true);
+
+				if (thisElement.tifPixelOrder == 0)
+					pixelOrderRadio1.value = true;
+				else if (thisElement.tifPixelOrder == 1)
+					pixelOrderRadio2.value = true;
+
+				if (thisElement.tifByteOrder == 0)
+					byteOrderRadio1.value = true;
+				else if (thisElement.tifByteOrder == 1)
+					byteOrderRadio2.value = true;
+
+				if (thisElement.tifLayerCompression == 0)
+					layerCompressionRadio1.value = true;
+				else if (thisElement.tifLayerCompression == 1)
+					layerCompressionRadio2.value = true;
+				else if (thisElement.tifLayerCompression == 2)
+					layerCompressionRadio3.value = true;
+
+				qualityTextbox.onChanging = function() {
+					qualitySlider.value = Math.floor(qualityTextbox.text);
+				}
+
+				qualitySlider.onChanging = function() {
+					qualityTextbox.text = Math.floor(qualitySlider.value);
+				}
+
+				imageCompressionRadio1.onClick = function() {
+					qualityLabel.enabled = false;
+					qualityTextbox.enabled = false;
+					qualitySlider.enabled = false;
+				}
+
+				imageCompressionRadio2.onClick = function() {
+					qualityLabel.enabled = false;
+					qualityTextbox.enabled = false;
+					qualitySlider.enabled = false;
+				}
+
+				imageCompressionRadio3.onClick = function() {
+					qualityLabel.enabled = false;
+					qualityTextbox.enabled = false;
+					qualitySlider.enabled = false;
+				}
+
+				imageCompressionRadio4.onClick = function() {
+					qualityLabel.enabled = true;
+					qualityTextbox.enabled = true;
+					qualitySlider.enabled = true;
+				}
 			}
 
-			//else if () {
-				// ... every other file type
-			//}
 
 			var elementDetailsDialogButtonGroup = elementDetailsDialog.add('group', undefined),
 				elementDetailsOkButton = elementDetailsDialogButtonGroup.add('button', undefined, 'OK'),
@@ -821,19 +955,58 @@ function buildPanelUI(userID, action, metadata) {
 						thisElement.jpgFormat = 0;
 					else if (optimizedFormatRadio.value == true)
 						thisElement.jpgFormat = 1;
-					else if (progressiveFormatRadio == true)
+					else if (progressiveFormatRadio.value == true)
 						thisElement.jpgFormat = 2;
+					
 					thisElement.jpgScans = scansDropdown.selection.index;
 				}
 				else if (thisExtension == 'png') {
 					thisElement.pngCompression = (compressionRadio1.value == true ? 0 : 1);
 					thisElement.pngInterlaced = (interlaceRadio1.value == true ? 0 : 1);
 				}
+				else if (thisExtension == 'tga') {
+					if (resolutionRadio1.value == true)
+						thisElement.tgaResolution = 0;
+					else if (resolutionRadio2.value == true)
+						thisElement.tgaResolution = 1;
+					else if (resolutionRadio3.value == true)
+						thisElement.tgaResolution = 2;
+					
+					thisElement.tgaCompress = (compressCheckbox.value == true ? 1 : 0);
+				}
+				else if (thisExtension == 'tif') {
+					if (imageCompressionRadio1.value == true)
+						thisElement.tifImageCompression = 0;
+					else if (imageCompressionRadio2.value == true)
+						thisElement.tifImageCompression = 1;
+					else if (imageCompressionRadio3.value == true)
+						thisElement.tifImageCompression = 2;
+					else if (imageCompressionRadio4.value == true)
+						thisElement.tifImageCompression = 3;
 
-				//else if () {
-					// ... every other file type
-				//}
+					thisElement.jpgQuality = Math.floor(qualitySlider.value);
+					thisElement.tifSaveImagePyramid = (saveImagePyramidCheckbox.value == true ? 1 : 0);
+					thisElement.tifSaveTransparency = (saveTransparencyCheckbox.value == true ? 1 : 0);
 
+					if (pixelOrderRadio1.value == true)
+						thisElement.tifPixelOrder = 0;
+					else if (pixelOrderRadio2.value == true)
+						thisElement.tifPixelOrder = 1;
+
+					if (byteOrderRadio1.value == true)
+						thisElement.tifByteOrder = 0;
+					else if (byteOrderRadio2.value == true)
+						thisElement.tifByteOrder = 1;
+
+					if (layerCompressionRadio1.value == true)
+						thisElement.tifLayerCompression = 0;
+					else if (layerCompressionRadio2.value == true)
+						thisElement.tifLayerCompression = 1;
+					else if (layerCompressionRadio3.value == true)
+						thisElement.tifLayerCompression = 2;
+				}
+
+				elementListbox.onChange();
 				elementDetailsDialog.close();
 			}
 
@@ -857,13 +1030,158 @@ function buildPanelUI(userID, action, metadata) {
 		}
 
 		elementListbox.onChange = function() {
-			if (this.selection) {
-				elementEditButton.enabled = true;
-				elementDeleteButton.enabled = true;
-			}
-			else {
+			if (!this.selection) {
 				elementEditButton.enabled = false;
 				elementDeleteButton.enabled = false;
+
+				elementDetailsText1.text = '';
+				elementDetailsText2.text = '';
+				elementDetailsText3.text = '';
+				elementDetailsText4.text = '';
+				elementDetailsText5.text = '';
+				elementDetailsText6.text = '';
+				elementDetailsText7.text = '';
+				elementDetailsText8.text = '';
+				return;
+			}
+
+			var thisElement = elementExports[this.selection.index],
+				thisExtension = thisElement.extension;
+
+			elementEditButton.enabled = true;
+			elementDeleteButton.enabled = true;
+
+			if (thisExtension == 'psd') {
+				elementDetailsText1.text = 'File Type: PSD';
+				elementDetailsText2.text = '';
+				elementDetailsText3.text = '';
+				elementDetailsText4.text = '';
+				elementDetailsText5.text = '';
+				elementDetailsText6.text = '';
+				elementDetailsText7.text = '';
+				elementDetailsText8.text = '';
+				elementEditButton.enabled = false;
+			}
+			else if (thisExtension == 'eps') {
+				var thisPreview = 'None',
+					thisEncoding = 'ASCII';
+
+				if (thisElement.epsPreview == 1)
+					thisPreview = 'TIFF (1 bit/pixel)';
+				else if (thisElement.epsPreview == 2)
+					thisPreview = 'TIFF (8 bits/pixel)';
+
+				if (thisElement.epsEncoding == 1)
+					thisEncoding = 'ASCII85';
+				else if (thisElement.epsEncoding == 2)
+					thisEncoding = 'Binary';
+				else if (thisElement.epsEncoding == 3)
+					thisEncoding = 'JPEG (low quality)';
+				else if (thisElement.epsEncoding == 4)
+					thisEncoding = 'JPEG (medium quality)';
+				else if (thisElement.epsEncoding == 5)
+					thisEncoding = 'JPEG (high quality)';
+				else if (thisElement.epsEncoding == 6)
+					thisEncoding = 'JPEG (maximum quality)';
+
+				elementDetailsText1.text = 'File Type: EPS';
+				elementDetailsText2.text = 'Preview: ' + thisPreview;
+				elementDetailsText3.text = 'Encoding: ' + thisEncoding;
+				elementDetailsText4.text = 'Include Halftone Screen: ' + (thisElement.epsHalftone == 0 ? 'No' : 'Yes');
+				elementDetailsText5.text = 'Include Transfer Function: ' + (thisElement.epsTransferFunction == 0 ? 'No' : 'Yes');
+				elementDetailsText6.text = 'PostScript Color Management: ' + (thisElement.epsPostScriptColor == 0 ? 'No' : 'Yes');
+				elementDetailsText7.text = 'Include Vector Data: ' + (thisElement.epsVectorData == 0 ? 'No' : 'Yes');
+				elementDetailsText8.text = 'Image Interpolation: ' + (thisElement.epsInterpolation == 0 ? 'No' : 'Yes');
+			}
+			else if (thisExtension == 'jpg') {
+				var thisFormat = 'Baseline ("Standard")',
+					thisScans = '';
+
+				if (thisElement.jpgFormat == 1)
+					thisFormat = 'Baseline Optimized';
+				else if (thisElement.jpgFormat == 2)
+					thisFormat = 'Progressive';
+
+				if (thisElement.jpgFormat == 2)
+					thisScans = 'Scans: ' + (parseInt(thisElement.jpgScans) + 3);
+
+				elementDetailsText1.text = 'File Type: JPEG (.jpg)';
+				elementDetailsText2.text = 'Quality: ' + thisElement.jpgQuality;
+				elementDetailsText3.text = 'Format: ' + thisFormat;
+				elementDetailsText4.text = thisScans;
+				elementDetailsText5.text = '';
+				elementDetailsText6.text = '';
+				elementDetailsText7.text = '';
+				elementDetailsText8.text = '';
+			}
+			else if (thisExtension == 'png') {
+				var thisCompression = 'None / Fast',
+					thisInterlace = 'None';
+
+				if (thisElement.pngCompression == 1)
+					thisCompression = 'Smallest / Slow';
+
+				if (thisElement.pngInterlaced == 1)
+					thisInterlace = 'Interlaced';
+
+				elementDetailsText1.text = 'File Type: PNG';
+				elementDetailsText2.text = 'Compression: ' + thisCompression;
+				elementDetailsText3.text = 'Interlace: ' + thisInterlace;
+				elementDetailsText4.text = '';
+				elementDetailsText5.text = '';
+				elementDetailsText6.text = '';
+				elementDetailsText7.text = '';
+				elementDetailsText8.text = '';
+			}
+			else if (thisExtension == 'tga') {
+				var thisResolution = '16 bits/pixel';
+
+				if (thisElement.tgaResolution == 1)
+					thisResolution = '24 bits/pixel';
+				else if (thisElement.tgaResolution == 2)
+					thisResolution = '32 bits/pixel';
+
+				elementDetailsText1.text = 'File Type: Targa (.tga)';
+				elementDetailsText2.text = 'Resolution: ' + thisResolution;
+				elementDetailsText3.text = 'Compress (RLE): ' + (thisElement.tgaCompress == 0 ? 'No' : 'Yes');
+				elementDetailsText4.text = '';
+				elementDetailsText5.text = '';
+				elementDetailsText6.text = '';
+				elementDetailsText7.text = '';
+				elementDetailsText8.text = '';
+			}
+			else if (thisExtension == 'tif') {
+				var thisImageCompression = 'None',
+					thisPixelOrder = 'Interleaved (RGBRGB)',
+					thisByteOrder = 'IBM PC',
+					thisLayerCompression = 'RLE (faster saves, bigger files)';
+
+				if (thisElement.tifImageCompression == 1)
+					thisImageCompression = 'LZW';
+				else if (thisElement.tifImageCompression == 2)
+					thisImageCompression = 'ZIP';
+				else if (thisElement.tifImageCompression == 3)
+					thisImageCompression = 'JPEG';
+
+				if (thisElement.tifPixelOrder == 1)
+					thisPixelOrder = 'Per Channel (RRGGBB)';
+
+				if (thisElement.tifByteOrder == 1)
+					thisByteOrder = 'Macintosh';
+
+				if (thisElement.tifLayerCompression == 1)
+					thisLayerCompression = 'ZIP (slower saves, smaller files)';
+				else if (thisElement.tifLayerCompression == 2)
+					thisLayerCompression = 'Discard Layers and Save a Copy';
+
+				elementDetailsText1.text = 'File Type: TIFF (.tif)';
+				elementDetailsText2.text = 'Image Compression: ' + thisImageCompression;
+				elementDetailsText3.text = (thisElement.tifImageCompression == 3 ? 'Quality: ' + thisElement.jpgQuality : '');
+				elementDetailsText4.text = 'Save Image Pyramid: ' + (thisElement.tifSaveImagePyramid == 0 ? 'No' : 'Yes');
+				elementDetailsText5.text = 'Save Transparency: ' + (thisElement.tifSaveTransparency == 0 ? 'No' : 'Yes');
+				elementDetailsText6.text = 'Pixel Order: ' + thisPixelOrder;
+				elementDetailsText7.text = 'Byte Order: ' + thisByteOrder;
+				elementDetailsText8.text = 'Layer Compression: ' + thisLayerCompression;
 			}
 		}
 	}
@@ -917,23 +1235,19 @@ function buildPanelUI(userID, action, metadata) {
 				saveOptions = new EPSSaveOptions();
 				extension = 'eps';
 			}
-			else if (fileTypeDropdown.selection == 3) {
+			else if (fileTypeDropdown.selection == 2) {
 				saveOptions = new JPEGSaveOptions();
 				extension = 'jpg';
 			}
-			else if (fileTypeDropdown.selection == 4) {
+			else if (fileTypeDropdown.selection == 3) {
 				saveOptions = new PNGSaveOptions();
 				extension = 'png';
 			}
-			else if (fileTypeDropdown.selection == 5) {
-				saveOptions = new RawSaveOptions();
-				extension = 'raw';
-			}
-			else if (fileTypeDropdown.selection == 6) {
+			else if (fileTypeDropdown.selection == 4) {
 				saveOptions = new TargaSaveOptions();
 				extension = 'tga';
 			}
-			else if (fileTypeDropdown.selection == 7) {
+			else if (fileTypeDropdown.selection == 5) {
 				saveOptions = new TiffSaveOptions();
 				extension = 'tif';
 			}
