@@ -674,6 +674,8 @@ function buildPanelUI(userID, action, metadata) {
 			// Add this item to the elementExports array
 			elementExports.push({
 				extension: thisExtension,
+				epsPreview: 0,
+				epsEncoding: 0,
 				epsHalftone: 0,
 				epsTransferFunction: 0,
 				epsPostScriptColor: 0,

@@ -30,27 +30,21 @@ function nimAPI(query) {
 		jsonData = null,
 		jsonObject = null;
 
-	function buildQueryString(value, string) {
-		if (!string) string = '';
-		var newString = string;
-/*
-		if (value.constructor === Array) {
-			var valueLength = value.length;
-			for (var x = 0; x < valueLength; x++)
-				string += '[' + x + ']' + buildQueryString(value[x], string);
-		}
-		else
-*/
+	function buildQueryString(value, key, subKey) {
+		if (!key) key = '';
+		if (!subKey) subKey = key;
+		var newKey = key;
+
 		if (typeof value == 'object') {
-			for (var key in value) {
-				newString += '[' + key + ']' + buildQueryString(value[key]) + '&' + string;
+			for (var newSubKey in value) {
+				newKey += '[' + newSubKey + ']' + buildQueryString( value[newSubKey], '', key + '[' + newSubKey + ']' ) + '&' + subKey;
+//alert(newKey);
 			}
-			newString = newString.slice(0, -(1 + string.length));
-//alert(newString);
+			newKey = newKey.slice(0, -(1 + subKey.length));
 		}
-		else newString += '=' + encodeURIComponent(value);
+		else newKey += '=' + encodeURIComponent(value);
 		
-		return newString;
+		return newKey;
 	}
 
 	// Access NIM
@@ -64,8 +58,10 @@ function nimAPI(query) {
 		else return false;
 
 /*
+		// To test that a query is being sent to API correctly (and not actually send it), uncomment these lines and fill in query name! 
 		if (query.q == 'setElementExports') {
 			alert(queryString);
+			return;
 		}
 */
 
@@ -519,33 +515,70 @@ function saveFile(classID, className, serverID, serverPath, taskID, taskFolder, 
 
 	// Save all the element exports
 	for (var x = 0; x < elementExportsLength; x++) {
-		var elementVersion = x + 1,
-			elementExtension = elementExports[x].extension,
+		var element = elementExports[x],
+			elementVersion = x + 1,
+			elementExtension = element.extension,
 			elementSaveOptions;
-		if (elementVersion < 10) elementVersion = '0' + x;
-		var newElementName = basename + '_v' + version + '_' + elementVersion + '.' + elementExtension;
+		if (elementVersion < 10) elementVersion = '0' + (x + 1);
+		var newElementName = basename + '_v' + version + '_el' + elementVersion + '.' + elementExtension,
+			fullElementFilePath = path + newElementName;
+			newElementFile = new File(fullElementFilePath);
 		nimAPI({ q: 'addElement', parent: className.toLowerCase(), parentID: classID, userID: userID, typeID: taskID, path: path, name: newElementName, isPublished: (publish == 1 ? 'True' : 'False') });
 		
-		if (elementExtension == 'eps') {
+		if (elementExtension == 'psd') {
+			elementSaveOptions = new PhotoshopSaveOptions({
+
+			});
+		}
+		else if (elementExtension == 'eps') {
 			elementSaveOptions = new EPSSaveOptions({
 
 			});
 		}
 		else if (elementExtension == 'jpg') {
 			elementSaveOptions = new JPEGSaveOptions({
-				
+
+			});
+		}
+		else if (elementExtension == 'png') {
+			elementSaveOptions = new PNGSaveOptions({
+
+			});
+		}
+		else if (elementExtension == 'tga') {
+			elementSaveOptions = new TargaSaveOptions({
+
+			});
+		}
+		else if (elementExtension == 'tif') {
+			var imageCompression = TIFFEncoding.NONE;
+
+			if (element.tifImageCompression == 1)
+				imageCompression = TIFFEncoding.TIFFLZW;
+			else if (element.tifImageCompression == 2)
+				imageCompression = TIFFEncoding.TIFFZIP;
+			else if (element.tifImageCompression == 3)
+				imageCompression = TIFFEncoding.JPEG;
+
+			elementSaveOptions = new TiffSaveOptions({
+				imageCompression: imageCompression,
+				jpegQuality: parseInt(element.jpgQuality),
+				saveImagePyramid: (element.tifSaveImagePyramid == 1 ? true : false),
+				transparency: (element.tifSaveTransparency == 1 ? true : false),
+				interleaveChannels: (element.tifPixelOrder == 0 ? true : false),
+				byteOrder: (element.tifByteOrder == 1 ? ByteOrder.MACOS : ByteOrder.IBM),
+				layers: (element.tifLayerCompression == 2 ? false : true),
+				layerCompression: (element.tifLayerCompression == 1 ? LayerCompression.ZIP : LayerCompression.RLE)
 			});
 		}
 
-		/*
 		try {
-			activeDocument.saveAs(newFile, saveOptions, true, Extension.LOWERCASE);
+			activeDocument.saveAs(newElementFile, elementSaveOptions, true, Extension.LOWERCASE);
 		}
 		catch (e) {
 			alert(e);
 			return false;
 		}
-		*/
 	}
 
 	if (publish) {
