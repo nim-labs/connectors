@@ -526,28 +526,69 @@ function saveFile(classID, className, serverID, serverPath, taskID, taskFolder, 
 		nimAPI({ q: 'addElement', parent: className.toLowerCase(), parentID: classID, userID: userID, typeID: taskID, path: path, name: newElementName, isPublished: (publish == 1 ? 'True' : 'False') });
 		
 		if (elementExtension == 'psd') {
-			elementSaveOptions = new PhotoshopSaveOptions({
-
-			});
+			elementSaveOptions = new PhotoshopSaveOptions();
 		}
 		else if (elementExtension == 'eps') {
-			elementSaveOptions = new EPSSaveOptions({
+			var preview = Preview.NONE,
+				encoding = SaveEncoding.ASCII;
 
+			if (element.epsPreview == 1)
+				preview = Preview.MONOCHROMETIFF;
+			else if (element.epsPreview == 2)
+				preview = Preview.EIGHTBITTIFF;
+
+			if (element.epsEncoding == 1)
+				encoding = SaveEncoding.BINARY;
+			else if (element.epsEncoding == 2)
+				encoding = SaveEncoding.JPEGLOW;
+			else if (element.epsEncoding == 3)
+				encoding = SaveEncoding.JPEGMEDIUM;
+			else if (element.epsEncoding == 4)
+				encoding = SaveEncoding.JPEGHIGH;
+			else if (element.epsEncoding == 5)
+				encoding = SaveEncoding.JPEGMAXIMUM;
+
+			elementSaveOptions = new EPSSaveOptions({
+				preview: preview,
+				encoding: encoding,
+				halftoneScreen: (element.epsHalftone == 0 ? false : true),
+				transferFunction: (element.epsTransferFunction == 0 ? false : true),
+				psColorManagement: (element.epsPostScriptColor == 0 ? false : true),
+				vectorData: (element.epsVectorData == 0 ? false : true),
+				interpolation: (element.epsInterpolation == 0 ? false : true)
 			});
 		}
 		else if (elementExtension == 'jpg') {
-			elementSaveOptions = new JPEGSaveOptions({
+			var formatOptions = FormatOptions.STANDARDBASELINE; 
 
+			if (element.jpgFormat == 1)
+				formatOptions = FormatOptions.OPTIMIZEDBASELINE;
+			else if (element.jpgFormat == 2)
+				formatOptions = FormatOptions.PROGRESSIVE;
+
+			elementSaveOptions = new JPEGSaveOptions({
+				jpegQuality: parseInt(element.jpgQuality),
+				formatOptions: formatOptions,
+				scans: parseInt(element.jpgScans) + 3
 			});
 		}
 		else if (elementExtension == 'png') {
 			elementSaveOptions = new PNGSaveOptions({
-
+				compression: (element.pngCompression == 0 ? 0 : 9),
+				interlaced: (element.pngInterlaced == 0 ? false : true)
 			});
 		}
 		else if (elementExtension == 'tga') {
-			elementSaveOptions = new TargaSaveOptions({
+			var resolution = TargaBitsPerPixels.SIXTEEN;
 
+			if (element.tgaResolution == 1)
+				resolution = TargaBitsPerPixels.TWENTYFOUR;
+			else if (element.tgaResolution == 2)
+				resolution = TargaBitsPerPixels.THIRTYTWO;
+
+			elementSaveOptions = new TargaSaveOptions({
+				resolution: resolution,
+				rleCompression: (element.tgaCompress == 1 ? true : false)
 			});
 		}
 		else if (elementExtension == 'tif') {
@@ -572,6 +613,11 @@ function saveFile(classID, className, serverID, serverPath, taskID, taskFolder, 
 			});
 		}
 
+
+		// Check target bit depths, convert file to lower bit depth if necessary
+		// activeDocument.bitsPerChannel = BitsPerChannelType.EIGHT;
+
+
 		try {
 			activeDocument.saveAs(newElementFile, elementSaveOptions, true, Extension.LOWERCASE);
 		}
@@ -579,7 +625,8 @@ function saveFile(classID, className, serverID, serverPath, taskID, taskFolder, 
 			alert(e);
 			return false;
 		}
-	}
+
+	}  // for (var x = 0; x < elementExportsLength; x++)
 
 	if (publish) {
 		nimAPI({ q: 'publishSymlink', fileID: newFileID });

@@ -196,6 +196,8 @@ function buildPanelUI(userID, action, metadata) {
 		elementDetailsText7,
 		elementDetailsText8,
 		elementExports,
+		documentBitDepth,
+		documentResolution,
 		allDropdowns = [jobDropdown, serverDropdown, assetDropdown, showDropdown, shotDropdown, taskDropdown, filterDropdown],
 		allDropdownsLength = allDropdowns.length,
 		buttonGroup = nimPanel.add('group', undefined),
@@ -289,6 +291,27 @@ function buildPanelUI(userID, action, metadata) {
 		elementAddButton = elementButtonGroup.add('button', undefined, 'Add Element');
 		fileID = getMetadata('fileID');
 		elementExports = nimAPI({ q: 'getElementExports', fileID: fileID || 0 }) || [];
+		documentResolution = activeDocument.resolution;
+
+		if (activeDocument.bitsPerChannel == BitsPerChannelType.THIRTYTWO)
+			documentBitDepth = 32;
+		else if (activeDocument.bitsPerChannel == BitsPerChannelType.SIXTEEN)
+			documentBitDepth = 16;
+		else if (activeDocument.bitsPerChannel == BitsPerChannelType.EIGHT)
+			documentBitDepth = 8;
+
+		var psdMaxBitDepth = 32,
+			epsMaxBitDepth = 8,
+			jpgMaxBitDepth = 16,
+			pngMaxBitDepth = 16,
+			tgaMaxBitDepth = 8,
+			tifMaxBitDepth = 32,
+			psdDefaultText = 'Photoshop (.psd) - ' + Math.min(documentBitDepth, psdMaxBitDepth) + '-bit - ',
+			epsDefaultText = 'EPS - ' + Math.min(documentBitDepth, epsMaxBitDepth) + '-bit - ',
+			jpgDefaultText = 'JPEG (.jpg) - ' + Math.min(documentBitDepth, jpgMaxBitDepth) + '-bit - ',
+			pngDefaultText = 'PNG - ' + Math.min(documentBitDepth, pngMaxBitDepth) + '-bit - ',
+			tgaDefaultText = 'Targa (.tga) - ' + Math.min(documentBitDepth, tgaMaxBitDepth) + '-bit - ',
+			tifDefaultText = 'TIFF (.tif) - ' + Math.min(documentBitDepth, tifMaxBitDepth) + '-bit - ';
 
 		elementListboxGroup = elementSelectionGroup.add('group', undefined);
 		elementListboxGroup.alignChildren = 'top';
@@ -326,17 +349,17 @@ function buildPanelUI(userID, action, metadata) {
 			var thisExtension = elementExports[x].extension,
 				thisExtensionName = thisExtension;
 			if (thisExtension == 'psd')
-				thisExtensionName = 'Photoshop (.psd)';
+				thisExtensionName = psdDefaultText;
 			else if (thisExtension == 'eps')
-				thisExtensionName = 'EPS';
+				thisExtensionName = epsDefaultText;
 			else if (thisExtension == 'jpg')
-				thisExtensionName = 'JPEG (.jpg)';
+				thisExtensionName = jpgDefaultText;
 			else if (thisExtension == 'png')
-				thisExtensionName = 'PNG';
+				thisExtensionName = pngDefaultText;
 			else if (thisExtension == 'tga')
-				thisExtensionName = 'Targa (.tga)';
+				thisExtensionName = tgaDefaultText;
 			else if (thisExtension == 'tif')
-				thisExtensionName = 'TIFF (.tif)';
+				thisExtensionName = tifDefaultText;
 			elementListbox.add('item', thisExtensionName);
 		}
 
@@ -656,24 +679,43 @@ function buildPanelUI(userID, action, metadata) {
 		}
 
 		elementAddButton.onClick = function() {
-			elementListbox.add('item', elementFileTypeDropdown.selection.text);
+			var thisExtension = 'psd',
+				thisExtensionText = psdDefaultText,
+				thisExtensionMaxBitDepth = psdMaxBitDepth;
 
-			var thisExtension = 'psd';
-
-			if (elementFileTypeDropdown.selection.index == 1)
+			if (elementFileTypeDropdown.selection.index == 1) {
 				thisExtension = 'eps';
-			else if (elementFileTypeDropdown.selection.index == 2)
+				thisExtensionText = epsDefaultText;
+				thisExtensionMaxBitDepth = epsMaxBitDepth;
+			}
+			else if (elementFileTypeDropdown.selection.index == 2) {
 				thisExtension = 'jpg';
-			else if (elementFileTypeDropdown.selection.index == 3)
+				thisExtensionText = jpgDefaultText;
+				thisExtensionMaxBitDepth = jpgMaxBitDepth;
+			}
+			else if (elementFileTypeDropdown.selection.index == 3) {
 				thisExtension = 'png';
-			else if (elementFileTypeDropdown.selection.index == 4)
+				thisExtensionText = pngDefaultText;
+				thisExtensionMaxBitDepth = pngMaxBitDepth;
+			}
+			else if (elementFileTypeDropdown.selection.index == 4) {
 				thisExtension = 'tga';
-			else if (elementFileTypeDropdown.selection.index == 5)
+				thisExtensionText = tgaDefaultText;
+				thisExtensionMaxBitDepth = tgaMaxBitDepth;
+			}
+			else if (elementFileTypeDropdown.selection.index == 5) {
 				thisExtension = 'tif';
+				thisExtensionText = tifDefaultText;
+				thisExtensionMaxBitDepth = tifMaxBitDepth;
+			}
+
+			elementListbox.add('item', thisExtensionText);
 
 			// Add this item to the elementExports array
 			elementExports.push({
 				extension: thisExtension,
+				bitDepth: Math.min(documentBitDepth, thisExtensionMaxBitDepth),
+				resolution: 1,
 				epsPreview: 0,
 				epsEncoding: 0,
 				epsHalftone: 0,
@@ -711,7 +753,7 @@ function buildPanelUI(userID, action, metadata) {
 					previewDropdown = previewGroup.add('dropdownlist', undefined, '', { items: ['None', 'TIFF (1 bit/pixel)', 'TIFF (8 bits/pixel)'] }),
 					encodingGroup = elementDetailsDialog.add('group', undefined),
 					encodingLabel = encodingGroup.add('statictext', undefined, 'Encoding:'),
-					encodingDropdown = encodingGroup.add('dropdownlist', undefined, '', { items: ['ASCII', 'ASCII85', 'Binary', 'JPEG (low quality)', 'JPEG (medium quality)', 'JPEG (high quality)', 'JPEG (maximum quality)'] }),
+					encodingDropdown = encodingGroup.add('dropdownlist', undefined, '', { items: ['ASCII', 'Binary', 'JPEG (low quality)', 'JPEG (medium quality)', 'JPEG (high quality)', 'JPEG (maximum quality)'] }),
 					halftoneCheckbox = elementDetailsDialog.add('checkbox', undefined, 'Include Halftone Screen'),
 					transferFunctionCheckbox = elementDetailsDialog.add('checkbox', undefined, 'Include Transfer Function'),
 					postScriptColorCheckbox = elementDetailsDialog.add('checkbox', undefined, 'PostScript Color Management'),
@@ -1074,16 +1116,14 @@ function buildPanelUI(userID, action, metadata) {
 					thisPreview = 'TIFF (8 bits/pixel)';
 
 				if (thisElement.epsEncoding == 1)
-					thisEncoding = 'ASCII85';
-				else if (thisElement.epsEncoding == 2)
 					thisEncoding = 'Binary';
-				else if (thisElement.epsEncoding == 3)
+				else if (thisElement.epsEncoding == 2)
 					thisEncoding = 'JPEG (low quality)';
-				else if (thisElement.epsEncoding == 4)
+				else if (thisElement.epsEncoding == 3)
 					thisEncoding = 'JPEG (medium quality)';
-				else if (thisElement.epsEncoding == 5)
+				else if (thisElement.epsEncoding == 4)
 					thisEncoding = 'JPEG (high quality)';
-				else if (thisElement.epsEncoding == 6)
+				else if (thisElement.epsEncoding == 5)
 					thisEncoding = 'JPEG (maximum quality)';
 
 				elementDetailsText1.text = 'File Type: EPS';
