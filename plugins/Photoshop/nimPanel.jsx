@@ -170,7 +170,7 @@ function buildPanelUI(userID, action, metadata) {
 		dateLabel = dateGroup.add('statictext', undefined, 'Date: '),
 		dateText = dateGroup.add('statictext', [0, 0, 550, 20], ''),
 		commentGroup = versionInfo.add('group', undefined),
-		alternateCommentGroup = nimPanel.add('group', undefined),
+		//alternateCommentGroup = nimPanel.add('group', undefined),
 		commentLabel = commentGroup.add('statictext', undefined, 'Comment: '),
 		commentText,
 		commentInput,
@@ -234,7 +234,7 @@ function buildPanelUI(userID, action, metadata) {
 	userGroup.alignment = 'right';
 	dateGroup.alignment = 'right';
 	commentGroup.alignment = 'right';
-	alternateCommentGroup.alignment = 'right';
+	//alternateCommentGroup.alignment = 'right';
 	buttonGroup.alignment = 'right';
 
 	populateDropdown(jobDropdown, jobs, ['number', 'jobname'], 'Select a job...');
@@ -371,7 +371,8 @@ function buildPanelUI(userID, action, metadata) {
 
 		if (action == 'versionUp' || action == 'publish') {
 			nimPanel.remove(jobTaskInfo);
-			outputFiles.remove(versionInfo);
+			//outputFiles.remove(versionInfo);
+			versionInfo.remove(versionGroup);
 			jobDropdown = null;
 			serverDropdown = null;
 			showDropdown = null;
@@ -381,9 +382,10 @@ function buildPanelUI(userID, action, metadata) {
 			basenameListbox = null;
 			versionListbox = null;
 			tagInput = null;
-			commentGroup = alternateCommentGroup,
-			commentLabel = commentGroup.add('statictext', undefined, 'Comment: ');
-			outputFiles.selection = elementsToAdd;
+			//commentGroup = alternateCommentGroup,
+			//commentLabel = commentGroup.add('statictext', undefined, 'Comment: ');
+			outputFiles.selection = versionInfo;
+			confirmButton.enabled = true;
 			if (action == 'versionUp')
 				confirmButton.text = 'Version Up';
 			else if (action == 'publish')
@@ -1331,30 +1333,34 @@ function buildPanelUI(userID, action, metadata) {
 				alert(e);
 				return;
 			}
+			setPanelPrefs();
 		}
-		else if (action == 'saveAs') {
-			if (!serverID) {
-				alert('Error: No server specified!');
-				return;
-			}
-			var newFileBasename = '',
-				classID, className, saveOptions, extension;
+		else if (action == 'saveAs' || action == 'versionUp' || action == 'publish') {
+			
+			if (action == 'saveAs') {
+				if (!serverID) {
+					alert('Error: No server specified!');
+					return;
+				}
+				var newFileBasename = '',
+					classID, className, saveOptions, extension;
 
-			if (assetID) {
-				classID = assetID;
-				className = 'ASSET';
-				newFileBasename = assetName + '_' + taskFolder;
-			}
-			else if (shotID) {
-				classID = shotID;
-				className = 'SHOT';
-				newFileBasename = shotName + '_' + taskFolder;
-			}
+				if (assetID) {
+					classID = assetID;
+					className = 'ASSET';
+					newFileBasename = assetName + '_' + taskFolder;
+				}
+				else if (shotID) {
+					classID = shotID;
+					className = 'SHOT';
+					newFileBasename = shotName + '_' + taskFolder;
+				}
 
-			if (basenameListbox.selection)
-				newFileBasename = basename;
-			else if (tagInput.text)
-				newFileBasename += '_' + tagInput.text.replace(/ /g, '_');
+				if (basenameListbox.selection)
+					newFileBasename = basename;
+				else if (tagInput.text)
+					newFileBasename += '_' + tagInput.text.replace(/ /g, '_');
+			}
 /*
 			if (fileTypeDropdown.selection == 0) {
 				saveOptions = new PhotoshopSaveOptions();
@@ -1388,13 +1394,24 @@ function buildPanelUI(userID, action, metadata) {
 			var thisVersion = parseInt(maxVersion) + 1,
 				thisComment = commentInput.text;
 
-			//setPanelPrefs();
-			//nimPanel.close();
+			if (action == 'saveAs') {
+				if (saveFile(classID, className, serverID, serverPath, taskID, taskFolder, newFileBasename, thisComment, false, elementExports, saveOptions, extension, thisVersion))
+					alert('Save successful.');
+				else
+					alert('Error: Save failed!');
 
-			if (saveFile(classID, className, serverID, serverPath, taskID, taskFolder, newFileBasename, thisComment, false, elementExports, saveOptions, extension, thisVersion))
-				alert('Save successful.');
-			else
-				alert('Error: Save failed!');
+				setPanelPrefs();
+			}
+			else if (action == 'versionUp') {
+				if (saveFile(metadata.classID, metadata.className, metadata.serverID, metadata.serverPath, metadata.taskID, metadata.taskFolder, metadata.basename, thisComment, false, elementExports, saveOptions, extension, thisVersion))
+					alert('New version saved.');
+				else
+					alert('Error: Version up failed!');
+			}
+			else if (action == 'publish') {
+				if (!saveFile(metadata.classID, metadata.className, metadata.serverID, metadata.serverPath, metadata.taskID, metadata.taskFolder, metadata.basename, thisComment, true, elementExports, saveOptions, extension, thisVersion))
+					alert('Error: Publish failed!');
+			}
 		}
 		/*
 		else if (action == 'import') {
@@ -1414,13 +1431,13 @@ function buildPanelUI(userID, action, metadata) {
 			}
 		}
 		*/
-		
-		setPanelPrefs();
+
 		nimPanel.close();
 	}
 
 	cancelButton.onClick = function() {
-		setPanelPrefs();
+		if (action == 'open' || action == 'saveAs')
+			setPanelPrefs();
 		nimPanel.close();
 	}
 

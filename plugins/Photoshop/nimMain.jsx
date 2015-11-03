@@ -550,7 +550,6 @@ function saveFile(classID, className, serverID, serverPath, taskID, taskFolder, 
 	}
 
 	if (parseInt(version) < 10) version = '0' + parseInt(version);
-
 	newFileName = basename + '_v' + version + '.' + extension;
 	fullFilePath = path + newFileName;
 	newFile = new File(fullFilePath);
@@ -562,6 +561,7 @@ function saveFile(classID, className, serverID, serverPath, taskID, taskFolder, 
 		newFileName = basename + '_v' + version + '.' + extension;
 		fullFilePath = path + newFileName;
 		newFile = new File(fullFilePath);
+		elementExportPrefix = basename + '_v' + version + '_el';
 	}
 
 	while (filesCreated == 0 || (publish && filesCreated == 1)) {
@@ -600,104 +600,8 @@ function saveFile(classID, className, serverID, serverPath, taskID, taskFolder, 
 		// Save this file's element export options
 		nimAPI({ q: 'setElementExports', fileID: newFileID, exports: elementExports });
 
-		if (elementExportsLength) {
-			var originalBitDepth = activeDocument.bitsPerChannel,
-				originalResolution = activeDocument.resolution,
-				elementVersion = 0,
-				bitDepthAndResolution = {
-					'32': {
-						'1': [],
-						'0.5': [],
-						'0.25': []
-					},
-					'16': {
-						'1': [],
-						'0.5': [],
-						'0.25': []
-					},
-					'8': {
-						'1': [],
-						'0.5': [],
-						'0.25': []
-					},
-				};
-
-			if (originalBitDepth == BitsPerChannelType.THIRTYTWO)
-				originalBitDepth = 32;
-			else if (originalBitDepth == BitsPerChannelType.SIXTEEN)
-				originalBitDepth = 16;
-			else if (originalBitDepth == BitsPerChannelType.EIGHT)
-				originalBitDepth = 8;
-
-			// Save elementExports array into bitDepthAndResolution object to organize the elements by their bit depth and resolution
-			for (var x = 0; x < elementExportsLength; x++) {
-				var element = elementExports[x];
-				bitDepthAndResolution[parseFloat(element.bitDepth).toString()][parseFloat(element.resolution).toString()].push(element);
-			}
-
-			app.displayDialogs = DialogModes.NO;
-
-			// Go through each category of bitDepthAndResolution object
-			for (var bitDepth in bitDepthAndResolution) {
-				var thisBitDepthObj = bitDepthAndResolution[bitDepth];
-				for (var resolution in thisBitDepthObj) {
-					var thisResolutionArray = thisBitDepthObj[resolution],
-						thisResolutionArrayLength = thisResolutionArray.length;
-				
-					// Ignore empty arrays
-					if (!thisResolutionArrayLength) continue;
-
-					// Convert document to correct bit depth
-					if (bitDepth == '32')
-						activeDocument.bitsPerChannel = BitsPerChannelType.THIRTYTWO;
-					else if (bitDepth == '16')
-						activeDocument.bitsPerChannel = BitsPerChannelType.SIXTEEN;
-					else if (bitDepth == '8')
-						activeDocument.bitsPerChannel = BitsPerChannelType.EIGHT;
-
-					// Convert document to correct resolution
-					if (resolution == '0.5')
-						activeDocument.resolution = activeDocument.resolution / 2;
-					else if (resolution == '0.25')
-						activeDocument.resolution = activeDocument.resolution / 4;
-
-					// Save all elements with this bit depth / resolution combo
-					for (var x = 0; x < thisResolutionArrayLength; x++) {
-						var element = thisResolutionArray[x],
-							elementExtension = element.extension,
-							elementSaveOptions = getFileSaveOptions(element);
-
-						elementVersion++;
-						if (elementVersion < 10) elementVersion = '0' + elementVersion;
-						
-						var newElementName = elementExportPrefix + elementVersion + '.' + elementExtension,
-							fullElementFilePath = path + newElementName;
-							newElementFile = new File(fullElementFilePath);
-						
-						nimAPI({ q: 'addElement', parent: className.toLowerCase(), parentID: classID, userID: userID, typeID: taskID, path: path, name: newElementName, isPublished: (publish == 1 ? 'True' : 'False') });
-
-						try {
-							activeDocument.saveAs(newElementFile, elementSaveOptions, true, Extension.LOWERCASE);
-						}
-						catch (e) {
-							alert(e);
-							return false;
-						}
-					}
-
-					// If bit depth and/or resolution isn't same as original, close this document and
-					// re-open original, just-saved-before-all-these-elements file
-					if (bitDepth != originalBitDepth || activeDocument.resolution != originalResolution) {
-						activeDocument.close(SaveOptions.DONOTSAVECHANGES);
-						app.open(newFile);
-					}
-				}
-			}
-
-			app.displayDialogs = DialogModes.ERROR;
-
-		}  // if (elementExportsLength)
-
+		// SAVE ALL ELEMENT EXPORTS HERE IF WE WANT TO SAVE THEM TWICE WHEN PUBLISHING (once for normal version, once for published)
+		// Currently saving element exports after this while loop
 
 		// If publishing, prepare to save another version
 		if (publish && filesCreated == 0) {
@@ -712,6 +616,110 @@ function saveFile(classID, className, serverID, serverPath, taskID, taskFolder, 
 		}
 		filesCreated++;
 	}
+
+	// Save all element exports
+	if (elementExportsLength) {
+		var originalBitDepth = activeDocument.bitsPerChannel,
+			originalResolution = activeDocument.resolution,
+			elementVersion = 0,
+			bitDepthAndResolution = {
+				'32': {
+					'1': [],
+					'0.5': [],
+					'0.25': []
+				},
+				'16': {
+					'1': [],
+					'0.5': [],
+					'0.25': []
+				},
+				'8': {
+					'1': [],
+					'0.5': [],
+					'0.25': []
+				},
+			};
+
+		if (originalBitDepth == BitsPerChannelType.THIRTYTWO)
+			originalBitDepth = 32;
+		else if (originalBitDepth == BitsPerChannelType.SIXTEEN)
+			originalBitDepth = 16;
+		else if (originalBitDepth == BitsPerChannelType.EIGHT)
+			originalBitDepth = 8;
+
+		// Save elementExports array into bitDepthAndResolution object to organize the elements by their bit depth and resolution
+		for (var x = 0; x < elementExportsLength; x++) {
+			var element = elementExports[x];
+			bitDepthAndResolution[parseFloat(element.bitDepth).toString()][parseFloat(element.resolution).toString()].push(element);
+		}
+
+		app.displayDialogs = DialogModes.NO;
+
+		// Go through each category of bitDepthAndResolution object
+		for (var bitDepth in bitDepthAndResolution) {
+			var thisBitDepthObj = bitDepthAndResolution[bitDepth];
+			for (var resolution in thisBitDepthObj) {
+				var thisResolutionArray = thisBitDepthObj[resolution],
+					thisResolutionArrayLength = thisResolutionArray.length;
+			
+				// Ignore empty arrays
+				if (!thisResolutionArrayLength) continue;
+
+				// Convert document to correct bit depth
+				if (bitDepth == '32')
+					activeDocument.bitsPerChannel = BitsPerChannelType.THIRTYTWO;
+				else if (bitDepth == '16')
+					activeDocument.bitsPerChannel = BitsPerChannelType.SIXTEEN;
+				else if (bitDepth == '8')
+					activeDocument.bitsPerChannel = BitsPerChannelType.EIGHT;
+
+				// Convert document to correct resolution
+				var newResolution = activeDocument.resolution;
+
+				if (resolution == '0.5')
+					newResolution = activeDocument.resolution / 2;
+				else if (resolution == '0.25')
+					newResolution = activeDocument.resolution / 4;
+
+				if (newResolution != activeDocument.resolution)
+					activeDocument.resizeImage(undefined, undefined, newResolution);
+
+				// Save all elements with this bit depth / resolution combo
+				for (var x = 0; x < thisResolutionArrayLength; x++) {
+					var element = thisResolutionArray[x],
+						elementExtension = element.extension,
+						elementSaveOptions = getFileSaveOptions(element);
+
+					elementVersion++;
+					if (elementVersion < 10) elementVersion = '0' + elementVersion;
+					
+					var newElementName = elementExportPrefix + elementVersion + '.' + elementExtension,
+						fullElementFilePath = path + newElementName;
+						newElementFile = new File(fullElementFilePath);
+					
+					nimAPI({ q: 'addElement', parent: className.toLowerCase(), parentID: classID, userID: userID, typeID: taskID, path: path, name: newElementName, isPublished: (publish == 1 ? 'True' : 'False') });
+
+					try {
+						activeDocument.saveAs(newElementFile, elementSaveOptions, true, Extension.LOWERCASE);
+					}
+					catch (e) {
+						alert(e);
+						return false;
+					}
+				}
+
+				// If bit depth and/or resolution isn't same as original, close this document and
+				// re-open original, just-saved-before-all-these-elements file
+				if (bitDepth != originalBitDepth || activeDocument.resolution != originalResolution) {
+					activeDocument.close(SaveOptions.DONOTSAVECHANGES);
+					app.open(newFile);
+				}
+			}
+		}  // for (var bitDepth in bitDepthAndResolution)
+
+		app.displayDialogs = DialogModes.ERROR;
+
+	}  // if (elementExportsLength)
 
 	if (publish) {
 		nimAPI({ q: 'publishSymlink', fileID: newFileID });
