@@ -30,13 +30,40 @@ function nimAPI(query) {
 		jsonData = null,
 		jsonObject = null;
 
+	function buildQueryString(value, key, subKey) {
+		if (!key) key = '';
+		if (!subKey) subKey = key;
+		var newKey = key;
+
+		if (typeof value == 'object') {
+			for (var newSubKey in value) {
+				newKey += '[' + newSubKey + ']' + buildQueryString( value[newSubKey], '', key + '[' + newSubKey + ']' ) + '&' + subKey;
+//alert(newKey);
+			}
+			newKey = newKey.slice(0, -(1 + subKey.length));
+		}
+		else newKey += '=' + encodeURIComponent(value);
+		
+		return newKey;
+	}
+
 	// Access NIM
 	if (conn.open(nimAPIHost + ':80')) {
-		for (var parameter in query)
-			queryArray.push(parameter + '=' + encodeURIComponent(query[parameter]));
+		for (var parameter in query) {
+			queryArray.push(buildQueryString(query[parameter], parameter));
+		}
+
 		if (queryArray.length)
 			queryString = '?' + queryArray.join('&');
 		else return false;
+
+/*
+		// To test that a query is being sent to API correctly (and not actually send it), uncomment these lines and fill in query name! 
+		if (query.q == 'setElementExports') {
+			alert(queryString);
+			return;
+		}
+*/
 
 		// send a HTTP GET request
 		conn.write ('GET ' + nimAPIURL + queryString + ' HTTP/1.0\n\n');
@@ -80,7 +107,7 @@ function getOperatingSystem() {
 function getUserID() {
 	var prefUser = getPref('NIM', 'User'),
 		envUser,
-		allUsers = nimAPI({ q: 'getUsers' }),
+		allUsers = nimAPI({ q: 'getUsers' }) || [],
 		allUsersLength = allUsers.length,
 		guessedUserID = null;
 
@@ -145,7 +172,7 @@ function changeUserDialog() {
 		alert('User changed to: ' + changeUserDropdown.selection.text);
 	}
 
-	var allUsers = nimAPI({ q: 'getUsers' }),
+	var allUsers = nimAPI({ q: 'getUsers' }) || [],
 		allUsersLength = allUsers.length,
 		allUsernames = [],
 		currentUserIndex = null,
@@ -260,6 +287,36 @@ function setNimMetadata(data) {
 }
 
 
+// Sets NIM fileID in file metadata
+function setNimFileIdMetadata(fileID) {
+	var proj = app.project,
+		metaData, schemaNS;
+ 
+	if (ExternalObject.AdobeXMPScript == undefined)
+		ExternalObject.AdobeXMPScript = new ExternalObject('lib:AdobeXMPScript');
+
+	try { metaData = new XMPMeta(activeDocument.xmpMetadata.rawData); }
+	catch(e) {
+		alert('Error: Cannot set metadata when no file is open!');
+		return;
+	}
+
+	schemaNS = XMPMeta.getNamespaceURI("NIM");
+	if (schemaNS == "" || schemaNS == undefined) {
+		XMPMeta.registerNamespace("NIM", "NIM");
+		schemaNS = XMPMeta.getNamespaceURI("NIM");
+	}
+	try {
+		metaData.setProperty(schemaNS, "NIM:fileID", fileID);
+	} catch(err) {
+		alert(err.toString());
+		return false;
+	}
+	activeDocument.xmpMetadata.rawData = metaData.serialize();
+	return true;
+}
+
+
 // Gets a preference value from the NIM preferences file
 function getPref(prefPrefix, prefName) {
 	var nimPrefsFile = new File(nimPrefsPath),
@@ -341,7 +398,7 @@ function setPref(prefPrefix, prefName, prefValue) {
 
 
 // Saves a file and writes it to NIM API; className = 'ASSET' or 'SHOT', classID = assetID or shotID
-function saveFile(classID, className, serverID, serverPath, taskID, taskFolder, basename, comment, publish, addElement, saveOptions, extension, version) {
+function saveFile(classID, className, serverID, serverPath, taskID, taskFolder, basename, comment, publish, elementExports, saveOptions, extension, version) {
 	var path = serverPath,
 		folder,
 		newFile,
@@ -353,7 +410,8 @@ function saveFile(classID, className, serverID, serverPath, taskID, taskFolder, 
 		metadataSet,
 		newFileID,
 		filesCreated = 0,
-		workingFilePath = '';
+		workingFilePath = '',
+		elementExportsLength = elementExports.length;
 
 	metadataSet = setNimMetadata({
 		classID: classID,
@@ -407,13 +465,8 @@ function saveFile(classID, className, serverID, serverPath, taskID, taskFolder, 
 	}
 
 	while (filesCreated == 0 || (publish && filesCreated == 1)) {
-		try {
-			activeDocument.saveAs(newFile, saveOptions, true, Extension.LOWERCASE);
-		}
-		catch (e) {
-			alert(e);
-			return false;
-		}
+
+		// Add file to files table in NIM and get new fileID
 		newFileID = nimAPI({
 			q: 'addFile',
 			itemID: classID,
@@ -431,6 +484,23 @@ function saveFile(classID, className, serverID, serverPath, taskID, taskFolder, 
 			isPub: isPub,
 			isWork: isWork
 		});
+
+		// Save this file's new fileID to its metadata
+		setNimFileIdMetadata(newFileID);
+
+		// Actually save the file
+		try {
+			activeDocument.saveAs(newFile, saveOptions, true, Extension.LOWERCASE);
+		}
+		catch (e) {
+			alert(e);
+			return false;
+		}
+
+		// Save this file's element export options
+		nimAPI({ q: 'setElementExports', fileID: newFileID, exports: elementExports });
+
+		// If publishing, prepare to save another version
 		if (publish && filesCreated == 0) {
 			isPub = 1;
 			isWork = 0;
@@ -443,8 +513,120 @@ function saveFile(classID, className, serverID, serverPath, taskID, taskFolder, 
 		filesCreated++;
 	}
 
-	if (addElement)
-		nimAPI({ q: 'addElement', parent: className.toLowerCase(), parentID: classID, userID: userID, typeID: taskID, path: path, name: newFileName, isPublished: (publish == 1 ? 'True' : 'False') });
+	// Save all the element exports
+	for (var x = 0; x < elementExportsLength; x++) {
+		var element = elementExports[x],
+			elementVersion = x + 1,
+			elementExtension = element.extension,
+			elementSaveOptions;
+		if (elementVersion < 10) elementVersion = '0' + (x + 1);
+		var newElementName = basename + '_v' + version + '_el' + elementVersion + '.' + elementExtension,
+			fullElementFilePath = path + newElementName;
+			newElementFile = new File(fullElementFilePath);
+		nimAPI({ q: 'addElement', parent: className.toLowerCase(), parentID: classID, userID: userID, typeID: taskID, path: path, name: newElementName, isPublished: (publish == 1 ? 'True' : 'False') });
+		
+		if (elementExtension == 'psd') {
+			elementSaveOptions = new PhotoshopSaveOptions();
+		}
+		else if (elementExtension == 'eps') {
+			var preview = Preview.NONE,
+				encoding = SaveEncoding.ASCII;
+
+			if (element.epsPreview == 1)
+				preview = Preview.MONOCHROMETIFF;
+			else if (element.epsPreview == 2)
+				preview = Preview.EIGHTBITTIFF;
+
+			if (element.epsEncoding == 1)
+				encoding = SaveEncoding.BINARY;
+			else if (element.epsEncoding == 2)
+				encoding = SaveEncoding.JPEGLOW;
+			else if (element.epsEncoding == 3)
+				encoding = SaveEncoding.JPEGMEDIUM;
+			else if (element.epsEncoding == 4)
+				encoding = SaveEncoding.JPEGHIGH;
+			else if (element.epsEncoding == 5)
+				encoding = SaveEncoding.JPEGMAXIMUM;
+
+			elementSaveOptions = new EPSSaveOptions({
+				preview: preview,
+				encoding: encoding,
+				halftoneScreen: (element.epsHalftone == 0 ? false : true),
+				transferFunction: (element.epsTransferFunction == 0 ? false : true),
+				psColorManagement: (element.epsPostScriptColor == 0 ? false : true),
+				vectorData: (element.epsVectorData == 0 ? false : true),
+				interpolation: (element.epsInterpolation == 0 ? false : true)
+			});
+		}
+		else if (elementExtension == 'jpg') {
+			var formatOptions = FormatOptions.STANDARDBASELINE; 
+
+			if (element.jpgFormat == 1)
+				formatOptions = FormatOptions.OPTIMIZEDBASELINE;
+			else if (element.jpgFormat == 2)
+				formatOptions = FormatOptions.PROGRESSIVE;
+
+			elementSaveOptions = new JPEGSaveOptions({
+				jpegQuality: parseInt(element.jpgQuality),
+				formatOptions: formatOptions,
+				scans: parseInt(element.jpgScans) + 3
+			});
+		}
+		else if (elementExtension == 'png') {
+			elementSaveOptions = new PNGSaveOptions({
+				compression: (element.pngCompression == 0 ? 0 : 9),
+				interlaced: (element.pngInterlaced == 0 ? false : true)
+			});
+		}
+		else if (elementExtension == 'tga') {
+			var resolution = TargaBitsPerPixels.SIXTEEN;
+
+			if (element.tgaResolution == 1)
+				resolution = TargaBitsPerPixels.TWENTYFOUR;
+			else if (element.tgaResolution == 2)
+				resolution = TargaBitsPerPixels.THIRTYTWO;
+
+			elementSaveOptions = new TargaSaveOptions({
+				resolution: resolution,
+				rleCompression: (element.tgaCompress == 1 ? true : false)
+			});
+		}
+		else if (elementExtension == 'tif') {
+			var imageCompression = TIFFEncoding.NONE;
+
+			if (element.tifImageCompression == 1)
+				imageCompression = TIFFEncoding.TIFFLZW;
+			else if (element.tifImageCompression == 2)
+				imageCompression = TIFFEncoding.TIFFZIP;
+			else if (element.tifImageCompression == 3)
+				imageCompression = TIFFEncoding.JPEG;
+
+			elementSaveOptions = new TiffSaveOptions({
+				imageCompression: imageCompression,
+				jpegQuality: parseInt(element.jpgQuality),
+				saveImagePyramid: (element.tifSaveImagePyramid == 1 ? true : false),
+				transparency: (element.tifSaveTransparency == 1 ? true : false),
+				interleaveChannels: (element.tifPixelOrder == 0 ? true : false),
+				byteOrder: (element.tifByteOrder == 1 ? ByteOrder.MACOS : ByteOrder.IBM),
+				layers: (element.tifLayerCompression == 2 ? false : true),
+				layerCompression: (element.tifLayerCompression == 1 ? LayerCompression.ZIP : LayerCompression.RLE)
+			});
+		}
+
+
+		// Check target bit depths, convert file to lower bit depth if necessary
+		// activeDocument.bitsPerChannel = BitsPerChannelType.EIGHT;
+
+
+		try {
+			activeDocument.saveAs(newElementFile, elementSaveOptions, true, Extension.LOWERCASE);
+		}
+		catch (e) {
+			alert(e);
+			return false;
+		}
+
+	}  // for (var x = 0; x < elementExportsLength; x++)
 
 	if (publish) {
 		nimAPI({ q: 'publishSymlink', fileID: newFileID });
