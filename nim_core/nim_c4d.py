@@ -496,7 +496,7 @@ class nim_fileUI( gui.GeDialog ) :
                                 path=str(js['osxPath']) )
                             self.SetLong( self.nim.inputIDs['server'], 800 )
                         serverOptNum+=1
-                    elif _os in ['linux2'] :
+                    elif _os in ['linux', 'linux2'] :
                         serverName=js['path']+' - ("'+js['server']+'")'
                         if self.mode.lower() in ['save', 'saveas'] :
                             self.AddChild( self.nim.inputIDs['server'], serverOptNum, serverName )
@@ -596,7 +596,7 @@ class nim_fileUI( gui.GeDialog ) :
                         self.nim.Input('server').setCurrentIndex( index )
                         self.nim.set_server( name=self.nim.Input('server').currentText(), ID=str(js['ID']), \
                             path=str(js['osxPath']) )
-                elif _os in ['linux2'] :
+                elif _os in ['linux', 'linux2'] :
                     self.nim.Input('server').addItem( js['path']+' - ("'+js['server']+'")' )
                     if js['path'] !=self.pref_serverPath :
                     #if js['path'] !=self.pref_defaultServerPath :
@@ -709,7 +709,7 @@ class nim_fileUI( gui.GeDialog ) :
                                         path=str(js['osxPath']) )
                                     self.SetLong( self.nim.inputIDs['server'], 800 )
                                 serverOptNum+=1
-                            elif _os in ['linux2'] :
+                            elif _os in ['linux', 'linux2'] :
                                 serverName=js['path']+' - ("'+js['server']+'")'
                                 if self.mode.lower() in ['save', 'saveas'] :
                                     self.AddChild( self.nim.inputIDs['server'], serverOptNum, serverName )

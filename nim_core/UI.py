@@ -31,7 +31,7 @@ except :
 #  Variables :
 WIN=''
 startTime=''
-version='v1.0.0'
+version='v1.0.2'
 winTitle='NIM_'+version
 _os=platform.system().lower()
 _osCap=platform.system()
@@ -1358,6 +1358,8 @@ class GUI(QtGui.QMainWindow) :
             #  Populate drop box :
             self.nim.Input('server').setEnabled( True )
             self.nim.Input('server').clear()
+
+            P.debug( '    _os = %s' % _os)
             for js in self.nim.Dict('server') :
                 if _os in ['windows', 'win32'] :
                     self.nim.Input('server').addItem( js['winPath']+' - ("'+js['server']+'")' )
@@ -1385,7 +1387,7 @@ class GUI(QtGui.QMainWindow) :
                         self.nim.set_server( name=self.nim.Input('server').currentText(), ID=str(js['ID']), \
                             path=str(js['osxPath']) )
 
-                elif _os in ['linux2'] :
+                elif _os in ['linux', 'linux2'] :
                     self.nim.Input('server').addItem( js['path']+' - ("'+js['server']+'")' )
                     #if js['path'] !=self.pref_defaultServerPath :
                     if js['path'] !=self.pref_serverPath :
@@ -1730,7 +1732,7 @@ class GUI(QtGui.QMainWindow) :
                     self.nim.set_server( name=js['server'], ID=str(js['ID']), path=str(js['osxPath']) )
                     self.pref_serverPath = str(js['osxPath'])
 
-            elif _os in ['linux2'] :
+            elif _os in ['linux', 'linux2'] :
                 ''' #REMOVED TO FIX FOR ADDITIONAL INFO IN SERVER DROPDOWN
                 if self.nim.Input('server').currentText()==self.nim.server( get='name' ) :
                     self.nim.set_server( name=self.nim.Input('server').currentText(), ID=str(js['ID']), \

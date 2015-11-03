@@ -28,7 +28,7 @@ except :
     except : pass
 
 #  Variables :
-version='v1.0.0'
+version='v1.0.2'
 winTitle='NIM_'+version
 
 def get_mainWin() :

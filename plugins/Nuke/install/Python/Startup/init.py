@@ -14,5 +14,6 @@ try:
 	from nimShotProcessorUI import *
 	from nimProcessorUI import *
 except:
+	print "Could not load NIM Connector:", sys.exc_info()[0]
 	pass
 # END NIM NukeStudio Connector
