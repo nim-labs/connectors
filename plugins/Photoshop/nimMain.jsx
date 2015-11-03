@@ -397,6 +397,104 @@ function setPref(prefPrefix, prefName, prefValue) {
 }
 
 
+// Given a file (an object with all the properties that an item in the "element_exports" table has),
+// returns an appropriate saveOptions object to pass to Photoshop's "save as" function
+function getFileSaveOptions(file) {
+	var fileExtension = file.extension,
+		fileSaveOptions;
+
+	if (fileExtension == 'psd') {
+		fileSaveOptions = new PhotoshopSaveOptions();
+	}
+	else if (fileExtension == 'eps') {
+		var preview = Preview.NONE,
+			encoding = SaveEncoding.ASCII;
+
+		if (file.epsPreview == 1)
+			preview = Preview.MONOCHROMETIFF;
+		else if (file.epsPreview == 2)
+			preview = Preview.EIGHTBITTIFF;
+
+		if (file.epsEncoding == 1)
+			encoding = SaveEncoding.BINARY;
+		else if (file.epsEncoding == 2)
+			encoding = SaveEncoding.JPEGLOW;
+		else if (file.epsEncoding == 3)
+			encoding = SaveEncoding.JPEGMEDIUM;
+		else if (file.epsEncoding == 4)
+			encoding = SaveEncoding.JPEGHIGH;
+		else if (file.epsEncoding == 5)
+			encoding = SaveEncoding.JPEGMAXIMUM;
+
+		fileSaveOptions = new EPSSaveOptions({
+			preview: preview,
+			encoding: encoding,
+			halftoneScreen: (file.epsHalftone == 0 ? false : true),
+			transferFunction: (file.epsTransferFunction == 0 ? false : true),
+			psColorManagement: (file.epsPostScriptColor == 0 ? false : true),
+			vectorData: (file.epsVectorData == 0 ? false : true),
+			interpolation: (file.epsInterpolation == 0 ? false : true)
+		});
+	}
+	else if (fileExtension == 'jpg') {
+		var formatOptions = FormatOptions.STANDARDBASELINE; 
+
+		if (file.jpgFormat == 1)
+			formatOptions = FormatOptions.OPTIMIZEDBASELINE;
+		else if (file.jpgFormat == 2)
+			formatOptions = FormatOptions.PROGRESSIVE;
+
+		fileSaveOptions = new JPEGSaveOptions({
+			jpegQuality: parseInt(file.jpgQuality),
+			formatOptions: formatOptions,
+			scans: parseInt(file.jpgScans) + 3
+		});
+	}
+	else if (fileExtension == 'png') {
+		fileSaveOptions = new PNGSaveOptions({
+			compression: (file.pngCompression == 0 ? 0 : 9),
+			interlaced: (file.pngInterlaced == 0 ? false : true)
+		});
+	}
+	else if (fileExtension == 'tga') {
+		var resolution = TargaBitsPerPixels.SIXTEEN;
+
+		if (file.tgaResolution == 1)
+			resolution = TargaBitsPerPixels.TWENTYFOUR;
+		else if (file.tgaResolution == 2)
+			resolution = TargaBitsPerPixels.THIRTYTWO;
+
+		fileSaveOptions = new TargaSaveOptions({
+			resolution: resolution,
+			rleCompression: (file.tgaCompress == 1 ? true : false)
+		});
+	}
+	else if (fileExtension == 'tif') {
+		var imageCompression = TIFFEncoding.NONE;
+
+		if (file.tifImageCompression == 1)
+			imageCompression = TIFFEncoding.TIFFLZW;
+		else if (file.tifImageCompression == 2)
+			imageCompression = TIFFEncoding.TIFFZIP;
+		else if (file.tifImageCompression == 3)
+			imageCompression = TIFFEncoding.JPEG;
+
+		fileSaveOptions = new TiffSaveOptions({
+			imageCompression: imageCompression,
+			jpegQuality: parseInt(file.jpgQuality),
+			saveImagePyramid: (file.tifSaveImagePyramid == 1 ? true : false),
+			transparency: (file.tifSaveTransparency == 1 ? true : false),
+			interleaveChannels: (file.tifPixelOrder == 0 ? true : false),
+			byteOrder: (file.tifByteOrder == 1 ? ByteOrder.MACOS : ByteOrder.IBM),
+			layers: (file.tifLayerCompression == 2 ? false : true),
+			layerCompression: (file.tifLayerCompression == 1 ? LayerCompression.ZIP : LayerCompression.RLE)
+		});
+	}
+
+	return fileSaveOptions;
+}
+
+
 // Saves a file and writes it to NIM API; className = 'ASSET' or 'SHOT', classID = assetID or shotID
 function saveFile(classID, className, serverID, serverPath, taskID, taskFolder, basename, comment, publish, elementExports, saveOptions, extension, version) {
 	var path = serverPath,
@@ -411,7 +509,8 @@ function saveFile(classID, className, serverID, serverPath, taskID, taskFolder, 
 		newFileID,
 		filesCreated = 0,
 		workingFilePath = '',
-		elementExportsLength = elementExports.length;
+		elementExportsLength = elementExports.length,
+		elementExportPrefix;
 
 	metadataSet = setNimMetadata({
 		classID: classID,
@@ -455,6 +554,7 @@ function saveFile(classID, className, serverID, serverPath, taskID, taskFolder, 
 	newFileName = basename + '_v' + version + '.' + extension;
 	fullFilePath = path + newFileName;
 	newFile = new File(fullFilePath);
+	elementExportPrefix = basename + '_v' + version + '_el';
 
 	while (newFile.exists) {
 		version = parseInt(version) + 1;
@@ -500,6 +600,105 @@ function saveFile(classID, className, serverID, serverPath, taskID, taskFolder, 
 		// Save this file's element export options
 		nimAPI({ q: 'setElementExports', fileID: newFileID, exports: elementExports });
 
+		if (elementExportsLength) {
+			var originalBitDepth = activeDocument.bitsPerChannel,
+				originalResolution = activeDocument.resolution,
+				elementVersion = 0,
+				bitDepthAndResolution = {
+					'32': {
+						'1': [],
+						'0.5': [],
+						'0.25': []
+					},
+					'16': {
+						'1': [],
+						'0.5': [],
+						'0.25': []
+					},
+					'8': {
+						'1': [],
+						'0.5': [],
+						'0.25': []
+					},
+				};
+
+			if (originalBitDepth == BitsPerChannelType.THIRTYTWO)
+				originalBitDepth = 32;
+			else if (originalBitDepth == BitsPerChannelType.SIXTEEN)
+				originalBitDepth = 16;
+			else if (originalBitDepth == BitsPerChannelType.EIGHT)
+				originalBitDepth = 8;
+
+			// Save elementExports array into bitDepthAndResolution object to organize the elements by their bit depth and resolution
+			for (var x = 0; x < elementExportsLength; x++) {
+				var element = elementExports[x];
+				bitDepthAndResolution[parseFloat(element.bitDepth).toString()][parseFloat(element.resolution).toString()].push(element);
+			}
+
+			app.displayDialogs = DialogModes.NO;
+
+			// Go through each category of bitDepthAndResolution object
+			for (var bitDepth in bitDepthAndResolution) {
+				var thisBitDepthObj = bitDepthAndResolution[bitDepth];
+				for (var resolution in thisBitDepthObj) {
+					var thisResolutionArray = thisBitDepthObj[resolution],
+						thisResolutionArrayLength = thisResolutionArray.length;
+				
+					// Ignore empty arrays
+					if (!thisResolutionArrayLength) continue;
+
+					// Convert document to correct bit depth
+					if (bitDepth == '32')
+						activeDocument.bitsPerChannel = BitsPerChannelType.THIRTYTWO;
+					else if (bitDepth == '16')
+						activeDocument.bitsPerChannel = BitsPerChannelType.SIXTEEN;
+					else if (bitDepth == '8')
+						activeDocument.bitsPerChannel = BitsPerChannelType.EIGHT;
+
+					// Convert document to correct resolution
+					if (resolution == '0.5')
+						activeDocument.resolution = activeDocument.resolution / 2;
+					else if (resolution == '0.25')
+						activeDocument.resolution = activeDocument.resolution / 4;
+
+					// Save all elements with this bit depth / resolution combo
+					for (var x = 0; x < thisResolutionArrayLength; x++) {
+						var element = thisResolutionArray[x],
+							elementExtension = element.extension,
+							elementSaveOptions = getFileSaveOptions(element);
+
+						elementVersion++;
+						if (elementVersion < 10) elementVersion = '0' + elementVersion;
+						
+						var newElementName = elementExportPrefix + elementVersion + '.' + elementExtension,
+							fullElementFilePath = path + newElementName;
+							newElementFile = new File(fullElementFilePath);
+						
+						nimAPI({ q: 'addElement', parent: className.toLowerCase(), parentID: classID, userID: userID, typeID: taskID, path: path, name: newElementName, isPublished: (publish == 1 ? 'True' : 'False') });
+
+						try {
+							activeDocument.saveAs(newElementFile, elementSaveOptions, true, Extension.LOWERCASE);
+						}
+						catch (e) {
+							alert(e);
+							return false;
+						}
+					}
+
+					// If bit depth and/or resolution isn't same as original, close this document and
+					// re-open original, just-saved-before-all-these-elements file
+					if (bitDepth != originalBitDepth || activeDocument.resolution != originalResolution) {
+						activeDocument.close(SaveOptions.DONOTSAVECHANGES);
+						app.open(newFile);
+					}
+				}
+			}
+
+			app.displayDialogs = DialogModes.ERROR;
+
+		}  // if (elementExportsLength)
+
+
 		// If publishing, prepare to save another version
 		if (publish && filesCreated == 0) {
 			isPub = 1;
@@ -507,126 +706,12 @@ function saveFile(classID, className, serverID, serverPath, taskID, taskFolder, 
 			workingFilePath = fullFilePath;
 			if (parseInt(version) < 10) version = '0' + parseInt(version);
 			newFileName = basename + '_v' + version + '_PUB.' + extension;
+			elementExportPrefix = basename + '_v' + version + '_PUB_el';
 			fullFilePath = path + newFileName;
 			newFile = new File(fullFilePath);
 		}
 		filesCreated++;
 	}
-
-	// Save all the element exports
-	for (var x = 0; x < elementExportsLength; x++) {
-		var element = elementExports[x],
-			elementVersion = x + 1,
-			elementExtension = element.extension,
-			elementSaveOptions;
-		if (elementVersion < 10) elementVersion = '0' + (x + 1);
-		var newElementName = basename + '_v' + version + '_el' + elementVersion + '.' + elementExtension,
-			fullElementFilePath = path + newElementName;
-			newElementFile = new File(fullElementFilePath);
-		nimAPI({ q: 'addElement', parent: className.toLowerCase(), parentID: classID, userID: userID, typeID: taskID, path: path, name: newElementName, isPublished: (publish == 1 ? 'True' : 'False') });
-		
-		if (elementExtension == 'psd') {
-			elementSaveOptions = new PhotoshopSaveOptions();
-		}
-		else if (elementExtension == 'eps') {
-			var preview = Preview.NONE,
-				encoding = SaveEncoding.ASCII;
-
-			if (element.epsPreview == 1)
-				preview = Preview.MONOCHROMETIFF;
-			else if (element.epsPreview == 2)
-				preview = Preview.EIGHTBITTIFF;
-
-			if (element.epsEncoding == 1)
-				encoding = SaveEncoding.BINARY;
-			else if (element.epsEncoding == 2)
-				encoding = SaveEncoding.JPEGLOW;
-			else if (element.epsEncoding == 3)
-				encoding = SaveEncoding.JPEGMEDIUM;
-			else if (element.epsEncoding == 4)
-				encoding = SaveEncoding.JPEGHIGH;
-			else if (element.epsEncoding == 5)
-				encoding = SaveEncoding.JPEGMAXIMUM;
-
-			elementSaveOptions = new EPSSaveOptions({
-				preview: preview,
-				encoding: encoding,
-				halftoneScreen: (element.epsHalftone == 0 ? false : true),
-				transferFunction: (element.epsTransferFunction == 0 ? false : true),
-				psColorManagement: (element.epsPostScriptColor == 0 ? false : true),
-				vectorData: (element.epsVectorData == 0 ? false : true),
-				interpolation: (element.epsInterpolation == 0 ? false : true)
-			});
-		}
-		else if (elementExtension == 'jpg') {
-			var formatOptions = FormatOptions.STANDARDBASELINE; 
-
-			if (element.jpgFormat == 1)
-				formatOptions = FormatOptions.OPTIMIZEDBASELINE;
-			else if (element.jpgFormat == 2)
-				formatOptions = FormatOptions.PROGRESSIVE;
-
-			elementSaveOptions = new JPEGSaveOptions({
-				jpegQuality: parseInt(element.jpgQuality),
-				formatOptions: formatOptions,
-				scans: parseInt(element.jpgScans) + 3
-			});
-		}
-		else if (elementExtension == 'png') {
-			elementSaveOptions = new PNGSaveOptions({
-				compression: (element.pngCompression == 0 ? 0 : 9),
-				interlaced: (element.pngInterlaced == 0 ? false : true)
-			});
-		}
-		else if (elementExtension == 'tga') {
-			var resolution = TargaBitsPerPixels.SIXTEEN;
-
-			if (element.tgaResolution == 1)
-				resolution = TargaBitsPerPixels.TWENTYFOUR;
-			else if (element.tgaResolution == 2)
-				resolution = TargaBitsPerPixels.THIRTYTWO;
-
-			elementSaveOptions = new TargaSaveOptions({
-				resolution: resolution,
-				rleCompression: (element.tgaCompress == 1 ? true : false)
-			});
-		}
-		else if (elementExtension == 'tif') {
-			var imageCompression = TIFFEncoding.NONE;
-
-			if (element.tifImageCompression == 1)
-				imageCompression = TIFFEncoding.TIFFLZW;
-			else if (element.tifImageCompression == 2)
-				imageCompression = TIFFEncoding.TIFFZIP;
-			else if (element.tifImageCompression == 3)
-				imageCompression = TIFFEncoding.JPEG;
-
-			elementSaveOptions = new TiffSaveOptions({
-				imageCompression: imageCompression,
-				jpegQuality: parseInt(element.jpgQuality),
-				saveImagePyramid: (element.tifSaveImagePyramid == 1 ? true : false),
-				transparency: (element.tifSaveTransparency == 1 ? true : false),
-				interleaveChannels: (element.tifPixelOrder == 0 ? true : false),
-				byteOrder: (element.tifByteOrder == 1 ? ByteOrder.MACOS : ByteOrder.IBM),
-				layers: (element.tifLayerCompression == 2 ? false : true),
-				layerCompression: (element.tifLayerCompression == 1 ? LayerCompression.ZIP : LayerCompression.RLE)
-			});
-		}
-
-
-		// Check target bit depths, convert file to lower bit depth if necessary
-		// activeDocument.bitsPerChannel = BitsPerChannelType.EIGHT;
-
-
-		try {
-			activeDocument.saveAs(newElementFile, elementSaveOptions, true, Extension.LOWERCASE);
-		}
-		catch (e) {
-			alert(e);
-			return false;
-		}
-
-	}  // for (var x = 0; x < elementExportsLength; x++)
 
 	if (publish) {
 		nimAPI({ q: 'publishSymlink', fileID: newFileID });

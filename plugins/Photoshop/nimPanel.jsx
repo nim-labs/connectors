@@ -305,13 +305,7 @@ function buildPanelUI(userID, action, metadata) {
 			jpgMaxBitDepth = 16,
 			pngMaxBitDepth = 16,
 			tgaMaxBitDepth = 8,
-			tifMaxBitDepth = 32,
-			psdDefaultText = 'Photoshop (.psd) - ' + Math.min(documentBitDepth, psdMaxBitDepth) + '-bit - ',
-			epsDefaultText = 'EPS - ' + Math.min(documentBitDepth, epsMaxBitDepth) + '-bit - ',
-			jpgDefaultText = 'JPEG (.jpg) - ' + Math.min(documentBitDepth, jpgMaxBitDepth) + '-bit - ',
-			pngDefaultText = 'PNG - ' + Math.min(documentBitDepth, pngMaxBitDepth) + '-bit - ',
-			tgaDefaultText = 'Targa (.tga) - ' + Math.min(documentBitDepth, tgaMaxBitDepth) + '-bit - ',
-			tifDefaultText = 'TIFF (.tif) - ' + Math.min(documentBitDepth, tifMaxBitDepth) + '-bit - ';
+			tifMaxBitDepth = 32;
 
 		elementListboxGroup = elementSelectionGroup.add('group', undefined);
 		elementListboxGroup.alignChildren = 'top';
@@ -347,19 +341,31 @@ function buildPanelUI(userID, action, metadata) {
 
 		for (var x = 0; x < elementExportsLength; x++) {
 			var thisExtension = elementExports[x].extension,
-				thisExtensionName = thisExtension;
+				thisExtensionName = thisExtension,
+				thisBitDepth = elementExports[x].bitDepth,
+				thisResolution = elementExports[x].resolution;
+
+			if (thisResolution == 1)
+				thisResolution = 'Full';
+			else if (thisResolution == 0.5)
+				thisResolution = '1/2';
+			else if (thisResolution == 0.25)
+				thisResolution = '1/4';
+
 			if (thisExtension == 'psd')
-				thisExtensionName = psdDefaultText;
+				thisExtensionName = 'Photoshop (.psd)';
 			else if (thisExtension == 'eps')
-				thisExtensionName = epsDefaultText;
+				thisExtensionName = 'EPS';
 			else if (thisExtension == 'jpg')
-				thisExtensionName = jpgDefaultText;
+				thisExtensionName = 'JPEG (.jpg)';
 			else if (thisExtension == 'png')
-				thisExtensionName = pngDefaultText;
+				thisExtensionName = 'PNG';
 			else if (thisExtension == 'tga')
-				thisExtensionName = tgaDefaultText;
+				thisExtensionName = 'Targa (.tga)';
 			else if (thisExtension == 'tif')
-				thisExtensionName = tifDefaultText;
+				thisExtensionName = 'TIFF (.tif)';
+
+			thisExtensionName += ' - ' + thisBitDepth + '-bit - ' + thisResolution + ' Res';
 			elementListbox.add('item', thisExtensionName);
 		}
 
@@ -680,35 +686,36 @@ function buildPanelUI(userID, action, metadata) {
 
 		elementAddButton.onClick = function() {
 			var thisExtension = 'psd',
-				thisExtensionText = psdDefaultText,
+				thisExtensionText = 'Photoshop (.psd)',
 				thisExtensionMaxBitDepth = psdMaxBitDepth;
 
 			if (elementFileTypeDropdown.selection.index == 1) {
 				thisExtension = 'eps';
-				thisExtensionText = epsDefaultText;
+				thisExtensionText = 'EPS';
 				thisExtensionMaxBitDepth = epsMaxBitDepth;
 			}
 			else if (elementFileTypeDropdown.selection.index == 2) {
 				thisExtension = 'jpg';
-				thisExtensionText = jpgDefaultText;
+				thisExtensionText = 'JPEG (.jpg)';
 				thisExtensionMaxBitDepth = jpgMaxBitDepth;
 			}
 			else if (elementFileTypeDropdown.selection.index == 3) {
 				thisExtension = 'png';
-				thisExtensionText = pngDefaultText;
+				thisExtensionText = 'PNG';
 				thisExtensionMaxBitDepth = pngMaxBitDepth;
 			}
 			else if (elementFileTypeDropdown.selection.index == 4) {
 				thisExtension = 'tga';
-				thisExtensionText = tgaDefaultText;
+				thisExtensionText = 'Targa (.tga)';
 				thisExtensionMaxBitDepth = tgaMaxBitDepth;
 			}
 			else if (elementFileTypeDropdown.selection.index == 5) {
 				thisExtension = 'tif';
-				thisExtensionText = tifDefaultText;
+				thisExtensionText = 'TIFF (.tif)';
 				thisExtensionMaxBitDepth = tifMaxBitDepth;
 			}
 
+			thisExtensionText += ' - ' + Math.min(documentBitDepth, thisExtensionMaxBitDepth) + '-bit - Full Res';
 			elementListbox.add('item', thisExtensionText);
 
 			// Add this item to the elementExports array
@@ -740,14 +747,26 @@ function buildPanelUI(userID, action, metadata) {
 		}
 
 		elementEditButton.onClick = function() {
+			elementDetailsDialog = new Window('dialog', 'Element Details', undefined);
+			elementDetailsDialog.alignChildren = 'fill';
 
 			var thisElement = elementExports[elementListbox.selection.index],
-				thisElementText = elementListbox.selection.text;
+				thisElementText = elementListbox.selection.text,
+				nimOptionsPanel = elementDetailsDialog.add('panel', undefined, 'Size'),
+				bitDepthGroup = nimOptionsPanel.add('group', undefined),
+				bitDepthLabel = bitDepthGroup.add('statictext', undefined, 'Bits Per Channel:'),
+				bitDepthDropdown,
+				resolutionGroup = nimOptionsPanel.add('group', undefined),
+				resolutionLabel = resolutionGroup.add('statictext', undefined, 'Resolution:'),
+				resolutionDropdown = resolutionGroup.add('dropdownlist', undefined, '', { items: ['Full', '1/2', '1/4'] });
 
-			elementDetailsDialog = new Window('dialog', 'Element Details', undefined);
-			elementDetailsDialog.alignChildren = 'fill';		
+			nimOptionsPanel.alignChildren = 'right';
 
-			if (thisElementText == 'EPS') {
+			if (thisElementText.substring(0, 16) == 'Photoshop (.psd)') {
+				elementDetailsDialog.text = 'Photoshop Options';
+				bitDepthDropdown = bitDepthGroup.add('dropdownlist', undefined, '', { items: ['32', '16', '8'] });
+			}
+			else if (thisElementText.substring(0, 3) == 'EPS') {
 				var previewGroup = elementDetailsDialog.add('group', undefined),
 					previewLabel = previewGroup.add('statictext', undefined, 'Preview:'),
 					previewDropdown = previewGroup.add('dropdownlist', undefined, '', { items: ['None', 'TIFF (1 bit/pixel)', 'TIFF (8 bits/pixel)'] }),
@@ -761,6 +780,7 @@ function buildPanelUI(userID, action, metadata) {
 					interpolationCheckbox = elementDetailsDialog.add('checkbox', undefined, 'Image Interpolation');
 
 				elementDetailsDialog.text = 'EPS Options';
+				bitDepthDropdown = bitDepthGroup.add('dropdownlist', undefined, '', { items: ['8'] });
 
 				previewDropdown.selection = thisElement.epsPreview;
 				encodingDropdown.selection = thisElement.epsEncoding;
@@ -771,7 +791,7 @@ function buildPanelUI(userID, action, metadata) {
 				vectorDataCheckbox.value = (thisElement.epsVectorData == 0 ? false : true);
 				interpolationCheckbox.value = (thisElement.epsInterpolation == 0 ? false : true);
 			}
-			else if (thisElementText == 'JPEG (.jpg)') {
+			else if (thisElementText.substring(0, 11) == 'JPEG (.jpg)') {
 				var imageOptions = elementDetailsDialog.add('panel', undefined, 'Image Options'),
 					formatOptions = elementDetailsDialog.add('panel', undefined, 'Format Options'),
 					qualityGroup = imageOptions.add('group', undefined),
@@ -786,6 +806,7 @@ function buildPanelUI(userID, action, metadata) {
 					scansDropdown = scansGroup.add('dropdownlist', undefined, '', { items: ['3', '4', '5'] });
 
 				elementDetailsDialog.text = 'JPEG Options';
+				bitDepthDropdown = bitDepthGroup.add('dropdownlist', undefined, '', { items: ['16', '8'] });
 
 				qualityGroup.orientation = 'row';
 
@@ -824,7 +845,7 @@ function buildPanelUI(userID, action, metadata) {
 					scansDropdown.enabled = true;
 				}
 			}
-			else if (thisElementText == 'PNG') {
+			else if (thisElementText.substring(0, 3) == 'PNG') {
 				var compressionPanel = elementDetailsDialog.add('panel', undefined, 'Compression'),
 					interlacePanel = elementDetailsDialog.add('panel', undefined, 'Interlace'),
 					compressionRadio1 = compressionPanel.add('radiobutton', undefined, 'None / Fast'),
@@ -833,6 +854,7 @@ function buildPanelUI(userID, action, metadata) {
 					interlaceRadio2 = interlacePanel.add('radiobutton', undefined, 'Interlaced');
 
 				elementDetailsDialog.text = 'PNG Options';
+				bitDepthDropdown = bitDepthGroup.add('dropdownlist', undefined, '', { items: ['16', '8'] });
 
 				compressionPanel.alignChildren = 'left';
 				interlacePanel.alignChildren = 'left';
@@ -847,7 +869,7 @@ function buildPanelUI(userID, action, metadata) {
 				else if (thisElement.pngInterlaced == 1)
 					interlaceRadio2.value = true;
 			}
-			else if (thisElementText == 'Targa (.tga)') {
+			else if (thisElementText.substring(0, 12) == 'Targa (.tga)') {
 				var resolutionPanel = elementDetailsDialog.add('panel', undefined, 'Resolution'),
 					resolutionRadio1 = resolutionPanel.add('radiobutton', undefined, '16 bits/pixel'),
 					resolutionRadio2 = resolutionPanel.add('radiobutton', undefined, '24 bits/pixel'),
@@ -855,6 +877,7 @@ function buildPanelUI(userID, action, metadata) {
 					compressCheckbox = elementDetailsDialog.add('checkbox', undefined, 'Compress (RLE)');
 
 				elementDetailsDialog.text = 'Targa Options';
+				bitDepthDropdown = bitDepthGroup.add('dropdownlist', undefined, '', { items: ['8'] });
 
 				resolutionPanel.alignChildren = 'left';
 
@@ -867,7 +890,7 @@ function buildPanelUI(userID, action, metadata) {
 
 				compressCheckbox.value = (thisElement.tgaCompress == 0 ? false : true);
 			}
-			else if (thisElementText == 'TIFF (.tif)') {
+			else if (thisElementText.substring(0, 11) == 'TIFF (.tif)') {
 				var twoColumnGroup = elementDetailsDialog.add('group', undefined),
 					column1 = twoColumnGroup.add('group', undefined),
 					column2 = twoColumnGroup.add('group', undefined),
@@ -894,6 +917,7 @@ function buildPanelUI(userID, action, metadata) {
 					layerCompressionRadio3 = layerCompressionPanel.add('radiobutton', undefined, 'Discard Layers and Save a Copy');
 
 				elementDetailsDialog.text = 'TIFF Options';
+				bitDepthDropdown = bitDepthGroup.add('dropdownlist', undefined, '', { items: ['32', '16', '8'] });
 
 				twoColumnGroup.alignChildren = 'fill';
 				column1.orientation = 'column';
@@ -975,6 +999,24 @@ function buildPanelUI(userID, action, metadata) {
 				}
 			}
 
+			// Set values for UI elements that all file types have in common
+			bitDepthDropdown.selection = 0;
+
+			var bitDepthDropdownLength = bitDepthDropdown.items.length;
+
+			for (var x = 0; x < bitDepthDropdownLength; x++) {
+				if (thisElement.bitDepth == bitDepthDropdown.items[x].text) {
+					bitDepthDropdown.selection = x;
+					break;
+				}
+			}
+
+			if (thisElement.resolution == 1)
+				resolutionDropdown.selection = 0;
+			else if (thisElement.resolution == 0.5)
+				resolutionDropdown.selection = 1;
+			else if (thisElement.resolution == 0.25)
+				resolutionDropdown.selection = 2;
 
 			var elementDetailsDialogButtonGroup = elementDetailsDialog.add('group', undefined),
 				elementDetailsOkButton = elementDetailsDialogButtonGroup.add('button', undefined, 'OK'),
@@ -984,7 +1026,17 @@ function buildPanelUI(userID, action, metadata) {
 			elementDetailsOkButton.onClick = function() {
 				var thisExtension = thisElement.extension;
 
-				if (thisExtension == 'eps') {
+				if (resolutionDropdown.selection.index == 0)
+					thisElement.resolution = 1;
+				else if (resolutionDropdown.selection.index == 1)
+					thisElement.resolution = 0.5;
+				else if (resolutionDropdown.selection.index == 2)
+					thisElement.resolution = 0.25;
+
+				if (thisExtension == 'psd') {
+					thisElement.bitDepth = (bitDepthDropdown.selection.index == 0 ? 32 : (bitDepthDropdown.selection.index == 1 ? 16 : 8));
+				}
+				else if (thisExtension == 'eps') {
 					thisElement.epsPreview = previewDropdown.selection.index;
 					thisElement.epsEncoding = encodingDropdown.selection.index;
 					thisElement.epsHalftone = (halftoneCheckbox.value == true ? 1 : 0);
@@ -994,6 +1046,7 @@ function buildPanelUI(userID, action, metadata) {
 					thisElement.epsInterpolation = (interpolationCheckbox.value == true ? 1 : 0);
 				}
 				else if (thisExtension == 'jpg') {
+					thisElement.bitDepth = (bitDepthDropdown.selection.index == 0 ? 16 : 8);
 					thisElement.jpgQuality = Math.floor(qualitySlider.value);
 					if (baselineFormatRadio.value == true)
 						thisElement.jpgFormat = 0;
@@ -1005,6 +1058,7 @@ function buildPanelUI(userID, action, metadata) {
 					thisElement.jpgScans = scansDropdown.selection.index;
 				}
 				else if (thisExtension == 'png') {
+					thisElement.bitDepth = (bitDepthDropdown.selection.index == 0 ? 16 : 8);
 					thisElement.pngCompression = (compressionRadio1.value == true ? 0 : 1);
 					thisElement.pngInterlaced = (interlaceRadio1.value == true ? 0 : 1);
 				}
@@ -1019,6 +1073,7 @@ function buildPanelUI(userID, action, metadata) {
 					thisElement.tgaCompress = (compressCheckbox.value == true ? 1 : 0);
 				}
 				else if (thisExtension == 'tif') {
+					thisElement.bitDepth = (bitDepthDropdown.selection.index == 0 ? 32 : (bitDepthDropdown.selection.index == 1 ? 16 : 8));
 					if (imageCompressionRadio1.value == true)
 						thisElement.tifImageCompression = 0;
 					else if (imageCompressionRadio2.value == true)
@@ -1048,6 +1103,38 @@ function buildPanelUI(userID, action, metadata) {
 						thisElement.tifLayerCompression = 1;
 					else if (layerCompressionRadio3.value == true)
 						thisElement.tifLayerCompression = 2;
+				}
+
+				var elementListboxLength = elementListbox.items.length;
+
+				for (var x = 0; x < elementListboxLength; x++) {
+					var thisExtension = elementExports[x].extension,
+						thisExtensionName = thisExtension,
+						thisBitDepth = elementExports[x].bitDepth,
+						thisResolution = elementExports[x].resolution;
+
+					if (thisResolution == 1)
+						thisResolution = 'Full';
+					else if (thisResolution == 0.5)
+						thisResolution = '1/2';
+					else if (thisResolution == 0.25)
+						thisResolution = '1/4';
+
+					if (thisExtension == 'psd')
+						thisExtensionName = 'Photoshop (.psd)';
+					else if (thisExtension == 'eps')
+						thisExtensionName = 'EPS';
+					else if (thisExtension == 'jpg')
+						thisExtensionName = 'JPEG (.jpg)';
+					else if (thisExtension == 'png')
+						thisExtensionName = 'PNG';
+					else if (thisExtension == 'tga')
+						thisExtensionName = 'Targa (.tga)';
+					else if (thisExtension == 'tif')
+						thisExtensionName = 'TIFF (.tif)';
+
+					thisExtensionName += ' - ' + thisBitDepth + '-bit - ' + thisResolution + ' Res';
+					elementListbox.items[x].text = thisExtensionName;
 				}
 
 				elementListbox.onChange();
@@ -1104,7 +1191,7 @@ function buildPanelUI(userID, action, metadata) {
 				elementDetailsText6.text = '';
 				elementDetailsText7.text = '';
 				elementDetailsText8.text = '';
-				elementEditButton.enabled = false;
+				//elementEditButton.enabled = false;
 			}
 			else if (thisExtension == 'eps') {
 				var thisPreview = 'None',
@@ -1298,9 +1385,13 @@ function buildPanelUI(userID, action, metadata) {
 			saveOptions = new PhotoshopSaveOptions();
 			extension = 'psd';
 
-			var thisVersion = parseInt(maxVersion) + 1;
+			var thisVersion = parseInt(maxVersion) + 1,
+				thisComment = commentInput.text;
 
-			if (saveFile(classID, className, serverID, serverPath, taskID, taskFolder, newFileBasename, commentInput.text, false, elementExports, saveOptions, extension, thisVersion))
+			//setPanelPrefs();
+			//nimPanel.close();
+
+			if (saveFile(classID, className, serverID, serverPath, taskID, taskFolder, newFileBasename, thisComment, false, elementExports, saveOptions, extension, thisVersion))
 				alert('Save successful.');
 			else
 				alert('Error: Save failed!');
@@ -1323,6 +1414,7 @@ function buildPanelUI(userID, action, metadata) {
 			}
 		}
 		*/
+		
 		setPanelPrefs();
 		nimPanel.close();
 	}
