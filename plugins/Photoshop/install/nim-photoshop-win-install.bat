@@ -1,1 +1,1 @@
-%CD%/../ExManWin/ExManCmd.exe /install com.nim-labs.nim.zxp
+%CD%\..\ExManWin\ExManCmd.exe /install %CD%\..\com.nim-labs.nim.zxp
