@@ -553,7 +553,7 @@ function saveFile(classID, className, serverID, serverPath, taskID, taskFolder, 
 	newFileName = basename + '_v' + version + '.' + extension;
 	fullFilePath = path + newFileName;
 	newFile = new File(fullFilePath);
-	elementExportPrefix = basename + '_v' + version + '_el';
+	elementExportPrefix = basename + '_v' + version + '_e';
 
 	while (newFile.exists) {
 		version = parseInt(version) + 1;
@@ -561,7 +561,7 @@ function saveFile(classID, className, serverID, serverPath, taskID, taskFolder, 
 		newFileName = basename + '_v' + version + '.' + extension;
 		fullFilePath = path + newFileName;
 		newFile = new File(fullFilePath);
-		elementExportPrefix = basename + '_v' + version + '_el';
+		elementExportPrefix = basename + '_v' + version + '_e';
 	}
 
 	while (filesCreated == 0 || (publish && filesCreated == 1)) {
@@ -610,7 +610,7 @@ function saveFile(classID, className, serverID, serverPath, taskID, taskFolder, 
 			workingFilePath = fullFilePath;
 			if (parseInt(version) < 10) version = '0' + parseInt(version);
 			newFileName = basename + '_v' + version + '_PUB.' + extension;
-			elementExportPrefix = basename + '_v' + version + '_PUB_el';
+			elementExportPrefix = basename + '_v' + version + '_PUB_e';
 			fullFilePath = path + newFileName;
 			newFile = new File(fullFilePath);
 		}
@@ -620,7 +620,7 @@ function saveFile(classID, className, serverID, serverPath, taskID, taskFolder, 
 	// Save all element exports
 	if (elementExportsLength) {
 		var originalBitDepth = activeDocument.bitsPerChannel,
-			originalResolution = activeDocument.resolution,
+			originalWidth = activeDocument.width.value,
 			elementVersion = 0,
 			bitDepthAndResolution = {
 				'32': {
@@ -674,15 +674,20 @@ function saveFile(classID, className, serverID, serverPath, taskID, taskFolder, 
 					activeDocument.bitsPerChannel = BitsPerChannelType.EIGHT;
 
 				// Convert document to correct resolution
-				var newResolution = activeDocument.resolution;
+				var newWidth = activeDocument.width,
+					newHeight = activeDocument.height;
 
-				if (resolution == '0.5')
-					newResolution = activeDocument.resolution / 2;
-				else if (resolution == '0.25')
-					newResolution = activeDocument.resolution / 4;
+				if (resolution == '0.5') {
+					newWidth.value = newWidth.value / 2;
+					newHeight.value = newHeight.value / 2;
+				}
+				else if (resolution == '0.25') {
+					newWidth.value = newWidth.value / 4;
+					newHeight.value = newHeight.value / 4;
+				}
 
-				if (newResolution != activeDocument.resolution)
-					activeDocument.resizeImage(undefined, undefined, newResolution);
+				if (newWidth.value != activeDocument.width.value)
+					activeDocument.resizeImage(newWidth, newHeight);
 
 				// Save all elements with this bit depth / resolution combo
 				for (var x = 0; x < thisResolutionArrayLength; x++) {
@@ -710,7 +715,7 @@ function saveFile(classID, className, serverID, serverPath, taskID, taskFolder, 
 
 				// If bit depth and/or resolution isn't same as original, close this document and
 				// re-open original, just-saved-before-all-these-elements file
-				if (bitDepth != originalBitDepth || activeDocument.resolution != originalResolution) {
+				if (bitDepth != originalBitDepth || activeDocument.width.value != originalWidth) {
 					activeDocument.close(SaveOptions.DONOTSAVECHANGES);
 					app.open(newFile);
 				}

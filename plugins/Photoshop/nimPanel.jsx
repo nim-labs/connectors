@@ -756,7 +756,7 @@ function buildPanelUI(userID, action, metadata) {
 				thisElementText = elementListbox.selection.text,
 				nimOptionsPanel = elementDetailsDialog.add('panel', undefined, 'Size'),
 				bitDepthGroup = nimOptionsPanel.add('group', undefined),
-				bitDepthLabel = bitDepthGroup.add('statictext', undefined, 'Bits Per Channel:'),
+				bitDepthLabel = bitDepthGroup.add('statictext', undefined, 'Bit Depth:'),
 				bitDepthDropdown,
 				resolutionGroup = nimOptionsPanel.add('group', undefined),
 				resolutionLabel = resolutionGroup.add('statictext', undefined, 'Resolution:'),
