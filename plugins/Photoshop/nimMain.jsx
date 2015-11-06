@@ -496,7 +496,7 @@ function getFileSaveOptions(file) {
 
 
 // Saves a file and writes it to NIM API; className = 'ASSET' or 'SHOT', classID = assetID or shotID
-function saveFile(classID, className, serverID, serverPath, taskID, taskFolder, basename, comment, publish, elementExports, saveOptions, extension, version) {
+function saveFile(classID, className, serverID, serverPath, taskID, taskFolder, basename, comment, publish, elementExports, fileSettings, version) {
 	var path = serverPath,
 		folder,
 		newFile,
@@ -509,6 +509,8 @@ function saveFile(classID, className, serverID, serverPath, taskID, taskFolder, 
 		newFileID,
 		filesCreated = 0,
 		workingFilePath = '',
+		extension = fileSettings.extension,
+		fileSaveOptions,
 		elementExportsLength = elementExports.length,
 		elementExportPrefix;
 
@@ -588,14 +590,20 @@ function saveFile(classID, className, serverID, serverPath, taskID, taskFolder, 
 		// Save this file's new fileID to its metadata
 		setNimFileIdMetadata(newFileID);
 
+		// Generate a fileSaveOptions object
+		fileSaveOptions = getFileSaveOptions(fileSettings);
+
 		// Actually save the file
 		try {
-			activeDocument.saveAs(newFile, saveOptions, true, Extension.LOWERCASE);
+			activeDocument.saveAs(newFile, fileSaveOptions, true, Extension.LOWERCASE);
 		}
 		catch (e) {
 			alert(e);
 			return false;
 		}
+
+		// Save this file's save options
+		nimAPI({ q: 'setFileSettings', fileID: newFileID, fileSettings: fileSettings });
 
 		// Save this file's element export options
 		nimAPI({ q: 'setElementExports', fileID: newFileID, exports: elementExports });

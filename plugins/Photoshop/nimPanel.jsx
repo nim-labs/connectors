@@ -135,6 +135,7 @@ function buildPanelUI(userID, action, metadata) {
 		maxVersion = 0,
 		filepath = '',
 		fileID = 0,
+		fileSettings,
 		jobTaskInfo = nimPanel.add('group', undefined),
 		jobInfo = jobTaskInfo.add('panel', undefined, 'Job Info'),
 		jobDropdown = jobInfo.add('dropdownlist', undefined, '', { items: ['None'] }),
@@ -174,7 +175,11 @@ function buildPanelUI(userID, action, metadata) {
 		commentLabel = commentGroup.add('statictext', undefined, 'Comment: '),
 		commentText,
 		commentInput,
+		allFileTypes = ['Photoshop (.psd)', 'EPS', 'JPEG (.jpg)', 'PNG', 'Targa (.tga)', 'TIFF (.tif)'],
+		fileTypeGroup,
+		fileTypeLabel,
 		fileTypeDropdown,
+		fileTypeEditButton,
 		elementsToAdd,
 		elementSelectionGroup,
 		elementButtonGroup,
@@ -198,6 +203,8 @@ function buildPanelUI(userID, action, metadata) {
 		elementExports,
 		documentBitDepth,
 		documentResolution,
+		bitDepthDropdown,
+		resolutionDropdown,
 		allDropdowns = [jobDropdown, serverDropdown, assetDropdown, showDropdown, shotDropdown, taskDropdown, filterDropdown],
 		allDropdownsLength = allDropdowns.length,
 		buttonGroup = nimPanel.add('group', undefined),
@@ -268,6 +275,416 @@ function buildPanelUI(userID, action, metadata) {
 		*/
 	}
 	else if (action == 'saveAs' || action == 'versionUp' || action == 'publish') {
+
+		// Functions for building dialogs to edit different file types
+
+		function buildDialogEPS(dialog, settings, bitDepthGroup) {
+			// Save all local function variables as keys on "dialogElements", which will be passed to "finishBuildingDialog" function
+			var dialogElements = {},
+				previewGroup = dialogElements.previewGroup = dialog.add('group', undefined),
+				previewLabel = dialogElements.previewLabel = previewGroup.add('statictext', undefined, 'Preview:'),
+				previewDropdown = dialogElements.previewDropdown = previewGroup.add('dropdownlist', undefined, '', { items: ['None', 'TIFF (1 bit/pixel)', 'TIFF (8 bits/pixel)'] }),
+				encodingGroup = dialogElements.encodingGroup = dialog.add('group', undefined),
+				encodingLabel = dialogElements.encodingLabel = encodingGroup.add('statictext', undefined, 'Encoding:'),
+				encodingDropdown = dialogElements.encodingDropdown = encodingGroup.add('dropdownlist', undefined, '', { items: ['ASCII', 'Binary', 'JPEG (low quality)', 'JPEG (medium quality)', 'JPEG (high quality)', 'JPEG (maximum quality)'] }),
+				halftoneCheckbox = dialogElements.halftoneCheckbox = dialog.add('checkbox', undefined, 'Include Halftone Screen'),
+				transferFunctionCheckbox = dialogElements.transferFunctionCheckbox = dialog.add('checkbox', undefined, 'Include Transfer Function'),
+				postScriptColorCheckbox = dialogElements.postScriptColorCheckbox = dialog.add('checkbox', undefined, 'PostScript Color Management'),
+				vectorDataCheckbox = dialogElements.vectorDataCheckbox = dialog.add('checkbox', undefined, 'Include Vector Data'),
+				interpolationCheckbox = dialogElements.interpolationCheckbox = dialog.add('checkbox', undefined, 'Image Interpolation');
+
+			dialog.text = 'EPS Options';
+
+			// bitDepthDropdown is a global variable; if no bitDepthGroup is passed, we don't have a bitDepthDropdown in this dialog
+			if (bitDepthGroup) bitDepthDropdown = bitDepthGroup.add('dropdownlist', undefined, '', { items: ['8'] });
+
+			previewDropdown.selection = settings.epsPreview;
+			encodingDropdown.selection = settings.epsEncoding;
+
+			halftoneCheckbox.value = (settings.epsHalftone == 0 ? false : true);
+			transferFunctionCheckbox.value = (settings.epsTransferFunction == 0 ? false : true);
+			postScriptColorCheckbox.value = (settings.epsPostScriptColor == 0 ? false : true);
+			vectorDataCheckbox.value = (settings.epsVectorData == 0 ? false : true);
+			interpolationCheckbox.value = (settings.epsInterpolation == 0 ? false : true);
+
+			finishBuildingDialog(dialog, settings, dialogElements);
+		}
+
+		function buildDialogJPG(dialog, settings, bitDepthGroup) {
+			// Save all local function variables as keys on "dialogElements", which will be passed to "finishBuildingDialog" function
+			var dialogElements = {},
+				imageOptions = dialogElements.imageOptions = dialog.add('panel', undefined, 'Image Options'),
+				formatOptions = dialogElements.formatOptions = dialog.add('panel', undefined, 'Format Options'),
+				qualityGroup = dialogElements.qualityGroup = imageOptions.add('group', undefined),
+				qualityLabel = dialogElements.qualityLabel = qualityGroup.add('statictext', undefined, 'Quality:'),
+				qualityTextbox = dialogElements.qualityTextbox = qualityGroup.add('edittext', undefined, settings.jpgQuality),
+				qualitySlider = dialogElements.qualitySlider = qualityGroup.add('slider', [0, 0, 170, 13], settings.jpgQuality, 0, 12),
+				baselineFormatRadio = dialogElements.baselineFormatRadio = formatOptions.add('radiobutton', undefined, 'Baseline ("Standard")'),
+				optimizedFormatRadio = dialogElements.optimizedFormatRadio = formatOptions.add('radiobutton', undefined, 'Baseline Optimized'),
+				progressiveFormatRadio = dialogElements.progressiveFormatRadio = formatOptions.add('radiobutton', undefined, 'Progressive'),
+				scansGroup = dialogElements.scansGroup = formatOptions.add('group', undefined),
+				scansLabel = dialogElements.scansLabel = scansGroup.add('statictext', undefined, 'Scans:'),
+				scansDropdown = dialogElements.scansDropdown = scansGroup.add('dropdownlist', undefined, '', { items: ['3', '4', '5'] });
+
+			dialog.text = 'JPEG Options';
+
+			// bitDepthDropdown is a global variable; if no bitDepthGroup is passed, we don't have a bitDepthDropdown in this dialog
+			if (bitDepthGroup) bitDepthDropdown = bitDepthGroup.add('dropdownlist', undefined, '', { items: ['16', '8'] });
+
+			qualityGroup.orientation = 'row';
+
+			qualityGroup.alignChildren = 'left';
+			formatOptions.alignChildren = 'left';
+
+			scansDropdown.selection = settings.jpgScans;
+			scansDropdown.enabled = false;
+
+			if (settings.jpgFormat == 0)
+				baselineFormatRadio.value = true;
+			else if (settings.jpgFormat == 1)
+				optimizedFormatRadio.value = true;
+			else if (settings.jpgFormat == 2) {
+				progressiveFormatRadio.value = true;
+				scansDropdown.enabled = true;
+			}
+
+			qualityTextbox.onChanging = function() {
+				qualitySlider.value = Math.floor(qualityTextbox.text);
+			}
+
+			qualitySlider.onChanging = function() {
+				qualityTextbox.text = Math.floor(qualitySlider.value);
+			}
+
+			baselineFormatRadio.onClick = function() {
+				scansDropdown.enabled = false;
+			}
+
+			optimizedFormatRadio.onClick = function() {
+				scansDropdown.enabled = false;
+			}
+
+			progressiveFormatRadio.onClick = function() {
+				scansDropdown.enabled = true;
+			}
+
+			finishBuildingDialog(dialog, settings, dialogElements);
+		}
+
+		function buildDialogPNG(dialog, settings, bitDepthGroup) {
+			// Save all local function variables as keys on "dialogElements", which will be passed to "finishBuildingDialog" function
+			var dialogElements = {},
+				compressionPanel = dialogElements.compressionPanel = dialog.add('panel', undefined, 'Compression'),
+				interlacePanel = dialogElements.interlacePanel = dialog.add('panel', undefined, 'Interlace'),
+				compressionRadio1 = dialogElements.compressionRadio1 = compressionPanel.add('radiobutton', undefined, 'None / Fast'),
+				compressionRadio2 = dialogElements.compressionRadio2 = compressionPanel.add('radiobutton', undefined, 'Smallest / Slow'),
+				interlaceRadio1 = dialogElements.interlaceRadio1 = interlacePanel.add('radiobutton', undefined, 'None'),
+				interlaceRadio2 = dialogElements.interlaceRadio2 = interlacePanel.add('radiobutton', undefined, 'Interlaced');
+
+			dialog.text = 'PNG Options';
+
+			// bitDepthDropdown is a global variable; if no bitDepthGroup is passed, we don't have a bitDepthDropdown in this dialog
+			if (bitDepthGroup) bitDepthDropdown = bitDepthGroup.add('dropdownlist', undefined, '', { items: ['16', '8'] });
+
+			compressionPanel.alignChildren = 'left';
+			interlacePanel.alignChildren = 'left';
+
+			if (settings.pngCompression == 0)
+				compressionRadio1.value = true;
+			else if (settings.pngCompression == 1)
+				compressionRadio2.value = true;
+
+			if (settings.pngInterlaced == 0)
+				interlaceRadio1.value = true;
+			else if (settings.pngInterlaced == 1)
+				interlaceRadio2.value = true;
+
+			finishBuildingDialog(dialog, settings, dialogElements);
+		}
+
+		function buildDialogTGA(dialog, settings, bitDepthGroup) {
+			// Save all local function variables as keys on "dialogElements", which will be passed to "finishBuildingDialog" function
+			var dialogElements = {},
+				resolutionPanel = dialogElements.resolutionPanel = dialog.add('panel', undefined, 'Resolution'),
+				resolutionRadio1 = dialogElements.resolutionRadio1 = resolutionPanel.add('radiobutton', undefined, '16 bits/pixel'),
+				resolutionRadio2 = dialogElements.resolutionRadio2 = resolutionPanel.add('radiobutton', undefined, '24 bits/pixel'),
+				resolutionRadio3 = dialogElements.resolutionRadio3 = resolutionPanel.add('radiobutton', undefined, '32 bits/pixel'),
+				compressCheckbox = dialogElements.compressCheckbox = dialog.add('checkbox', undefined, 'Compress (RLE)');
+
+			dialog.text = 'Targa Options';
+
+			// bitDepthDropdown is a global variable; if no bitDepthGroup is passed, we don't have a bitDepthDropdown in this dialog
+			if (bitDepthGroup) bitDepthDropdown = bitDepthGroup.add('dropdownlist', undefined, '', { items: ['8'] });
+
+			resolutionPanel.alignChildren = 'left';
+
+			if (settings.tgaResolution == 0)
+				resolutionRadio1.value = true;
+			else if (settings.tgaResolution == 1)
+				resolutionRadio2.value = true;
+			else if (settings.tgaResolution == 2)
+				resolutionRadio3.value = true;
+
+			compressCheckbox.value = (settings.tgaCompress == 0 ? false : true);
+
+			finishBuildingDialog(dialog, settings, dialogElements);
+		}
+
+		function buildDialogTIF(dialog, settings, bitDepthGroup) {
+			// Save all local function variables as keys on "dialogElements", which will be passed to "finishBuildingDialog" function
+			var dialogElements = {},
+				twoColumnGroup = dialogElements.twoColumnGroup = dialog.add('group', undefined),
+				column1 = dialogElements.column1 = twoColumnGroup.add('group', undefined),
+				column2 = dialogElements.column2 = twoColumnGroup.add('group', undefined),
+				imageCompressionPanel = dialogElements.imageCompressionPanel = column1.add('panel', undefined, 'Image Compression'),
+				imageCompressionRadio1 = dialogElements.imageCompressionRadio1 = imageCompressionPanel.add('radiobutton', undefined, 'None'),
+				imageCompressionRadio2 = dialogElements.imageCompressionRadio2 = imageCompressionPanel.add('radiobutton', undefined, 'LZW'),
+				imageCompressionRadio3 = dialogElements.imageCompressionRadio3 = imageCompressionPanel.add('radiobutton', undefined, 'ZIP'),
+				imageCompressionRadio4 = dialogElements.imageCompressionRadio4 = imageCompressionPanel.add('radiobutton', undefined, 'JPEG'),
+				qualityGroup = dialogElements.qualityGroup = imageCompressionPanel.add('group', undefined),
+				qualityLabel = dialogElements.qualityLabel = qualityGroup.add('statictext', undefined, 'Quality:'),
+				qualityTextbox = dialogElements.qualityTextbox = qualityGroup.add('edittext', undefined, settings.jpgQuality),
+				qualitySlider = dialogElements.qualitySlider = imageCompressionPanel.add('slider', [0, 0, 170, 13], settings.jpgQuality, 0, 12),
+				saveImagePyramidCheckbox = dialogElements.saveImagePyramidCheckbox = column1.add('checkbox', undefined, 'Save Image Pyramid'),
+				saveTransparencyCheckbox = dialogElements.saveTransparencyCheckbox = column1.add('checkbox', undefined, 'Save Transparency'),
+				pixelOrderPanel = dialogElements.pixelOrderPanel = column2.add('panel', undefined, 'Pixel Order'),
+				pixelOrderRadio1 = dialogElements.pixelOrderRadio1 = pixelOrderPanel.add('radiobutton', undefined, 'Interleaved (RGBRGB)'),
+				pixelOrderRadio2 = dialogElements.pixelOrderRadio2 = pixelOrderPanel.add('radiobutton', undefined, 'Per Channel (RRGGBB)'),
+				byteOrderPanel = dialogElements.byteOrderPanel = column2.add('panel', undefined, 'Byte Order'),
+				byteOrderRadio1 = dialogElements.byteOrderRadio1 = byteOrderPanel.add('radiobutton', undefined, 'IBM PC'),
+				byteOrderRadio2 = dialogElements.byteOrderRadio2 = byteOrderPanel.add('radiobutton', undefined, 'Macintosh'),
+				layerCompressionPanel = dialogElements.layerCompressionPanel = column2.add('panel', undefined, 'Layer Compression'),
+				layerCompressionRadio1 = dialogElements.layerCompressionRadio1 = layerCompressionPanel.add('radiobutton', undefined, 'RLE (faster saves, bigger files)'),
+				layerCompressionRadio2 = dialogElements.layerCompressionRadio2 = layerCompressionPanel.add('radiobutton', undefined, 'ZIP (slower saves, smaller files)'),
+				layerCompressionRadio3 = dialogElements.layerCompressionRadio3 = layerCompressionPanel.add('radiobutton', undefined, 'Discard Layers and Save a Copy');
+
+			dialog.text = 'TIFF Options';
+
+			// bitDepthDropdown is a global variable; if no bitDepthGroup is passed, we don't have a bitDepthDropdown in this dialog
+			if (bitDepthGroup) bitDepthDropdown = bitDepthGroup.add('dropdownlist', undefined, '', { items: ['32', '16', '8'] });
+
+			twoColumnGroup.alignChildren = 'fill';
+			column1.orientation = 'column';
+			column1.alignChildren = 'fill';
+			column2.orientation = 'column';
+			column2.alignChildren = 'fill';
+			imageCompressionPanel.alignChildren = 'left';
+			pixelOrderPanel.alignChildren = 'left';
+			byteOrderPanel.alignChildren = 'left';
+			layerCompressionPanel.alignChildren = 'left';
+
+			qualityLabel.enabled = false;
+			qualityTextbox.enabled = false;
+			qualitySlider.enabled = false;
+
+			if (settings.tifImageCompression == 0)
+				imageCompressionRadio1.value = true;
+			else if (settings.tifImageCompression == 1)
+				imageCompressionRadio2.value = true;
+			else if (settings.tifImageCompression == 2)
+				imageCompressionRadio3.value = true;
+			else if (settings.tifImageCompression == 3) {
+				imageCompressionRadio4.value = true;
+				qualityLabel.enabled = true;
+				qualityTextbox.enabled = true;
+				qualitySlider.enabled = true;
+			}
+
+			saveImagePyramidCheckbox.value = (settings.tifSaveImagePyramid == 0 ? false : true);
+			saveTransparencyCheckbox.value = (settings.tifSaveTransparency == 0 ? false : true);
+
+			if (settings.tifPixelOrder == 0)
+				pixelOrderRadio1.value = true;
+			else if (settings.tifPixelOrder == 1)
+				pixelOrderRadio2.value = true;
+
+			if (settings.tifByteOrder == 0)
+				byteOrderRadio1.value = true;
+			else if (settings.tifByteOrder == 1)
+				byteOrderRadio2.value = true;
+
+			if (settings.tifLayerCompression == 0)
+				layerCompressionRadio1.value = true;
+			else if (settings.tifLayerCompression == 1)
+				layerCompressionRadio2.value = true;
+			else if (settings.tifLayerCompression == 2)
+				layerCompressionRadio3.value = true;
+
+			qualityTextbox.onChanging = function() {
+				qualitySlider.value = Math.floor(qualityTextbox.text);
+			}
+
+			qualitySlider.onChanging = function() {
+				qualityTextbox.text = Math.floor(qualitySlider.value);
+			}
+
+			imageCompressionRadio1.onClick = function() {
+				qualityLabel.enabled = false;
+				qualityTextbox.enabled = false;
+				qualitySlider.enabled = false;
+			}
+
+			imageCompressionRadio2.onClick = function() {
+				qualityLabel.enabled = false;
+				qualityTextbox.enabled = false;
+				qualitySlider.enabled = false;
+			}
+
+			imageCompressionRadio3.onClick = function() {
+				qualityLabel.enabled = false;
+				qualityTextbox.enabled = false;
+				qualitySlider.enabled = false;
+			}
+
+			imageCompressionRadio4.onClick = function() {
+				qualityLabel.enabled = true;
+				qualityTextbox.enabled = true;
+				qualitySlider.enabled = true;
+			}
+
+			finishBuildingDialog(dialog, settings, dialogElements);
+		}
+
+		// Adds OK and Cancel buttons to bottom of file-type-specific saving dialog;
+		// makes OK button save all appropriate settings to "settings" object;
+		// all relevant dialog UI elements are keys in "dialogElements"
+		function finishBuildingDialog(dialog, settings, dialogElements) {
+			var dialogButtonGroup = dialog.add('group', undefined),
+				dialogOkButton = dialogButtonGroup.add('button', undefined, 'OK'),
+				dialogCancelButton = dialogButtonGroup.add('button', undefined, 'Cancel');
+
+			dialogOkButton.onClick = function() {
+				var thisExtension = settings.extension;
+
+				if (resolutionDropdown) {
+					if (resolutionDropdown.selection.index == 0)
+						settings.resolution = 1;
+					else if (resolutionDropdown.selection.index == 1)
+						settings.resolution = 0.5;
+					else if (resolutionDropdown.selection.index == 2)
+						settings.resolution = 0.25;
+				}
+
+				if (thisExtension == 'psd') {
+					if (bitDepthDropdown) settings.bitDepth = (bitDepthDropdown.selection.index == 0 ? 32 : (bitDepthDropdown.selection.index == 1 ? 16 : 8));
+				}
+				else if (thisExtension == 'eps') {
+					settings.epsPreview = dialogElements.previewDropdown.selection.index;
+					settings.epsEncoding = dialogElements.encodingDropdown.selection.index;
+					settings.epsHalftone = (dialogElements.halftoneCheckbox.value == true ? 1 : 0);
+					settings.epsTransferFunction = (dialogElements.transferFunctionCheckbox.value == true ? 1 : 0);
+					settings.epsPostScriptColor = (dialogElements.postScriptColorCheckbox.value == true ? 1 : 0);
+					settings.epsVectorData = (dialogElements.vectorDataCheckbox.value == true ? 1 : 0);
+					settings.epsInterpolation = (dialogElements.interpolationCheckbox.value == true ? 1 : 0);
+				}
+				else if (thisExtension == 'jpg') {
+					if (bitDepthDropdown) settings.bitDepth = (bitDepthDropdown.selection.index == 0 ? 16 : 8);
+					settings.jpgQuality = Math.floor(dialogElements.qualitySlider.value);
+					if (dialogElements.baselineFormatRadio.value == true)
+						settings.jpgFormat = 0;
+					else if (dialogElements.optimizedFormatRadio.value == true)
+						settings.jpgFormat = 1;
+					else if (dialogElements.progressiveFormatRadio.value == true)
+						settings.jpgFormat = 2;
+					
+					settings.jpgScans = dialogElements.scansDropdown.selection.index;
+				}
+				else if (thisExtension == 'png') {
+					if (bitDepthDropdown) settings.bitDepth = (bitDepthDropdown.selection.index == 0 ? 16 : 8);
+					settings.pngCompression = (dialogElements.compressionRadio1.value == true ? 0 : 1);
+					settings.pngInterlaced = (dialogElements.interlaceRadio1.value == true ? 0 : 1);
+				}
+				else if (thisExtension == 'tga') {
+					if (dialogElements.resolutionRadio1.value == true)
+						settings.tgaResolution = 0;
+					else if (dialogElements.resolutionRadio2.value == true)
+						settings.tgaResolution = 1;
+					else if (dialogElements.resolutionRadio3.value == true)
+						settings.tgaResolution = 2;
+					
+					settings.tgaCompress = (dialogElements.compressCheckbox.value == true ? 1 : 0);
+				}
+				else if (thisExtension == 'tif') {
+					if (bitDepthDropdown) settings.bitDepth = (bitDepthDropdown.selection.index == 0 ? 32 : (bitDepthDropdown.selection.index == 1 ? 16 : 8));
+					if (dialogElements.imageCompressionRadio1.value == true)
+						settings.tifImageCompression = 0;
+					else if (dialogElements.imageCompressionRadio2.value == true)
+						settings.tifImageCompression = 1;
+					else if (dialogElements.imageCompressionRadio3.value == true)
+						settings.tifImageCompression = 2;
+					else if (dialogElements.imageCompressionRadio4.value == true)
+						settings.tifImageCompression = 3;
+
+					settings.jpgQuality = Math.floor(dialogElements.qualitySlider.value);
+					settings.tifSaveImagePyramid = (dialogElements.saveImagePyramidCheckbox.value == true ? 1 : 0);
+					settings.tifSaveTransparency = (dialogElements.saveTransparencyCheckbox.value == true ? 1 : 0);
+
+					if (dialogElements.pixelOrderRadio1.value == true)
+						settings.tifPixelOrder = 0;
+					else if (dialogElements.pixelOrderRadio2.value == true)
+						settings.tifPixelOrder = 1;
+
+					if (dialogElements.byteOrderRadio1.value == true)
+						settings.tifByteOrder = 0;
+					else if (dialogElements.byteOrderRadio2.value == true)
+						settings.tifByteOrder = 1;
+
+					if (dialogElements.layerCompressionRadio1.value == true)
+						settings.tifLayerCompression = 0;
+					else if (dialogElements.layerCompressionRadio2.value == true)
+						settings.tifLayerCompression = 1;
+					else if (dialogElements.layerCompressionRadio3.value == true)
+						settings.tifLayerCompression = 2;
+				}
+
+				// If there are bit depth and resolution dropdowns, change element list item on OK
+				if (bitDepthDropdown && resolutionDropdown) {
+					var elementListboxLength = elementListbox.items.length;
+
+					for (var x = 0; x < elementListboxLength; x++) {
+						var thisExtension = elementExports[x].extension,
+							thisExtensionName = thisExtension,
+							thisBitDepth = elementExports[x].bitDepth,
+							thisResolution = elementExports[x].resolution;
+
+						if (thisResolution == 1)
+							thisResolution = 'Full';
+						else if (thisResolution == 0.5)
+							thisResolution = '1/2';
+						else if (thisResolution == 0.25)
+							thisResolution = '1/4';
+
+						if (thisExtension == 'psd')
+							thisExtensionName = 'Photoshop (.psd)';
+						else if (thisExtension == 'eps')
+							thisExtensionName = 'EPS';
+						else if (thisExtension == 'jpg')
+							thisExtensionName = 'JPEG (.jpg)';
+						else if (thisExtension == 'png')
+							thisExtensionName = 'PNG';
+						else if (thisExtension == 'tga')
+							thisExtensionName = 'Targa (.tga)';
+						else if (thisExtension == 'tif')
+							thisExtensionName = 'TIFF (.tif)';
+
+						thisExtensionName += ' - ' + thisBitDepth + '-bit - ' + thisResolution + ' Res';
+						elementListbox.items[x].text = thisExtensionName;
+					}
+
+					elementListbox.onChange();
+				}
+
+				dialog.close();
+			}
+
+			dialogCancelButton.onClick = function() {
+				dialog.close();
+			}
+
+		}  // function finishBuildingDialog(dialog, settings, dialogElements)
+
+
+		// Other stuff to do when action == saveAs or versionUp or publish
 		taskInfo.remove(filterDropdown);
 		filterDropdown = null;
 		tagGroup = taskInfo.add('group', undefined);
@@ -276,6 +693,11 @@ function buildPanelUI(userID, action, metadata) {
 		versionInfo.remove(pathGroup);
 		versionInfo.remove(userGroup);
 		versionInfo.remove(dateGroup);
+		fileTypeGroup = versionInfo.add('group', undefined);
+		fileTypeLabel = fileTypeGroup.add('statictext', undefined, 'File Type: ');
+		fileTypeDropdown = fileTypeGroup.add('dropdownlist', undefined, '', { items: allFileTypes });
+		fileTypeDropdown.selection = 0;
+		fileTypeEditButton = fileTypeGroup.add('button', undefined, 'Edit Settings');
 		pathText = null;
 		userText = null;
 		dateText = null;
@@ -286,12 +708,59 @@ function buildPanelUI(userID, action, metadata) {
 		elementSelectionGroup.orientation = 'column';
 		elementSelectionGroup.alignChildren = 'left';
 		elementButtonGroup = elementSelectionGroup.add('group', undefined);
-		elementFileTypeDropdown = elementButtonGroup.add('dropdownlist', undefined, '', { items: ['Photoshop (.psd)', 'EPS', 'JPEG (.jpg)', 'PNG', 'Targa (.tga)', 'TIFF (.tif)'] });
+		elementFileTypeDropdown = elementButtonGroup.add('dropdownlist', undefined, '', { items: allFileTypes });
 		elementFileTypeDropdown.selection = 0;
 		elementAddButton = elementButtonGroup.add('button', undefined, 'Add Element');
 		fileID = getMetadata('fileID');
+		fileSettings = nimAPI({ q: 'getFileSettings', fileID: fileID || 0 });
 		elementExports = nimAPI({ q: 'getElementExports', fileID: fileID || 0 }) || [];
 		documentResolution = activeDocument.resolution;
+
+		// If no fileSettings row is found with this fileID, make new fileSettings object
+		if (fileSettings.length == 0) {
+			fileSettings = {
+				extension: 'psd',
+				epsPreview: 0,
+				epsEncoding: 0,
+				epsHalftone: 0,
+				epsTransferFunction: 0,
+				epsPostScriptColor: 0,
+				epsVectorData: 0,
+				epsInterpolation: 0,
+				jpgQuality: 3,
+				jpgFormat: 0,
+				jpgScans: 0,
+				pngCompression: 0,
+				pngInterlaced: 0,
+				tgaResolution: 1,
+				tgaCompress: 1,
+				tifImageCompression: 0,
+				tifSaveImagePyramid: 0,
+				tifSaveTransparency: 0,
+				tifPixelOrder: 0,
+				tifByteOrder: 0,
+				tifLayerCompression: 0
+			};
+		}
+		else
+			fileSettings = fileSettings[0];
+
+		if (fileTypeDropdown) {
+			if (fileSettings.extension == 'psd') {
+				fileTypeDropdown.selection = 0;
+				fileTypeEditButton.enabled = false;
+			}
+			else if (fileSettings.extension == 'eps')
+				fileTypeDropdown.selection = 1;
+			else if (fileSettings.extension == 'jpg')
+				fileTypeDropdown.selection = 2;
+			else if (fileSettings.extension == 'png')
+				fileTypeDropdown.selection = 3;
+			else if (fileSettings.extension == 'tga')
+				fileTypeDropdown.selection = 4;
+			else if (fileSettings.extension == 'tif')
+				fileTypeDropdown.selection = 5;
+		}
 
 		if (activeDocument.bitsPerChannel == BitsPerChannelType.THIRTYTWO)
 			documentBitDepth = 32;
@@ -337,6 +806,7 @@ function buildPanelUI(userID, action, metadata) {
 		elementDetailsText7 = elementDetailsPanel.add('statictext', undefined, '');
 		elementDetailsText8 = elementDetailsPanel.add('statictext', undefined, '');
 
+		// Populate element exports list
 		var elementExportsLength = elementExports.length;
 
 		for (var x = 0; x < elementExportsLength; x++) {
@@ -390,6 +860,13 @@ function buildPanelUI(userID, action, metadata) {
 				confirmButton.text = 'Version Up';
 			else if (action == 'publish')
 				confirmButton.text = 'Publish';
+
+			// Need to get max version to know what version to version up / publish to
+			if (metadata) {
+				maxVersion = nimAPI({ q: 'getMaxVersion', fileID: fileID });
+				if (maxVersion.length)
+					maxVersion = maxVersion[0].maxVersion;
+			}
 		}
 		else if (action == 'saveAs') {
 			outputFiles.selection = versionInfo;
@@ -397,7 +874,8 @@ function buildPanelUI(userID, action, metadata) {
 		}
 
 		commentInput = commentGroup.add('edittext', [0, 0, 550, 20]);
-	}
+	
+	}  // if (action == 'saveAs' || action == 'versionUp' || action == 'publish')
 
 	// Add events to elements
 	if (jobDropdown) {
@@ -682,10 +1160,47 @@ function buildPanelUI(userID, action, metadata) {
 		}
 	}
 
-	if (elementsToAdd) {
-		elementFileTypeDropdown.onChange = function() {
-		}
+	if (fileTypeDropdown) {
+		fileTypeDropdown.onChange = function() {
+			if (this.selection.index == 0)
+				fileTypeEditButton.enabled = false;
+			else
+				fileTypeEditButton.enabled = true;
 
+			if (this.selection.index == 1)
+				fileSettings.extension = 'eps';
+			else if (this.selection.index == 2)
+				fileSettings.extension = 'jpg';
+			else if (this.selection.index == 3)
+				fileSettings.extension = 'png';
+			else if (this.selection.index == 4)
+				fileSettings.extension = 'tga';
+			else if (this.selection.index == 5)
+				fileSettings.extension = 'tif';
+		}
+	}
+
+	if (fileTypeEditButton) {
+		fileTypeEditButton.onClick = function() {
+			var fileSettingsDialog = new Window('dialog', 'File Settings', undefined);
+			fileSettingsDialog.alignChildren = 'fill';
+
+			if (fileTypeDropdown.selection.index == 1)
+				buildDialogEPS(fileSettingsDialog, fileSettings);
+			else if (fileTypeDropdown.selection.index == 2)
+				buildDialogJPG(fileSettingsDialog, fileSettings);
+			else if (fileTypeDropdown.selection.index == 3)
+				buildDialogPNG(fileSettingsDialog, fileSettings);
+			else if (fileTypeDropdown.selection.index == 4)
+				buildDialogTGA(fileSettingsDialog, fileSettings);
+			else if (fileTypeDropdown.selection.index == 5)
+				buildDialogTIF(fileSettingsDialog, fileSettings);
+
+			fileSettingsDialog.show();
+		}
+	}
+
+	if (elementsToAdd) {
 		elementAddButton.onClick = function() {
 			var thisExtension = 'psd',
 				thisExtensionText = 'Photoshop (.psd)',
@@ -757,248 +1272,30 @@ function buildPanelUI(userID, action, metadata) {
 				nimOptionsPanel = elementDetailsDialog.add('panel', undefined, 'Size'),
 				bitDepthGroup = nimOptionsPanel.add('group', undefined),
 				bitDepthLabel = bitDepthGroup.add('statictext', undefined, 'Bit Depth:'),
-				bitDepthDropdown,
 				resolutionGroup = nimOptionsPanel.add('group', undefined),
-				resolutionLabel = resolutionGroup.add('statictext', undefined, 'Resolution:'),
-				resolutionDropdown = resolutionGroup.add('dropdownlist', undefined, '', { items: ['Full', '1/2', '1/4'] });
+				resolutionLabel = resolutionGroup.add('statictext', undefined, 'Resolution:');
 
 			nimOptionsPanel.alignChildren = 'right';
+			resolutionDropdown = resolutionGroup.add('dropdownlist', undefined, '', { items: ['Full', '1/2', '1/4'] });
 
 			if (thisElementText.substring(0, 16) == 'Photoshop (.psd)') {
 				elementDetailsDialog.text = 'Photoshop Options';
 				bitDepthDropdown = bitDepthGroup.add('dropdownlist', undefined, '', { items: ['32', '16', '8'] });
 			}
 			else if (thisElementText.substring(0, 3) == 'EPS') {
-				var previewGroup = elementDetailsDialog.add('group', undefined),
-					previewLabel = previewGroup.add('statictext', undefined, 'Preview:'),
-					previewDropdown = previewGroup.add('dropdownlist', undefined, '', { items: ['None', 'TIFF (1 bit/pixel)', 'TIFF (8 bits/pixel)'] }),
-					encodingGroup = elementDetailsDialog.add('group', undefined),
-					encodingLabel = encodingGroup.add('statictext', undefined, 'Encoding:'),
-					encodingDropdown = encodingGroup.add('dropdownlist', undefined, '', { items: ['ASCII', 'Binary', 'JPEG (low quality)', 'JPEG (medium quality)', 'JPEG (high quality)', 'JPEG (maximum quality)'] }),
-					halftoneCheckbox = elementDetailsDialog.add('checkbox', undefined, 'Include Halftone Screen'),
-					transferFunctionCheckbox = elementDetailsDialog.add('checkbox', undefined, 'Include Transfer Function'),
-					postScriptColorCheckbox = elementDetailsDialog.add('checkbox', undefined, 'PostScript Color Management'),
-					vectorDataCheckbox = elementDetailsDialog.add('checkbox', undefined, 'Include Vector Data'),
-					interpolationCheckbox = elementDetailsDialog.add('checkbox', undefined, 'Image Interpolation');
-
-				elementDetailsDialog.text = 'EPS Options';
-				bitDepthDropdown = bitDepthGroup.add('dropdownlist', undefined, '', { items: ['8'] });
-
-				previewDropdown.selection = thisElement.epsPreview;
-				encodingDropdown.selection = thisElement.epsEncoding;
-
-				halftoneCheckbox.value = (thisElement.epsHalftone == 0 ? false : true);
-				transferFunctionCheckbox.value = (thisElement.epsTransferFunction == 0 ? false : true);
-				postScriptColorCheckbox.value = (thisElement.epsPostScriptColor == 0 ? false : true);
-				vectorDataCheckbox.value = (thisElement.epsVectorData == 0 ? false : true);
-				interpolationCheckbox.value = (thisElement.epsInterpolation == 0 ? false : true);
+				buildDialogEPS(elementDetailsDialog, thisElement, bitDepthGroup);
 			}
 			else if (thisElementText.substring(0, 11) == 'JPEG (.jpg)') {
-				var imageOptions = elementDetailsDialog.add('panel', undefined, 'Image Options'),
-					formatOptions = elementDetailsDialog.add('panel', undefined, 'Format Options'),
-					qualityGroup = imageOptions.add('group', undefined),
-					qualityLabel = qualityGroup.add('statictext', undefined, 'Quality:'),
-					qualityTextbox = qualityGroup.add('edittext', undefined, thisElement.jpgQuality),
-					qualitySlider = qualityGroup.add('slider', [0, 0, 170, 13], thisElement.jpgQuality, 0, 12),
-					baselineFormatRadio = formatOptions.add('radiobutton', undefined, 'Baseline ("Standard")'),
-					optimizedFormatRadio = formatOptions.add('radiobutton', undefined, 'Baseline Optimized'),
-					progressiveFormatRadio = formatOptions.add('radiobutton', undefined, 'Progressive'),
-					scansGroup = formatOptions.add('group', undefined),
-					scansLabel = scansGroup.add('statictext', undefined, 'Scans:'),
-					scansDropdown = scansGroup.add('dropdownlist', undefined, '', { items: ['3', '4', '5'] });
-
-				elementDetailsDialog.text = 'JPEG Options';
-				bitDepthDropdown = bitDepthGroup.add('dropdownlist', undefined, '', { items: ['16', '8'] });
-
-				qualityGroup.orientation = 'row';
-
-				qualityGroup.alignChildren = 'left';
-				formatOptions.alignChildren = 'left';
-
-				scansDropdown.selection = thisElement.jpgScans;
-				scansDropdown.enabled = false;
-
-				if (thisElement.jpgFormat == 0)
-					baselineFormatRadio.value = true;
-				else if (thisElement.jpgFormat == 1)
-					optimizedFormatRadio.value = true;
-				else if (thisElement.jpgFormat == 2) {
-					progressiveFormatRadio.value = true;
-					scansDropdown.enabled = true;
-				}
-
-				qualityTextbox.onChanging = function() {
-					qualitySlider.value = Math.floor(qualityTextbox.text);
-				}
-
-				qualitySlider.onChanging = function() {
-					qualityTextbox.text = Math.floor(qualitySlider.value);
-				}
-
-				baselineFormatRadio.onClick = function() {
-					scansDropdown.enabled = false;
-				}
-
-				optimizedFormatRadio.onClick = function() {
-					scansDropdown.enabled = false;
-				}
-
-				progressiveFormatRadio.onClick = function() {
-					scansDropdown.enabled = true;
-				}
+				buildDialogJPG(elementDetailsDialog, thisElement, bitDepthGroup);
 			}
 			else if (thisElementText.substring(0, 3) == 'PNG') {
-				var compressionPanel = elementDetailsDialog.add('panel', undefined, 'Compression'),
-					interlacePanel = elementDetailsDialog.add('panel', undefined, 'Interlace'),
-					compressionRadio1 = compressionPanel.add('radiobutton', undefined, 'None / Fast'),
-					compressionRadio2 = compressionPanel.add('radiobutton', undefined, 'Smallest / Slow'),
-					interlaceRadio1 = interlacePanel.add('radiobutton', undefined, 'None'),
-					interlaceRadio2 = interlacePanel.add('radiobutton', undefined, 'Interlaced');
-
-				elementDetailsDialog.text = 'PNG Options';
-				bitDepthDropdown = bitDepthGroup.add('dropdownlist', undefined, '', { items: ['16', '8'] });
-
-				compressionPanel.alignChildren = 'left';
-				interlacePanel.alignChildren = 'left';
-
-				if (thisElement.pngCompression == 0)
-					compressionRadio1.value = true;
-				else if (thisElement.pngCompression == 1)
-					compressionRadio2.value = true;
-
-				if (thisElement.pngInterlaced == 0)
-					interlaceRadio1.value = true;
-				else if (thisElement.pngInterlaced == 1)
-					interlaceRadio2.value = true;
+				buildDialogPNG(elementDetailsDialog, thisElement, bitDepthGroup);
 			}
 			else if (thisElementText.substring(0, 12) == 'Targa (.tga)') {
-				var resolutionPanel = elementDetailsDialog.add('panel', undefined, 'Resolution'),
-					resolutionRadio1 = resolutionPanel.add('radiobutton', undefined, '16 bits/pixel'),
-					resolutionRadio2 = resolutionPanel.add('radiobutton', undefined, '24 bits/pixel'),
-					resolutionRadio3 = resolutionPanel.add('radiobutton', undefined, '32 bits/pixel'),
-					compressCheckbox = elementDetailsDialog.add('checkbox', undefined, 'Compress (RLE)');
-
-				elementDetailsDialog.text = 'Targa Options';
-				bitDepthDropdown = bitDepthGroup.add('dropdownlist', undefined, '', { items: ['8'] });
-
-				resolutionPanel.alignChildren = 'left';
-
-				if (thisElement.tgaResolution == 0)
-					resolutionRadio1.value = true;
-				else if (thisElement.tgaResolution == 1)
-					resolutionRadio2.value = true;
-				else if (thisElement.tgaResolution == 2)
-					resolutionRadio3.value = true;
-
-				compressCheckbox.value = (thisElement.tgaCompress == 0 ? false : true);
+				buildDialogTGA(elementDetailsDialog, thisElement, bitDepthGroup);
 			}
 			else if (thisElementText.substring(0, 11) == 'TIFF (.tif)') {
-				var twoColumnGroup = elementDetailsDialog.add('group', undefined),
-					column1 = twoColumnGroup.add('group', undefined),
-					column2 = twoColumnGroup.add('group', undefined),
-					imageCompressionPanel = column1.add('panel', undefined, 'Image Compression'),
-					imageCompressionRadio1 = imageCompressionPanel.add('radiobutton', undefined, 'None'),
-					imageCompressionRadio2 = imageCompressionPanel.add('radiobutton', undefined, 'LZW'),
-					imageCompressionRadio3 = imageCompressionPanel.add('radiobutton', undefined, 'ZIP'),
-					imageCompressionRadio4 = imageCompressionPanel.add('radiobutton', undefined, 'JPEG'),
-					qualityGroup = imageCompressionPanel.add('group', undefined),
-					qualityLabel = qualityGroup.add('statictext', undefined, 'Quality:'),
-					qualityTextbox = qualityGroup.add('edittext', undefined, thisElement.jpgQuality),
-					qualitySlider = imageCompressionPanel.add('slider', [0, 0, 170, 13], thisElement.jpgQuality, 0, 12),
-					saveImagePyramidCheckbox = column1.add('checkbox', undefined, 'Save Image Pyramid'),
-					saveTransparencyCheckbox = column1.add('checkbox', undefined, 'Save Transparency'),
-					pixelOrderPanel = column2.add('panel', undefined, 'Pixel Order'),
-					pixelOrderRadio1 = pixelOrderPanel.add('radiobutton', undefined, 'Interleaved (RGBRGB)'),
-					pixelOrderRadio2 = pixelOrderPanel.add('radiobutton', undefined, 'Per Channel (RRGGBB)'),
-					byteOrderPanel = column2.add('panel', undefined, 'Byte Order'),
-					byteOrderRadio1 = byteOrderPanel.add('radiobutton', undefined, 'IBM PC'),
-					byteOrderRadio2 = byteOrderPanel.add('radiobutton', undefined, 'Macintosh'),
-					layerCompressionPanel = column2.add('panel', undefined, 'Layer Compression'),
-					layerCompressionRadio1 = layerCompressionPanel.add('radiobutton', undefined, 'RLE (faster saves, bigger files)'),
-					layerCompressionRadio2 = layerCompressionPanel.add('radiobutton', undefined, 'ZIP (slower saves, smaller files)'),
-					layerCompressionRadio3 = layerCompressionPanel.add('radiobutton', undefined, 'Discard Layers and Save a Copy');
-
-				elementDetailsDialog.text = 'TIFF Options';
-				bitDepthDropdown = bitDepthGroup.add('dropdownlist', undefined, '', { items: ['32', '16', '8'] });
-
-				twoColumnGroup.alignChildren = 'fill';
-				column1.orientation = 'column';
-				column1.alignChildren = 'fill';
-				column2.orientation = 'column';
-				column2.alignChildren = 'fill';
-				imageCompressionPanel.alignChildren = 'left';
-				pixelOrderPanel.alignChildren = 'left';
-				byteOrderPanel.alignChildren = 'left';
-				layerCompressionPanel.alignChildren = 'left';
-
-				qualityLabel.enabled = false;
-				qualityTextbox.enabled = false;
-				qualitySlider.enabled = false;
-
-				if (thisElement.tifImageCompression == 0)
-					imageCompressionRadio1.value = true;
-				else if (thisElement.tifImageCompression == 1)
-					imageCompressionRadio2.value = true;
-				else if (thisElement.tifImageCompression == 2)
-					imageCompressionRadio3.value = true;
-				else if (thisElement.tifImageCompression == 3) {
-					imageCompressionRadio4.value = true;
-					qualityLabel.enabled = true;
-					qualityTextbox.enabled = true;
-					qualitySlider.enabled = true;
-				}
-
-				saveImagePyramidCheckbox.value = (thisElement.tifSaveImagePyramid == 0 ? false : true);
-				saveTransparencyCheckbox.value = (thisElement.tifSaveTransparency == 0 ? false : true);
-
-				if (thisElement.tifPixelOrder == 0)
-					pixelOrderRadio1.value = true;
-				else if (thisElement.tifPixelOrder == 1)
-					pixelOrderRadio2.value = true;
-
-				if (thisElement.tifByteOrder == 0)
-					byteOrderRadio1.value = true;
-				else if (thisElement.tifByteOrder == 1)
-					byteOrderRadio2.value = true;
-
-				if (thisElement.tifLayerCompression == 0)
-					layerCompressionRadio1.value = true;
-				else if (thisElement.tifLayerCompression == 1)
-					layerCompressionRadio2.value = true;
-				else if (thisElement.tifLayerCompression == 2)
-					layerCompressionRadio3.value = true;
-
-				qualityTextbox.onChanging = function() {
-					qualitySlider.value = Math.floor(qualityTextbox.text);
-				}
-
-				qualitySlider.onChanging = function() {
-					qualityTextbox.text = Math.floor(qualitySlider.value);
-				}
-
-				imageCompressionRadio1.onClick = function() {
-					qualityLabel.enabled = false;
-					qualityTextbox.enabled = false;
-					qualitySlider.enabled = false;
-				}
-
-				imageCompressionRadio2.onClick = function() {
-					qualityLabel.enabled = false;
-					qualityTextbox.enabled = false;
-					qualitySlider.enabled = false;
-				}
-
-				imageCompressionRadio3.onClick = function() {
-					qualityLabel.enabled = false;
-					qualityTextbox.enabled = false;
-					qualitySlider.enabled = false;
-				}
-
-				imageCompressionRadio4.onClick = function() {
-					qualityLabel.enabled = true;
-					qualityTextbox.enabled = true;
-					qualitySlider.enabled = true;
-				}
+				buildDialogTIF(elementDetailsDialog, thisElement, bitDepthGroup);
 			}
 
 			// Set values for UI elements that all file types have in common
@@ -1020,139 +1317,12 @@ function buildPanelUI(userID, action, metadata) {
 			else if (thisElement.resolution == 0.25)
 				resolutionDropdown.selection = 2;
 
-			var elementDetailsDialogButtonGroup = elementDetailsDialog.add('group', undefined),
-				elementDetailsOkButton = elementDetailsDialogButtonGroup.add('button', undefined, 'OK'),
-				elementDetailsCancelButton = elementDetailsDialogButtonGroup.add('button', undefined, 'Cancel');
-
-
-			elementDetailsOkButton.onClick = function() {
-				var thisExtension = thisElement.extension;
-
-				if (resolutionDropdown.selection.index == 0)
-					thisElement.resolution = 1;
-				else if (resolutionDropdown.selection.index == 1)
-					thisElement.resolution = 0.5;
-				else if (resolutionDropdown.selection.index == 2)
-					thisElement.resolution = 0.25;
-
-				if (thisExtension == 'psd') {
-					thisElement.bitDepth = (bitDepthDropdown.selection.index == 0 ? 32 : (bitDepthDropdown.selection.index == 1 ? 16 : 8));
-				}
-				else if (thisExtension == 'eps') {
-					thisElement.epsPreview = previewDropdown.selection.index;
-					thisElement.epsEncoding = encodingDropdown.selection.index;
-					thisElement.epsHalftone = (halftoneCheckbox.value == true ? 1 : 0);
-					thisElement.epsTransferFunction = (transferFunctionCheckbox.value == true ? 1 : 0);
-					thisElement.epsPostScriptColor = (postScriptColorCheckbox.value == true ? 1 : 0);
-					thisElement.epsVectorData = (vectorDataCheckbox.value == true ? 1 : 0);
-					thisElement.epsInterpolation = (interpolationCheckbox.value == true ? 1 : 0);
-				}
-				else if (thisExtension == 'jpg') {
-					thisElement.bitDepth = (bitDepthDropdown.selection.index == 0 ? 16 : 8);
-					thisElement.jpgQuality = Math.floor(qualitySlider.value);
-					if (baselineFormatRadio.value == true)
-						thisElement.jpgFormat = 0;
-					else if (optimizedFormatRadio.value == true)
-						thisElement.jpgFormat = 1;
-					else if (progressiveFormatRadio.value == true)
-						thisElement.jpgFormat = 2;
-					
-					thisElement.jpgScans = scansDropdown.selection.index;
-				}
-				else if (thisExtension == 'png') {
-					thisElement.bitDepth = (bitDepthDropdown.selection.index == 0 ? 16 : 8);
-					thisElement.pngCompression = (compressionRadio1.value == true ? 0 : 1);
-					thisElement.pngInterlaced = (interlaceRadio1.value == true ? 0 : 1);
-				}
-				else if (thisExtension == 'tga') {
-					if (resolutionRadio1.value == true)
-						thisElement.tgaResolution = 0;
-					else if (resolutionRadio2.value == true)
-						thisElement.tgaResolution = 1;
-					else if (resolutionRadio3.value == true)
-						thisElement.tgaResolution = 2;
-					
-					thisElement.tgaCompress = (compressCheckbox.value == true ? 1 : 0);
-				}
-				else if (thisExtension == 'tif') {
-					thisElement.bitDepth = (bitDepthDropdown.selection.index == 0 ? 32 : (bitDepthDropdown.selection.index == 1 ? 16 : 8));
-					if (imageCompressionRadio1.value == true)
-						thisElement.tifImageCompression = 0;
-					else if (imageCompressionRadio2.value == true)
-						thisElement.tifImageCompression = 1;
-					else if (imageCompressionRadio3.value == true)
-						thisElement.tifImageCompression = 2;
-					else if (imageCompressionRadio4.value == true)
-						thisElement.tifImageCompression = 3;
-
-					thisElement.jpgQuality = Math.floor(qualitySlider.value);
-					thisElement.tifSaveImagePyramid = (saveImagePyramidCheckbox.value == true ? 1 : 0);
-					thisElement.tifSaveTransparency = (saveTransparencyCheckbox.value == true ? 1 : 0);
-
-					if (pixelOrderRadio1.value == true)
-						thisElement.tifPixelOrder = 0;
-					else if (pixelOrderRadio2.value == true)
-						thisElement.tifPixelOrder = 1;
-
-					if (byteOrderRadio1.value == true)
-						thisElement.tifByteOrder = 0;
-					else if (byteOrderRadio2.value == true)
-						thisElement.tifByteOrder = 1;
-
-					if (layerCompressionRadio1.value == true)
-						thisElement.tifLayerCompression = 0;
-					else if (layerCompressionRadio2.value == true)
-						thisElement.tifLayerCompression = 1;
-					else if (layerCompressionRadio3.value == true)
-						thisElement.tifLayerCompression = 2;
-				}
-
-				var elementListboxLength = elementListbox.items.length;
-
-				for (var x = 0; x < elementListboxLength; x++) {
-					var thisExtension = elementExports[x].extension,
-						thisExtensionName = thisExtension,
-						thisBitDepth = elementExports[x].bitDepth,
-						thisResolution = elementExports[x].resolution;
-
-					if (thisResolution == 1)
-						thisResolution = 'Full';
-					else if (thisResolution == 0.5)
-						thisResolution = '1/2';
-					else if (thisResolution == 0.25)
-						thisResolution = '1/4';
-
-					if (thisExtension == 'psd')
-						thisExtensionName = 'Photoshop (.psd)';
-					else if (thisExtension == 'eps')
-						thisExtensionName = 'EPS';
-					else if (thisExtension == 'jpg')
-						thisExtensionName = 'JPEG (.jpg)';
-					else if (thisExtension == 'png')
-						thisExtensionName = 'PNG';
-					else if (thisExtension == 'tga')
-						thisExtensionName = 'Targa (.tga)';
-					else if (thisExtension == 'tif')
-						thisExtensionName = 'TIFF (.tif)';
-
-					thisExtensionName += ' - ' + thisBitDepth + '-bit - ' + thisResolution + ' Res';
-					elementListbox.items[x].text = thisExtensionName;
-				}
-
-				elementListbox.onChange();
-				elementDetailsDialog.close();
-			}
-
-			elementDetailsCancelButton.onClick = function() {
-				elementDetailsDialog.close();
-			}
-
 			elementDetailsDialog.show();
 		}
 
 		elementDeleteButton.onClick = function() {
-
-			var indexToRemove = elementListbox.selection.index;
+			var indexToRemove = elementListbox.selection.index,
+				newElementListboxLength = elementListbox.items.length - 1;
 			
 			// Remove this item from the elementExports array
 			elementExports.splice(indexToRemove, 1);
@@ -1160,6 +1330,11 @@ function buildPanelUI(userID, action, metadata) {
 			elementListbox.remove(elementListbox.selection);
 			elementEditButton.enabled = false;
 			elementDeleteButton.enabled = false;
+
+			if (indexToRemove >= newElementListboxLength)
+				elementListbox.selection = indexToRemove - 1;
+			else
+				elementListbox.selection = indexToRemove;
 		}
 
 		elementListbox.onChange = function() {
@@ -1361,41 +1536,12 @@ function buildPanelUI(userID, action, metadata) {
 				else if (tagInput.text)
 					newFileBasename += '_' + tagInput.text.replace(/ /g, '_');
 			}
-/*
-			if (fileTypeDropdown.selection == 0) {
-				saveOptions = new PhotoshopSaveOptions();
-				extension = 'psd';
-			}
-			else if (fileTypeDropdown.selection == 1) {
-				saveOptions = new EPSSaveOptions();
-				extension = 'eps';
-			}
-			else if (fileTypeDropdown.selection == 2) {
-				saveOptions = new JPEGSaveOptions();
-				extension = 'jpg';
-			}
-			else if (fileTypeDropdown.selection == 3) {
-				saveOptions = new PNGSaveOptions();
-				extension = 'png';
-			}
-			else if (fileTypeDropdown.selection == 4) {
-				saveOptions = new TargaSaveOptions();
-				extension = 'tga';
-			}
-			else if (fileTypeDropdown.selection == 5) {
-				saveOptions = new TiffSaveOptions();
-				extension = 'tif';
-			}
-*/
-
-			saveOptions = new PhotoshopSaveOptions();
-			extension = 'psd';
 
 			var thisVersion = parseInt(maxVersion) + 1,
 				thisComment = commentInput.text;
 
 			if (action == 'saveAs') {
-				if (saveFile(classID, className, serverID, serverPath, taskID, taskFolder, newFileBasename, thisComment, false, elementExports, saveOptions, extension, thisVersion))
+				if (saveFile(classID, className, serverID, serverPath, taskID, taskFolder, newFileBasename, thisComment, false, elementExports, fileSettings, thisVersion))
 					alert('Save successful.');
 				else
 					alert('Error: Save failed!');
@@ -1403,13 +1549,13 @@ function buildPanelUI(userID, action, metadata) {
 				setPanelPrefs();
 			}
 			else if (action == 'versionUp') {
-				if (saveFile(metadata.classID, metadata.className, metadata.serverID, metadata.serverPath, metadata.taskID, metadata.taskFolder, metadata.basename, thisComment, false, elementExports, saveOptions, extension, thisVersion))
+				if (saveFile(metadata.classID, metadata.className, metadata.serverID, metadata.serverPath, metadata.taskID, metadata.taskFolder, metadata.basename, thisComment, false, elementExports, fileSettings, thisVersion))
 					alert('New version saved.');
 				else
 					alert('Error: Version up failed!');
 			}
 			else if (action == 'publish') {
-				if (!saveFile(metadata.classID, metadata.className, metadata.serverID, metadata.serverPath, metadata.taskID, metadata.taskFolder, metadata.basename, thisComment, true, elementExports, saveOptions, extension, thisVersion))
+				if (!saveFile(metadata.classID, metadata.className, metadata.serverID, metadata.serverPath, metadata.taskID, metadata.taskFolder, metadata.basename, thisComment, true, elementExports, fileSettings, thisVersion))
 					alert('Error: Publish failed!');
 			}
 		}
