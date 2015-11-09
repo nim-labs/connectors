@@ -717,7 +717,7 @@ function buildPanelUI(userID, action, metadata) {
 		documentResolution = activeDocument.resolution;
 
 		// If no fileSettings row is found with this fileID, make new fileSettings object
-		if (fileSettings.length == 0) {
+		if (!fileSettings.length) {
 			fileSettings = {
 				extension: 'psd',
 				epsPreview: 0,
