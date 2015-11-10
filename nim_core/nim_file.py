@@ -62,6 +62,10 @@ def get_app() :
         import hiero.ui
         return 'Hiero'
     except : pass
+    try :
+        import MaxPlus
+        return '3dsMax'
+    except : pass
     return None
 
 def get_apps() :
