@@ -626,7 +626,8 @@ function saveFile(classID, className, serverID, serverPath, taskID, taskFolder, 
 	}
 
 	// Save all element exports
-	if (elementExportsLength) {
+	// Check file export settings to make sure elements should be exported
+	if (elementExportsLength && (fileSettings.export == 1 || (publish && fileSettings.export == 2))) {
 		var originalBitDepth = activeDocument.bitsPerChannel,
 			originalWidth = activeDocument.width.value,
 			elementVersion = 0,

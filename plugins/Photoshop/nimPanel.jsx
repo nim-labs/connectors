@@ -160,7 +160,7 @@ function buildPanelUI(userID, action, metadata) {
 		versionInfo = outputFiles.add('tab', undefined, 'Version Info'),
 		versionGroup = versionInfo.add('group', undefined),
 		versionListboxLabel = versionGroup.add('statictext', undefined, 'Versions: '),
-		versionListbox = versionGroup.add('listbox', [0, 0, 550, 250], 'Versions'),
+		versionListbox = versionGroup.add('listbox', [0, 0, 550, 220], 'Versions'),
 		pathGroup = versionInfo.add('group', undefined),
 		pathLabel = pathGroup.add('statictext', undefined, 'Path: '),
 		pathText = pathGroup.add('statictext', [0, 0, 550, 20], ''),
@@ -180,6 +180,8 @@ function buildPanelUI(userID, action, metadata) {
 		fileTypeLabel,
 		fileTypeDropdown,
 		fileTypeEditButton,
+		exportElementsDropdownGroup,
+		exportElementsDropdown,
 		elementsToAdd,
 		elementSelectionGroup,
 		elementButtonGroup,
@@ -698,6 +700,9 @@ function buildPanelUI(userID, action, metadata) {
 		fileTypeDropdown = fileTypeGroup.add('dropdownlist', undefined, '', { items: allFileTypes });
 		fileTypeDropdown.selection = 0;
 		fileTypeEditButton = fileTypeGroup.add('button', undefined, 'Edit Settings');
+		exportElementsDropdownGroup = versionInfo.add('group', undefined);
+		exportElementsDropdownLabel = exportElementsDropdownGroup.add('statictext', undefined, 'Export Elements: ');
+		exportElementsDropdown = exportElementsDropdownGroup.add('dropdownlist', [0, 0, 250, 20], '', { items: ['Never', 'On Save, Version Up, and Publish', 'Only on Publish'] });
 		pathText = null;
 		userText = null;
 		dateText = null;
@@ -719,6 +724,7 @@ function buildPanelUI(userID, action, metadata) {
 		// If no fileSettings row is found with this fileID, make new fileSettings object
 		if (!fileSettings.length) {
 			fileSettings = {
+				'export': 1,
 				extension: 'psd',
 				epsPreview: 0,
 				epsEncoding: 0,
@@ -761,6 +767,9 @@ function buildPanelUI(userID, action, metadata) {
 			else if (fileSettings.extension == 'tif')
 				fileTypeDropdown.selection = 5;
 		}
+
+		if (exportElementsDropdown)
+			exportElementsDropdown.selection = parseInt(fileSettings.export);
 
 		if (activeDocument.bitsPerChannel == BitsPerChannelType.THIRTYTWO)
 			documentBitDepth = 32;
@@ -1200,6 +1209,12 @@ function buildPanelUI(userID, action, metadata) {
 		}
 	}
 
+	if (exportElementsDropdown) {
+		exportElementsDropdown.onChange = function() {
+			fileSettings.export = this.selection.index;
+		}
+	}
+
 	if (elementsToAdd) {
 		elementAddButton.onClick = function() {
 			var thisExtension = 'psd',
@@ -1237,6 +1252,7 @@ function buildPanelUI(userID, action, metadata) {
 
 			// Add this item to the elementExports array
 			elementExports.push({
+				'export': 1,
 				extension: thisExtension,
 				bitDepth: Math.min(documentBitDepth, thisExtensionMaxBitDepth),
 				resolution: 1,
