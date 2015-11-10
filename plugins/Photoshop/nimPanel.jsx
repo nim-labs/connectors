@@ -1281,6 +1281,7 @@ function buildPanelUI(userID, action, metadata) {
 			if (thisElementText.substring(0, 16) == 'Photoshop (.psd)') {
 				elementDetailsDialog.text = 'Photoshop Options';
 				bitDepthDropdown = bitDepthGroup.add('dropdownlist', undefined, '', { items: ['32', '16', '8'] });
+				finishBuildingDialog(elementDetailsDialog, thisElement);
 			}
 			else if (thisElementText.substring(0, 3) == 'EPS') {
 				buildDialogEPS(elementDetailsDialog, thisElement, bitDepthGroup);
