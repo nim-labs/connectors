@@ -561,7 +561,7 @@ function buildPanelUI(userID, action, metadata) {
 			dialogOkButton.onClick = function() {
 				var thisExtension = settings.extension;
 
-				if (elementTypeDropdown)
+				if (elementTypeDropdown && elementTypes.length)
 					settings.elementTypeID = elementTypes[elementTypeDropdown.selection.index].ID;
 
 				if (resolutionDropdown) {
