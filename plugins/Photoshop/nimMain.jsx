@@ -626,7 +626,8 @@ function saveFile(classID, className, serverID, serverPath, taskID, taskFolder, 
 	}
 
 	// Save all element exports
-	if (elementExportsLength) {
+	// Check file export settings to make sure elements should be exported
+	if (elementExportsLength && (fileSettings.export == 1 || (publish && fileSettings.export == 2))) {
 		var originalBitDepth = activeDocument.bitsPerChannel,
 			originalWidth = activeDocument.width.value,
 			elementVersion = 0,
@@ -710,7 +711,7 @@ function saveFile(classID, className, serverID, serverPath, taskID, taskFolder, 
 						fullElementFilePath = path + newElementName;
 						newElementFile = new File(fullElementFilePath);
 					
-					nimAPI({ q: 'addElement', parent: className.toLowerCase(), parentID: classID, userID: userID, typeID: taskID, path: path, name: newElementName, isPublished: (publish == 1 ? 'True' : 'False') });
+					nimAPI({ q: 'addElement', parent: className.toLowerCase(), parentID: classID, userID: userID, typeID: element.elementTypeID, path: path, name: newElementName, isPublished: (publish == 1 ? 'True' : 'False') });
 
 					try {
 						activeDocument.saveAs(newElementFile, elementSaveOptions, true, Extension.LOWERCASE);
