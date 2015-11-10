@@ -711,7 +711,7 @@ function saveFile(classID, className, serverID, serverPath, taskID, taskFolder, 
 						fullElementFilePath = path + newElementName;
 						newElementFile = new File(fullElementFilePath);
 					
-					nimAPI({ q: 'addElement', parent: className.toLowerCase(), parentID: classID, userID: userID, typeID: taskID, path: path, name: newElementName, isPublished: (publish == 1 ? 'True' : 'False') });
+					nimAPI({ q: 'addElement', parent: className.toLowerCase(), parentID: classID, userID: userID, typeID: element.elementTypeID, path: path, name: newElementName, isPublished: (publish == 1 ? 'True' : 'False') });
 
 					try {
 						activeDocument.saveAs(newElementFile, elementSaveOptions, true, Extension.LOWERCASE);

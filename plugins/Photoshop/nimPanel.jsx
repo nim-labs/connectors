@@ -203,8 +203,11 @@ function buildPanelUI(userID, action, metadata) {
 		elementDetailsText7,
 		elementDetailsText8,
 		elementExports,
+		elementTypes,
+		elementTypeNames,
 		documentBitDepth,
 		documentResolution,
+		elementTypeDropdown,
 		bitDepthDropdown,
 		resolutionDropdown,
 		allDropdowns = [jobDropdown, serverDropdown, assetDropdown, showDropdown, shotDropdown, taskDropdown, filterDropdown],
@@ -558,6 +561,9 @@ function buildPanelUI(userID, action, metadata) {
 			dialogOkButton.onClick = function() {
 				var thisExtension = settings.extension;
 
+				if (elementTypeDropdown)
+					settings.elementTypeID = elementTypes[elementTypeDropdown.selection.index].ID;
+
 				if (resolutionDropdown) {
 					if (resolutionDropdown.selection.index == 0)
 						settings.resolution = 1;
@@ -719,11 +725,14 @@ function buildPanelUI(userID, action, metadata) {
 		fileID = getMetadata('fileID');
 		fileSettings = nimAPI({ q: 'getFileSettings', fileID: fileID || 0 });
 		elementExports = nimAPI({ q: 'getElementExports', fileID: fileID || 0 }) || [];
+		elementTypes = nimAPI({ q: 'getElementTypes' });
+		elementTypeNames = [];
 		documentResolution = activeDocument.resolution;
 
 		// If no fileSettings row is found with this fileID, make new fileSettings object
 		if (!fileSettings.length) {
 			fileSettings = {
+				elementTypeID: 0,
 				'export': 1,
 				extension: 'psd',
 				epsPreview: 0,
@@ -847,6 +856,12 @@ function buildPanelUI(userID, action, metadata) {
 			thisExtensionName += ' - ' + thisBitDepth + '-bit - ' + thisResolution + ' Res';
 			elementListbox.add('item', thisExtensionName);
 		}
+
+		// Populate elementTypeNames array
+		var elementTypesLength = elementTypes.length;
+
+		for (var x = 0; x < elementTypesLength; x++)
+			elementTypeNames.push(elementTypes[x].name);
 
 		if (action == 'versionUp' || action == 'publish') {
 			nimPanel.remove(jobTaskInfo);
@@ -1252,6 +1267,7 @@ function buildPanelUI(userID, action, metadata) {
 
 			// Add this item to the elementExports array
 			elementExports.push({
+				elementTypeID: 0,
 				'export': 1,
 				extension: thisExtension,
 				bitDepth: Math.min(documentBitDepth, thisExtensionMaxBitDepth),
@@ -1285,13 +1301,29 @@ function buildPanelUI(userID, action, metadata) {
 
 			var thisElement = elementExports[elementListbox.selection.index],
 				thisElementText = elementListbox.selection.text,
-				nimOptionsPanel = elementDetailsDialog.add('panel', undefined, 'Size'),
-				bitDepthGroup = nimOptionsPanel.add('group', undefined),
+				elementTypeGroup = elementDetailsDialog.add('group', undefined),
+				elementTypeLabel = elementTypeGroup.add('statictext', undefined, 'Element Type:'),
+				sizePanel = elementDetailsDialog.add('panel', undefined, 'Size'),
+				bitDepthGroup = sizePanel.add('group', undefined),
 				bitDepthLabel = bitDepthGroup.add('statictext', undefined, 'Bit Depth:'),
-				resolutionGroup = nimOptionsPanel.add('group', undefined),
-				resolutionLabel = resolutionGroup.add('statictext', undefined, 'Resolution:');
+				resolutionGroup = sizePanel.add('group', undefined),
+				resolutionLabel = resolutionGroup.add('statictext', undefined, 'Resolution:'),
+				elementTypesLength = elementTypes.length;
 
-			nimOptionsPanel.alignChildren = 'right';
+			elementTypeDropdown = elementTypeGroup.add('dropdownlist', undefined, '', { items: elementTypeNames });
+
+			if (elementTypesLength) {
+				elementTypeDropdown.selection = 0;
+				var thisElementTypeID = thisElement.elementTypeID;
+				for (var x = 0; x < elementTypesLength; x++) {
+					if (thisElementTypeID == elementTypes[x].ID) {
+						elementTypeDropdown.selection = x;
+						break;
+					}
+				}
+			}
+
+			sizePanel.alignChildren = 'right';
 			resolutionDropdown = resolutionGroup.add('dropdownlist', undefined, '', { items: ['Full', '1/2', '1/4'] });
 
 			if (thisElementText.substring(0, 16) == 'Photoshop (.psd)') {
