@@ -93,6 +93,17 @@ def mk( mode='open', _import=False, _export=False, ref=False, pub=False ) :
                 P.error( '    %s' % traceback.print_exc() )
                 return False
     
+        # 3dsMax :
+        elif app=='3dsMax' :
+            try :
+                import MaxPlus
+                #win_parent=MaxPlus.Win32_GetMAXHWnd()
+                #WIN=GUI( parent=win_parent, mode=mode )
+                WIN=GUI( mode=mode )
+            except Exception, e :
+                P.error( 'Sorry, unable to retrieve variables from the NIM preference file.' )
+                P.error( '    %s' % traceback.print_exc() )
+                return False
     #  Set the window to one of five modes :
     if WIN.complete :
         P.info( '\nStarting up the NIM File Browser, in %s mode.' % mode )
