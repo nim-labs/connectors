@@ -202,8 +202,10 @@ function buildPanelUI(userID, action, metadata) {
 		elementDetailsText6,
 		elementDetailsText7,
 		elementDetailsText8,
+		elementDetailsText9,
 		elementExports,
 		elementTypes,
+		elementTypesLength,
 		elementTypeNames,
 		documentBitDepth,
 		documentResolution,
@@ -708,11 +710,11 @@ function buildPanelUI(userID, action, metadata) {
 		fileTypeEditButton = fileTypeGroup.add('button', undefined, 'Edit Settings');
 		exportElementsDropdownGroup = versionInfo.add('group', undefined);
 		exportElementsDropdownLabel = exportElementsDropdownGroup.add('statictext', undefined, 'Export Elements: ');
-		exportElementsDropdown = exportElementsDropdownGroup.add('dropdownlist', [0, 0, 250, 20], '', { items: ['Never', 'On Save, Version Up, and Publish', 'Only on Publish'] });
+		exportElementsDropdown = exportElementsDropdownGroup.add('dropdownlist', [0, 0, 250, 20], '', { items: ['Never', 'Always', 'Only on Publish'] });
 		pathText = null;
 		userText = null;
 		dateText = null;
-		elementsToAdd = outputFiles.add('tab', [0, 0, 687, 295], 'Export Elements');
+		elementsToAdd = outputFiles.add('tab', [0, 0, 687, 265], 'Export Elements');
 		elementsToAdd.orientation = 'row';
 		elementsToAdd.alignChildren = 'fill';
 		elementSelectionGroup = elementsToAdd.add('group', undefined);
@@ -726,6 +728,7 @@ function buildPanelUI(userID, action, metadata) {
 		fileSettings = nimAPI({ q: 'getFileSettings', fileID: fileID || 0 });
 		elementExports = nimAPI({ q: 'getElementExports', fileID: fileID || 0 }) || [];
 		elementTypes = nimAPI({ q: 'getElementTypes' });
+		elementTypesLength = elementTypes.length;
 		elementTypeNames = [];
 		documentResolution = activeDocument.resolution;
 
@@ -797,7 +800,7 @@ function buildPanelUI(userID, action, metadata) {
 		elementListboxGroup = elementSelectionGroup.add('group', undefined);
 		elementListboxGroup.alignChildren = 'top';
 		elementListboxLabel = elementListboxGroup.add('statictext', undefined, 'Elements: ');
-		elementListbox = elementListboxGroup.add('listbox', [0, 0, 250, 236], 'Elements');
+		elementListbox = elementListboxGroup.add('listbox', [0, 0, 250, 210], 'Elements');
 
 		elementDetailsGroup = elementsToAdd.add('group', undefined);
 		elementDetailsGroup.orientation = 'column';
@@ -811,8 +814,9 @@ function buildPanelUI(userID, action, metadata) {
 		elementEditButton.enabled = false;
 		elementDeleteButton.enabled = false;
 
-		elementDetailsPanel = elementDetailsGroup.add('panel', [0, 0, 345, 236], 'Element Details');
-		elementDetailsPanel.margins = [15, 10, 0, 10];
+		elementDetailsPanel = elementDetailsGroup.add('panel', [0, 0, 345, 210], 'Element Details');
+		elementDetailsPanel.margins = [15, 15, 0, 10];
+		elementDetailsPanel.spacing = 2;
 		elementDetailsPanel.alignChildren = 'fill';
 
 		elementDetailsText1 = elementDetailsPanel.add('statictext', undefined, '');
@@ -823,6 +827,7 @@ function buildPanelUI(userID, action, metadata) {
 		elementDetailsText6 = elementDetailsPanel.add('statictext', undefined, '');
 		elementDetailsText7 = elementDetailsPanel.add('statictext', undefined, '');
 		elementDetailsText8 = elementDetailsPanel.add('statictext', undefined, '');
+		elementDetailsText9 = elementDetailsPanel.add('statictext', undefined, '');
 
 		// Populate element exports list
 		var elementExportsLength = elementExports.length;
@@ -858,8 +863,6 @@ function buildPanelUI(userID, action, metadata) {
 		}
 
 		// Populate elementTypeNames array
-		var elementTypesLength = elementTypes.length;
-
 		for (var x = 0; x < elementTypesLength; x++)
 			elementTypeNames.push(elementTypes[x].name);
 
@@ -1234,7 +1237,8 @@ function buildPanelUI(userID, action, metadata) {
 		elementAddButton.onClick = function() {
 			var thisExtension = 'psd',
 				thisExtensionText = 'Photoshop (.psd)',
-				thisExtensionMaxBitDepth = psdMaxBitDepth;
+				thisExtensionMaxBitDepth = psdMaxBitDepth,
+				firstElementTypeID = 0;
 
 			if (elementFileTypeDropdown.selection.index == 1) {
 				thisExtension = 'eps';
@@ -1265,9 +1269,12 @@ function buildPanelUI(userID, action, metadata) {
 			thisExtensionText += ' - ' + Math.min(documentBitDepth, thisExtensionMaxBitDepth) + '-bit - Full Res';
 			elementListbox.add('item', thisExtensionText);
 
+			if (elementTypesLength)
+				firstElementTypeID = elementTypes[0].ID;
+
 			// Add this item to the elementExports array
 			elementExports.push({
-				elementTypeID: 0,
+				elementTypeID: firstElementTypeID,
 				'export': 1,
 				extension: thisExtension,
 				bitDepth: Math.min(documentBitDepth, thisExtensionMaxBitDepth),
@@ -1307,8 +1314,7 @@ function buildPanelUI(userID, action, metadata) {
 				bitDepthGroup = sizePanel.add('group', undefined),
 				bitDepthLabel = bitDepthGroup.add('statictext', undefined, 'Bit Depth:'),
 				resolutionGroup = sizePanel.add('group', undefined),
-				resolutionLabel = resolutionGroup.add('statictext', undefined, 'Resolution:'),
-				elementTypesLength = elementTypes.length;
+				resolutionLabel = resolutionGroup.add('statictext', undefined, 'Resolution:');
 
 			elementTypeDropdown = elementTypeGroup.add('dropdownlist', undefined, '', { items: elementTypeNames });
 
@@ -1399,24 +1405,35 @@ function buildPanelUI(userID, action, metadata) {
 				elementDetailsText6.text = '';
 				elementDetailsText7.text = '';
 				elementDetailsText8.text = '';
+				elementDetailsText9.text = '';
 				return;
 			}
 
 			var thisElement = elementExports[this.selection.index],
-				thisExtension = thisElement.extension;
+				thisExtension = thisElement.extension,
+				thisElementTypeID = thisElement.elementTypeID,
+				thisElementTypeName = '';
+
+			for (var x = 0; x < elementTypesLength; x++) {
+				if (thisElementTypeID == elementTypes[x].ID) {
+					thisElementTypeName = elementTypes[x].name;
+					break;
+				}
+			}
 
 			elementEditButton.enabled = true;
 			elementDeleteButton.enabled = true;
 
 			if (thisExtension == 'psd') {
 				elementDetailsText1.text = 'File Type: PSD';
-				elementDetailsText2.text = '';
+				elementDetailsText2.text = 'Element Type: ' + thisElementTypeName;
 				elementDetailsText3.text = '';
 				elementDetailsText4.text = '';
 				elementDetailsText5.text = '';
 				elementDetailsText6.text = '';
 				elementDetailsText7.text = '';
 				elementDetailsText8.text = '';
+				elementDetailsText9.text = '';
 				//elementEditButton.enabled = false;
 			}
 			else if (thisExtension == 'eps') {
@@ -1440,13 +1457,14 @@ function buildPanelUI(userID, action, metadata) {
 					thisEncoding = 'JPEG (maximum quality)';
 
 				elementDetailsText1.text = 'File Type: EPS';
-				elementDetailsText2.text = 'Preview: ' + thisPreview;
-				elementDetailsText3.text = 'Encoding: ' + thisEncoding;
-				elementDetailsText4.text = 'Include Halftone Screen: ' + (thisElement.epsHalftone == 0 ? 'No' : 'Yes');
-				elementDetailsText5.text = 'Include Transfer Function: ' + (thisElement.epsTransferFunction == 0 ? 'No' : 'Yes');
-				elementDetailsText6.text = 'PostScript Color Management: ' + (thisElement.epsPostScriptColor == 0 ? 'No' : 'Yes');
-				elementDetailsText7.text = 'Include Vector Data: ' + (thisElement.epsVectorData == 0 ? 'No' : 'Yes');
-				elementDetailsText8.text = 'Image Interpolation: ' + (thisElement.epsInterpolation == 0 ? 'No' : 'Yes');
+				elementDetailsText2.text = 'Element Type: ' + thisElementTypeName;
+				elementDetailsText3.text = 'Preview: ' + thisPreview;
+				elementDetailsText4.text = 'Encoding: ' + thisEncoding;
+				elementDetailsText5.text = 'Include Halftone Screen: ' + (thisElement.epsHalftone == 0 ? 'No' : 'Yes');
+				elementDetailsText6.text = 'Include Transfer Function: ' + (thisElement.epsTransferFunction == 0 ? 'No' : 'Yes');
+				elementDetailsText7.text = 'PostScript Color Management: ' + (thisElement.epsPostScriptColor == 0 ? 'No' : 'Yes');
+				elementDetailsText8.text = 'Include Vector Data: ' + (thisElement.epsVectorData == 0 ? 'No' : 'Yes');
+				elementDetailsText9.text = 'Image Interpolation: ' + (thisElement.epsInterpolation == 0 ? 'No' : 'Yes');
 			}
 			else if (thisExtension == 'jpg') {
 				var thisFormat = 'Baseline ("Standard")',
@@ -1461,13 +1479,14 @@ function buildPanelUI(userID, action, metadata) {
 					thisScans = 'Scans: ' + (parseInt(thisElement.jpgScans) + 3);
 
 				elementDetailsText1.text = 'File Type: JPEG (.jpg)';
-				elementDetailsText2.text = 'Quality: ' + thisElement.jpgQuality;
-				elementDetailsText3.text = 'Format: ' + thisFormat;
-				elementDetailsText4.text = thisScans;
-				elementDetailsText5.text = '';
+				elementDetailsText2.text = 'Element Type: ' + thisElementTypeName;
+				elementDetailsText3.text = 'Quality: ' + thisElement.jpgQuality;
+				elementDetailsText4.text = 'Format: ' + thisFormat;
+				elementDetailsText5.text = thisScans;
 				elementDetailsText6.text = '';
 				elementDetailsText7.text = '';
 				elementDetailsText8.text = '';
+				elementDetailsText9.text = '';
 			}
 			else if (thisExtension == 'png') {
 				var thisCompression = 'None / Fast',
@@ -1480,13 +1499,14 @@ function buildPanelUI(userID, action, metadata) {
 					thisInterlace = 'Interlaced';
 
 				elementDetailsText1.text = 'File Type: PNG';
-				elementDetailsText2.text = 'Compression: ' + thisCompression;
-				elementDetailsText3.text = 'Interlace: ' + thisInterlace;
-				elementDetailsText4.text = '';
+				elementDetailsText2.text = 'Element Type: ' + thisElementTypeName;
+				elementDetailsText3.text = 'Compression: ' + thisCompression;
+				elementDetailsText4.text = 'Interlace: ' + thisInterlace;
 				elementDetailsText5.text = '';
 				elementDetailsText6.text = '';
 				elementDetailsText7.text = '';
 				elementDetailsText8.text = '';
+				elementDetailsText9.text = '';
 			}
 			else if (thisExtension == 'tga') {
 				var thisResolution = '16 bits/pixel';
@@ -1497,13 +1517,14 @@ function buildPanelUI(userID, action, metadata) {
 					thisResolution = '32 bits/pixel';
 
 				elementDetailsText1.text = 'File Type: Targa (.tga)';
-				elementDetailsText2.text = 'Resolution: ' + thisResolution;
-				elementDetailsText3.text = 'Compress (RLE): ' + (thisElement.tgaCompress == 0 ? 'No' : 'Yes');
-				elementDetailsText4.text = '';
+				elementDetailsText2.text = 'Element Type: ' + thisElementTypeName;
+				elementDetailsText3.text = 'Resolution: ' + thisResolution;
+				elementDetailsText4.text = 'Compress (RLE): ' + (thisElement.tgaCompress == 0 ? 'No' : 'Yes');
 				elementDetailsText5.text = '';
 				elementDetailsText6.text = '';
 				elementDetailsText7.text = '';
 				elementDetailsText8.text = '';
+				elementDetailsText9.text = '';
 			}
 			else if (thisExtension == 'tif') {
 				var thisImageCompression = 'None',
@@ -1530,13 +1551,14 @@ function buildPanelUI(userID, action, metadata) {
 					thisLayerCompression = 'Discard Layers and Save a Copy';
 
 				elementDetailsText1.text = 'File Type: TIFF (.tif)';
-				elementDetailsText2.text = 'Image Compression: ' + thisImageCompression;
-				elementDetailsText3.text = (thisElement.tifImageCompression == 3 ? 'Quality: ' + thisElement.jpgQuality : '');
-				elementDetailsText4.text = 'Save Image Pyramid: ' + (thisElement.tifSaveImagePyramid == 0 ? 'No' : 'Yes');
-				elementDetailsText5.text = 'Save Transparency: ' + (thisElement.tifSaveTransparency == 0 ? 'No' : 'Yes');
-				elementDetailsText6.text = 'Pixel Order: ' + thisPixelOrder;
-				elementDetailsText7.text = 'Byte Order: ' + thisByteOrder;
-				elementDetailsText8.text = 'Layer Compression: ' + thisLayerCompression;
+				elementDetailsText2.text = 'Element Type: ' + thisElementTypeName;
+				elementDetailsText3.text = 'Image Compression: ' + thisImageCompression;
+				elementDetailsText4.text = (thisElement.tifImageCompression == 3 ? 'Quality: ' + thisElement.jpgQuality : '');
+				elementDetailsText5.text = 'Save Image Pyramid: ' + (thisElement.tifSaveImagePyramid == 0 ? 'No' : 'Yes');
+				elementDetailsText6.text = 'Save Transparency: ' + (thisElement.tifSaveTransparency == 0 ? 'No' : 'Yes');
+				elementDetailsText7.text = 'Pixel Order: ' + thisPixelOrder;
+				elementDetailsText8.text = 'Byte Order: ' + thisByteOrder;
+				elementDetailsText9.text = 'Layer Compression: ' + thisLayerCompression;
 			}
 		}
 	}
