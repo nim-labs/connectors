@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: nim_file.py
-# Version:  v0.7.3.150625
+# Version:  v1.0.3.151112
 #
 # Copyright (c) 2015 NIM Labs LLC
 # All rights reserved.
@@ -23,7 +23,7 @@ import nim as Nim
 
 
 #  Variables :
-version='v0.6.5'
+version='v1.0.3'
 winTitle='NIM_'+version
 _os=platform.system().lower()
 #  Compiled REGEX Searches :
@@ -70,7 +70,7 @@ def get_app() :
 
 def get_apps() :
     'Provides a list of supported applications'
-    return ['Maya', 'Nuke', 'C4D', 'Hiero']
+    return ['Maya', 'Nuke', 'C4D', 'Hiero', '3dsMax']
 
 def get_ext( filePath='' ) :
     'Retrieves the extension of a given file'
@@ -97,6 +97,8 @@ def get_ext( filePath='' ) :
             ext='.c4d'
         elif app=='Hiero' :
             ext='.hrox'
+        elif app=='3dsMax' :
+            ext='.max'
         if ext :
             return ext
         else :
@@ -151,7 +153,15 @@ def get_filePath() :
             if fileDir and fileName :
                 filePath=os.path.join( fileDir, fileName )
         except : pass
-    
+    #   3dsMax :
+    if not filePath :
+        try :
+            import MaxPlus
+            P.debug("get_filePath: 3dsMax Found")
+            fm = MaxPlus.FileManager
+            filePath=fm.GetFileNameAndPath()
+        except : pass
+
     #  Return :
     if filePath :
         return os.path.normpath( filePath )
@@ -399,18 +409,6 @@ def verUp( nim=None, padding=2, selected=False, win_launch=False, pub=False, sym
         P.info( 'Creating basename directory within...\n    %s' % projDir )
         og_umask=os.umask(0)
         os.makedirs( projDir )
-        '''
-        num=1
-        path=''
-        tok_path=projDir.replace('/', os.sep).replace('\\', os.sep).split(os.sep)
-        while num < len(tok_path) :
-            path=path+tok_path[num]+os.sep
-            if not os.path.exists( path ) :
-                os.mkdir( projDir )
-            else :
-                print projDir
-            num+=1
-        '''
         os.umask(og_umask)
         if os.path.isdir( projDir ) :
             P.info( '  Successfully created the basename directory!' )
@@ -428,19 +426,29 @@ def verUp( nim=None, padding=2, selected=False, win_launch=False, pub=False, sym
         if os.path.isdir( renDir ) :
             P.info( '    Successfully created the render directory!' )
         else :
-            P.warning( '    Unable to create Maya project directories.' )
+            P.warning( '    Unable to create project directories.' )
     elif renDir :
         P.debug( 'Render directory already exists.\n' )
     
     #  Make Maya Project directory :
     if os.path.isdir( projDir ) and nim.app()=='Maya' :
         import nim_maya as M
-        if M.mk_proj( path=projDir, renPath=renDir ) :
+        if M.makeProject( projectLocation=projDir, renderPath=renDir ) :
             P.info( 'Created Maya project directorires within...\n    %s' % projDir )
         else :
             P.warning( '    Unable to create Maya project directories.' )
     elif nim.app()=='Maya' :
         P.warning( 'Didn\'t create Maya project directories.' )
+
+    #  Make 3dsMax Project directory :
+    if os.path.isdir( projDir ) and nim.app()=='3dsMax' :
+        import nim_3dsmax as Max
+        if Max.mk_proj( path=projDir, renPath=renDir ) :
+            P.info( 'Created 3dsMax project directorires within...\n    %s' % projDir )
+        else :
+            P.warning( '    Unable to create 3dsMax project directories.' )
+    elif nim.app()=='3dsMax' :
+        P.warning( 'Didn\'t create 3dsMax project directories.' )
     
     
     #  Save :
@@ -524,6 +532,23 @@ def verUp( nim=None, padding=2, selected=False, win_launch=False, pub=False, sym
         #proj=hiero.core.Project
         #proj=self._get_current_project()
     
+    #  3dsMax :
+    if nim.app()=='3dsMax' :
+        import MaxPlus
+        maxFM = MaxPlus.FileManager
+        #  Save File :
+        if not selected :
+            #  Set Vars :
+            import nim_3dsmax as Max
+            Max.set_vars( nim=nim )
+            #Save File
+            P.info( 'Saving file as %s \n' % new_filePath )
+            maxFM.Save(new_filePath)
+        else :
+            #Save Selected Items
+            P.info( 'Saving selected items as %s \n' % new_filePath )
+            maxFM.SaveSelected(new_filePath)
+
     #  Make a copy of the file, if publishing :
     if pub and not symLink :
         pub_fileName=basename+ext
@@ -578,6 +603,9 @@ def scripts_reload() :
         elif app=='C4D' :
             import nim_c4d as C
             reload(C)
+        elif app=='3dsMax' :
+            import nim_3dsmax as Max
+            reload(Max)
         P.info( '    NIM scripts. have been reloaded.' )
     except Exception, e :
         print 'Sorry, problem reloading scripts...'

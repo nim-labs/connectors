@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: nim_tools.py
-# Version:  v0.7.3.150625
+# Version:  v1.0.3.151113
 #
 # Copyright (c) 2015 NIM Labs LLC
 # All rights reserved.
@@ -47,9 +47,7 @@ def ui2py( uiFile='', pyFile='') :
 
 def get_comment( app='', num_requests=3 ) :
     'Gets a comment from the user'
-    msgs=['Please enter a comment:                                    ', 
-                'Really, please enter a comment:                        ',
-                'Seriously, please enter a comment:                    ']
+    msgs=['Please enter a comment:                                    ']
     comment=''
     
     for i in range(0,num_requests) :
@@ -68,13 +66,15 @@ def get_comment( app='', num_requests=3 ) :
             comment=nim_win.popup( title='NIM - Input Comment', msg=msgs[i], type='input' )
         elif app=='Hiero' :
             comment=nim_win.popup( app='Hiero', title='NIM - Input Comment', msg=msgs[i], type='input' )
+        elif app=='3dsMax' :
+            comment=nim_win.popup( title='NIM - Input Comment', msg=msgs[i], type='input' )
         else :
             nim_print.info( 'Couldn\'t determine the application to prompt for a user comment.  :\'(' )
         #  Stop, once a comment has been input :
         if comment : break
     
     if not comment :
-        nim_print.info( 'Tsk, tsk, tsk...  You really should input a comment next time!' )
+        nim_print.info( 'Consider entering a comment next time.' )
     
     return comment
 
@@ -103,7 +103,7 @@ def mk_home() :
         if not os.path.exists( mk_dir ) :
             os.makedirs( mk_dir )
     
-    appDirs=['Maya', 'Nuke', 'C4D']
+    appDirs=['Maya', 'Nuke', 'C4D', '3dsMax']
     #  Make Application subdirectories :
     for appDir in appDirs :
         mk_dir=os.path.normpath( os.path.join( nimHome, 'apps', appDir ) )

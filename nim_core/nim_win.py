@@ -109,6 +109,32 @@ def popup( title='', msg='', type='ok', defaultInput='', pyside=False, _list=[],
         elif type=='input' :
             userInput=gui.InputDialog( msg )
     
+    #  3dsMax :
+    elif app=='3dsMax' :
+        import MaxPlus
+        from PySide import QtCore, QtGui
+        #maxWin=MaxPlus.Win32_GetMAXHWnd()
+
+        if type=='ok' :
+            dialog=QtGui.QMessageBox.information( None, title, msg, \
+                QtGui.QMessageBox.Ok)
+            if dialog==QtGui.QMessageBox.Ok :
+                userInput='OK'
+        elif type=='okCancel' :
+            dialog=QtGui.QMessageBox.question( None, title, msg, \
+                QtGui.QMessageBox.Cancel, QtGui.QMessageBox.Ok )
+            if dialog==QtGui.QMessageBox.Ok :
+                userInput='OK'
+            elif dialog==QtGui.QMessageBox.Cancel :
+                userInput='Cancel'
+        elif type=='input' :
+            dialog=QtGui.QInputDialog.getText( QtGui.QInputDialog(), title, msg, \
+                QtGui.QLineEdit.Normal )
+            if dialog[1] :
+                userInput=dialog[0]
+            else :
+                userInput=None
+
     #P.info('Returning PopUP INFO: %s' % userInput)
     return userInput
 
