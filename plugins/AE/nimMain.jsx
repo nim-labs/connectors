@@ -232,12 +232,12 @@ function setNimMetadata(data) {
 	var proj = app.project,
 		metaData, schemaNS;
  
-	if(ExternalObject.AdobeXMPScript == undefined)
+	if (ExternalObject.AdobeXMPScript == undefined)
 		ExternalObject.AdobeXMPScript = new ExternalObject('lib:AdobeXMPScript');
 
 	metaData = new XMPMeta(proj.xmpPacket);
 	schemaNS = XMPMeta.getNamespaceURI("NIM");
-	if(schemaNS == "" || schemaNS == undefined) {
+	if (schemaNS == "" || schemaNS == undefined) {
 		XMPMeta.registerNamespace("NIM", "NIM");
 		schemaNS = XMPMeta.getNamespaceURI("NIM");
 	}
@@ -249,6 +249,31 @@ function setNimMetadata(data) {
 		metaData.setProperty(schemaNS, "NIM:taskID", data.taskID);
 		metaData.setProperty(schemaNS, "NIM:taskFolder", data.taskFolder);
 		metaData.setProperty(schemaNS, "NIM:basename", data.basename);
+	} catch(err) {
+		alert(err.toString());
+		return false;
+	}
+	proj.xmpPacket = metaData.serialize();
+	return true;
+}
+
+
+// Sets NIM fileID in file metadata
+function setNimFileIdMetadata(fileID) {
+	var proj = app.project,
+		metaData, schemaNS;
+ 
+	if (ExternalObject.AdobeXMPScript == undefined)
+		ExternalObject.AdobeXMPScript = new ExternalObject('lib:AdobeXMPScript');
+
+	metaData = new XMPMeta(proj.xmpPacket);
+	schemaNS = XMPMeta.getNamespaceURI("NIM");
+	if (schemaNS == "" || schemaNS == undefined) {
+		XMPMeta.registerNamespace("NIM", "NIM");
+		schemaNS = XMPMeta.getNamespaceURI("NIM");
+	}
+	try {
+		metaData.setProperty(schemaNS, "NIM:fileID", fileID);
 	} catch(err) {
 		alert(err.toString());
 		return false;
@@ -432,6 +457,10 @@ function saveFile(classID, className, serverID, serverPath, taskID, taskFolder, 
 			isPub: isPub,
 			isWork: isWork
 		});
+
+		// Save this file's new fileID to its metadata
+		setNimFileIdMetadata(newFileID);
+		
 		if (publish && filesCreated == 0) {
 			isPub = 1;
 			isWork = 0;

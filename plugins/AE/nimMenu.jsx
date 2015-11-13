@@ -37,14 +37,26 @@ function buildMenuUI(thisObj) {
 
 	versionUpButton.onClick = function() {
 		var metadata = getNimMetadata(),
-			comment;
+			comment,
+			fileID = getMetadata('fileID') || 0,
+			maxVersion,
+			version;
+
 		if (!metadata.classID) {
 			alert("Error: This file doesn't have any NIM metadata; please save it through the NIM menu before attempting to version up.");
 			return;
 		}
+
+		// Need to get max version to know what version to version up / publish to
+		maxVersion = nimAPI({ q: 'getMaxVersion', fileID: fileID }) || 0;
+		if (maxVersion.length)
+			maxVersion = parseInt(maxVersion[0].maxVersion) || 0;
+
+		version = maxVersion + 1;
+		
 		commentDialog(function(comment) {
 			if (comment === false) return;
-			if (saveFile(metadata.classID, metadata.className, metadata.serverID, metadata.serverPath, metadata.taskID, metadata.taskFolder, metadata.basename, comment, false))
+			if (saveFile(metadata.classID, metadata.className, metadata.serverID, metadata.serverPath, metadata.taskID, metadata.taskFolder, metadata.basename, comment, false, version))
 				alert('New version saved.');
 			else
 				alert('Error: Version up failed!');
@@ -53,14 +65,26 @@ function buildMenuUI(thisObj) {
 
 	publishButton.onClick = function() {
 		var metadata = getNimMetadata(),
-			comment;
+			comment,
+			fileID = getMetadata('fileID') || 0,
+			maxVersion,
+			version;
+
 		if (!metadata.classID) {
 			alert("Error: This file doesn't have any NIM metadata; please save it through the NIM menu before attempting to publish.");
 			return;
 		}
+
+		// Need to get max version to know what version to version up / publish to
+		maxVersion = nimAPI({ q: 'getMaxVersion', fileID: fileID }) || 0;
+		if (maxVersion.length)
+			maxVersion = parseInt(maxVersion[0].maxVersion) || 0;
+
+		version = maxVersion + 1;
+
 		commentDialog(function(comment) {
 			if (comment === false) return;
-			if (!saveFile(metadata.classID, metadata.className, metadata.serverID, metadata.serverPath, metadata.taskID, metadata.taskFolder, metadata.basename, comment, true))
+			if (!saveFile(metadata.classID, metadata.className, metadata.serverID, metadata.serverPath, metadata.taskID, metadata.taskFolder, metadata.basename, comment, true, version))
 				alert('Error: Publish failed!');
 		});
 	}

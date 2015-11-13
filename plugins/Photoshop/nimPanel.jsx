@@ -892,7 +892,7 @@ function buildPanelUI(userID, action, metadata) {
 			if (metadata) {
 				maxVersion = nimAPI({ q: 'getMaxVersion', fileID: fileID });
 				if (maxVersion.length)
-					maxVersion = maxVersion[0].maxVersion;
+					maxVersion = parseInt(maxVersion[0].maxVersion) || 0;
 			}
 		}
 		else if (action == 'saveAs') {
