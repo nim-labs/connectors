@@ -268,7 +268,7 @@ def get_vars( nim=None ) :
     
     return
 
-
+#DEPRICATED
 def mk_workspace( renPath='' ) :
     'Creates the NIM Project Workspace'
     
@@ -342,6 +342,7 @@ def mk_workspace( renPath='' ) :
     
     return workspace
 
+#DEPRICATED
 def mk_proj( path='', renPath='' ) :
     'Creates a show project structure'
     workspaceExists=False
@@ -415,15 +416,14 @@ def makeProject(projectLocation='', renderPath='') :
     'Create the new project and workspace setup'
 
     createDirectories = True
-    #projectLocation = '//192.168.1.28/raid/TMP/NIM/15511_UNC/SHOW/SHOTS/UNC_001/CAMERA/test17'
 
     # Get list of all standard file rules
     fileRules = mm.eval('np_getDefaultFileRuleWidgets')
     try:
         #Update with NIM Render Directory
         if renderPath:
-            imageRuleIndex=fileRules.index('images')
-            fileRules[imageRuleIndex+1]=renderPath
+            imageRuleIndex=fileRules.index(u'images'.replace('\\','/'))
+            fileRules[imageRuleIndex+1]=unicode(renderPath)
     except:
         P.error('Could not set NIM render path in workspace.')
 
@@ -435,17 +435,16 @@ def makeProject(projectLocation='', renderPath='') :
         mc.workspace( dir=mc.workspace(q=True,rootDirectory=True) )
 
     items=len(fileRules)
-    print "Items: %s" % items
-
-    for i in range(0 ,items-1 ) :
+    for i in range(0 ,items-1, 2) :
         # each rule has 2 entries: rulename, value
         ruleName  = fileRules[i]
         ruleValue = fileRules[i+1]
-        print "Rule: %s:%s" % (ruleName, ruleValue)
         mc.workspace(fr=(ruleName,ruleValue))
         if createDirectories :
             mc.workspace(create=ruleValue)
-        i=i+2
+
+    #Adding images folder to project
+    mc.workspace(create='images')
 
     mc.workspace(saveWorkspace=True)
     mc.workspace(projectLocation,o=True)
