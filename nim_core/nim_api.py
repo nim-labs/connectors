@@ -1077,6 +1077,23 @@ def versionUp( nim=None, padding=2, selected=False, win_launch=False, pub=False,
                             P.error( 'Failed reading the file: %s' % filePath )
                             P.error( '    %s' % traceback.print_exc() )
                             return False
+                    
+                    elif nim.app()=='3dsMax' :
+                        import MaxPlus
+                        maxFM = MaxPlus.FileManager
+                        try :
+                            maxFM.Open(filePath)
+                            #  Set env vars brought over from nim_file
+                            P.info('Setting Environment Variables')
+                            P.info('NIM: %s \n' % verUpNim.name(elem='base'))
+                            import nim_3dsmax as Max
+                            Max.set_vars( nim=verUpNim )
+                            nim = verUpNim
+                            
+                        except Exception, e :
+                            P.error( 'Failed reading the file: %s' % filePath )
+                            P.error( '    %s' % traceback.print_exc() )
+                            return False
             
             return filePath
     

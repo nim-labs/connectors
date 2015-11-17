@@ -2368,7 +2368,8 @@ class GUI(QtGui.QMainWindow) :
             if _os=='windows' :
                 projPath=projPath.replace( '\\', '/' )
             if os.path.isdir( projPath ) :
-                MaxPlus.SetProjectFolderDir( projPath )
+                #TODO: FIX SET PROJECT CALL
+                #MaxPlus.SetProjectFolderDir( projPath )
                 P.info( '\nUI - Project set to...\n    %s\n' % projPath )
             else :
                 P.warning('\nProject was not set!\n')

@@ -257,6 +257,7 @@ def set_vars( nim=None ) :
         mc.addAttr( 'defaultRenderGlobals', longName='nim_fileID', dt="string")
     mc.setAttr( 'defaultRenderGlobals.nim_fileID', str(nim.ID('ver')), type='string' )
     '''
+    P.info("FileID: %s" % str(nim.ID('ver')))
     MaxPlus.Core.EvalMAXScript('rootNodeDataCA.nim_fileID="'+str(nim.ID('ver'))+'"' )
     MaxPlus.Core.EvalMAXScript('sceneDataCA.nim_fileID="'+str(nim.ID('ver'))+'"' )
 
@@ -364,7 +365,7 @@ def get_vars( nim=None ) :
     success = MaxPlus.Core.EvalMAXScript("rootNodeDataCA.nim_userID", nim_userID )
     if success:
         nim.set_userID( nim_userID.Get() )
-        P.error(' reading nim_userID')
+        P.error('Reading nim_userID')
     else:
         P.error('Failed reading nim_userID')
 
@@ -380,7 +381,7 @@ def get_vars( nim=None ) :
     success = MaxPlus.Core.EvalMAXScript("rootNodeDataCA.nim_class", nim_class )
     if success:
         nim.set_tab( nim_class.Get() )
-        P.error(' reading nim_class')
+        P.error('Reading nim_class')
     else:
         P.error('Failed reading nim_class')
 
@@ -396,7 +397,7 @@ def get_vars( nim=None ) :
     success = MaxPlus.Core.EvalMAXScript("rootNodeDataCA.nim_server", nim_server )
     if success:
         nim.set_server( path=nim_server.Get() )
-        P.error(' reading nim_server')
+        P.error('Reading nim_server')
     else:
         P.error('Failed reading nim_server')
 
@@ -412,7 +413,7 @@ def get_vars( nim=None ) :
     success = MaxPlus.Core.EvalMAXScript("rootNodeDataCA.nim_serverID", nim_serverID )
     if success:
         nim.set_ID( elem='server', ID=nim_serverID.Get() )
-        P.error(' reading nim_serverID')
+        P.error('Reading nim_serverID')
     else:
         P.error('Failed reading nim_serverID')
 
@@ -428,7 +429,7 @@ def get_vars( nim=None ) :
     success = MaxPlus.Core.EvalMAXScript("rootNodeDataCA.nim_jobName", nim_jobName )
     if success:
         nim.set_name( elem='job', name=nim_jobName.Get() )
-        P.error(' reading nim_jobName')
+        P.error('Reading nim_jobName')
     else:
         P.error('Failed reading nim_jobName')
 
@@ -443,7 +444,7 @@ def get_vars( nim=None ) :
     success = MaxPlus.Core.EvalMAXScript("rootNodeDataCA.nim_jobID", nim_jobID )
     if success:
         nim.set_ID( elem='job', ID=nim_jobID.Get() )
-        P.error(' reading nim_jobID')
+        P.error('Reading nim_jobID')
     else:
         P.error('Failed reading nim_jobID')
 
@@ -459,7 +460,7 @@ def get_vars( nim=None ) :
     success = MaxPlus.Core.EvalMAXScript("rootNodeDataCA.nim_showName", nim_showName )
     if success:
         nim.set_name( elem='show', name=nim_showName.Get() )
-        P.error(' reading nim_showName')
+        P.error('Reading nim_showName')
     else:
         P.error('Failed reading nim_showName')
 
@@ -475,7 +476,7 @@ def get_vars( nim=None ) :
     success = MaxPlus.Core.EvalMAXScript("rootNodeDataCA.nim_showID", nim_showID )
     if success:
         nim.set_ID( elem='show', ID=nim_showID.Get() )
-        P.error(' reading nim_showID')
+        P.error('Reading nim_showID')
     else:
         P.error('Failed reading nim_showID')
 
@@ -491,7 +492,7 @@ def get_vars( nim=None ) :
     success = MaxPlus.Core.EvalMAXScript("rootNodeDataCA.nim_shot", nim_shot )
     if success:
         nim.set_name( elem='shot', name=nim_shot.Get() )
-        P.error(' reading nim_shot')
+        P.error('Reading nim_shot')
     else:
         P.error('Failed reading nim_shot')
 
@@ -507,7 +508,7 @@ def get_vars( nim=None ) :
     success = MaxPlus.Core.EvalMAXScript("rootNodeDataCA.nim_shotID", nim_shotID )
     if success:
         nim.set_ID( elem='shot', ID=nim_shotID.Get() )
-        P.error(' reading nim_shotID')
+        P.error('Reading nim_shotID')
     else:
         P.error('Failed reading nim_shotID')
 
@@ -523,7 +524,7 @@ def get_vars( nim=None ) :
     success = MaxPlus.Core.EvalMAXScript("rootNodeDataCA.nim_asset", nim_asset )
     if success:
         nim.set_name( elem='asset', name=nim_asset.Get() )
-        P.error(' reading nim_asset')
+        P.error('Reading nim_asset')
     else:
         P.error('Failed reading nim_asset')
     
@@ -538,7 +539,7 @@ def get_vars( nim=None ) :
     success = MaxPlus.Core.EvalMAXScript("rootNodeDataCA.nim_assetID", nim_assetID )
     if success:
         nim.set_ID( elem='asset', ID=nim_assetID.Get() )
-        P.error(' reading nim_assetID')
+        P.error('Reading nim_assetID')
     else:
         P.error('Failed reading nim_assetID')
     
@@ -555,7 +556,7 @@ def get_vars( nim=None ) :
     if success:
         #nim.set_ID( elem='file', ID=nim_fileID.Get() )
         #nim.set_tab( tab=nim_fileID.Get() )
-        #P.error(' reading nim_fileID')
+        #P.error('Reading nim_fileID')
         pass
     else:
         P.error('Failed reading nim_fileID')
@@ -600,7 +601,7 @@ def get_vars( nim=None ) :
     success = MaxPlus.Core.EvalMAXScript("rootNodeDataCA.nim_basename", nim_basename )
     if success:
         nim.set_name( elem='base', name=nim_basename.Get() )
-        P.error(' reading nim_basename')
+        P.error('Reading nim_basename')
     else:
         P.error('Failed reading nim_basename')
 
@@ -617,7 +618,7 @@ def get_vars( nim=None ) :
     success = MaxPlus.Core.EvalMAXScript("rootNodeDataCA.nim_type", nim_type )
     if success:
         nim.set_name( elem='task', name=nim_type.Get() )
-        P.error(' reading nim_type')
+        P.error('Reading nim_type')
     else:
         P.error('Failed reading nim_type')
 
@@ -634,7 +635,7 @@ def get_vars( nim=None ) :
     success = MaxPlus.Core.EvalMAXScript("rootNodeDataCA.nim_typeID", nim_typeID )
     if success:
         nim.set_ID( elem='task', ID=nim_typeID.Get() )
-        P.error(' reading nim_typeID')
+        P.error('Reading nim_typeID')
     else:
         P.error('Failed reading nim_typeID')
 
@@ -651,7 +652,7 @@ def get_vars( nim=None ) :
     success = MaxPlus.Core.EvalMAXScript("rootNodeDataCA.nim_typeFolder", nim_typeFolder )
     if success:
         nim.set_taskFolder( folder=nim_typeFolder.Get() )
-        P.error(' reading nim_typeFolder')
+        P.error('Reading nim_typeFolder')
     else:
         P.error('Failed reading nim_typeFolder')
     
@@ -667,7 +668,7 @@ def get_vars( nim=None ) :
     success = MaxPlus.Core.EvalMAXScript("rootNodeDataCA.nim_tag", nim_tag )
     if success:
         nim.set_name( elem='tag', name=nim_tag.Get() )
-        P.error(' reading nim_tag')
+        P.error('Reading nim_tag')
     else:
         P.error('Failed reading nim_tag')
     
@@ -682,7 +683,7 @@ def get_vars( nim=None ) :
     success = MaxPlus.Core.EvalMAXScript("rootNodeDataCA.nim_fileType", nim_fileType )
     if success:
         nim.set_name( elem='file', name=nim_fileType.Get() )
-        P.error(' reading nim_fileType')
+        P.error('Reading nim_fileType')
     else:
         P.error('Failed reading nim_fileType')
 
@@ -767,7 +768,7 @@ def mk_proj( path='', renPath='' ) :
     #  Create 3dsMax project directories :
     if os.path.isdir( path ) :
         for projDir in projDirs:
-            _dir=os.path.normpath( os.path.join( path, projDir ) )
+            _dir=os.path.normpath( os.path.join( path, projDir ).replace('\\', '/') )
             if not os.path.isdir( _dir ) :
                 try : os.mkdir( _dir )
                 except Exception, e :
