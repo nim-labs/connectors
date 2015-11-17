@@ -251,6 +251,9 @@ class GUI(QtGui.QMainWindow) :
             elif self.app=='Nuke' :
                 import nim_nuke as N
                 N.get_vars( nim=self.nimPrefs )
+            elif self.app=='3dsMax' :
+                import nim_3dsmax as Max
+                Max.get_vars( nim=self.nimPrefs )
         else :
             self.nimPrefs=Nim.NIM().ingest_prefs()
             #self.nimPrefs.Print()
@@ -772,6 +775,8 @@ class GUI(QtGui.QMainWindow) :
             self.nim.set_name( elem='fileExt', name='.nk' )
         elif self.app=='C4D' :
             self.nim.set_name( elem='fileExt', name='.c4d' )
+        elif self.app=='3dsMax' :
+            self.nim.set_name( elem='fileExt', name='.max' )
         
         #  Enable :
         for elem in ['job', 'server', 'asset', 'show', 'shot', 'task', 'base'] :
@@ -846,6 +851,10 @@ class GUI(QtGui.QMainWindow) :
             self.checkBox.setText('Group')
             self.checkBox.setMaximumWidth(68)
             self.checkBox.setVisible( True )
+        elif self.app=='3dsMax' :
+            self.checkBox.setText('Group')
+            self.checkBox.setMaximumWidth(68)
+            self.checkBox.setVisible( True )
         else :
             self.checkBox.setVisible( False )
         
@@ -864,6 +873,8 @@ class GUI(QtGui.QMainWindow) :
                 self.btn_2.setVisible( True )
             elif self.app=='Nuke' :
                 self.btn_2.setVisible( False )
+            elif self.app=='3dsMax' :
+                self.btn_2.setVisible( True )
         
         #  File Extension elements :
         self.fileExtText.setVisible( False )
@@ -886,7 +897,10 @@ class GUI(QtGui.QMainWindow) :
         self.btn_1.clicked.connect( self.file_import )
         if self.app=='Maya' :
             self.btn_2.clicked.connect( self.maya_fileReference )
-        
+        if self.app=='3dsMax' :
+            #TODO
+            pass
+
         self.complete=True
         return True
     
@@ -1192,6 +1206,12 @@ class GUI(QtGui.QMainWindow) :
                                     if re.search( '^'+basename+'.c4d$', _file ) :
                                         if _file not in files :
                                             files.append( _file )
+                            if self.app=='3dsMax' :
+                                temp_files=os.listdir( nimDir )
+                                for _file in temp_files :
+                                    if re.search( '^'+basename+'.max$', _file ) :
+                                        if _file not in files :
+                                            files.append( _file )
                         if files :
                             for _file in files :
                                 item=QtGui.QListWidgetItem( self.nim.Input( elem ) )
@@ -1235,6 +1255,8 @@ class GUI(QtGui.QMainWindow) :
                                     if ext !='.nk' : item.setFlags( QtCore.Qt.ItemIsEditable )
                                 elif self.app=='C4D' :
                                     if ext !='.c4d' : item.setFlags( QtCore.Qt.ItemIsEditable )
+                                elif self.app=='3dsMax' :
+                                    if ext !='.max' : item.setFlags( QtCore.Qt.ItemIsEditable )
                                 #  Select the item :
                                 self.nim.Input('ver').setCurrentItem( item )
                                 self.verPath.setText( fileDir )
@@ -1285,6 +1307,9 @@ class GUI(QtGui.QMainWindow) :
                                     elif self.app=='C4D' :
                                         if option['ext'] !='.c4d' :
                                             item.setFlags( QtCore.Qt.ItemIsEditable )
+                                    elif self.app=='3dsMax' :
+                                        if option['ext'] !='.max' :
+                                            item.setFlags( QtCore.Qt.ItemIsEditable )
                                     #  Select the item :
                                     #self.nim.Input( elem ).setCurrentItem( item )
                                     self.verPath.setText( nimDir )
@@ -1312,6 +1337,10 @@ class GUI(QtGui.QMainWindow) :
                                 elif self.app=='C4D' :
                                     ext=F.get_ext( filePath=option['filename'] )
                                     if ext !='.c4d' :
+                                        item.setFlags( QtCore.Qt.ItemIsEditable )
+                                elif self.app=='3dsMax' :
+                                    ext=F.get_ext( filePath=option['filename'] )
+                                    if ext !='.max' :
                                         item.setFlags( QtCore.Qt.ItemIsEditable )
                                 #  Set from preferences :
                                 if option['filename']+' - '+option['note']==self.pref_version and \
@@ -1346,6 +1375,10 @@ class GUI(QtGui.QMainWindow) :
                             elif self.app=='C4D' :
                                 ext=F.get_ext( filePath=option['filename'] )
                                 if ext !='.c4d' :
+                                    item.setFlags( QtCore.Qt.ItemIsEditable )
+                            elif self.app=='3dsMax' :
+                                ext=F.get_ext( filePath=option['filename'] )
+                                if ext !='.max' :
                                     item.setFlags( QtCore.Qt.ItemIsEditable )
                             #  Set from preferences :
                             if option['filename']+' - '+option['note']==self.pref_version and \
@@ -1515,6 +1548,8 @@ class GUI(QtGui.QMainWindow) :
                             if ext !='.nk' : item.setFlags( QtCore.Qt.ItemIsEditable )
                         elif self.app=='C4D' :
                             if ext !='.c4d' : item.setFlags( QtCore.Qt.ItemIsEditable )
+                        elif self.app=='3dsMax' :
+                            if ext !='.max' : item.setFlags( QtCore.Qt.ItemIsEditable )
                         #  Select the item :
                         self.nim.Input('ver').setCurrentItem( item )
                         self.verPath.setText( fileDir )
@@ -1598,6 +1633,8 @@ class GUI(QtGui.QMainWindow) :
                                     if option['ext'] !='.nk' : item.setFlags( QtCore.Qt.ItemIsEditable )
                                 elif self.app=='C4D' :
                                     if option['ext'] !='.c4d' : item.setFlags( QtCore.Qt.ItemIsEditable )
+                                elif self.app=='3dsMax' :
+                                    if option['ext'] !='.max' : item.setFlags( QtCore.Qt.ItemIsEditable )
                                 #  Select the item :
                                 self.nim.Input( elem ).setCurrentItem( item )
                                 self.verPath.setText( nimDir )

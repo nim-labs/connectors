@@ -901,6 +901,9 @@ def versionUp( nim=None, padding=2, selected=False, win_launch=False, pub=False,
             import nim_c4d as C
             nim_plugin_ID=1032427
             C.get_vars( nim=nim, ID=nim_plugin_ID )
+        elif nim.app()=='3dsMax' :
+            import nim_3dsmax as Max
+            Max.get_vars( nim=nim )
     
     #  Error check :
     try :
