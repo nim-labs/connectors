@@ -2356,6 +2356,7 @@ class GUI(QtGui.QMainWindow) :
             try :
                 import MaxPlus
                 mpFM = MaxPlus.FileManager
+                mpPM = MaxPlus.PathManager
                 import nim_3dsmax as Max
                 mpFM.Open(filePath)
             except Exception, e :
@@ -2368,8 +2369,7 @@ class GUI(QtGui.QMainWindow) :
             if _os=='windows' :
                 projPath=projPath.replace( '\\', '/' )
             if os.path.isdir( projPath ) :
-                #TODO: FIX SET PROJECT CALL
-                #MaxPlus.SetProjectFolderDir( projPath )
+                mpPM.SetProjectFolderDir( projPath )
                 P.info( '\nUI - Project set to...\n    %s\n' % projPath )
             else :
                 P.warning('\nProject was not set!\n')

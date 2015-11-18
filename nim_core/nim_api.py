@@ -661,6 +661,7 @@ def to_fileDir( nim=None ) :
         if basename :
             #  Derive File Directory from NIM :
             if nim.app()=='Maya' : fileDir=os.path.join( nimDir, basename, 'scenes' )
+            elif nim.app()=='3dsMax' : fileDir=os.path.join( nimDir, basename, 'scenes' )
             else : fileDir=os.path.join( nimDir, basename )
             #  Return :
             if fileDir : return os.path.normpath( fileDir )

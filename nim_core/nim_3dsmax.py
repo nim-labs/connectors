@@ -754,10 +754,11 @@ def mk_workspace( proj_folder='', renPath='' ) :
 def mk_proj( path='', renPath='' ) :
     'Creates a show project structure'
     import MaxPlus
+    mpPM = MaxPlus.PathManager
     workspaceExists=False
     
     #  Variables :
-    projDirs=['sceneassets/animations', 'archives', 'autoback', 'proxies', 'downloads',
+    projDirs=['sceneassets','sceneassets/animations', 'archives', 'autoback', 'proxies', 'downloads',
         'export', 'express', 'sceneassets/images', 'import', 'materiallibraries', 'scenes',
         'sceneassets\photometric', 'previews', 'sceneassets/renderassets', 'renderoutput', 'renderpresets',
         'sceneassets/sound', 'vpost' ]
@@ -770,6 +771,7 @@ def mk_proj( path='', renPath='' ) :
         for projDir in projDirs:
             _dir=os.path.normpath( os.path.join( path, projDir ).replace('\\', '/') )
             if not os.path.isdir( _dir ) :
+                P.info("DIR: %s" % _dir)
                 try : os.mkdir( _dir )
                 except Exception, e :
                     P.error( 'Failed creating the directory: %s' % _dir )
@@ -802,7 +804,7 @@ def mk_proj( path='', renPath='' ) :
     try :
         pathToSet=path.replace('\\', '/')+'/'
         if os.path.isdir( pathToSet ) :
-            MaxPlus.SetProjectFolderDir( pathToSet )
+            mpPM.SetProjectFolderDir( pathToSet )
             P.info( 'nim_3dsmax - Current Project Set: %s\n' % pathToSet )
         else :
             P.info('Project not set!')
