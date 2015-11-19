@@ -39,7 +39,7 @@ def get_mainWin() :
 def set_vars( nim=None ) :
     'Add variables to 3dsMax Globals'
     
-    P.info( '\n3dsMax - Setting Render Globals variables...' )
+    P.info( '\n3dsMax - Setting Globals variables...' )
 
     makeGlobalAttrs = False
     try:
@@ -108,26 +108,27 @@ def set_vars( nim=None ) :
                             rootNodeDataCA = rootnode.custAttributes[rootnode.custAttributes.count] \n\
                         sceneDataCA = undefined \n\
                         if (custattributes.add thescene sceneDataCADef) do \n\
-                            sceneDataCA = thescene.custAttributes[thescene.custAttributes.count]'
+                            sceneDataCA = thescene.custAttributes[thescene.custAttributes.count] \n'
         try:
             MaxPlus.Core.EvalMAXScript(nimAttrCmd)
+            P.info("Root and Scene attributes added")
         except:
             P.error("Failed to create global attributes")
             return
-    else :
-        P.info("NIM Data Found.\nReading Global Attributes")
-        nimAttrReadCmd = 'thescene = (refs.dependents rootnode)[1] \n\
-                          rootNodeDataCA = undefined \n\
-                          if(rootnode.custAttributes.count != 0) do \n\
-                             rootNodeDataCA = rootnode.custAttributes[rootnode.custAttributes.count] \n\
-                          sceneDataCA = undefined \n\
-                          if(thescene.custAttributes.count != 0) do \n\
-                             sceneDataCA = thescene.custAttributes[thescene.custAttributes.count]'
-        try:
-            MaxPlus.Core.EvalMAXScript(nimAttrReadCmd)
-        except:
-            P.error('Failed to read global attributes')
-            return
+
+    P.info("Reading Global Attributes")
+    nimAttrReadCmd = 'thescene = (refs.dependents rootnode)[1] \n\
+                      rootNodeDataCA = undefined \n\
+                      if(rootnode.custAttributes.count != 0) do \n\
+                         rootNodeDataCA = rootnode.custAttributes[rootnode.custAttributes.count] \n\
+                      sceneDataCA = undefined \n\
+                      if(thescene.custAttributes.count != 0) do \n\
+                         sceneDataCA = thescene.custAttributes[thescene.custAttributes.count] \n'
+    try:
+        MaxPlus.Core.EvalMAXScript(nimAttrReadCmd)
+    except:
+        P.error('Failed to read global attributes')
+        return
 
     #  User :
     userInfo=nim.userInfo()

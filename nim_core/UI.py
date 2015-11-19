@@ -31,7 +31,7 @@ except :
 #  Variables :
 WIN=''
 startTime=''
-version='v1.0.2'
+version='v1.0.3'
 winTitle='NIM_'+version
 _os=platform.system().lower()
 _osCap=platform.system()
@@ -852,9 +852,10 @@ class GUI(QtGui.QMainWindow) :
             self.checkBox.setMaximumWidth(68)
             self.checkBox.setVisible( True )
         elif self.app=='3dsMax' :
-            self.checkBox.setText('Group')
-            self.checkBox.setMaximumWidth(68)
-            self.checkBox.setVisible( True )
+            #self.checkBox.setText('Group')
+            #self.checkBox.setMaximumWidth(68)
+            #self.checkBox.setVisible( True )
+            pass
         else :
             self.checkBox.setVisible( False )
         
@@ -897,9 +898,8 @@ class GUI(QtGui.QMainWindow) :
         self.btn_1.clicked.connect( self.file_import )
         if self.app=='Maya' :
             self.btn_2.clicked.connect( self.maya_fileReference )
-        if self.app=='3dsMax' :
-            #TODO
-            pass
+        elif self.app=='3dsMax' :
+            self.btn_2.clicked.connect( self.max_fileReference )
 
         self.complete=True
         return True
@@ -2645,6 +2645,14 @@ class GUI(QtGui.QMainWindow) :
             #NOT GROUPED
             #mc.file( filePath, force=True, reference=True, namespace=fileName )
             #MaxPlus.SceneSetIgnoreFlag()
+
+            value = MaxPlus.FPValue()
+            result = MaxPlus.Core.EvalMAXScript("xrefs.addNewXRefFile \""+filePath.replace('\\','/')+"\"", value)
+            if result:
+                P.info("File Referenced")
+            else:
+                P.error("Filepath: %s" % filePath)
+                print value.Get()
             pass
 
         #  Close window upon completion :
