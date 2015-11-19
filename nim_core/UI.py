@@ -851,11 +851,6 @@ class GUI(QtGui.QMainWindow) :
             self.checkBox.setText('Group')
             self.checkBox.setMaximumWidth(68)
             self.checkBox.setVisible( True )
-        elif self.app=='3dsMax' :
-            #self.checkBox.setText('Group')
-            #self.checkBox.setMaximumWidth(68)
-            #self.checkBox.setVisible( True )
-            pass
         else :
             self.checkBox.setVisible( False )
         
