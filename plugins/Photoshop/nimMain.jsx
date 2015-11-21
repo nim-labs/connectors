@@ -237,21 +237,60 @@ function getMetadata(property) {
 }
 
 
-// Gets NIM-related project metadata
+// Gets NIM-related project metadata; look first in file (with getMetadata),
+// then in manually-created NIM text file metadata if not found
 function getNimMetadata() {
-	return {
-		classID: getMetadata('classID'),
-		className: getMetadata('className'),
-		serverID: getMetadata('serverID'),
-		serverPath: getMetadata('serverPath'),
-		taskID: getMetadata('taskID'),
-		taskFolder: getMetadata('taskFolder'),
-		basename: getMetadata('basename')
-	};
+	// Try getting classID from file metadata
+	var classID = getMetadata('classID');
+	// If that worked, everything else should also be there
+	if (classID) {
+		return {
+			classID: classID,
+			className: getMetadata('className'),
+			serverID: getMetadata('serverID'),
+			serverPath: getMetadata('serverPath'),
+			taskID: getMetadata('taskID'),
+			taskFolder: getMetadata('taskFolder'),
+			basename: getMetadata('basename')
+		};
+	}
+	// If not, look in NIM Photoshop metadata file
+	else {
+
+
+
+
+
+
+
+/*
+		while (!photoshopFileTemp.eof) {
+			currentLine = photoshopFileTemp.readln();
+			if (!foundFileString) {
+				fileStringPos = currentLine.indexOf(fileString);
+				if (fileStringPos != -1) {
+					foundFileString = true;
+					currentLine = currentLine.substr(0, fileStringPos + fileString.length) + thisMetadataString;
+				}
+			}
+			photoshopFile.writeln(currentLine);
+		}
+
+		if (!foundFileString)  // If no matching item was found, add new entry
+			photoshopFile.writeln(fileString + thisMetadataString);
+*/
+
+
+
+
+
+
+
+	}
 }
 
 
-// Sets NIM-related project metadata
+// Sets NIM-related project metadata; only works on PSD files
 function setNimMetadata(data) {
 	var proj = app.project,
 		metaData, schemaNS;
@@ -278,6 +317,7 @@ function setNimMetadata(data) {
 		metaData.setProperty(schemaNS, "NIM:taskID", data.taskID);
 		metaData.setProperty(schemaNS, "NIM:taskFolder", data.taskFolder);
 		metaData.setProperty(schemaNS, "NIM:basename", data.basename);
+		metaData.setProperty(schemaNS, "NIM:fileID", data.fileID);
 	} catch(err) {
 		alert(err.toString());
 		return false;
@@ -287,32 +327,50 @@ function setNimMetadata(data) {
 }
 
 
-// Sets NIM fileID in file metadata
-function setNimFileIdMetadata(fileID) {
-	var proj = app.project,
-		metaData, schemaNS;
- 
-	if (ExternalObject.AdobeXMPScript == undefined)
-		ExternalObject.AdobeXMPScript = new ExternalObject('lib:AdobeXMPScript');
+// Sets NIM-related project metadata in "thisfilefolder/.nim/photoshop-metadata.nim"; for non-PSDs
+function setNimManualMetadata(data, path, filename) {
+	var thisNimFolderPath = path + '.nim/',
+		photoshopFilePath = thisNimFolderPath + 'photoshop-metadata.nim',
+		thisNimFolder = new Folder(thisNimFolderPath),
+		photoshopFile = new File(photoshopFilePath),
+		photoshopFileTempPath = thisNimFolderPath + 'photoshop-metadata-temp.nim',
+		photoshopFileTemp,
+		fileString = filename + ':',
+		currentLine,
+		fileStringPos,
+		foundFileString = false,
+		thisMetadataString = '';
 
-	try { metaData = new XMPMeta(activeDocument.xmpMetadata.rawData); }
-	catch(e) {
-		alert('Error: Cannot set metadata when no file is open!');
-		return;
+	if (!thisNimFolder.exists) {
+		if (!thisNimFolder.create()) {
+			alert('Error creating the following directory to store NIM metadata: ' + thisNimFolderPath);
+			return false;
+		}
 	}
 
-	schemaNS = XMPMeta.getNamespaceURI("NIM");
-	if (schemaNS == "" || schemaNS == undefined) {
-		XMPMeta.registerNamespace("NIM", "NIM");
-		schemaNS = XMPMeta.getNamespaceURI("NIM");
+	for (var key in data)
+		thisMetadataString += '\n  ' + key + '=' + data[key];
+
+	thisMetadataString += '\n';
+
+	if (photoshopFile.exists) {
+		if (!photoshopFile.open('e')) {
+			alert('Error editing the following file: ' + photoshopFilePath);
+			return false;
+		}
+		while (!photoshopFile.eof)  // Read lines until we get to end of file so we don't overwrite existing stuff
+			photoshopFile.readln();
 	}
-	try {
-		metaData.setProperty(schemaNS, "NIM:fileID", fileID);
-	} catch(err) {
-		alert(err.toString());
-		return false;
+	else {
+		if (!photoshopFile.open('w')) {
+			alert('Error creating the following file: ' + photoshopFilePath);
+			return false;
+		}
 	}
-	activeDocument.xmpMetadata.rawData = metaData.serialize();
+
+	// Write metadata for this new file
+	photoshopFile.writeln(fileString + thisMetadataString);
+	photoshopFile.close();
 	return true;
 }
 
@@ -392,8 +450,7 @@ function setPref(prefPrefix, prefName, prefValue) {
 	nimPrefsFileTemp.close();
 	nimPrefsFile.close();
 	nimPrefsFileTemp.remove();
-	if (foundPref) return true;
-	else return false;
+	return true;
 }
 
 
@@ -505,6 +562,7 @@ function saveFile(classID, className, serverID, serverPath, taskID, taskFolder, 
 		isWork = 1,
 		newFileName = '',
 		fullFilePath = '',
+		nimMetadata,
 		metadataSet,
 		newFileID,
 		filesCreated = 0,
@@ -513,22 +571,6 @@ function saveFile(classID, className, serverID, serverPath, taskID, taskFolder, 
 		fileSaveOptions,
 		elementExportsLength = elementExports.length,
 		elementExportPrefix;
-
-	metadataSet = setNimMetadata({
-		classID: classID,
-		className: className,
-		serverID: serverID,
-		serverPath: serverPath,
-		taskID: taskID,
-		taskFolder: taskFolder,
-		basename: basename,
-		comment: comment
-	});
-
-	if (!metadataSet) {
-		alert('Error setting metadata; project could not be saved!');
-		return false;
-	}
 
 	itemPaths = nimAPI({ q: 'getPaths', type: className.toLowerCase(), ID: classID });
 	if (!itemPaths || !itemPaths['root']) {
@@ -587,8 +629,27 @@ function saveFile(classID, className, serverID, serverPath, taskID, taskFolder, 
 			isWork: isWork
 		});
 
-		// Save this file's new fileID to its metadata
-		setNimFileIdMetadata(newFileID);
+		nimMetadata = {
+			classID: classID,
+			className: className,
+			serverID: serverID,
+			serverPath: serverPath,
+			taskID: taskID,
+			taskFolder: taskFolder,
+			basename: basename,
+			fileID: newFileID
+		};
+
+		if (extension == 'psd')
+			metadataSet = setNimMetadata(nimMetadata);
+
+		if (!metadataSet)
+			metadataSet = setNimManualMetadata(nimMetadata, path, newFileName);
+
+		if (!metadataSet) {
+			alert('Error setting metadata; project could not be saved!');
+			return false;
+		}
 
 		// Generate a fileSaveOptions object
 		fileSaveOptions = getFileSaveOptions(fileSettings);
