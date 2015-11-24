@@ -16,6 +16,12 @@
 var os, userID;
 
 
+// Add String.trim() functionality, for some reason it's missing
+String.prototype.trim = function () {  
+    return this.replace(/^\s+/,'').replace(/\s+$/,'');  
+}  
+
+
 // Adds JSON parsing support; https://github.com/douglascrockford/JSON-js/blob/master/json2.js
 if(typeof JSON!=="object"){JSON={}}(function(){"use strict";function f(e){return e<10?"0"+e:e}function quote(e){escapable.lastIndex=0;return escapable.test(e)?'"'+e.replace(escapable,function(e){var t=meta[e];return typeof t==="string"?t:"\\u"+("0000"+e.charCodeAt(0).toString(16)).slice(-4)})+'"':'"'+e+'"'}function str(e,t){var n,r,i,s,o=gap,u,a=t[e];if(a&&typeof a==="object"&&typeof a.toJSON==="function"){a=a.toJSON(e)}if(typeof rep==="function"){a=rep.call(t,e,a)}switch(typeof a){case"string":return quote(a);case"number":return isFinite(a)?String(a):"null";case"boolean":case"null":return String(a);case"object":if(!a){return"null"}gap+=indent;u=[];if(Object.prototype.toString.apply(a)==="[object Array]"){s=a.length;for(n=0;n<s;n+=1){u[n]=str(n,a)||"null"}i=u.length===0?"[]":gap?"[\n"+gap+u.join(",\n"+gap)+"\n"+o+"]":"["+u.join(",")+"]";gap=o;return i}if(rep&&typeof rep==="object"){s=rep.length;for(n=0;n<s;n+=1){if(typeof rep[n]==="string"){r=rep[n];i=str(r,a);if(i){u.push(quote(r)+(gap?": ":":")+i)}}}}else{for(r in a){if(Object.prototype.hasOwnProperty.call(a,r)){i=str(r,a);if(i){u.push(quote(r)+(gap?": ":":")+i)}}}}i=u.length===0?"{}":gap?"{\n"+gap+u.join(",\n"+gap)+"\n"+o+"}":"{"+u.join(",")+"}";gap=o;return i}}if(typeof Date.prototype.toJSON!=="function"){Date.prototype.toJSON=function(){return isFinite(this.valueOf())?this.getUTCFullYear()+"-"+f(this.getUTCMonth()+1)+"-"+f(this.getUTCDate())+"T"+f(this.getUTCHours())+":"+f(this.getUTCMinutes())+":"+f(this.getUTCSeconds())+"Z":null};String.prototype.toJSON=Number.prototype.toJSON=Boolean.prototype.toJSON=function(){return this.valueOf()}}var cx,escapable,gap,indent,meta,rep;if(typeof JSON.stringify!=="function"){escapable=/[\\\"\x00-\x1f\x7f-\x9f\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g;meta={"\b":"\\b","  ":"\\t","\n":"\\n","\f":"\\f","\r":"\\r",'"':'\\"',"\\":"\\\\"};JSON.stringify=function(e,t,n){var r;gap="";indent="";if(typeof n==="number"){for(r=0;r<n;r+=1){indent+=" "}}else if(typeof n==="string"){indent=n}rep=t;if(t&&typeof t!=="function"&&(typeof t!=="object"||typeof t.length!=="number")){throw new Error("JSON.stringify")}return str("",{"":e})}}if(typeof JSON.parse!=="function"){cx=/[\u0000\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g;JSON.parse=function(text,reviver){function walk(e,t){var n,r,i=e[t];if(i&&typeof i==="object"){for(n in i){if(Object.prototype.hasOwnProperty.call(i,n)){r=walk(i,n);if(r!==undefined){i[n]=r}else{delete i[n]}}}}return reviver.call(e,t,i)}var j;text=String(text);cx.lastIndex=0;if(cx.test(text)){text=text.replace(cx,function(e){return"\\u"+("0000"+e.charCodeAt(0).toString(16)).slice(-4)})}if(/^[\],:{}\s]*$/.test(text.replace(/\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g,"@").replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g,"]").replace(/(?:^|:|,)(?:\s*\[)+/g,""))){j=eval("("+text+")");return typeof reviver==="function"?walk({"":j},""):j}throw new SyntaxError("JSON.parse")}}})()
 
@@ -251,46 +257,60 @@ function getNimMetadata() {
 			serverPath: getMetadata('serverPath'),
 			taskID: getMetadata('taskID'),
 			taskFolder: getMetadata('taskFolder'),
-			basename: getMetadata('basename')
+			basename: getMetadata('basename'),
+			fileID: getMetadata('fileID')
 		};
 	}
 	// If not, look in NIM Photoshop metadata file
 	else {
+		var thisNimFolderPath = activeDocument.path.absoluteURI + '/.nim/',
+			photoshopFilePath = thisNimFolderPath + 'photoshop-metadata.nim',
+			thisNimFolder = new Folder(thisNimFolderPath),
+			photoshopFile = new File(photoshopFilePath),
+			fileString = activeDocument.name + ':',
+			currentLine,
+			fileStringPos,
+			foundFileString = false,
+			equalPos,
+			keyValue,
+			metadata = {};
 
+		// Will get a "no metadata" error back in file that calls this function
+		if (!thisNimFolder.exists || !photoshopFile.exists)
+			return false;
 
-
-
-
-
-
-/*
-		while (!photoshopFileTemp.eof) {
-			currentLine = photoshopFileTemp.readln();
-			if (!foundFileString) {
-				fileStringPos = currentLine.indexOf(fileString);
-				if (fileStringPos != -1) {
-					foundFileString = true;
-					currentLine = currentLine.substr(0, fileStringPos + fileString.length) + thisMetadataString;
-				}
-			}
-			photoshopFile.writeln(currentLine);
+		// More specific error + the "no metadata" error
+		if (!photoshopFile.open('r')) {
+			alert('Error reading the following file: ' + photoshopFilePath);
+			return false;
 		}
 
-		if (!foundFileString)  // If no matching item was found, add new entry
-			photoshopFile.writeln(fileString + thisMetadataString);
-*/
+		while (!photoshopFile.eof) {
+			currentLine = photoshopFile.readln();
+			fileStringPos = currentLine.indexOf(fileString);
+			if (fileStringPos == -1) continue;
+			foundFileString = true;
+			while (!photoshopFile.eof) {
+				currentLine = photoshopFile.readln();
+				equalPos = currentLine.indexOf('=');
+				if (equalPos == -1) break;
+				keyValue = currentLine.split('=');
+				metadata[keyValue[0].trim()] = keyValue[1].trim();
+			}
+			break;
+		}
 
+		photoshopFile.close();
 
-
-
-
-
-
+		if (!foundFileString)
+			return false;
+		
+		return metadata;
 	}
 }
 
 
-// Sets NIM-related project metadata; only works on PSD files
+// Sets NIM-related project metadata
 function setNimMetadata(data) {
 	var proj = app.project,
 		metaData, schemaNS;
@@ -327,7 +347,7 @@ function setNimMetadata(data) {
 }
 
 
-// Sets NIM-related project metadata in "thisfilefolder/.nim/photoshop-metadata.nim"; for non-PSDs
+// Sets NIM-related project metadata in "thisfilefolder/.nim/photoshop-metadata.nim"; for files that might not allow metadata to be stored in them
 function setNimManualMetadata(data, path, filename) {
 	var thisNimFolderPath = path + '.nim/',
 		photoshopFilePath = thisNimFolderPath + 'photoshop-metadata.nim',
@@ -554,7 +574,8 @@ function getFileSaveOptions(file) {
 
 // Saves a file and writes it to NIM API; className = 'ASSET' or 'SHOT', classID = assetID or shotID
 function saveFile(classID, className, serverID, serverPath, taskID, taskFolder, basename, comment, publish, elementExports, fileSettings, version) {
-	var path = serverPath,
+	var oldDocument = activeDocument,
+		path = serverPath,
 		folder,
 		newFile,
 		itemPaths,
@@ -640,8 +661,7 @@ function saveFile(classID, className, serverID, serverPath, taskID, taskFolder, 
 			fileID: newFileID
 		};
 
-		if (extension == 'psd')
-			metadataSet = setNimMetadata(nimMetadata);
+		metadataSet = setNimMetadata(nimMetadata);
 
 		if (!metadataSet)
 			metadataSet = setNimManualMetadata(nimMetadata, path, newFileName);
@@ -685,6 +705,10 @@ function saveFile(classID, className, serverID, serverPath, taskID, taskFolder, 
 		}
 		filesCreated++;
 	}
+
+	// Open newly-saved file, since Save As seems to be treated like Export in Photoshop
+	oldDocument.close(SaveOptions.DONOTSAVECHANGES);
+	app.open(newFile);
 
 	// Save all element exports
 	// Check file export settings to make sure elements should be exported

@@ -724,7 +724,7 @@ function buildPanelUI(userID, action, metadata) {
 		elementFileTypeDropdown = elementButtonGroup.add('dropdownlist', undefined, '', { items: allFileTypes });
 		elementFileTypeDropdown.selection = 0;
 		elementAddButton = elementButtonGroup.add('button', undefined, 'Add Element');
-		fileID = getMetadata('fileID');
+		fileID = (metadata ? (metadata.fileID ? metadata.fileID : getMetadata('fileID')) : getMetadata('fileID'));
 		fileSettings = nimAPI({ q: 'getFileSettings', fileID: fileID || 0 });
 		elementExports = nimAPI({ q: 'getElementExports', fileID: fileID || 0 }) || [];
 		elementTypes = nimAPI({ q: 'getElementTypes' });
@@ -1189,8 +1189,10 @@ function buildPanelUI(userID, action, metadata) {
 
 	if (fileTypeDropdown) {
 		fileTypeDropdown.onChange = function() {
-			if (this.selection.index == 0)
+			if (this.selection.index == 0) {
 				fileTypeEditButton.enabled = false;
+				fileSettings.extension = 'psd';
+			}
 			else
 				fileTypeEditButton.enabled = true;
 
