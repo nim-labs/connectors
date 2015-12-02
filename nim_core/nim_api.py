@@ -661,6 +661,7 @@ def to_fileDir( nim=None ) :
         if basename :
             #  Derive File Directory from NIM :
             if nim.app()=='Maya' : fileDir=os.path.join( nimDir, basename, 'scenes' )
+            elif nim.app()=='3dsMax' : fileDir=os.path.join( nimDir, basename, 'scenes' )
             else : fileDir=os.path.join( nimDir, basename )
             #  Return :
             if fileDir : return os.path.normpath( fileDir )
@@ -901,6 +902,9 @@ def versionUp( nim=None, padding=2, selected=False, win_launch=False, pub=False,
             import nim_c4d as C
             nim_plugin_ID=1032427
             C.get_vars( nim=nim, ID=nim_plugin_ID )
+        elif nim.app()=='3dsMax' :
+            import nim_3dsmax as Max
+            Max.get_vars( nim=nim )
     
     #  Error check :
     try :
@@ -1068,6 +1072,23 @@ def versionUp( nim=None, padding=2, selected=False, win_launch=False, pub=False,
                             nim_plugin_ID=1032427
                             import nim_c4d as C
                             C.set_vars( nim=verUpNim, ID=nim_plugin_ID )
+                            nim = verUpNim
+                            
+                        except Exception, e :
+                            P.error( 'Failed reading the file: %s' % filePath )
+                            P.error( '    %s' % traceback.print_exc() )
+                            return False
+                    
+                    elif nim.app()=='3dsMax' :
+                        import MaxPlus
+                        maxFM = MaxPlus.FileManager
+                        try :
+                            maxFM.Open(filePath)
+                            #  Set env vars brought over from nim_file
+                            P.info('Setting Environment Variables')
+                            P.info('NIM: %s \n' % verUpNim.name(elem='base'))
+                            import nim_3dsmax as Max
+                            Max.set_vars( nim=verUpNim )
                             nim = verUpNim
                             
                         except Exception, e :

@@ -268,7 +268,7 @@ def get_vars( nim=None ) :
     
     return
 
-
+#DEPRICATED
 def mk_workspace( renPath='' ) :
     'Creates the NIM Project Workspace'
     
@@ -342,6 +342,7 @@ def mk_workspace( renPath='' ) :
     
     return workspace
 
+#DEPRICATED
 def mk_proj( path='', renPath='' ) :
     'Creates a show project structure'
     workspaceExists=False
@@ -355,7 +356,9 @@ def mk_proj( path='', renPath='' ) :
         'sourceimages', 'sourceimages/3dPaintTextures']
     
     #  Create Maya project directories :
+    path=os.path.normpath(path)
     if os.path.isdir( path ) :
+        P.info('Creating Project Folders...')
         for projDir in projDirs:
             _dir=os.path.normpath( os.path.join( path, projDir ) )
             if not os.path.isdir( _dir ) :
@@ -364,38 +367,90 @@ def mk_proj( path='', renPath='' ) :
                     P.error( 'Failed creating the directory: %s' % _dir )
                     P.error( '    %s' % traceback.print_exc() )
                     return False
-    
+        P.info('Complete')
+
     #  Check for workspace file :
     workspaceFile=os.path.normpath( os.path.join( path, 'workspace.mel' ) )
     if os.path.exists( workspaceFile ) :
         workspaceExists=True
-    
-    #  Set Project :
-    try :
-        pathToSet=path.replace('\\', '/')+'/'
-        if os.path.isdir( pathToSet ) :
-            mm.eval( 'setProject "%s"' % pathToSet )
-            P.info( 'Current Project Set: %s\n' % pathToSet )
-        else :
-            P.info('Project not set!')
-    except : pass
-    
+        P.info('Workspace exists!')
+
+
     #  Create workspace file :
     if not workspaceExists :
         P.info('Creating Maya workspace.mel file...')
         workspace_text=mk_workspace( renPath )
+        #P.info(workspace_text)
         workspace_file=open( workspaceFile, 'w' )
         workspace_file.write( workspace_text )
         workspace_file.close
-    
+        P.info('Complete')
+
         #  Write out the render path :
         if renPath and os.path.isdir( renPath ) :
             try :
-                nim_file=open( os.path.join( path, 'nim.mel' ), 'w' )
+                nim_file=open( os.path.join(path,'nim.mel'),'w')
                 nim_file.write( renPath )
                 nim_file.close
             except : P.info( 'Sorry, unable to write the nim.mel file' )
-    
+
+
+    #  Set Project
+    try :
+        P.info('Setting Project...')
+        pathToSet=path.replace('\\', '/')
+        if os.path.isdir( pathToSet ) :
+            mm.eval( 'setProject "%s"' % pathToSet )
+            #mc.workspace( pathToSet, o=True)
+            P.info( 'nim_maya: Current Project Set: %s\n' % pathToSet )
+        else :
+            P.info('Project not set!')
+    except : pass
+
+
+
+    return True
+
+
+def makeProject(projectLocation='', renderPath='') :
+    'Create the new project and workspace setup'
+
+    createDirectories = True
+
+    # Get list of all standard file rules
+    fileRules = mm.eval('np_getDefaultFileRuleWidgets')
+    try:
+        #Update with NIM Render Directory
+        if renderPath:
+            imageRuleIndex=fileRules.index(u'images'.replace('\\','/'))
+            fileRules[imageRuleIndex+1]=unicode(renderPath)
+    except:
+        P.error('Could not set NIM render path in workspace.')
+
+    mc.workspace( projectLocation, openWorkspace=True )
+
+    if createDirectories :
+        print "Creating Directories";
+        # Set workspace current directory to the workspace root so relative paths created with -create are located correctly
+        mc.workspace( dir=mc.workspace(q=True,rootDirectory=True) )
+
+    items=len(fileRules)
+    for i in range(0 ,items-1, 2) :
+        # each rule has 2 entries: rulename, value
+        ruleName  = fileRules[i]
+        ruleValue = fileRules[i+1]
+        mc.workspace(fr=(ruleName,ruleValue))
+        if createDirectories :
+            mc.workspace(create=ruleValue)
+
+    #Adding images folder to project
+    mc.workspace(create='images')
+
+    mc.workspace(saveWorkspace=True)
+    mc.workspace(projectLocation,o=True)
+    mm.eval('if (`window -ex projectWindow`){print "Window Open"; deleteUI projectWindow;projectWindow;}')
+    mm.eval('np_resetBrowserPrefs;');
+
     return True
 
 

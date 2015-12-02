@@ -31,7 +31,7 @@ except :
 #  Variables :
 WIN=''
 startTime=''
-version='v1.0.2'
+version='v1.0.3'
 winTitle='NIM_'+version
 _os=platform.system().lower()
 _osCap=platform.system()
@@ -100,6 +100,7 @@ def mk( mode='open', _import=False, _export=False, ref=False, pub=False ) :
                 #win_parent=MaxPlus.Win32_GetMAXHWnd()
                 #WIN=GUI( parent=win_parent, mode=mode )
                 WIN=GUI( mode=mode )
+                MaxPlus.CUI.DisableAccelerators()
             except Exception, e :
                 P.error( 'Sorry, unable to retrieve variables from the NIM preference file.' )
                 P.error( '    %s' % traceback.print_exc() )
@@ -250,6 +251,9 @@ class GUI(QtGui.QMainWindow) :
             elif self.app=='Nuke' :
                 import nim_nuke as N
                 N.get_vars( nim=self.nimPrefs )
+            elif self.app=='3dsMax' :
+                import nim_3dsmax as Max
+                Max.get_vars( nim=self.nimPrefs )
         else :
             self.nimPrefs=Nim.NIM().ingest_prefs()
             #self.nimPrefs.Print()
@@ -771,6 +775,8 @@ class GUI(QtGui.QMainWindow) :
             self.nim.set_name( elem='fileExt', name='.nk' )
         elif self.app=='C4D' :
             self.nim.set_name( elem='fileExt', name='.c4d' )
+        elif self.app=='3dsMax' :
+            self.nim.set_name( elem='fileExt', name='.max' )
         
         #  Enable :
         for elem in ['job', 'server', 'asset', 'show', 'shot', 'task', 'base'] :
@@ -863,6 +869,8 @@ class GUI(QtGui.QMainWindow) :
                 self.btn_2.setVisible( True )
             elif self.app=='Nuke' :
                 self.btn_2.setVisible( False )
+            elif self.app=='3dsMax' :
+                self.btn_2.setVisible( True )
         
         #  File Extension elements :
         self.fileExtText.setVisible( False )
@@ -885,7 +893,9 @@ class GUI(QtGui.QMainWindow) :
         self.btn_1.clicked.connect( self.file_import )
         if self.app=='Maya' :
             self.btn_2.clicked.connect( self.maya_fileReference )
-        
+        elif self.app=='3dsMax' :
+            self.btn_2.clicked.connect( self.max_fileReference )
+
         self.complete=True
         return True
     
@@ -926,6 +936,11 @@ class GUI(QtGui.QMainWindow) :
             import nim_nuke as N
             N.get_vars( nim=self.nim )
             N.get_vars( nim=self.nimPrefs )
+        if self.nim.app()=='3dsMax' :
+            import nim_3dsmax as Max
+            Max.get_vars( nim=self.nim )
+            Max.get_vars( nim=self.nimPrefs )
+
         #  Populate the window elements :
         self.nim.set_filePath()
         
@@ -992,6 +1007,10 @@ class GUI(QtGui.QMainWindow) :
             self.nim.Input('fileExt').setVisible( False )
         elif self.app=='C4D' :
             self.nim.set_name( elem='fileExt', name='.c4d' )
+            self.fileExtText.setVisible( False )
+            self.nim.Input('fileExt').setVisible( False )
+        elif self.app=='3dsMax' :
+            self.nim.set_name( elem='fileExt', name='.max' )
             self.fileExtText.setVisible( False )
             self.nim.Input('fileExt').setVisible( False )
         
@@ -1182,6 +1201,12 @@ class GUI(QtGui.QMainWindow) :
                                     if re.search( '^'+basename+'.c4d$', _file ) :
                                         if _file not in files :
                                             files.append( _file )
+                            if self.app=='3dsMax' :
+                                temp_files=os.listdir( nimDir )
+                                for _file in temp_files :
+                                    if re.search( '^'+basename+'.max$', _file ) :
+                                        if _file not in files :
+                                            files.append( _file )
                         if files :
                             for _file in files :
                                 item=QtGui.QListWidgetItem( self.nim.Input( elem ) )
@@ -1225,6 +1250,8 @@ class GUI(QtGui.QMainWindow) :
                                     if ext !='.nk' : item.setFlags( QtCore.Qt.ItemIsEditable )
                                 elif self.app=='C4D' :
                                     if ext !='.c4d' : item.setFlags( QtCore.Qt.ItemIsEditable )
+                                elif self.app=='3dsMax' :
+                                    if ext !='.max' : item.setFlags( QtCore.Qt.ItemIsEditable )
                                 #  Select the item :
                                 self.nim.Input('ver').setCurrentItem( item )
                                 self.verPath.setText( fileDir )
@@ -1275,6 +1302,9 @@ class GUI(QtGui.QMainWindow) :
                                     elif self.app=='C4D' :
                                         if option['ext'] !='.c4d' :
                                             item.setFlags( QtCore.Qt.ItemIsEditable )
+                                    elif self.app=='3dsMax' :
+                                        if option['ext'] !='.max' :
+                                            item.setFlags( QtCore.Qt.ItemIsEditable )
                                     #  Select the item :
                                     #self.nim.Input( elem ).setCurrentItem( item )
                                     self.verPath.setText( nimDir )
@@ -1302,6 +1332,10 @@ class GUI(QtGui.QMainWindow) :
                                 elif self.app=='C4D' :
                                     ext=F.get_ext( filePath=option['filename'] )
                                     if ext !='.c4d' :
+                                        item.setFlags( QtCore.Qt.ItemIsEditable )
+                                elif self.app=='3dsMax' :
+                                    ext=F.get_ext( filePath=option['filename'] )
+                                    if ext !='.max' :
                                         item.setFlags( QtCore.Qt.ItemIsEditable )
                                 #  Set from preferences :
                                 if option['filename']+' - '+option['note']==self.pref_version and \
@@ -1336,6 +1370,10 @@ class GUI(QtGui.QMainWindow) :
                             elif self.app=='C4D' :
                                 ext=F.get_ext( filePath=option['filename'] )
                                 if ext !='.c4d' :
+                                    item.setFlags( QtCore.Qt.ItemIsEditable )
+                            elif self.app=='3dsMax' :
+                                ext=F.get_ext( filePath=option['filename'] )
+                                if ext !='.max' :
                                     item.setFlags( QtCore.Qt.ItemIsEditable )
                             #  Set from preferences :
                             if option['filename']+' - '+option['note']==self.pref_version and \
@@ -1505,6 +1543,8 @@ class GUI(QtGui.QMainWindow) :
                             if ext !='.nk' : item.setFlags( QtCore.Qt.ItemIsEditable )
                         elif self.app=='C4D' :
                             if ext !='.c4d' : item.setFlags( QtCore.Qt.ItemIsEditable )
+                        elif self.app=='3dsMax' :
+                            if ext !='.max' : item.setFlags( QtCore.Qt.ItemIsEditable )
                         #  Select the item :
                         self.nim.Input('ver').setCurrentItem( item )
                         self.verPath.setText( fileDir )
@@ -1588,6 +1628,8 @@ class GUI(QtGui.QMainWindow) :
                                     if option['ext'] !='.nk' : item.setFlags( QtCore.Qt.ItemIsEditable )
                                 elif self.app=='C4D' :
                                     if option['ext'] !='.c4d' : item.setFlags( QtCore.Qt.ItemIsEditable )
+                                elif self.app=='3dsMax' :
+                                    if option['ext'] !='.max' : item.setFlags( QtCore.Qt.ItemIsEditable )
                                 #  Select the item :
                                 self.nim.Input( elem ).setCurrentItem( item )
                                 self.verPath.setText( nimDir )
@@ -2046,6 +2088,13 @@ class GUI(QtGui.QMainWindow) :
             P.debug(' ')
             self.nim.Print( debug=True )
             P.debug(' ')
+
+        # Return focus to Main Window for 3dsMax
+        '''
+        if self.app=='3dsMax' :
+            import MaxPlus
+            MaxPlus.CUI.EnableAccelerators()
+        '''
     
     
     #  File Operations :
@@ -2064,6 +2113,9 @@ class GUI(QtGui.QMainWindow) :
             import hiero.core
             projects=hiero.core.projects()
             filePath=projects[0].path()
+        elif self.app=='3dsMax' :
+            import MaxPlus
+            filePath=MaxPlus.FileManager.GetFileNameAndPath()
         
         #  Error check file path :
         if not filePath :
@@ -2213,7 +2265,7 @@ class GUI(QtGui.QMainWindow) :
                 projPath=projPath.replace( '\\', '/' )
             if os.path.isdir( projPath ) :
                 mm.eval( 'setProject "%s"' % projPath )
-                P.info( '\nProject set to...\n    %s\n' % projPath )
+                P.info( '\nUI - Project set to...\n    %s\n' % projPath )
             else :
                 P.warning('\nProject was not set!\n')
             
@@ -2293,6 +2345,39 @@ class GUI(QtGui.QMainWindow) :
                 P.error( '    %s' % traceback.print_exc() )
                 return False
         
+        #  3dsMax :
+        if self.app=='3dsMax' :
+            #  Open :
+            try :
+                import MaxPlus
+                mpFM = MaxPlus.FileManager
+                mpPM = MaxPlus.PathManager
+                import nim_3dsmax as Max
+                mpFM.Open(filePath)
+            except Exception, e :
+                P.error( 'Failed reading the file: %s' % filePath )
+                P.error( '    %s' % traceback.print_exc() )
+                return False
+            
+            #  Set Project :
+            projPath=os.path.dirname( os.path.normpath( filePath ) ).replace( 'scenes', '' )
+            if _os=='windows' :
+                projPath=projPath.replace( '\\', '/' )
+            if os.path.isdir( projPath ) :
+                mpPM.SetProjectFolderDir( projPath )
+                P.info( '\nUI - Project set to...\n    %s\n' % projPath )
+            else :
+                P.warning('\nProject was not set!\n')
+            
+            #  Set Variables :
+            try :
+                import nim_3dsmax as Max
+                Max.set_vars( nim=self.nim )
+            except Exception, e :
+                P.error( 'Failed adding NIM attributes to Project Settings node...' )
+                P.error( '    %s' % traceback.print_exc() )
+                return False
+
         P.info( 'File, %s, opened!' % filePath )
         self.close()
         
@@ -2337,6 +2422,33 @@ class GUI(QtGui.QMainWindow) :
             import nuke
             nuke.nodePaste( filePath )
         
+        #  3dsMax Merge :
+        if self.app=='3dsMax' :
+            import MaxPlus
+            mpFM = MaxPlus.FileManager
+            #  Derive file name to use for namespace :
+            index=self.nim.Input('ver').currentItem().text().find(' - ')
+            fileName=self.nim.Input('ver').currentItem().text()[0:index]
+            grpName=os.path.splitext( fileName )[0]
+            
+            #  Import the file :
+            if os.path.isfile( filePath ) :
+                P.info('File found, importing the following file...')
+                P.info( '    %s' % filePath )
+                if self.checkBox.checkState() :
+                    #  Import file as a group :
+                    #mc.file( filePath, i=True, force=True, groupReference=True, groupName=grpName+'_GRP' )
+                    mpFM.Merge( filePath, True )
+                else :
+                    #  Import file :
+                    #mc.file( filePath, i=True, force=True )
+                    mpFM.Merge( filePath, True )
+            else :
+                msg='Sorry, file to import doesn\'t exist...\n    %s' % filePath
+                P.error( msg )
+                Win.popup( title='NIM - Import Error', msg=msg )
+                return
+
         #  Close window upon completion :
         self.close()
         
@@ -2348,7 +2460,7 @@ class GUI(QtGui.QMainWindow) :
         
         #  Set Selected flag for saving only the selected objects :
         selected=False
-        if self.app in ['Maya', 'Nuke'] :
+        if self.app in ['Maya', 'Nuke', '3dsMax'] :
             selected=self.checkBox.checkState()
         
        
@@ -2359,6 +2471,7 @@ class GUI(QtGui.QMainWindow) :
         if self.app=='Maya' : ext=self.nim.Input('fileExt').currentText()
         elif self.app=='Nuke' : ext='.nk'
         elif self.app=='C4D' : ext='.c4d'
+        elif self.app=='3dsMax' : ext='.max'
         
         #  Ensure that if tag has been entered, that the Basename doesn't already exist :
         if self.nim.name('tag') :
@@ -2392,6 +2505,7 @@ class GUI(QtGui.QMainWindow) :
         if self.app=='Maya' : ext=self.nim['fileExt']['input'].currentText()
         elif self.app=='Nuke' : ext='.nk'
         elif self.app=='C4D' : ext='.c4d'
+        elif self.app=='3dsMax' : ext='.max'
         #  Version Up :
         if self.nim.tab()=='SHOT' :
             Api.versionUp( projPath=self.nim.Input('server').currentText(), app=self.app, shotID=self.nim.ID('shot'), \
@@ -2410,13 +2524,14 @@ class GUI(QtGui.QMainWindow) :
         if self.app=='Maya' : ext=self.nim.Input('fileExt').currentText()
         elif self.app=='Nuke' : ext='.nk'
         elif self.app=='C4D' :  ext='.c4d'
+        elif self.app=='3dsMax' : ext='.max'
         #  Version Up File :
         P.info('\nPublish Step #1 - Versioning Up the file...')
         ver_filePath=Api.versionUp( nim=self.nim, win_launch=True )
         if ver_filePath :
             #  Run Checks :
-            P.info('\nPublishing Step #2 - Running Maya publish checks...')
-            #  TO DO -> Insert Maya publish checks.
+            P.info('\nPublishing Step #2 - Running publish checks...')
+            #  TO DO -> Insert publish checks.
             
             #  Publish :
             P.info('\nPublishing Step #3 - Publishing work file and sym-link...\n')
@@ -2447,6 +2562,11 @@ class GUI(QtGui.QMainWindow) :
                 elif self.nim.app().lower()=='hiero' :
                     print ver_filePath
                     print 'No Open protocal defined yet'
+                if self.nim.app().lower()=='3dsmax' :
+                    P.info( 'Publishing Step #5 - Opening work file...\n    %s' % ver_filePath )
+                    import MaxPlus
+                    mpFM = MaxPlus.FileManager
+                    mpFM.Open( ver_filePath )
             
             #  Set Variables :
             if self.nim.app().lower()=='maya' :
@@ -2455,6 +2575,9 @@ class GUI(QtGui.QMainWindow) :
             elif self.nim.app().lower()=='nuke' :
                 import nim_nuke as N
                 N.set_vars( nim=self.nim )
+            elif self.nim.app().lower()=='3dsmax' :
+                import nim_3dsmax as Max
+                Max.set_vars( nim=self.nim )
             
             #  Close window upon completion :
             P.info('\nClosing NIM Publish Window.\n')
@@ -2490,6 +2613,46 @@ class GUI(QtGui.QMainWindow) :
         self.close()
         return
 
+    #  Maya File Operations :
+    def max_fileReference(self) :
+        'References a given 3dsMax file'
+        import MaxPlus
+
+        #  Get File Path :
+        filePath=self.get_filePath()
+        
+        #  Derive file name to use for namespace :
+        index=self.nim.Input('ver').currentItem().text().find(' - ')
+        fileName=self.nim.Input('ver').currentItem().text()[0:index]
+        #  Remove file extension from file name :
+        fileName=os.path.splitext( fileName )[0]
+        
+        #  Reference the file :
+        if self.checkBox.checkState() :
+            #GROUPED
+            '''
+            mc.file( filePath, force=True, reference=True, namespace=fileName, groupReference=True, \
+                groupName=fileName+'_GRP' )
+            '''
+            #MaxPlus.SceneSetIgnoreFlag()
+            pass
+        else :
+            #NOT GROUPED
+            #mc.file( filePath, force=True, reference=True, namespace=fileName )
+            #MaxPlus.SceneSetIgnoreFlag()
+
+            value = MaxPlus.FPValue()
+            result = MaxPlus.Core.EvalMAXScript("xrefs.addNewXRefFile \""+filePath.replace('\\','/')+"\"", value)
+            if result:
+                P.info("File Referenced")
+            else:
+                P.error("Filepath: %s" % filePath)
+                print value.Get()
+            pass
+
+        #  Close window upon completion :
+        self.close()
+        return
 
 #  End of Class
 

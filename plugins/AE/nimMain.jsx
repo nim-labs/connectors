@@ -358,8 +358,7 @@ function setPref(prefPrefix, prefName, prefValue) {
 	nimPrefsFileTemp.close();
 	nimPrefsFile.close();
 	nimPrefsFileTemp.remove();
-	if (foundPref) return true;
-	else return false;
+	return true;
 }
 
 
