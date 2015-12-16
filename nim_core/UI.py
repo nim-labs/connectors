@@ -105,6 +105,17 @@ def mk( mode='open', _import=False, _export=False, ref=False, pub=False ) :
                 P.error( 'Sorry, unable to retrieve variables from the NIM preference file.' )
                 P.error( '    %s' % traceback.print_exc() )
                 return False
+
+        # Houdini :
+        elif app=='Houdini' :
+            try :
+                import hou
+                WIN=GUI( mode=mode )
+            except Exception, e :
+                P.error( 'Sorry, unable to retrieve variables from the NIM preference file.' )
+                P.error( '    %s' % traceback.print_exc() )
+                return False
+
     #  Set the window to one of five modes :
     if WIN.complete :
         P.info( '\nStarting up the NIM File Browser, in %s mode.' % mode )
@@ -777,6 +788,8 @@ class GUI(QtGui.QMainWindow) :
             self.nim.set_name( elem='fileExt', name='.c4d' )
         elif self.app=='3dsMax' :
             self.nim.set_name( elem='fileExt', name='.max' )
+        elif self.app=='Houdini' :
+            self.nim.set_name( elem='fileExt', name='.hip' )
         
         #  Enable :
         for elem in ['job', 'server', 'asset', 'show', 'shot', 'task', 'base'] :
@@ -871,6 +884,8 @@ class GUI(QtGui.QMainWindow) :
                 self.btn_2.setVisible( False )
             elif self.app=='3dsMax' :
                 self.btn_2.setVisible( True )
+            elif self.app=='Houdini' :
+                self.btn_2.setVisible( True )
         
         #  File Extension elements :
         self.fileExtText.setVisible( False )
@@ -895,6 +910,10 @@ class GUI(QtGui.QMainWindow) :
             self.btn_2.clicked.connect( self.maya_fileReference )
         elif self.app=='3dsMax' :
             self.btn_2.clicked.connect( self.max_fileReference )
+        elif self.app=='Houdini' :
+            #TODO
+            #self.btn_2.clicked.connect( self.houdini_fileReference )
+            pass
 
         self.complete=True
         return True
@@ -940,6 +959,12 @@ class GUI(QtGui.QMainWindow) :
             import nim_3dsmax as Max
             Max.get_vars( nim=self.nim )
             Max.get_vars( nim=self.nimPrefs )
+        if self.nim.app()=='Houdini' :
+            #TODO
+            #import nim_houdini as H
+            #H.get_vars( nim=self.nim )
+            #H.get_vars( nim=self.nimPrefs )
+            pass
 
         #  Populate the window elements :
         self.nim.set_filePath()
@@ -1011,6 +1036,10 @@ class GUI(QtGui.QMainWindow) :
             self.nim.Input('fileExt').setVisible( False )
         elif self.app=='3dsMax' :
             self.nim.set_name( elem='fileExt', name='.max' )
+            self.fileExtText.setVisible( False )
+            self.nim.Input('fileExt').setVisible( False )
+        elif self.app=='Houdini' :
+            self.nim.set_name( elem='fileExt', name='.hip' )
             self.fileExtText.setVisible( False )
             self.nim.Input('fileExt').setVisible( False )
         
@@ -1207,6 +1236,12 @@ class GUI(QtGui.QMainWindow) :
                                     if re.search( '^'+basename+'.max$', _file ) :
                                         if _file not in files :
                                             files.append( _file )
+                            if self.app=='Houdini' :
+                                temp_files=os.listdir( nimDir )
+                                for _file in temp_files :
+                                    if re.search( '^'+basename+'.hip$', _file ) :
+                                        if _file not in files :
+                                            files.append( _file )
                         if files :
                             for _file in files :
                                 item=QtGui.QListWidgetItem( self.nim.Input( elem ) )
@@ -1252,6 +1287,8 @@ class GUI(QtGui.QMainWindow) :
                                     if ext !='.c4d' : item.setFlags( QtCore.Qt.ItemIsEditable )
                                 elif self.app=='3dsMax' :
                                     if ext !='.max' : item.setFlags( QtCore.Qt.ItemIsEditable )
+                                elif self.app=='Houdini' :
+                                    if ext !='.hip' : item.setFlags( QtCore.Qt.ItemIsEditable )
                                 #  Select the item :
                                 self.nim.Input('ver').setCurrentItem( item )
                                 self.verPath.setText( fileDir )
@@ -1305,6 +1342,9 @@ class GUI(QtGui.QMainWindow) :
                                     elif self.app=='3dsMax' :
                                         if option['ext'] !='.max' :
                                             item.setFlags( QtCore.Qt.ItemIsEditable )
+                                    elif self.app=='Houdini' :
+                                        if option['ext'] !='.hip' :
+                                            item.setFlags( QtCore.Qt.ItemIsEditable )
                                     #  Select the item :
                                     #self.nim.Input( elem ).setCurrentItem( item )
                                     self.verPath.setText( nimDir )
@@ -1336,6 +1376,10 @@ class GUI(QtGui.QMainWindow) :
                                 elif self.app=='3dsMax' :
                                     ext=F.get_ext( filePath=option['filename'] )
                                     if ext !='.max' :
+                                        item.setFlags( QtCore.Qt.ItemIsEditable )
+                                elif self.app=='Houdini' :
+                                    ext=F.get_ext( filePath=option['filename'] )
+                                    if ext !='.hip' :
                                         item.setFlags( QtCore.Qt.ItemIsEditable )
                                 #  Set from preferences :
                                 if option['filename']+' - '+option['note']==self.pref_version and \
@@ -1374,6 +1418,10 @@ class GUI(QtGui.QMainWindow) :
                             elif self.app=='3dsMax' :
                                 ext=F.get_ext( filePath=option['filename'] )
                                 if ext !='.max' :
+                                    item.setFlags( QtCore.Qt.ItemIsEditable )
+                            elif self.app=='Houdini' :
+                                ext=F.get_ext( filePath=option['filename'] )
+                                if ext !='.hip' :
                                     item.setFlags( QtCore.Qt.ItemIsEditable )
                             #  Set from preferences :
                             if option['filename']+' - '+option['note']==self.pref_version and \
@@ -1545,6 +1593,8 @@ class GUI(QtGui.QMainWindow) :
                             if ext !='.c4d' : item.setFlags( QtCore.Qt.ItemIsEditable )
                         elif self.app=='3dsMax' :
                             if ext !='.max' : item.setFlags( QtCore.Qt.ItemIsEditable )
+                        elif self.app=='Houdini' :
+                            if ext !='.hip' : item.setFlags( QtCore.Qt.ItemIsEditable )
                         #  Select the item :
                         self.nim.Input('ver').setCurrentItem( item )
                         self.verPath.setText( fileDir )
@@ -1630,6 +1680,8 @@ class GUI(QtGui.QMainWindow) :
                                     if option['ext'] !='.c4d' : item.setFlags( QtCore.Qt.ItemIsEditable )
                                 elif self.app=='3dsMax' :
                                     if option['ext'] !='.max' : item.setFlags( QtCore.Qt.ItemIsEditable )
+                                elif self.app=='Houdini' :
+                                    if option['ext'] !='.hip' : item.setFlags( QtCore.Qt.ItemIsEditable )
                                 #  Select the item :
                                 self.nim.Input( elem ).setCurrentItem( item )
                                 self.verPath.setText( nimDir )

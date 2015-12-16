@@ -2,8 +2,15 @@
     Demonstrates the menu manager API.
 '''
 import MaxPlus
+import os,sys
 
-sys.path.append('I:/VAULT/modules/nim_dev')
+nim3dsMaxScriptPath = os.path.dirname(os.path.realpath(__file__))
+nim3dsMaxScriptPath = nim3dsMaxScriptPath.replace('\\','/')
+nimScriptPath = nim3dsMaxScriptPath.rstrip('/plugins/3dsMax/scripts')
+print "NIM Script Path: %s" % nimScriptPath
+
+#sys.path.append('[NIM_CONNECTOR_ROOT]')
+sys.path.append(nimScriptPath)
 import nim_core.UI as nimUI
 import nim_core.nim_api as nimAPI
 import nim_core.nim_file as nimFile
@@ -123,7 +130,7 @@ def createNimMenu(name):
         mb.AddItem(nimReload)
         
         menu = mb.Create(MaxPlus.MenuManager.GetMainMenu())
-        print 'menu created', menu.Title 
+        #print 'menu created', menu.Title 
     else:
         print 'The menu ', name, ' already exists'
 
@@ -146,12 +153,6 @@ def main():
     outputMenu(MaxPlus.MenuManager.GetMainMenu(), False)
     testLastItem(u"NIM")
     
-    '''
-    print "Unregistering the 'NIM' menu"
-    MaxPlus.MenuManager.UnregisterMenu(u"NIM")
-    outputMenu(MaxPlus.MenuManager.GetMainMenu(), False)
-    testLastItem(u"&Help")
-    '''
 
 if __name__ == '__main__':
     main()

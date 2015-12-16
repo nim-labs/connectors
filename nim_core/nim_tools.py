@@ -68,6 +68,8 @@ def get_comment( app='', num_requests=3 ) :
             comment=nim_win.popup( app='Hiero', title='NIM - Input Comment', msg=msgs[i], type='input' )
         elif app=='3dsMax' :
             comment=nim_win.popup( title='NIM - Input Comment', msg=msgs[i], type='input' )
+        elif app=='Houdini' :
+            comment=nim_win.popup( title='NIM - Input Comment', msg=msgs[i], type='input' )
         else :
             nim_print.info( 'Couldn\'t determine the application to prompt for a user comment.  :\'(' )
         #  Stop, once a comment has been input :
@@ -103,7 +105,7 @@ def mk_home() :
         if not os.path.exists( mk_dir ) :
             os.makedirs( mk_dir )
     
-    appDirs=['Maya', 'Nuke', 'C4D', '3dsMax']
+    appDirs=['Maya', 'Nuke', 'C4D', '3dsMax', 'Houdini']
     #  Make Application subdirectories :
     for appDir in appDirs :
         mk_dir=os.path.normpath( os.path.join( nimHome, 'apps', appDir ) )

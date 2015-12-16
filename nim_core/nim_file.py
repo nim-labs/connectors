@@ -66,11 +66,15 @@ def get_app() :
         import MaxPlus
         return '3dsMax'
     except : pass
+    try :
+        import hou
+        return 'Houdini'
+    except : pass
     return None
 
 def get_apps() :
     'Provides a list of supported applications'
-    return ['Maya', 'Nuke', 'C4D', 'Hiero', '3dsMax']
+    return ['Maya', 'Nuke', 'C4D', 'Hiero', '3dsMax', 'Houdini']
 
 def get_ext( filePath='' ) :
     'Retrieves the extension of a given file'
@@ -99,6 +103,8 @@ def get_ext( filePath='' ) :
             ext='.hrox'
         elif app=='3dsMax' :
             ext='.max'
+        elif app=='Houdini' :
+            ext='.hip'
         if ext :
             return ext
         else :
