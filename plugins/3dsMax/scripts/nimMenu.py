@@ -1,6 +1,16 @@
-'''
-    Demonstrates the menu manager API.
-'''
+#****************************************************************************
+#
+# Filename: 3dsMax/nimMenu.py
+# Version:  v1.0.3.151215
+#
+# Copyright (c) 2015 NIM Labs LLC
+# All rights reserved.
+#
+# Use of this software is subject to the terms of the NIM Labs license
+# agreement provided at the time of installation or download, or which
+# otherwise accompanies this software in either electronic or hard copy form.
+#
+# ****************************************************************************
 import MaxPlus
 import os,sys
 
