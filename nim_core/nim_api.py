@@ -31,7 +31,7 @@ import nim_tools
 import nim_win as Win
 
 #  Variables :
-version='v0.7.2'
+version='v1.0.3'
 winTitle='NIM_'+version
 
 
@@ -193,6 +193,10 @@ def get_app() :
     try :
         import MaxPlus
         return '3dsMax'
+    except : pass
+    try :
+        import hou
+        return 'Houdini'
     except : pass
     return None
 
@@ -905,6 +909,9 @@ def versionUp( nim=None, padding=2, selected=False, win_launch=False, pub=False,
         elif nim.app()=='3dsMax' :
             import nim_3dsmax as Max
             Max.get_vars( nim=nim )
+        elif nim.app()=='Houdini' :
+            import nim_houdini as Houdini
+            Houdini.get_vars( nim=nim )
     
     #  Error check :
     try :
@@ -1089,6 +1096,28 @@ def versionUp( nim=None, padding=2, selected=False, win_launch=False, pub=False,
                             P.info('NIM: %s \n' % verUpNim.name(elem='base'))
                             import nim_3dsmax as Max
                             Max.set_vars( nim=verUpNim )
+                            nim = verUpNim
+                            
+                        except Exception, e :
+                            P.error( 'Failed reading the file: %s' % filePath )
+                            P.error( '    %s' % traceback.print_exc() )
+                            return False
+
+                    elif nim.app()=='Houdini' :
+                        import hou
+                        try :
+                            #TODO: check unsaved changed RuntimeError
+                            #if hou.hipFile.hasUnsavedChanges():
+                            #    raise RuntimeError
+                            #hou.hipFile.load(file_name=str(filePath), suppress_save_prompt=True)
+                            P.error('Loading File in nim_api')
+                            filePath = filePath.replace('\\','/')
+                            hou.hipFile.load(file_name=str(filePath))
+                            #  Set env vars brought over from nim_file
+                            P.info('Setting Environment Variables')
+                            P.info('NIM: %s \n' % verUpNim.name(elem='base'))
+                            import nim_houdini as Houdini
+                            Houdini.set_vars( nim=verUpNim )
                             nim = verUpNim
                             
                         except Exception, e :

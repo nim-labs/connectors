@@ -265,6 +265,9 @@ class GUI(QtGui.QMainWindow) :
             elif self.app=='3dsMax' :
                 import nim_3dsmax as Max
                 Max.get_vars( nim=self.nimPrefs )
+            elif self.app=='Houdini' :
+                import nim_houdini as Houdini
+                Houdini.get_vars( nim=self.nimPrefs )
         else :
             self.nimPrefs=Nim.NIM().ingest_prefs()
             #self.nimPrefs.Print()
@@ -911,8 +914,7 @@ class GUI(QtGui.QMainWindow) :
         elif self.app=='3dsMax' :
             self.btn_2.clicked.connect( self.max_fileReference )
         elif self.app=='Houdini' :
-            #TODO
-            #self.btn_2.clicked.connect( self.houdini_fileReference )
+            self.btn_2.clicked.connect( self.houdini_fileReference )
             pass
 
         self.complete=True
@@ -960,10 +962,9 @@ class GUI(QtGui.QMainWindow) :
             Max.get_vars( nim=self.nim )
             Max.get_vars( nim=self.nimPrefs )
         if self.nim.app()=='Houdini' :
-            #TODO
-            #import nim_houdini as H
-            #H.get_vars( nim=self.nim )
-            #H.get_vars( nim=self.nimPrefs )
+            import nim_houdini as Houdini
+            Houdini.get_vars( nim=self.nim )
+            Houdini.get_vars( nim=self.nimPrefs )
             pass
 
         #  Populate the window elements :
@@ -2168,6 +2169,9 @@ class GUI(QtGui.QMainWindow) :
         elif self.app=='3dsMax' :
             import MaxPlus
             filePath=MaxPlus.FileManager.GetFileNameAndPath()
+        elif self.app=='Houdini' :
+            import hou
+            filePath=hou.hipFile.name()
         
         #  Error check file path :
         if not filePath :
@@ -2430,6 +2434,48 @@ class GUI(QtGui.QMainWindow) :
                 P.error( '    %s' % traceback.print_exc() )
                 return False
 
+
+        #  Houdini :
+        if self.app=='Houdini' :
+            #  Open :
+            try :
+                import hou
+                import nim_houdini as Houdini
+                #TODO: check for unsaved file change RuntimeError
+                #if hou.hipFile.hasUnsavedChanges():
+                #    raise RuntimeError
+                #hou.hipFile.load(file_name=str(filePath), suppress_save_prompt=True)
+                P.error('Loading file in UI-2451')
+                filePath=filePath.replace( '\\', '/' )
+                hou.hipFile.load(file_name=str(filePath))
+            except Exception, e :
+                P.error( 'Failed reading the file: %s' % filePath )
+                P.error( '    %s' % traceback.print_exc() )
+                return False
+            
+            #  Set Project :
+            projPath=os.path.dirname( os.path.normpath( filePath ) ).replace( 'scenes', '' )
+            if _os=='windows' :
+                projPath=projPath.replace( '\\', '/' )
+            if os.path.isdir( projPath ) :
+                # update the environment variables
+                os.environ.update({"JOB": str(projPath)})
+                # update JOB using hscript
+                hou.hscript("set -g JOB = '" + str(projPath) + "'")
+                #hou.allowEnvironmentVariableToOverwriteVariable("JOB", True)
+                P.info( '\nUI - Project set to...\n    %s\n' % projPath )
+            else :
+                P.warning('\nProject was not set!\n')
+            
+            #  Set Variables :
+            try :
+                import nim_houdini as Houdini
+                Houdini.set_vars( nim=self.nim )
+            except Exception, e :
+                P.error( 'Failed adding NIM attributes to Project Settings node...' )
+                P.error( '    %s' % traceback.print_exc() )
+                return False
+
         P.info( 'File, %s, opened!' % filePath )
         self.close()
         
@@ -2489,12 +2535,37 @@ class GUI(QtGui.QMainWindow) :
                 P.info( '    %s' % filePath )
                 if self.checkBox.checkState() :
                     #  Import file as a group :
-                    #mc.file( filePath, i=True, force=True, groupReference=True, groupName=grpName+'_GRP' )
+                    #TODO: Group on Import
                     mpFM.Merge( filePath, True )
                 else :
                     #  Import file :
                     #mc.file( filePath, i=True, force=True )
                     mpFM.Merge( filePath, True )
+            else :
+                msg='Sorry, file to import doesn\'t exist...\n    %s' % filePath
+                P.error( msg )
+                Win.popup( title='NIM - Import Error', msg=msg )
+                return
+
+        #  Houdini Merge :
+        if self.app=='Houdini' :
+            import hou
+            #  Derive file name to use for namespace :
+            index=self.nim.Input('ver').currentItem().text().find(' - ')
+            fileName=self.nim.Input('ver').currentItem().text()[0:index]
+            grpName=os.path.splitext( fileName )[0]
+            
+            #  Import the file :
+            if os.path.isfile( filePath ) :
+                P.info('File found, importing the following file...')
+                P.info( '    %s' % filePath )
+                if self.checkBox.checkState() :
+                    #  Import file as a group :
+                    #TODO: Group on Import
+                    hou.hipFile.merge( str(filePath) )
+                else :
+                    #  Import file :
+                    hou.hipFile.merge( str(filePath) )
             else :
                 msg='Sorry, file to import doesn\'t exist...\n    %s' % filePath
                 P.error( msg )
@@ -2512,7 +2583,7 @@ class GUI(QtGui.QMainWindow) :
         
         #  Set Selected flag for saving only the selected objects :
         selected=False
-        if self.app in ['Maya', 'Nuke', '3dsMax'] :
+        if self.app in ['Maya', 'Nuke', '3dsMax','Houdini'] :
             selected=self.checkBox.checkState()
         
        
@@ -2524,6 +2595,7 @@ class GUI(QtGui.QMainWindow) :
         elif self.app=='Nuke' : ext='.nk'
         elif self.app=='C4D' : ext='.c4d'
         elif self.app=='3dsMax' : ext='.max'
+        elif self.app=='Houdini' : ext='.hip'
         
         #  Ensure that if tag has been entered, that the Basename doesn't already exist :
         if self.nim.name('tag') :
@@ -2558,6 +2630,7 @@ class GUI(QtGui.QMainWindow) :
         elif self.app=='Nuke' : ext='.nk'
         elif self.app=='C4D' : ext='.c4d'
         elif self.app=='3dsMax' : ext='.max'
+        elif self.app=='Houdini' : ext='.hip'
         #  Version Up :
         if self.nim.tab()=='SHOT' :
             Api.versionUp( projPath=self.nim.Input('server').currentText(), app=self.app, shotID=self.nim.ID('shot'), \
@@ -2577,6 +2650,7 @@ class GUI(QtGui.QMainWindow) :
         elif self.app=='Nuke' : ext='.nk'
         elif self.app=='C4D' :  ext='.c4d'
         elif self.app=='3dsMax' : ext='.max'
+        elif self.app=='Houdini' : ext='.hip'
         #  Version Up File :
         P.info('\nPublish Step #1 - Versioning Up the file...')
         ver_filePath=Api.versionUp( nim=self.nim, win_launch=True )
@@ -2619,7 +2693,17 @@ class GUI(QtGui.QMainWindow) :
                     import MaxPlus
                     mpFM = MaxPlus.FileManager
                     mpFM.Open( ver_filePath )
-            
+                if self.nim.app().lower()=='houdini' :
+                    P.info( 'Publishing Step #5 - Opening work file...\n    %s' % ver_filePath )
+                    import hou
+                    #TODO: check unsaved changed Runtime Error
+                    #if hou.hipFile.hasUnsavedChanges():
+                    #    raise RuntimeError
+                    #hou.hipFile.load(file_name=str(ver_filePath), suppress_save_prompt=True) 
+                    P.error('Loading file UI - 2706')
+                    ver_filePath=ver_filePath.replace('\\','/')
+                    hou.hipFile.load(file_name=str(ver_filePath))
+
             #  Set Variables :
             if self.nim.app().lower()=='maya' :
                 import nim_maya as M
@@ -2630,6 +2714,9 @@ class GUI(QtGui.QMainWindow) :
             elif self.nim.app().lower()=='3dsmax' :
                 import nim_3dsmax as Max
                 Max.set_vars( nim=self.nim )
+            elif self.nim.app().lower()=='houdini' :
+                import nim_houdini as Houdini
+                Houdini.set_vars( nim=self.nim )
             
             #  Close window upon completion :
             P.info('\nClosing NIM Publish Window.\n')
@@ -2665,7 +2752,7 @@ class GUI(QtGui.QMainWindow) :
         self.close()
         return
 
-    #  Maya File Operations :
+    #  3dsMax File Operations :
     def max_fileReference(self) :
         'References a given 3dsMax file'
         import MaxPlus
@@ -2700,6 +2787,49 @@ class GUI(QtGui.QMainWindow) :
             else:
                 P.error("Filepath: %s" % filePath)
                 print value.Get()
+            pass
+
+        #  Close window upon completion :
+        self.close()
+        return
+
+
+    #  3dsMax File Operations :
+    def houdini_fileReference(self) :
+        'References a given 3dsMax file'
+        import hou
+        #TODO: look up houdini referencing
+        #  Get File Path :
+        filePath=self.get_filePath()
+        
+        #  Derive file name to use for namespace :
+        index=self.nim.Input('ver').currentItem().text().find(' - ')
+        fileName=self.nim.Input('ver').currentItem().text()[0:index]
+        #  Remove file extension from file name :
+        fileName=os.path.splitext( fileName )[0]
+        
+        #  Reference the file :
+        if self.checkBox.checkState() :
+            #GROUPED
+            '''
+            mc.file( filePath, force=True, reference=True, namespace=fileName, groupReference=True, \
+                groupName=fileName+'_GRP' )
+            '''
+            #MaxPlus.SceneSetIgnoreFlag()
+            pass
+        else :
+            #NOT GROUPED
+            #mc.file( filePath, force=True, reference=True, namespace=fileName )
+            #MaxPlus.SceneSetIgnoreFlag()
+            '''
+            value = MaxPlus.FPValue()
+            result = MaxPlus.Core.EvalMAXScript("xrefs.addNewXRefFile \""+filePath.replace('\\','/')+"\"", value)
+            if result:
+                P.info("File Referenced")
+            else:
+                P.error("Filepath: %s" % filePath)
+                print value.Get()
+            '''
             pass
 
         #  Close window upon completion :

@@ -167,6 +167,13 @@ def get_filePath() :
             fm = MaxPlus.FileManager
             filePath=fm.GetFileNameAndPath()
         except : pass
+    #   Houdini :
+    if not filePath :
+        try :
+            import hou
+            P.debug("get_filePath: Houdini Found")
+            filePath=hou.hipFile.name()
+        except : pass
 
     #  Return :
     if filePath :
@@ -455,6 +462,16 @@ def verUp( nim=None, padding=2, selected=False, win_launch=False, pub=False, sym
             P.warning( '    Unable to create 3dsMax project directories.' )
     elif nim.app()=='3dsMax' :
         P.warning( 'Didn\'t create 3dsMax project directories.' )
+
+    #  Make Houdini Project directory :
+    if os.path.isdir( projDir ) and nim.app()=='Houdini' :
+        import nim_houdini as Houdini
+        if Houdini.mk_proj( path=projDir, renPath=renDir ) :
+            P.info( 'Created Houdini project directorires within...\n    %s' % projDir )
+        else :
+            P.warning( '    Unable to create Houdini project directories.' )
+    elif nim.app()=='Houdini' :
+        P.warning( 'Didn\'t create Houdini project directories.' )
     
     
     #  Save :
@@ -555,6 +572,23 @@ def verUp( nim=None, padding=2, selected=False, win_launch=False, pub=False, sym
             P.info( 'Saving selected items as %s \n' % new_filePath )
             maxFM.SaveSelected(new_filePath)
 
+    #  Houdini :
+    if nim.app()=='Houdini' :
+        import hou
+        #  Save File :
+        if not selected :
+            #  Set Vars :
+            import nim_houdini as Houdini
+            Houdini.set_vars( nim=nim )
+            #Save File
+            P.info( 'Saving file as %s \n' % new_filePath )
+            hou.hipFile.save(file_name=str(new_filePath))
+        else :
+            #Save Selected Items
+            #TODO: set to saveSelect items... currently saving entire scene
+            P.info( 'Saving selected items as %s \n' % new_filePath )
+            hou.hipFile.save(file_name=str(new_filePath))
+
     #  Make a copy of the file, if publishing :
     if pub and not symLink :
         pub_fileName=basename+ext
@@ -612,6 +646,9 @@ def scripts_reload() :
         elif app=='3dsMax' :
             import nim_3dsmax as Max
             reload(Max)
+        elif app=='Houdini' :
+            import nim_houdini as Houdini
+            reload(Houdini)
         P.info( '    NIM scripts. have been reloaded.' )
     except Exception, e :
         print 'Sorry, problem reloading scripts...'
