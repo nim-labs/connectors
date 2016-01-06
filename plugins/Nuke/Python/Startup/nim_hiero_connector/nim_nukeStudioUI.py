@@ -974,6 +974,9 @@ class NimNS_saveDialog(QDialog):
 		#Get NIM Jobs
 		self.nim_jobID = None
 		self.nim_jobs = nimAPI.get_jobs(self.nim_userID)
+		if not self.nim_jobs :
+			print "No Jobs Found"
+			self.nim_jobs["None"]="0"
 		
 		
 		
