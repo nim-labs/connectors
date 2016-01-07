@@ -2241,7 +2241,8 @@ class GUI(QtGui.QMainWindow) :
         
         P.debug('file_open - filePath: %s' % filePath)
          
-        '''THIS CODE SHOULD BE DEPRICATED'''
+        # DEPRICATED ---->
+        '''
         #  Derive Server Path from File Name :
         if not self.nim.server() :
             for sp in ['winPath', 'osxPath', 'path'] :
@@ -2249,9 +2250,9 @@ class GUI(QtGui.QMainWindow) :
                 if prefix==os.path.normpath( filePath[:len(prefix)] ) :
                     self.nim.set_server( path=prefix )
                     break
-        '''END DEPRICATED'''
+        '''
+        # <---- END DEPRICATED
 
-        '''TEST: FIXING BAD PATH CALLS ABOVE'''
         # Get Server OS Path from server ID
         P.info("FileID: %s" % self.nim.ID('ver'))
         
@@ -2269,9 +2270,8 @@ class GUI(QtGui.QMainWindow) :
             self.saveServerPref = True
 
         #  Convert file path :
-        #filePath=F.os_filePath( path=filePath, nim=self.nim, serverID=open_file_serverID )
         filePath=F.os_filePath( path=filePath, nim=self.nim )
-        P.info("filePath: %s" % filePath)
+        #P.info("filePath: %s" % filePath)
 
         #  Set File Version :
         ver=F.get_ver( filePath=filePath )

@@ -181,24 +181,19 @@ def get_filePath() :
     else :
         return False
 
-def os_filePath( path='', nim=None, serverID=None ) :
+def os_filePath( path='', nim=None ) :
     'Returns the platform specific path to a filepath.'
     filePath, fp_noServer, server='', '', ''
     
-    P.info("os_filePath PATH: %s" % path)
+    #P.info("os_filePath PATH: %s" % path)
     #  Error Checking :
     if not nim.ID('job') :
         P.warning('Unable to find a platform specific OS path')
         return path
-    #serverDict=Api.get_jobServers( nim.ID('job') ) - REMOVED Returning all servers... Need just current server
-    # BUG: If opening a file after initial file is set, this gets the wrong server info
-    # Needs to be determined from file being opened, not from current server info
-    if serverID :
-        serverDict=Api.get_serverInfo( serverID )
-    else :
-        serverDict=Api.get_serverInfo( nim.server(get='ID') )
 
-    P.info("serverDict: %s" % serverDict)
+    #serverDict=Api.get_jobServers( nim.ID('job') ) - REMOVED Returning all servers... Need just current server
+    serverDict=Api.get_serverInfo( nim.server(get='ID') )
+    #P.info("serverDict: %s" % serverDict)
 
     if not serverDict or not len(serverDict) :
         P.warning('Unable to find a platform specific OS path')
@@ -206,12 +201,15 @@ def os_filePath( path='', nim=None, serverID=None ) :
     
     if nim.server() :
         fp_noServer=path[len(nim.server()):]
+
+    # The following removed - redundant
     '''
     if nim.tab()=='SHOT' :
         serverDict=Api.get_jobServers( nim.ID('job') )
     elif nim.tab()=='ASSET' :
         serverDict=Api.get_jobServers( nim.ID('job') )
     '''
+    
     #if serverDict and len(serverDict)>0 :      # removed to only compare to single server  
     if serverDict and len(serverDict)==1 :      # failed if more than one server found in serverDict
 
