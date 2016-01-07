@@ -99,7 +99,8 @@ class NimProcessorUIBase(IProcessorUI):
 
     self.nim_OS = platform.system()
 
-    self.nim_userID = nimAPI.get_userID()
+    self.nim_userID = nimAPI.get_userID(self.user)
+    print "NIM: user=%s" % self.user
     print "NIM: userID=%s" % self.nim_userID
     print "NIM: default job=%s" % self.pref_job
 

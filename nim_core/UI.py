@@ -595,6 +595,10 @@ class GUI(QtGui.QMainWindow) :
         #===------------------------
         
         self.cssFiles=glob.glob( self.pref_styleSheetDir+'*.css' )
+        #TODO: Fix reading of self.pref_styleSheetDir...  or set to application for Houdini - 
+        # QtGui.QApplication.instance().styleSheet() - OR - hou.ui.qtStyleSheet()
+        #self.cssFiles=glob.glob( 'I:/VAULT/modules/nim_dev/css/*.css' )
+
         self.cssFiles.append('None')
         #  Add menu items to menu :
         if self.cssFiles :

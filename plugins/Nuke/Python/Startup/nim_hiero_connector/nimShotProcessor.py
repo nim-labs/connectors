@@ -553,8 +553,12 @@ class NimShotProcessor(hiero.core.ProcessorBase):
                        The Nuke comp will be created but not logged into NIM."
                 nim_doSave = False
               
-              userID = nimAPI.get_userID()
-              print "userID: %s" % userID
+
+              nim_prefInfo = nimPrefs.read()
+              user = nim_prefInfo['NIM_User']
+              userID = nimAPI.get_userID(user)
+              print "NIM: user=%s" % user
+              print "NIM: userID: %s" % userID
 
               #Derive basename from file ( TODO: give option to use shot_task_tag_ver.nk method )
               #Using filename entered in Export window

@@ -71,7 +71,8 @@ class NimHieroExport(QAction):
 
 			self.nim_OS = platform.system()
 			
-			nim_userID = nimAPI.get_userID()
+			nim_userID = nimAPI.get_userID(self.user)
+			print "NIM: user=%s" % self.user
 			print "NIM: userID=%s" % nim_userID
 			print "NIM: default job=%s" % self.pref_job
 

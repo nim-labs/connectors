@@ -369,6 +369,7 @@ class NimNS_openDialog(QDialog):
 
 		self.app=nimFile.get_app()
 		self.prefs=nimPrefs.read()
+
 		try:
 			self.user=self.prefs['NIM_User']
 			self.pref_job=self.prefs[self.app+'_Job']
@@ -383,7 +384,8 @@ class NimNS_openDialog(QDialog):
 
 		self.nim_OS = platform.system()
 		
-		self.nim_userID = nimAPI.get_userID()
+		self.nim_userID = nimAPI.get_userID(self.user)
+		print "NIM: user=%s" % self.user
 		print "NIM: userID=%s" % self.nim_userID
 		print "NIM: default job=%s" % self.pref_job
 
@@ -925,7 +927,8 @@ class NimNS_saveDialog(QDialog):
 
 		self.nim_OS = platform.system()
 		
-		self.nim_userID = nimAPI.get_userID()
+		self.nim_userID = nimAPI.get_userID(self.user)
+		print "NIM: user=%s" % self.user
 		print "NIM: userID=%s" % self.nim_userID
 		print "NIM: default job=%s" % self.pref_job
 
@@ -1515,7 +1518,21 @@ class NimNS_versionDialog(QDialog):
 		super(NimNS_versionDialog, self).__init__()
 		'''NIM NukeStudio Project Management UI'''
 
-		self.nim_userID = nimAPI.get_userID()
+		self.prefs=nimPrefs.read()
+		try:
+			self.user=self.prefs['NIM_User']
+			#self.pref_job=self.prefs[self.app+'_Job']
+			#self.pref_show=self.prefs[self.app+'_Show']
+			#self.pref_server=self.prefs[self.app+'_ServerPath']
+			#self.pref_task=self.prefs[self.app+'_Task']
+			#self.pref_basename=self.prefs[self.app+'_Basename']
+			#self.pref_version=self.prefs[self.app+'_Version']
+		except:
+			#return False
+			pass
+
+		self.nim_userID = nimAPI.get_userID(self.user)
+		print "NIM: user=%s" % self.user
 		print "NIM: userID=%s" % self.nim_userID
 
 		self.nim_comment = ''
