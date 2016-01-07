@@ -770,10 +770,10 @@ def add_file( nim=None, filePath='', comment='', pub=False ) :
     
     #  Error check input :
     if not projPath or not app or not nim.name( 'task' ) or not fileBase or not ext or not ver :
-        P.error( 'api.versionUp function did not get the proper variables passed to it...  Exiting.' )
+        P.error( 'api.add_file function did not get the proper variables passed to it...  Exiting.' )
         return False
     if not nim.ID( 'asset' ) and not nim.ID( 'shot' ) :
-        P.error( 'api.versionUp function needs to be given either a shot, or asset, ID number...  Exiting.' )
+        P.error( 'api.add_file function needs to be given either a shot, or asset, ID number...  Exiting.' )
         return False
     if not nim.name( 'comment' ) :
         nim.set_name( elem='comment', name=nim_tools.get_comment( app=app, num_requests=1 ) )

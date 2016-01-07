@@ -181,28 +181,40 @@ def get_filePath() :
     else :
         return False
 
-def os_filePath( path='', nim=None ) :
+def os_filePath( path='', nim=None, serverID=None ) :
     'Returns the platform specific path to a filepath.'
     filePath, fp_noServer, server='', '', ''
     
+    P.info("os_filePath PATH: %s" % path)
     #  Error Checking :
     if not nim.ID('job') :
         P.warning('Unable to find a platform specific OS path')
         return path
-    serverDict=Api.get_servers( nim.ID('job') )
-    
+    #serverDict=Api.get_jobServers( nim.ID('job') ) - REMOVED Returning all servers... Need just current server
+    # BUG: If opening a file after initial file is set, this gets the wrong server info
+    # Needs to be determined from file being opened, not from current server info
+    if serverID :
+        serverDict=Api.get_serverInfo( serverID )
+    else :
+        serverDict=Api.get_serverInfo( nim.server(get='ID') )
+
+    P.info("serverDict: %s" % serverDict)
+
     if not serverDict or not len(serverDict) :
         P.warning('Unable to find a platform specific OS path')
         return path
     
     if nim.server() :
         fp_noServer=path[len(nim.server()):]
+    '''
     if nim.tab()=='SHOT' :
-        serverDict=Api.get_servers( nim.ID('job') )
+        serverDict=Api.get_jobServers( nim.ID('job') )
     elif nim.tab()=='ASSET' :
-        serverDict=Api.get_servers( nim.ID('job') )
-    if serverDict and len(serverDict)>0 :      #was if serverDict and len(serverDict)==1  -  failed if more than one server found in serverDict
-        
+        serverDict=Api.get_jobServers( nim.ID('job') )
+    '''
+    #if serverDict and len(serverDict)>0 :      # removed to only compare to single server  
+    if serverDict and len(serverDict)==1 :      # failed if more than one server found in serverDict
+
         #  Substitute Windows Paths :
         if serverDict[0]['winPath']:
             #P.info('Reading Window Path...')
@@ -296,7 +308,7 @@ def verUp( nim=None, padding=2, selected=False, win_launch=False, pub=False, sym
     
 
     ''' TEST SETTING THE SERVER ID HERE'''
-    #print "TEST SERVER ID: %s" % str(nim.server(get='ID'))
+    P.info("TEST SERVER ID: %s" % str(nim.server(get='ID')))
     # Get Server OS Path from server ID
     serverOsPathInfo = Api.get_serverOSPath( nim.server(get='ID'), platform.system() )
     P.info("Server OS Path: %s" % serverOsPathInfo)
@@ -329,6 +341,7 @@ def verUp( nim=None, padding=2, selected=False, win_launch=False, pub=False, sym
     
     
     #  Convert file directory :
+    #P.info("fileDir: %s" % fileDir)
     fileDir=os_filePath( path=fileDir, nim=nim )
     P.info( 'File Directory = %s' %  fileDir )
     projDir=os_filePath( path=projDir, nim=nim )

@@ -2259,6 +2259,7 @@ class GUI(QtGui.QMainWindow) :
 
         if open_file_versionInfo:
             open_file_serverID = open_file_versionInfo[0]['serverID']
+            self.nim.set_server( ID=open_file_serverID )
             P.info("ServerID: %s" % open_file_serverID)
             serverOsPathInfo = Api.get_serverOSPath( open_file_serverID, platform.system() )
             P.info("Server OS Path Info: %s" % serverOsPathInfo)
@@ -2268,8 +2269,9 @@ class GUI(QtGui.QMainWindow) :
             self.saveServerPref = True
 
         #  Convert file path :
+        #filePath=F.os_filePath( path=filePath, nim=self.nim, serverID=open_file_serverID )
         filePath=F.os_filePath( path=filePath, nim=self.nim )
-        P.debug("filePath: %s" % filePath)
+        P.info("filePath: %s" % filePath)
 
         #  Set File Version :
         ver=F.get_ver( filePath=filePath )
@@ -2434,7 +2436,6 @@ class GUI(QtGui.QMainWindow) :
                 P.error( '    %s' % traceback.print_exc() )
                 return False
 
-
         #  Houdini :
         if self.app=='Houdini' :
             #  Open :
@@ -2483,10 +2484,11 @@ class GUI(QtGui.QMainWindow) :
 
     
     def file_import(self) :
-        'Imports elements into a Maya or Nuke scene file'
+        'Imports elements into a scene file'
         
         #  Get file path :
         path=self.get_filePath()
+        # TODO: check file path conversion for multiple server scenario
         filePath=F.os_filePath( path=path, nim=self.nim )
         
         #  Maya Import :
