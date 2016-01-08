@@ -14,21 +14,12 @@
 import hou
 import os,sys
 
-'''
-nimHoudiniScriptPath = os.path.dirname(os.path.realpath(__file__))
-nimHoudiniScriptPath = nimHoudiniScriptPath.replace('\\','/')
-nimScriptPath = nimHoudiniScriptPath.rstrip('/plugins/Houdini/scripts')
-print "NIM Script Path: %s" % nimScriptPath
-'''
-
 action = sys.argv[1]
-nimScriptPath = sys.argv[2]
+
+nimScriptPath = hou.expandString('$NIM_CONNECTOR_ROOT')
+sys.path.append(nimScriptPath)
 print "NIM Script Path: %s" % nimScriptPath
 
-#sys.path.append('[NIM_CONNECTOR_ROOT]')
-#sys.path.append(nimScriptPath)
-
-sys.path.append('I:/VAULT/modules/nim_dev')
 
 import nim_core.UI as nimUI
 import nim_core.nim_api as nimAPI
@@ -66,6 +57,15 @@ def publishAction():
     nimUI.mk('PUB')
     print 'NIM: publishAction'
 
+def changeUserAction():
+    try:
+        nimUI.GUI().update_user()
+    except Exception, e :
+        print 'Sorry, there was a problem choosing NIM user...'
+        print '    %s' % traceback.print_exc()
+    print 'NIM: changeUserAction'
+
+
 def reloadScriptsAction():
     nimFile.scripts_reload()
     print 'NIM: reloadScriptsAction'
@@ -91,6 +91,9 @@ if action == 'ver':
 
 if action == 'pub':
 	publishAction()
+
+if action == 'user':
+    changeUserAction()
 
 if action == 'reload':
 	reloadScriptsAction()

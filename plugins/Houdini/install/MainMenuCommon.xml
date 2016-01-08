@@ -52,6 +52,12 @@
 
       <separatorItem/>
       
+      <scriptItem id="nimChangeUser">
+        <label>Change User</label>
+        <scriptPath>$NIM_CONNECTOR_ROOT/plugins/Houdini/scripts/nimMenu.py</scriptPath>
+        <scriptArgs>user</scriptArgs>
+      </scriptItem>
+
       <scriptItem id="nimReload">
         <label>Reload Scripts</label>
         <scriptPath>$NIM_CONNECTOR_ROOT/plugins/Houdini/scripts/nimMenu.py</scriptPath>
