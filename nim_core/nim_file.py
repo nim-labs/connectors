@@ -181,7 +181,7 @@ def get_filePath() :
     else :
         return False
 
-def os_filePath( path='', nim=None ) :
+def os_filePath( path='', nim=None, serverID=None ) :
     'Returns the platform specific path to a filepath.'
     filePath, fp_noServer, server='', '', ''
     
@@ -191,8 +191,10 @@ def os_filePath( path='', nim=None ) :
         P.warning('Unable to find a platform specific OS path')
         return path
 
-    #serverDict=Api.get_jobServers( nim.ID('job') ) - REMOVED Returning all servers... Need just current server
-    serverDict=Api.get_serverInfo( nim.server(get='ID') )
+    if not serverID :
+        serverDict=Api.get_serverInfo( nim.server(get='ID') )
+    else :
+        serverDict=Api.get_serverInfo( serverID )
     #P.info("serverDict: %s" % serverDict)
 
     if not serverDict or not len(serverDict) :

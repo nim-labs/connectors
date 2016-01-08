@@ -27,6 +27,7 @@ import base64
 import platform
 import ntpath
 
+import nim_core.UI as nimUI
 import nim_core.nim_api as nimAPI
 import nim_core.nim_prefs as nimPrefs
 import nim_core.nim_file as nimFile
@@ -557,6 +558,11 @@ class NimShotProcessor(hiero.core.ProcessorBase):
               nim_prefInfo = nimPrefs.read()
               user = nim_prefInfo['NIM_User']
               userID = nimAPI.get_userID(user)
+              if not userID :
+                nimUI.GUI().update_user()
+                userInfo=nim.NIM().userInfo()
+                user = userInfo['name']
+                userID = userInfo['ID']
               print "NIM: user=%s" % user
               print "NIM: userID: %s" % userID
 

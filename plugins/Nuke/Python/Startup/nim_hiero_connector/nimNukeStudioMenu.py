@@ -45,7 +45,9 @@ nimProjectSaveAsAction = QAction('Save As',nimProjectMenu)
 #nimProjectExportSelectedAction = QAction('Export Selected',nimProjectMenu) 
 nimProjectVersionUpAction = QAction('Version Up',nimProjectMenu) 
 #nimProjectPublishAction = QAction('Publish',nimProjectMenu) 
-nimProjectReloadScriptsAction = QAction('Reload Scripts',nimProjectMenu) 
+nimProjectChangeUserAction = QAction('Change User',nimProjectMenu)
+nimProjectReloadScriptsAction = QAction('Reload Scripts',nimProjectMenu)
+ 
 
 def nimProjectOpen(): nimNS_UI.openDialog()
 #ef nimProjectImport(): nimUI.mk("LOAD", _import=True)
@@ -53,6 +55,14 @@ def nimProjectSaveAs(): nimNS_UI.saveDialog()
 #def nimProjectExportSelected(): nimUI.mk("SAVE", _export=True)
 def nimProjectVersionUp(): nimNS_UI.versionDialog()
 #def nimProjectPublish(): nimUI.mk("PUB")
+
+def nimProjectChangeUser():
+	try:
+		nimUI.GUI().update_user()
+	except Exception, e :
+		print 'Sorry, there was a problem choosing NIM user...'
+		print '    %s' % traceback.print_exc()
+	return
 
 def nimProjectReloadScripts():
 	try:
@@ -77,9 +87,11 @@ def nimProjectReloadScripts():
 		reload(nimShotProcessor)
 		P.info('Scripts Reloaded')
 	except Exception, e :
-		print 'Sorry, problem reloading scripts...'
+		print 'Sorry, there was a problem reloading the NIM scripts...'
 		print '    %s' % traceback.print_exc()
 	return
+
+
 
 # Set the QAction to trigger the launchNuke method 
 nimProjectOpenAction.triggered.connect(nimProjectOpen)
@@ -88,7 +100,8 @@ nimProjectSaveAsAction.triggered.connect(nimProjectSaveAs)
 #nimProjectExportSelectedAction.triggered.connect(nimProjectExportSelected)
 nimProjectVersionUpAction.triggered.connect(nimProjectVersionUp) 
 #nimProjectPublishAction.triggered.connect(nimProjectPublish) 
-nimProjectReloadScriptsAction.triggered.connect(nimProjectReloadScripts) 
+nimProjectReloadScriptsAction.triggered.connect(nimProjectReloadScripts)
+nimProjectChangeUserAction.triggered.connect(nimProjectChangeUser) 
 
 # Add the Action to your Nuke Menu
 nimProjectMenu.insertAction(None, nimProjectOpenAction)
@@ -98,7 +111,9 @@ nimProjectMenu.insertAction(None, nimProjectSaveAsAction)
 nimProjectMenu.insertAction(None, nimProjectVersionUpAction)
 #nimProjectMenu.insertAction(None, nimProjectPublishAction)
 nimProjectMenu.addSeparator()
+nimProjectMenu.insertAction(None, nimProjectChangeUserAction)
 nimProjectMenu.insertAction(None, nimProjectReloadScriptsAction)
+
 
 # END NIM Project Menu ----------------------------------------------------------------
 

@@ -595,6 +595,7 @@ class GUI(QtGui.QMainWindow) :
         #===------------------------
         
         self.cssFiles=glob.glob( self.pref_styleSheetDir+'*.css' )
+
         #TODO: Fix reading of self.pref_styleSheetDir...  or set to application for Houdini - 
         # QtGui.QApplication.instance().styleSheet() - OR - hou.ui.qtStyleSheet()
         #self.cssFiles=glob.glob( 'I:/VAULT/modules/nim_dev/css/*.css' )
@@ -1811,6 +1812,13 @@ class GUI(QtGui.QMainWindow) :
                     Prefs.update( attr='useStyleSheet', app=self.app, value=self.cssFiles[index] )
                 else :
                     self.setStyleSheet('')
+                    #TODO: Fix Houdini StyleSheets
+                    if self.app=='Houdini' :
+                        import hou
+                        try :
+                            self.setStyleSheet(hou.ui.qtStyleSheet())
+                        except:
+                            P.info('NIM: Unable to set stylesheet')
 
     
     def update_server(self) :
@@ -2492,8 +2500,19 @@ class GUI(QtGui.QMainWindow) :
         
         #  Get file path :
         path=self.get_filePath()
+        
+        # Get Server OS Path from server ID
+        P.info("FileID: %s" % self.nim.ID('ver'))
+        
+        open_file_versionInfo = Api.get_verInfo( self.nim.ID('ver') )
+
+        if open_file_versionInfo:
+            open_file_serverID = open_file_versionInfo[0]['serverID']
+            #serverOsPathInfo = Api.get_serverOSPath( open_file_serverID, platform.system() )
+            #serverOSPath = serverOsPathInfo[0]['serverOSPath']
+
         # TODO: check file path conversion for multiple server scenario
-        filePath=F.os_filePath( path=path, nim=self.nim )
+        filePath=F.os_filePath( path=path, nim=self.nim, serverID=open_file_serverID )
         
         #  Maya Import :
         if self.app=='Maya' :

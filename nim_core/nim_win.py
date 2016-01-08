@@ -172,7 +172,7 @@ def userInfo( url='' ) :
     for u in users : userList.append( u['username'] )
     
     #  Create window to get user name from :
-    user=popup( title='User Name Error', msg='Pick a username to use', type='comboBox', \
+    user=popup( title='Select NIM User', msg='Pick a username to use', type='comboBox', \
         pyside=True, _list=userList )
     
     #  Get user ID :

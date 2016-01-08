@@ -24,6 +24,7 @@ import base64
 import platform
 import ntpath
 
+import nim_core.UI as nimUI
 import nim_core.nim_api as nimAPI
 import nim_core.nim_prefs as nimPrefs
 import nim_core.nim_file as nimFile
@@ -385,9 +386,16 @@ class NimNS_openDialog(QDialog):
 		self.nim_OS = platform.system()
 		
 		self.nim_userID = nimAPI.get_userID(self.user)
+		if not self.nim_userID :
+			nimUI.GUI().update_user()
+			userInfo=nim.NIM().userInfo()
+			self.user = userInfo['name']
+			self.nim_userID = userInfo['ID']
+
 		print "NIM: user=%s" % self.user
 		print "NIM: userID=%s" % self.nim_userID
 		print "NIM: default job=%s" % self.pref_job
+
 
 
 		self.nim_jobPaths = {}
@@ -928,9 +936,17 @@ class NimNS_saveDialog(QDialog):
 		self.nim_OS = platform.system()
 		
 		self.nim_userID = nimAPI.get_userID(self.user)
+		if not self.nim_userID :
+			nimUI.GUI().update_user()
+			userInfo=nim.NIM().userInfo()
+			self.user = userInfo['name']
+			self.nim_userID = userInfo['ID']
+
 		print "NIM: user=%s" % self.user
 		print "NIM: userID=%s" % self.nim_userID
 		print "NIM: default job=%s" % self.pref_job
+
+		
 
 		self.nim_jobChooser = QComboBox()
 
@@ -1532,8 +1548,16 @@ class NimNS_versionDialog(QDialog):
 			pass
 
 		self.nim_userID = nimAPI.get_userID(self.user)
+		if not self.nim_userID :
+			nimUI.GUI().update_user()
+			userInfo=nim.NIM().userInfo()
+			self.user = userInfo['name']
+			self.nim_userID = userInfo['ID']
+
 		print "NIM: user=%s" % self.user
 		print "NIM: userID=%s" % self.nim_userID
+
+		
 
 		self.nim_comment = ''
 
