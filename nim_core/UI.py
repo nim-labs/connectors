@@ -2819,7 +2819,7 @@ class GUI(QtGui.QMainWindow) :
         return
 
 
-    #  3dsMax File Operations :
+    #  Houdini File Operations :
     def houdini_fileReference(self) :
         'References a given 3dsMax file'
         import hou

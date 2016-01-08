@@ -67,6 +67,15 @@ def publishAction():
     nimUI.mk('PUB')
     print 'NIM: publishAction'
 
+def changeUserAction():
+    print 'NIM: changeUserAction'
+    try:
+        nimUI.GUI().update_user()
+    except Exception, e :
+        print 'Sorry, there was a problem choosing NIM user...'
+        print '    %s' % traceback.print_exc()
+    return
+    
 def reloadScriptsAction():
     nimFile.scripts_reload()
     print 'NIM: reloadScriptsAction'
@@ -78,8 +87,8 @@ nimSaveAs = MaxPlus.ActionFactory.Create('Save As', 'Save As', saveFileAction)
 nimExportSelected = MaxPlus.ActionFactory.Create('Export Selected', 'Export Selected', saveSelectedAction)
 nimVersionUp = MaxPlus.ActionFactory.Create('Version Up', 'Version Up', versionUpAction)
 nimPublish = MaxPlus.ActionFactory.Create('Publish File', 'Publish', publishAction)
+nimChangeUser = MaxPlus.ActionFactory.Create('Change User', 'Change User', changeUserAction)
 nimReload = MaxPlus.ActionFactory.Create('Reload Scripts', 'Reload Scripts', reloadScriptsAction)
-
 
 def createNimMenu(name):
     if not MaxPlus.MenuManager.MenuExists(name):
@@ -133,6 +142,12 @@ def createNimMenu(name):
         
         mb.AddSeparator()
         
+        if nimChangeUser._IsValidWrapper():
+            print "Created nimChangeUser"
+        else:
+            print "Failed to create nimChangeUser"
+        mb.AddItem(nimChangeUser)
+
         if nimReload._IsValidWrapper():
             print "Created nimReload"
         else:

@@ -45,8 +45,7 @@ nimProjectSaveAsAction = QAction('Save As',nimProjectMenu)
 #nimProjectExportSelectedAction = QAction('Export Selected',nimProjectMenu) 
 nimProjectVersionUpAction = QAction('Version Up',nimProjectMenu) 
 #nimProjectPublishAction = QAction('Publish',nimProjectMenu) 
-nimProjectChangeUserAction = QAction('Change User',nimProjectMenu)
-nimProjectReloadScriptsAction = QAction('Reload Scripts',nimProjectMenu)
+
  
 
 def nimProjectOpen(): nimNS_UI.openDialog()
@@ -55,41 +54,6 @@ def nimProjectSaveAs(): nimNS_UI.saveDialog()
 #def nimProjectExportSelected(): nimUI.mk("SAVE", _export=True)
 def nimProjectVersionUp(): nimNS_UI.versionDialog()
 #def nimProjectPublish(): nimUI.mk("PUB")
-
-def nimProjectChangeUser():
-	try:
-		nimUI.GUI().update_user()
-	except Exception, e :
-		print 'Sorry, there was a problem choosing NIM user...'
-		print '    %s' % traceback.print_exc()
-	return
-
-def nimProjectReloadScripts():
-	try:
-		P.info('Reloading Scripts')
-		import nim_core.nim_prefs as nimPrefs
-		import nim_core.UI as nimUI
-		import nim_core.nim_api as nimAPI
-		import nim_core.nim_file as nimFile
-		import nimHieroConnector as nimHC
-		#import nimHieroExport as nimHExport
-		import nim_nukeStudioUI as nimNS_UI
-		import nimProcessorUI
-		import nimShotProcessor
-		reload(nimPrefs)
-		reload(nimUI)
-		reload(nimAPI)
-		reload(nimFile)
-		reload(nimHC)
-		#reload(nimHExport)
-		reload(nimNS_UI)
-		reload(nimProcessorUI)
-		reload(nimShotProcessor)
-		P.info('Scripts Reloaded')
-	except Exception, e :
-		print 'Sorry, there was a problem reloading the NIM scripts...'
-		print '    %s' % traceback.print_exc()
-	return
 
 
 
@@ -100,8 +64,8 @@ nimProjectSaveAsAction.triggered.connect(nimProjectSaveAs)
 #nimProjectExportSelectedAction.triggered.connect(nimProjectExportSelected)
 nimProjectVersionUpAction.triggered.connect(nimProjectVersionUp) 
 #nimProjectPublishAction.triggered.connect(nimProjectPublish) 
-nimProjectReloadScriptsAction.triggered.connect(nimProjectReloadScripts)
-nimProjectChangeUserAction.triggered.connect(nimProjectChangeUser) 
+
+
 
 # Add the Action to your Nuke Menu
 nimProjectMenu.insertAction(None, nimProjectOpenAction)
@@ -110,9 +74,7 @@ nimProjectMenu.insertAction(None, nimProjectSaveAsAction)
 #nimProjectMenu.insertAction(None, nimProjectExportSelectedAction)
 nimProjectMenu.insertAction(None, nimProjectVersionUpAction)
 #nimProjectMenu.insertAction(None, nimProjectPublishAction)
-nimProjectMenu.addSeparator()
-nimProjectMenu.insertAction(None, nimProjectChangeUserAction)
-nimProjectMenu.insertAction(None, nimProjectReloadScriptsAction)
+
 
 
 # END NIM Project Menu ----------------------------------------------------------------
@@ -164,7 +126,8 @@ if nuke.env[ 'studio' ]:
 	nimCreateWriteTIFAction = QAction('TIF', nimCompWriteMenu)
 	nimCreateWriteMOVAction = QAction('MOV', nimCompWriteMenu)
 
-	nimCompReloadScriptsAction = QAction('Reload Scripts',nimCompMenu) 
+	#nimCompChangeUserAction = QAction('Change user',nimCompMenu) 
+	#nimCompReloadScriptsAction = QAction('Reload Scripts',nimCompMenu) 
 
 	def nimCreateWriteJPG(): nuke.createNode( 'WriteNIM_JPG' )
 	def nimCreateWritePNG(): nuke.createNode( 'WriteNIM_PNG' )
@@ -173,7 +136,8 @@ if nuke.env[ 'studio' ]:
 	def nimCreateWriteTIF(): nuke.createNode( 'WriteNIM_TIF' )
 	def nimCreateWriteMOV(): nuke.createNode( 'WriteNIM_MOV' )
 
-	def nimReloadCompScripts(): nimFile.scripts_reload()
+	#def nimCompChangeUser(): nimUI.GUI().update_user()
+	#def nimReloadCompScripts(): nimFile.scripts_reload()
 
 	# Set the QAction to trigger the launchNuke method 
 	nimCreateWriteJPGAction.triggered.connect(nimCreateWriteJPG) 
@@ -183,7 +147,8 @@ if nuke.env[ 'studio' ]:
 	nimCreateWriteTIFAction.triggered.connect(nimCreateWriteTIF) 
 	nimCreateWriteMOVAction.triggered.connect(nimCreateWriteMOV) 
 
-	nimCompReloadScriptsAction.triggered.connect(nimReloadCompScripts) 
+	#nimCompChangeUserAction.triggered.connect(nimCompChangeUser)
+	#nimCompReloadScriptsAction.triggered.connect(nimReloadCompScripts) 
 
 	# Add the Action to your Nuke Menu
 	nimCompWriteMenu.insertAction(None, nimCreateWriteJPGAction)
@@ -193,8 +158,68 @@ if nuke.env[ 'studio' ]:
 	nimCompWriteMenu.insertAction(None, nimCreateWriteTIFAction)
 	nimCompWriteMenu.insertAction(None, nimCreateWriteMOVAction)
 
-	nimCompMenu.addSeparator()
+	#nimCompMenu.addSeparator()
 
-	nimCompMenu.insertAction(None, nimCompReloadScriptsAction)
+	#nimCompMenu.insertAction(None, nimCompChangeUserAction)
+	#nimCompMenu.insertAction(None, nimCompReloadScriptsAction)
 
 # END NIM Comp Menu --------------------------------------------------------------------
+
+
+# NIM Settings Menu --------------------------------------------------------------------
+if nuke.env[ 'studio' ]:
+	nimSettingsMenu = nimMainMenu.addMenu('Settings')
+else:
+	nimSettingsMenu = nimMainMenu
+	nimMainMenu.addSeparator()
+
+nimProjectChangeUserAction = QAction('Change User',nimSettingsMenu)
+nimProjectReloadScriptsAction = QAction('Reload Scripts',nimSettingsMenu)
+
+
+def nimProjectChangeUser():
+	try:
+		nimUI.GUI().update_user()
+	except Exception, e :
+		print 'Sorry, there was a problem choosing NIM user...'
+		print '    %s' % traceback.print_exc()
+	return
+
+def nimProjectReloadScripts():
+	try:
+		P.info('Reloading Scripts')
+		import nim_core.nim_prefs as nimPrefs
+		import nim_core.UI as nimUI
+		import nim_core.nim_api as nimAPI
+		import nim_core.nim_file as nimFile
+		import nimHieroConnector as nimHC
+		#import nimHieroExport as nimHExport
+		import nim_nukeStudioUI as nimNS_UI
+		import nimProcessorUI
+		import nimShotProcessor
+		reload(nimPrefs)
+		reload(nimUI)
+		reload(nimAPI)
+		reload(nimFile)
+		reload(nimHC)
+		#reload(nimHExport)
+		reload(nimNS_UI)
+		reload(nimProcessorUI)
+		reload(nimShotProcessor)
+		
+		if nuke.env[ 'studio' ]:
+			nimFile.scripts_reload()
+
+		P.info('Scripts Reloaded')
+	except Exception, e :
+		print 'Sorry, there was a problem reloading the NIM scripts...'
+		print '    %s' % traceback.print_exc()
+	return
+
+
+nimProjectChangeUserAction.triggered.connect(nimProjectChangeUser) 
+nimProjectReloadScriptsAction.triggered.connect(nimProjectReloadScripts)
+
+
+nimSettingsMenu.insertAction(None, nimProjectChangeUserAction)
+nimSettingsMenu.insertAction(None, nimProjectReloadScriptsAction)
