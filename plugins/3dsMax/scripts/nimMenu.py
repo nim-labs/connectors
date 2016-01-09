@@ -146,15 +146,21 @@ def createNimMenu(name):
             print "Created nimChangeUser"
         else:
             print "Failed to create nimChangeUser"
-        mb.AddItem(nimChangeUser)
+        #mb.AddItem(nimChangeUser)
 
         if nimReload._IsValidWrapper():
             print "Created nimReload"
         else:
             print "Failed to create nimReload"
-        mb.AddItem(nimReload)
+        #mb.AddItem(nimReload)
+        
+        subMenu = MaxPlus.MenuBuilder(u"NIM Settings")
+        subMenu.AddItem(nimChangeUser)
+        subMenu.AddItem(nimReload)
         
         menu = mb.Create(MaxPlus.MenuManager.GetMainMenu())
+        nimSubMenu = subMenu.Create(menu)
+
         #print 'menu created', menu.Title 
     else:
         print 'The menu ', name, ' already exists'
@@ -168,6 +174,7 @@ def testLastItem(text):
 def main():
     print "Removing any previously left 'menu items'"
     MaxPlus.MenuManager.UnregisterMenu(u"NIM")
+    MaxPlus.MenuManager.UnregisterMenu(u"NIM Settings")
     
     print "Creating a new menu"
     testLastItem(u"&Help")

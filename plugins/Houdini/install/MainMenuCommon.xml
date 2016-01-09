@@ -16,12 +16,6 @@
         <scriptArgs>import</scriptArgs>
       </scriptItem>
 
-      <scriptItem id="nimRef">
-        <label>Reference</label>
-        <scriptPath>$NIM_CONNECTOR_ROOT/plugins/Houdini/scripts/nimMenu.py</scriptPath>
-        <scriptArgs>ref</scriptArgs>
-      </scriptItem>
-
       <separatorItem/>
 
       <scriptItem id="nimSaveAs">

@@ -2818,7 +2818,6 @@ class GUI(QtGui.QMainWindow) :
         self.close()
         return
 
-
     #  Houdini File Operations :
     def houdini_fileReference(self) :
         'References a given 3dsMax file'
@@ -2836,25 +2835,9 @@ class GUI(QtGui.QMainWindow) :
         #  Reference the file :
         if self.checkBox.checkState() :
             #GROUPED
-            '''
-            mc.file( filePath, force=True, reference=True, namespace=fileName, groupReference=True, \
-                groupName=fileName+'_GRP' )
-            '''
-            #MaxPlus.SceneSetIgnoreFlag()
             pass
         else :
             #NOT GROUPED
-            #mc.file( filePath, force=True, reference=True, namespace=fileName )
-            #MaxPlus.SceneSetIgnoreFlag()
-            '''
-            value = MaxPlus.FPValue()
-            result = MaxPlus.Core.EvalMAXScript("xrefs.addNewXRefFile \""+filePath.replace('\\','/')+"\"", value)
-            if result:
-                P.info("File Referenced")
-            else:
-                P.error("Filepath: %s" % filePath)
-                print value.Get()
-            '''
             pass
 
         #  Close window upon completion :
