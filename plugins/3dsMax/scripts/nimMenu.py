@@ -154,12 +154,13 @@ def createNimMenu(name):
             print "Failed to create nimReload"
         #mb.AddItem(nimReload)
         
-        subMenu = MaxPlus.MenuBuilder(u"NIM Settings")
-        subMenu.AddItem(nimChangeUser)
-        subMenu.AddItem(nimReload)
-        
         menu = mb.Create(MaxPlus.MenuManager.GetMainMenu())
-        nimSubMenu = subMenu.Create(menu)
+        
+        if not MaxPlus.MenuManager.MenuExists(u"NIM Settings"):
+            subMenu = MaxPlus.MenuBuilder(u"NIM Settings")
+            subMenu.AddItem(nimChangeUser)
+            subMenu.AddItem(nimReload)
+            nimSubMenu = subMenu.Create(menu)
 
         #print 'menu created', menu.Title 
     else:
