@@ -593,13 +593,13 @@ class GUI(QtGui.QMainWindow) :
         
         #  Style Sheet Menu :
         #===------------------------
-        
-        self.cssFiles=glob.glob( self.pref_styleSheetDir+'*.css' )
+        self.pref_styleSheetDir = self.pref_styleSheetDir.rstrip('/')
+        self.cssFiles=glob.glob( self.pref_styleSheetDir+'/*.css' )
 
         #TODO: Fix reading of self.pref_styleSheetDir...  or set to application for Houdini - 
         # QtGui.QApplication.instance().styleSheet() - OR - hou.ui.qtStyleSheet()
-        #self.cssFiles=glob.glob( 'I:/VAULT/modules/nim_dev/css/*.css' )
 
+        '''
         self.cssFiles.append('None')
         #  Add menu items to menu :
         if self.cssFiles :
@@ -630,9 +630,11 @@ class GUI(QtGui.QMainWindow) :
                 styleMenu.addAction( self.menuItems[-1] )
                 #  Connect menu item :
                 self.menuItems[-1].triggered.connect( self.update_styleSheet )
-        
+        '''
+
         #  Print success :
         P.debug( '%.3f => Menu bar created' % (time.time()-startTime) )
+
     
     
     #  Customize Window :
@@ -711,6 +713,8 @@ class GUI(QtGui.QMainWindow) :
         except : pass
         self.btn_1.clicked.connect( self.file_open )
         
+        self.setNimStyle()
+
         self.complete=True
         return True
     
@@ -812,6 +816,8 @@ class GUI(QtGui.QMainWindow) :
         except : pass
         self.btn_1.clicked.connect( self.file_saveAs )
         
+        self.setNimStyle()
+
         self.complete=True
         return True
     
@@ -922,6 +928,8 @@ class GUI(QtGui.QMainWindow) :
             self.btn_2.clicked.connect( self.houdini_fileReference )
             pass
 
+        self.setNimStyle()
+
         self.complete=True
         return True
     
@@ -942,6 +950,8 @@ class GUI(QtGui.QMainWindow) :
         self.btn_1.setText( 'Version Up' )
         self.btn_2.setVisible( False )
         
+        self.setNimStyle()
+
         return True
     
     
@@ -1056,6 +1066,8 @@ class GUI(QtGui.QMainWindow) :
         try : self.btn_1.clicked.disconnect()
         except : pass
         self.btn_1.clicked.connect( self.file_pub )
+        
+        self.setNimStyle()
         
         self.complete=True
         return True
@@ -1812,13 +1824,6 @@ class GUI(QtGui.QMainWindow) :
                     Prefs.update( attr='useStyleSheet', app=self.app, value=self.cssFiles[index] )
                 else :
                     self.setStyleSheet('')
-                    #TODO: Fix Houdini StyleSheets
-                    if self.app=='Houdini' :
-                        import hou
-                        try :
-                            self.setStyleSheet(hou.ui.qtStyleSheet())
-                        except:
-                            P.info('NIM: Unable to set stylesheet')
 
     
     def update_server(self) :
@@ -2843,6 +2848,28 @@ class GUI(QtGui.QMainWindow) :
         #  Close window upon completion :
         self.close()
         return
+
+
+    def setNimStyle(self) :
+        if self.app=='Houdini' :
+            import hou
+            try :
+                #self.pref_styleSheetDir = self.pref_styleSheetDir.rstrip('/')
+                nimScriptPath = os.path.dirname(os.path.realpath(__file__))
+                nimScriptPath = nimScriptPath.replace('\\','/')
+                nimScriptPath = nimScriptPath.rstrip('/nim_core')
+                darkStyleSheetPath = nimScriptPath+'/css/nim_darkStyleSheet.css'
+                with open(darkStyleSheetPath, 'r') as styleSheetFile:
+                    darkStyleSheet=styleSheetFile.read().replace('\n', '')
+
+                darkStyleSheet = darkStyleSheet.replace('down_arrow.png',nimScriptPath+'/css/resources/down_arrow.png')
+                self.setStyleSheet(darkStyleSheet)
+                #self.setStyleSheet(hou.ui.qtStyleSheet())
+                #self.setStyleSheet(QtGui.QApplication.instance().styleSheet())
+            except:
+                P.info('NIM: Unable to set stylesheet')
+        return
+
 
 #  End of Class
 
