@@ -1,7 +1,7 @@
 #****************************************************************************
 #
 # Filename: 3dsMax/nimMenu.py
-# Version:  v1.0.3.151215
+# Version:  v1.0.5.160118
 #
 # Copyright (c) 2015 NIM Labs LLC
 # All rights reserved.
@@ -12,14 +12,13 @@
 #
 # ****************************************************************************
 import MaxPlus
-import os,sys
+import os,sys,re
 
 nim3dsMaxScriptPath = os.path.dirname(os.path.realpath(__file__))
 nim3dsMaxScriptPath = nim3dsMaxScriptPath.replace('\\','/')
-nimScriptPath = nim3dsMaxScriptPath.rstrip('/plugins/3dsMax/scripts')
+nimScriptPath = re.sub(r"\/plugins/3dsMax/scripts$", "", nim3dsMaxScriptPath)
 print "NIM Script Path: %s" % nimScriptPath
 
-#sys.path.append('[NIM_CONNECTOR_ROOT]')
 sys.path.append(nimScriptPath)
 import nim_core.UI as nimUI
 import nim_core.nim_api as nimAPI
