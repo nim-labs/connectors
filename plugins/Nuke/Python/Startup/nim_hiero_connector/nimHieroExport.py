@@ -72,7 +72,7 @@ class NimHieroExport(QAction):
 
 			self.nim_OS = platform.system()
 			
-			nim_userID = nimAPI.get_userID(self.user)
+			self.nim_userID = nimAPI.get_userID(self.user)
 			if not self.nim_userID :
 				nimUI.GUI().update_user()
 				userInfo=nim.NIM().userInfo()
@@ -80,7 +80,7 @@ class NimHieroExport(QAction):
 				self.nim_userID = userInfo['ID']
 
 			print "NIM: user=%s" % self.user
-			print "NIM: userID=%s" % nim_userID
+			print "NIM: userID=%s" % self.nim_userID
 			print "NIM: default job=%s" % self.pref_job
 
 			
@@ -95,7 +95,7 @@ class NimHieroExport(QAction):
 
 			#Get NIM Jobs
 			self.nim_jobID = None
-			self.nim_jobs = nimAPI.get_jobs(nim_userID)
+			self.nim_jobs = nimAPI.get_jobs(self.nim_userID)
 			if not self.nim_jobs :
 				print "No Jobs Found"
 				self.nim_jobs["None"]="0"
