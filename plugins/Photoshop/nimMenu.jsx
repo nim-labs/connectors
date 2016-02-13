@@ -55,7 +55,7 @@ function buildMenuUI(thisObj) {
 		}
 		commentDialog(function(comment, addElement) {
 			if (comment === false) return;
-			if (saveFile(metadata.classID, metadata.className, metadata.serverID, metadata.serverPath, metadata.taskID, metadata.taskFolder, metadata.basename, comment, false, addElement))
+			if (saveFile(metadata.classID, metadata.className, metadata.serverID, metadata.serverPath, metadata.taskID, metadata.taskName, metadata.taskFolder, metadata.basename, comment, false, addElement))
 				alert('New version saved.');
 			else
 				alert('Error: Version up failed!');
@@ -76,7 +76,7 @@ function buildMenuUI(thisObj) {
 		}
 		commentDialog(function(comment, addElement) {
 			if (comment === false) return;
-			if (!saveFile(metadata.classID, metadata.className, metadata.serverID, metadata.serverPath, metadata.taskID, metadata.taskFolder, metadata.basename, comment, true, addElement))
+			if (!saveFile(metadata.classID, metadata.className, metadata.serverID, metadata.serverPath, metadata.taskID, metadata.taskName, metadata.taskFolder, metadata.basename, comment, true, addElement))
 				alert('Error: Publish failed!');
 		});
 	}
