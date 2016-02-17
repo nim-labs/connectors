@@ -1,9 +1,9 @@
 #****************************************************************************
 #
 # Filename: 3dsMax/nimMenu.py
-# Version:  v1.0.5.160118
+# Version:  v1.2.5.160209
 #
-# Copyright (c) 2015 NIM Labs LLC
+# Copyright (c) 2016 NIM Labs LLC
 # All rights reserved.
 #
 # Use of this software is subject to the terms of the NIM Labs license
@@ -165,26 +165,18 @@ def createNimMenu(name):
     else:
         print 'The menu ', name, ' already exists'
 
-def getLastMenuItem(menu = MaxPlus.MenuManager.GetMainMenu()):
-    return list(menu.Items)[-1]
-    
-def testLastItem(text):
-    assert(getLastMenuItem().Title  == text)
-
 def main():
     print "Removing any previously left 'menu items'"
     MaxPlus.MenuManager.UnregisterMenu(u"NIM")
     MaxPlus.MenuManager.UnregisterMenu(u"NIM Settings")
     
     print "Creating a new menu"
-    testLastItem(u"&Help")
     outputMenu(MaxPlus.MenuManager.GetMainMenu(), False)
     
     print "Creating a new menu"
     createNimMenu(u"NIM")
     outputMenu(MaxPlus.MenuManager.GetMainMenu(), False)
-    testLastItem(u"NIM")
-    
+  
 
 if __name__ == '__main__':
     main()

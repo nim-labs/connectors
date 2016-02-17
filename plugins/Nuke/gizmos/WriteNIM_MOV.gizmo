@@ -1,72 +1,96 @@
-#! C:/Program Files/Nuke8.0v5/nuke-8.0.v5.dll -nx
-version 8.0 v5
+#! C:/Program Files/Nuke9.0v8/nuke-9.0.8.dll -nx
+#write_info WriteNIM_MOV5 file:"[ value nimPath ]/[value nimFolder]/[value nimFilename]" format:"2048 1556 1" chans:":" framerange:"1 100" fps:"0" colorspace:"default (Gamma1.8)" datatype:"unknown" transfer:"unknown" views:"main"
+version 9.0 v8
 Gizmo {
- addUserKnob {20 User l "WriteNIM MOV"}
- addUserKnob {26 outputFileText l Filename -STARTLINE T "NIM filename"}
- addUserKnob {41 nimCompTag l "Render Tag" T WriteNIM_MOV.nimCompTag}
- addUserKnob {41 nimFilename l INVISIBLE +INVISIBLE T WriteNIM_MOV.nimFilename}
- addUserKnob {22 refreshFilename l "Refresh Filename" t "This is just a check to visualize the output filename.  The output filename will always be correct.  This button just refreshed the display label incase the file was versioned up or the tag changed while the preference pane was open." T "nuke.thisNode()\['outputFileText'].setValue(nuke.thisNode()\['nimFilename'].value()+'.mov')" +STARTLINE}
- addUserKnob {52 pythonFilenameScript T "nuke.thisNode()\['outputFileText'].setValue(nuke.thisNode()\['nimFilename'].value()+'.mov')" +STARTLINE}
- addUserKnob {26 "" +STARTLINE}
- addUserKnob {41 channels T WriteNIM_MOV.channels}
- addUserKnob {41 frame_mode l frame T WriteNIM_MOV.frame_mode}
- addUserKnob {41 frame l "" -STARTLINE T WriteNIM_MOV.frame}
- addUserKnob {41 colorspace T WriteNIM_MOV.colorspace}
- addUserKnob {41 premultiplied T WriteNIM_MOV.premultiplied}
- addUserKnob {41 raw l "raw data" T WriteNIM_MOV.raw}
- addUserKnob {41 views T WriteNIM_MOV.views}
+ addUserKnob {20 User}
+ addUserKnob {26 outputFileText l Filename T AA_001_COMP_writeNode_v13.mov}
+ addUserKnob {41 nimCompTag l "Render Tag" T WriteNIM_MOV5.nimCompTag}
+ addUserKnob {41 nimFilename l INVISIBLE +INVISIBLE T WriteNIM_MOV5.nimFilename}
+ addUserKnob {22 refreshFilename l "Refresh Filename" t "This is just a check to visualize the output filename.  The output filename will always be correct.  This button just refreshed the display label incase the file was versioned up or the tag changed while the preference pane was open." T "nuke.thisNode()\['outputFileText'].setValue(nuke.thisNode()\['nimFilename'].value())" +STARTLINE}
+ addUserKnob {52 pythonFilenameScript T "nuke.thisNode()\['outputFileText'].setValue(nuke.thisNode()\['nimFilename'].value())" +STARTLINE}
  addUserKnob {26 "" l "mov Options"}
- addUserKnob {41 codec T WriteNIM_MOV.codec}
- addUserKnob {41 advanced T WriteNIM_MOV.advanced}
- addUserKnob {41 Flatten l "Fast Start" T WriteNIM_MOV.Flatten}
- addUserKnob {41 use_format_aspect l "use format aspect" T WriteNIM_MOV.use_format_aspect}
- addUserKnob {26 "" l " "}
- addUserKnob {41 ycbcr_matrix_type l "ycbcr matrix" T WriteNIM_MOV.ycbcr_matrix_type}
- addUserKnob {41 pixel_format l "pixel format" T WriteNIM_MOV.pixel_format}
- addUserKnob {41 write_nclc l "write nclc" T WriteNIM_MOV.write_nclc}
- addUserKnob {41 write_gamma l "write gamma" T WriteNIM_MOV.write_gamma}
- addUserKnob {41 write_prores l "write prores" T WriteNIM_MOV.write_prores}
- addUserKnob {41 audiofile l "audio file" T WriteNIM_MOV.audiofile}
- addUserKnob {41 audio_offset l "audio offset" T WriteNIM_MOV.audio_offset}
- addUserKnob {41 units T WriteNIM_MOV.units}
- addUserKnob {41 writeTimeCode l "write time code" T WriteNIM_MOV.writeTimeCode}
+ addUserKnob {41 meta_codec l codec T WriteNIM_MOV5.meta_codec}
+ addUserKnob {41 meta_encoder l encoder -STARTLINE T WriteNIM_MOV5.meta_encoder}
+ addUserKnob {41 mov32_codec l INVISIBLE +INVISIBLE T WriteNIM_MOV5.mov32_codec}
+ addUserKnob {41 mov64_dnxhd_codec_profile l "codec profile" T WriteNIM_MOV5.mov64_dnxhd_codec_profile}
+ addUserKnob {41 mov32_fps l fps T WriteNIM_MOV5.mov32_fps}
+ addUserKnob {41 mov32_audiofile l "audio file" T WriteNIM_MOV5.mov32_audiofile}
+ addUserKnob {41 mov32_audio_offset l "audio offset" T WriteNIM_MOV5.mov32_audio_offset}
+ addUserKnob {41 mov32_units l units T WriteNIM_MOV5.mov32_units}
+ addUserKnob {41 mov32_write_timecode l "write time code" -STARTLINE T WriteNIM_MOV5.mov32_write_timecode}
+ addUserKnob {20 mov32_advanced l Advanced +HIDDEN n 2}
+ mov32_advanced 1
+ addUserKnob {41 mov32_codecoptions l "codec options" T WriteNIM_MOV5.mov32_codecoptions}
+ addUserKnob {41 mov32_flatten l "fast start" -STARTLINE T WriteNIM_MOV5.mov32_flatten}
+ addUserKnob {41 mov32_use_format_aspect l "use format aspect" -STARTLINE T WriteNIM_MOV5.mov32_use_format_aspect}
+ addUserKnob {41 mov32_ycbcr_matrix_type l "ycbcr matrix" T WriteNIM_MOV5.mov32_ycbcr_matrix_type}
+ addUserKnob {41 mov32_pixel_format l "pixel format" T WriteNIM_MOV5.mov32_pixel_format}
+ addUserKnob {41 mov32_write_nclc l "write nclc" -STARTLINE T WriteNIM_MOV5.mov32_write_nclc}
+ addUserKnob {41 mov32_write_gamma l "write gamma" -STARTLINE T WriteNIM_MOV5.mov32_write_gamma}
+ addUserKnob {41 mov32_write_prores l "write prores" -STARTLINE T WriteNIM_MOV5.mov32_write_prores}
+ addUserKnob {20 "" n -1}
+ addUserKnob {41 mov64_format l INVISIBLE +INVISIBLE T WriteNIM_MOV5.mov64_format}
+ addUserKnob {41 mov64_codec l INVISIBLE +INVISIBLE T WriteNIM_MOV5.mov64_codec}
+ addUserKnob {41 mov64_fps l INVISIBLE +INVISIBLE T WriteNIM_MOV5.mov64_fps}
+ addUserKnob {41 mov64_audiofile l INVISIBLE +INVISIBLE T WriteNIM_MOV5.mov64_audiofile}
+ addUserKnob {41 mov64_audio_offset l INVISIBLE +INVISIBLE T WriteNIM_MOV5.mov64_audio_offset}
+ addUserKnob {41 mov64_units l INVISIBLE +INVISIBLE T WriteNIM_MOV5.mov64_units}
+ addUserKnob {41 mov64_write_timecode l INVISIBLE +INVISIBLE T WriteNIM_MOV5.mov64_write_timecode}
+ addUserKnob {20 mov64_advanced l Advanced n 2}
+ mov64_advanced 1
+ addUserKnob {41 mov64_dnxhd_encode_video_range l "output range" T WriteNIM_MOV5.mov64_dnxhd_encode_video_range}
+ addUserKnob {41 mov64_bitrate l bitrate T WriteNIM_MOV5.mov64_bitrate}
+ addUserKnob {41 mov64_bitrate_tolerance l "bitrate tolerance" T WriteNIM_MOV5.mov64_bitrate_tolerance}
+ addUserKnob {41 mov64_quality_min l "quality min" T WriteNIM_MOV5.mov64_quality_min}
+ addUserKnob {41 mov64_quality_max l max T WriteNIM_MOV5.mov64_quality_max}
+ addUserKnob {41 mov64_gop_size l "gop size" T WriteNIM_MOV5.mov64_gop_size}
+ addUserKnob {41 mov64_b_frames l "b frames" T WriteNIM_MOV5.mov64_b_frames}
+ addUserKnob {41 mov64_write_nclc l "write nclc" T WriteNIM_MOV5.mov64_write_nclc}
+ addUserKnob {20 "" n -1}
  addUserKnob {26 ""}
- addUserKnob {41 render_order l "render order" T WriteNIM_MOV.render_order}
- addUserKnob {41 Render T WriteNIM_MOV.Render}
- addUserKnob {41 first l "frame range" T WriteNIM_MOV.first}
- addUserKnob {41 last l "" -STARTLINE T WriteNIM_MOV.last}
- addUserKnob {41 use_limit l "limit to range" T WriteNIM_MOV.use_limit}
+ addUserKnob {41 render_order l "render order" T WriteNIM_MOV5.render_order}
+ addUserKnob {41 Render T WriteNIM_MOV5.Render}
+ addUserKnob {41 first l "frame range" T WriteNIM_MOV5.first}
+ addUserKnob {41 last l "" -STARTLINE T WriteNIM_MOV5.last}
+ addUserKnob {41 use_limit l "limit to range" T WriteNIM_MOV5.use_limit}
  addUserKnob {26 "" l " "}
- addUserKnob {41 reading l "read file" T WriteNIM_MOV.reading}
- addUserKnob {41 checkHashOnRead l "check file matches input" T WriteNIM_MOV.checkHashOnRead}
- addUserKnob {41 on_error l "missing frames" T WriteNIM_MOV.on_error}
- addUserKnob {41 reload l Reload T WriteNIM_MOV.reload}
+ addUserKnob {41 reading l "read file" T WriteNIM_MOV5.reading}
+ addUserKnob {41 checkHashOnRead l "check file matches input" T WriteNIM_MOV5.checkHashOnRead}
+ addUserKnob {41 on_error l "missing frames" T WriteNIM_MOV5.on_error}
+ addUserKnob {41 reload l Reload T WriteNIM_MOV5.reload}
  addUserKnob {20 "" l Python}
- addUserKnob {41 beforeRender l "before render" T WriteNIM_MOV.beforeRender}
- addUserKnob {41 beforeFrameRender l "before each frame" T WriteNIM_MOV.beforeFrameRender}
- addUserKnob {41 afterFrameRender l "after each frame" T WriteNIM_MOV.afterFrameRender}
- addUserKnob {41 afterRender l "after render" T WriteNIM_MOV.afterRender}
- addUserKnob {41 renderProgress l "render progress" T WriteNIM_MOV.renderProgress}
- addUserKnob {41 disable_1 l INVISIBLE +INVISIBLE T WriteNIM_PNG.disable}
+ addUserKnob {41 beforeRender l "before render" T WriteNIM_MOV5.beforeRender}
+ addUserKnob {41 beforeFrameRender l "before each frame" T WriteNIM_MOV5.beforeFrameRender}
+ addUserKnob {41 afterFrameRender l "after each frame" T WriteNIM_MOV5.afterFrameRender}
+ addUserKnob {41 afterRender l "after render" T WriteNIM_MOV5.afterRender}
+ addUserKnob {41 renderProgress l "render progress" T WriteNIM_MOV5.renderProgress}
 }
  Input {
   inputs 0
   name Input1
-  xpos 282
-  ypos 160
+  xpos 400
+  ypos -48
  }
  Write {
-  file "\[ value nimPath ]/\[value nimFolder]/\[value nimFilename].mov"
+  file "\[ value nimPath ]/\[value nimFolder]/\[value nimFilename]"
   file_type mov
-  codec avc1
-  pixel_format {{0} "default (YCbCr  8-bit 422 (2vuy))" "RGBA  8-bit" "YCbCr  8-bit 422 (2vuy)"}
+  meta_codec "rle "
+  mov32_codec "rle "
+  mov32_pixel_format {{0} "default (RGBA  8-bit)" "RGBA  8-bit"}
+  mov64_codec "rle "
+  mov64_bitrate 400000
+  mov64_bitrate_tolerance 40000000
+  mov64_quality_min 2
+  mov64_quality_max 31
+  mov64_gop_size 12
+  mov64_b_frames 0
   checkHashOnRead false
   version 1
-  beforeRender "import nim_tools; nim_tools.CheckOutputPath();"
-  name WriteNIM_MOV
-  xpos 282
-  ypos 200
-  disable {{parent.disable}}
+  beforeRender "import nim_tools; nim_tools.CheckOutputPath()"
+  name WriteNIM_MOV5
+  knobChanged "\nn = nuke.thisNode()\nk = nuke.thisKnob()\nif k.name()=='meta_encoder':\n    nParent = nuke.toNode( '.'.join( n.fullName().split('.')\[:-1] ) ) or nuke.root()\n    if n\['meta_encoder'].getValue()==0:\n        nParent\['mov64_dnxhd_codec_profile'].setVisible(True)\n        nParent\['mov64_advanced'].setVisible(True)\n        nParent\['mov32_advanced'].setVisible(False)\n    else:\n        nParent\['mov64_dnxhd_codec_profile'].setVisible(False)\n        nParent\['mov32_advanced'].setVisible(True)\n        nParent\['mov64_advanced'].setVisible(False)\n        \n"
+  xpos 400
+  ypos -8
   addUserKnob {20 User}
   addUserKnob {1 nimCompTag l "Render Tag" t "A tag to append to the current filename"}
   addUserKnob {1 nimPath l "NIM Path"}
@@ -74,11 +98,11 @@ Gizmo {
   addUserKnob {1 nimFolder l "NIM Folder"}
   nimFolder "\[value root.nim_basename]_v\[format %02d \[value root.nim_version]]\[ if \{ !\[string equal \[string trim \[value nimCompTag] \" \"] \"\"] \} \{return _\[string trim \[value nimCompTag] \" \"]\} ]"
   addUserKnob {1 nimFilename l "NIM Filename"}
-  nimFilename "\[value root.nim_basename]_v\[format %02d \[value root.nim_version]]\[ if \{ !\[string equal \[string trim \[value nimCompTag] \" \"] \"\"] \} \{return _\[string trim \[value nimCompTag] \" \"]\} ]"
+  nimFilename "\[value root.nim_basename]_v\[format %02d \[value root.nim_version]]\[ if \{ !\[string equal \[string trim \[value nimCompTag] \" \"] \"\"] \} \{return _\[string trim \[value nimCompTag] \" \"]\} ].\[value file_type]"
  }
  Output {
   name Output1
-  xpos 282
-  ypos 300
+  xpos 400
+  ypos 92
  }
 end_group
