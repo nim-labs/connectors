@@ -129,6 +129,7 @@ function buildPanelUI(userID, action) {
 		shotID = 0,
 		shotName = '',
 		taskID = 0,
+		taskName = '',
 		taskFolder = '',
 		showPub = 0,
 		basename = '',
@@ -382,6 +383,7 @@ function buildPanelUI(userID, action) {
 	taskDropdown.onChange = function() {
 		if (!this.selection || !this.selection.index) {
 			taskID = 0;
+			taskName = '';
 			taskFolder = '';
 			basename = '';
 			maxVersion = 0;
@@ -401,6 +403,7 @@ function buildPanelUI(userID, action) {
 			className = 'SHOT';
 		}
 		taskID = tasks[this.selection.index].ID;
+		taskName = tasks[this.selection.index].name;
 		taskFolder = tasks[this.selection.index].folder;
 		if (showPub)
 			basenames = nimAPI({ q: 'getBasenameAllPub', task_type_ID: taskID, itemID: classID, 'class': className });
@@ -545,12 +548,12 @@ function buildPanelUI(userID, action) {
 			if (assetID) {
 				classID = assetID;
 				className = 'ASSET';
-				newFileBasename = assetName + '_' + taskFolder;
+				newFileBasename = assetName + '_' + taskName;
 			}
 			else if (shotID) {
 				classID = shotID;
 				className = 'SHOT';
-				newFileBasename = shotName + '_' + taskFolder;
+				newFileBasename = shotName + '_' + taskName;
 			}
 			if (basenameListbox.selection)
 				newFileBasename = basename;
@@ -559,7 +562,7 @@ function buildPanelUI(userID, action) {
 
 			var thisVersion = parseInt(maxVersion) + 1;
 
-			if (saveFile(classID, className, serverID, serverPath, taskID, taskFolder, newFileBasename, commentInput.text, false, thisVersion))
+			if (saveFile(classID, className, serverID, serverPath, taskID, taskName, taskFolder, newFileBasename, commentInput.text, false, thisVersion))
 				alert('Save successful.');
 			else
 				alert('Error: Save failed!');

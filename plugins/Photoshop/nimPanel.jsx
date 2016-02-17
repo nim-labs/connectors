@@ -129,6 +129,7 @@ function buildPanelUI(userID, action, metadata) {
 		shotID = 0,
 		shotName = '',
 		taskID = 0,
+		taskName = '',
 		taskFolder = '',
 		showPub = 0,
 		basename = '',
@@ -1045,6 +1046,7 @@ function buildPanelUI(userID, action, metadata) {
 		taskDropdown.onChange = function() {
 			if (!this.selection || !this.selection.index) {
 				taskID = 0;
+				taskName = '';
 				taskFolder = '';
 				basename = '';
 				maxVersion = 0;
@@ -1064,6 +1066,7 @@ function buildPanelUI(userID, action, metadata) {
 				className = 'SHOT';
 			}
 			taskID = tasks[this.selection.index].ID;
+			taskName = tasks[this.selection.index].name;
 			taskFolder = tasks[this.selection.index].folder;
 			if (showPub)
 				basenames = nimAPI({ q: 'getBasenameAllPub', task_type_ID: taskID, itemID: classID, 'class': className });
@@ -1596,12 +1599,12 @@ function buildPanelUI(userID, action, metadata) {
 				if (assetID) {
 					classID = assetID;
 					className = 'ASSET';
-					newFileBasename = assetName + '_' + taskFolder;
+					newFileBasename = assetName + '_' + taskName;
 				}
 				else if (shotID) {
 					classID = shotID;
 					className = 'SHOT';
-					newFileBasename = shotName + '_' + taskFolder;
+					newFileBasename = shotName + '_' + taskName;
 				}
 
 				if (basenameListbox.selection)
@@ -1614,7 +1617,7 @@ function buildPanelUI(userID, action, metadata) {
 				thisComment = commentInput.text;
 
 			if (action == 'saveAs') {
-				if (saveFile(classID, className, serverID, serverPath, taskID, taskFolder, newFileBasename, thisComment, false, elementExports, fileSettings, thisVersion))
+				if (saveFile(classID, className, serverID, serverPath, taskID, taskName, taskFolder, newFileBasename, thisComment, false, elementExports, fileSettings, thisVersion))
 					alert('Save successful.');
 				else
 					alert('Error: Save failed!');
@@ -1622,13 +1625,13 @@ function buildPanelUI(userID, action, metadata) {
 				setPanelPrefs();
 			}
 			else if (action == 'versionUp') {
-				if (saveFile(metadata.classID, metadata.className, metadata.serverID, metadata.serverPath, metadata.taskID, metadata.taskFolder, metadata.basename, thisComment, false, elementExports, fileSettings, thisVersion))
+				if (saveFile(metadata.classID, metadata.className, metadata.serverID, metadata.serverPath, metadata.taskID, metadata.taskName, metadata.taskFolder, metadata.basename, thisComment, false, elementExports, fileSettings, thisVersion))
 					alert('New version saved.');
 				else
 					alert('Error: Version up failed!');
 			}
 			else if (action == 'publish') {
-				if (!saveFile(metadata.classID, metadata.className, metadata.serverID, metadata.serverPath, metadata.taskID, metadata.taskFolder, metadata.basename, thisComment, true, elementExports, fileSettings, thisVersion))
+				if (!saveFile(metadata.classID, metadata.className, metadata.serverID, metadata.serverPath, metadata.taskID, metadata.taskName, metadata.taskFolder, metadata.basename, thisComment, true, elementExports, fileSettings, thisVersion))
 					alert('Error: Publish failed!');
 			}
 		}
@@ -1708,6 +1711,7 @@ function buildPanelUI(userID, action, metadata) {
 		serverID = metadata.serverID;
 		serverPath = metadata.serverPath;
 		taskID = metadata.taskID;
+		taskName = metadata.taskName;
 		taskFolder = metadata.taskFolder;
 		basename = metadata.basename;
 	}
