@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: UI.py
-# Version:  v0.7.3.150625
+# Version:  v1.0.5.160328
 #
 # Copyright (c) 2015 NIM Labs LLC
 # All rights reserved.
@@ -31,7 +31,7 @@ except :
 #  Variables :
 WIN=''
 startTime=''
-version='v1.0.3'
+version='v1.0.5'
 winTitle='NIM_'+version
 _os=platform.system().lower()
 _osCap=platform.system()
@@ -2502,7 +2502,7 @@ class GUI(QtGui.QMainWindow) :
     
     def file_import(self) :
         'Imports elements into a scene file'
-        
+
         #  Get file path :
         path=self.get_filePath()
         
@@ -2511,6 +2511,7 @@ class GUI(QtGui.QMainWindow) :
         
         open_file_versionInfo = Api.get_verInfo( self.nim.ID('ver') )
 
+        open_file_serverID = None
         if open_file_versionInfo:
             open_file_serverID = open_file_versionInfo[0]['serverID']
             #serverOsPathInfo = Api.get_serverOSPath( open_file_serverID, platform.system() )
@@ -2518,7 +2519,8 @@ class GUI(QtGui.QMainWindow) :
 
         # TODO: check file path conversion for multiple server scenario
         filePath=F.os_filePath( path=path, nim=self.nim, serverID=open_file_serverID )
-        
+
+
         #  Maya Import :
         if self.app=='Maya' :
             import maya.cmds as mc

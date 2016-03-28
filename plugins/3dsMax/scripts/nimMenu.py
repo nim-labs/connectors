@@ -166,17 +166,20 @@ def createNimMenu(name):
         print 'The menu ', name, ' already exists'
 
 def main():
-    print "Removing any previously left 'menu items'"
-    MaxPlus.MenuManager.UnregisterMenu(u"NIM")
-    MaxPlus.MenuManager.UnregisterMenu(u"NIM Settings")
-    
-    print "Creating a new menu"
-    outputMenu(MaxPlus.MenuManager.GetMainMenu(), False)
-    
-    print "Creating a new menu"
-    createNimMenu(u"NIM")
-    outputMenu(MaxPlus.MenuManager.GetMainMenu(), False)
-  
+    try:
+        print "Removing any previously left 'menu items'"
+        MaxPlus.MenuManager.UnregisterMenu(u"NIM")
+        MaxPlus.MenuManager.UnregisterMenu(u"NIM Settings")
+
+        print "Reading current NIM menu"
+        outputMenu(MaxPlus.MenuManager.GetMainMenu(), False)
+
+        print "Creating the NIM menu"
+        createNimMenu(u"NIM")
+        outputMenu(MaxPlus.MenuManager.GetMainMenu(), False)
+    except:
+        print "Failed to create NIM menu"
+        
 
 if __name__ == '__main__':
     main()
