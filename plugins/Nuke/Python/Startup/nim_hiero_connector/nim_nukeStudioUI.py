@@ -24,6 +24,7 @@ import base64
 import platform
 import ntpath
 
+import nim_core.UI as nimUI
 import nim_core.nim_api as nimAPI
 import nim_core.nim_prefs as nimPrefs
 import nim_core.nim_file as nimFile
@@ -369,6 +370,7 @@ class NimNS_openDialog(QDialog):
 
 		self.app=nimFile.get_app()
 		self.prefs=nimPrefs.read()
+
 		try:
 			self.user=self.prefs['NIM_User']
 			self.pref_job=self.prefs[self.app+'_Job']
@@ -383,9 +385,17 @@ class NimNS_openDialog(QDialog):
 
 		self.nim_OS = platform.system()
 		
-		self.nim_userID = nimAPI.get_userID()
+		self.nim_userID = nimAPI.get_userID(self.user)
+		if not self.nim_userID :
+			nimUI.GUI().update_user()
+			userInfo=nim.NIM().userInfo()
+			self.user = userInfo['name']
+			self.nim_userID = userInfo['ID']
+
+		print "NIM: user=%s" % self.user
 		print "NIM: userID=%s" % self.nim_userID
 		print "NIM: default job=%s" % self.pref_job
+
 
 
 		self.nim_jobPaths = {}
@@ -411,6 +421,10 @@ class NimNS_openDialog(QDialog):
 		#Get NIM Jobs
 		self.nim_jobID = None
 		self.nim_jobs = nimAPI.get_jobs(self.nim_userID)
+		if not self.nim_jobs :
+			print "No Jobs Found"
+			self.nim_jobs["None"]="0"
+
 		self.nim_jobChooser = QComboBox()
 
 		self.nim_shows = []
@@ -921,9 +935,18 @@ class NimNS_saveDialog(QDialog):
 
 		self.nim_OS = platform.system()
 		
-		self.nim_userID = nimAPI.get_userID()
+		self.nim_userID = nimAPI.get_userID(self.user)
+		if not self.nim_userID :
+			nimUI.GUI().update_user()
+			userInfo=nim.NIM().userInfo()
+			self.user = userInfo['name']
+			self.nim_userID = userInfo['ID']
+
+		print "NIM: user=%s" % self.user
 		print "NIM: userID=%s" % self.nim_userID
 		print "NIM: default job=%s" % self.pref_job
+
+		
 
 		self.nim_jobChooser = QComboBox()
 
@@ -970,6 +993,9 @@ class NimNS_saveDialog(QDialog):
 		#Get NIM Jobs
 		self.nim_jobID = None
 		self.nim_jobs = nimAPI.get_jobs(self.nim_userID)
+		if not self.nim_jobs :
+			print "No Jobs Found"
+			self.nim_jobs["None"]="0"
 		
 		
 		
@@ -1508,8 +1534,30 @@ class NimNS_versionDialog(QDialog):
 		super(NimNS_versionDialog, self).__init__()
 		'''NIM NukeStudio Project Management UI'''
 
-		self.nim_userID = nimAPI.get_userID()
+		self.prefs=nimPrefs.read()
+		try:
+			self.user=self.prefs['NIM_User']
+			#self.pref_job=self.prefs[self.app+'_Job']
+			#self.pref_show=self.prefs[self.app+'_Show']
+			#self.pref_server=self.prefs[self.app+'_ServerPath']
+			#self.pref_task=self.prefs[self.app+'_Task']
+			#self.pref_basename=self.prefs[self.app+'_Basename']
+			#self.pref_version=self.prefs[self.app+'_Version']
+		except:
+			#return False
+			pass
+
+		self.nim_userID = nimAPI.get_userID(self.user)
+		if not self.nim_userID :
+			nimUI.GUI().update_user()
+			userInfo=nim.NIM().userInfo()
+			self.user = userInfo['name']
+			self.nim_userID = userInfo['ID']
+
+		print "NIM: user=%s" % self.user
 		print "NIM: userID=%s" % self.nim_userID
+
+		
 
 		self.nim_comment = ''
 

@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: UI.py
-# Version:  v0.7.3.150625
+# Version:  v1.0.5.160328
 #
 # Copyright (c) 2015 NIM Labs LLC
 # All rights reserved.
@@ -31,7 +31,7 @@ except :
 #  Variables :
 WIN=''
 startTime=''
-version='v1.0.3'
+version='v1.0.5'
 winTitle='NIM_'+version
 _os=platform.system().lower()
 _osCap=platform.system()
@@ -105,6 +105,17 @@ def mk( mode='open', _import=False, _export=False, ref=False, pub=False ) :
                 P.error( 'Sorry, unable to retrieve variables from the NIM preference file.' )
                 P.error( '    %s' % traceback.print_exc() )
                 return False
+
+        # Houdini :
+        elif app=='Houdini' :
+            try :
+                import hou
+                WIN=GUI( mode=mode )
+            except Exception, e :
+                P.error( 'Sorry, unable to retrieve variables from the NIM preference file.' )
+                P.error( '    %s' % traceback.print_exc() )
+                return False
+
     #  Set the window to one of five modes :
     if WIN.complete :
         P.info( '\nStarting up the NIM File Browser, in %s mode.' % mode )
@@ -254,6 +265,9 @@ class GUI(QtGui.QMainWindow) :
             elif self.app=='3dsMax' :
                 import nim_3dsmax as Max
                 Max.get_vars( nim=self.nimPrefs )
+            elif self.app=='Houdini' :
+                import nim_houdini as Houdini
+                Houdini.get_vars( nim=self.nimPrefs )
         else :
             self.nimPrefs=Nim.NIM().ingest_prefs()
             #self.nimPrefs.Print()
@@ -579,8 +593,13 @@ class GUI(QtGui.QMainWindow) :
         
         #  Style Sheet Menu :
         #===------------------------
-        
-        self.cssFiles=glob.glob( self.pref_styleSheetDir+'*.css' )
+        self.pref_styleSheetDir = self.pref_styleSheetDir.rstrip('/')
+        self.cssFiles=glob.glob( self.pref_styleSheetDir+'/*.css' )
+
+        #TODO: Fix reading of self.pref_styleSheetDir...  or set to application for Houdini - 
+        # QtGui.QApplication.instance().styleSheet() - OR - hou.ui.qtStyleSheet()
+
+        '''
         self.cssFiles.append('None')
         #  Add menu items to menu :
         if self.cssFiles :
@@ -611,9 +630,11 @@ class GUI(QtGui.QMainWindow) :
                 styleMenu.addAction( self.menuItems[-1] )
                 #  Connect menu item :
                 self.menuItems[-1].triggered.connect( self.update_styleSheet )
-        
+        '''
+
         #  Print success :
         P.debug( '%.3f => Menu bar created' % (time.time()-startTime) )
+
     
     
     #  Customize Window :
@@ -692,6 +713,8 @@ class GUI(QtGui.QMainWindow) :
         except : pass
         self.btn_1.clicked.connect( self.file_open )
         
+        self.setNimStyle()
+
         self.complete=True
         return True
     
@@ -777,6 +800,8 @@ class GUI(QtGui.QMainWindow) :
             self.nim.set_name( elem='fileExt', name='.c4d' )
         elif self.app=='3dsMax' :
             self.nim.set_name( elem='fileExt', name='.max' )
+        elif self.app=='Houdini' :
+            self.nim.set_name( elem='fileExt', name='.hip' )
         
         #  Enable :
         for elem in ['job', 'server', 'asset', 'show', 'shot', 'task', 'base'] :
@@ -791,6 +816,8 @@ class GUI(QtGui.QMainWindow) :
         except : pass
         self.btn_1.clicked.connect( self.file_saveAs )
         
+        self.setNimStyle()
+
         self.complete=True
         return True
     
@@ -871,6 +898,8 @@ class GUI(QtGui.QMainWindow) :
                 self.btn_2.setVisible( False )
             elif self.app=='3dsMax' :
                 self.btn_2.setVisible( True )
+            elif self.app=='Houdini' :
+                self.btn_2.setVisible( True )
         
         #  File Extension elements :
         self.fileExtText.setVisible( False )
@@ -895,6 +924,11 @@ class GUI(QtGui.QMainWindow) :
             self.btn_2.clicked.connect( self.maya_fileReference )
         elif self.app=='3dsMax' :
             self.btn_2.clicked.connect( self.max_fileReference )
+        elif self.app=='Houdini' :
+            self.btn_2.clicked.connect( self.houdini_fileReference )
+            pass
+
+        self.setNimStyle()
 
         self.complete=True
         return True
@@ -916,6 +950,8 @@ class GUI(QtGui.QMainWindow) :
         self.btn_1.setText( 'Version Up' )
         self.btn_2.setVisible( False )
         
+        self.setNimStyle()
+
         return True
     
     
@@ -940,6 +976,11 @@ class GUI(QtGui.QMainWindow) :
             import nim_3dsmax as Max
             Max.get_vars( nim=self.nim )
             Max.get_vars( nim=self.nimPrefs )
+        if self.nim.app()=='Houdini' :
+            import nim_houdini as Houdini
+            Houdini.get_vars( nim=self.nim )
+            Houdini.get_vars( nim=self.nimPrefs )
+            pass
 
         #  Populate the window elements :
         self.nim.set_filePath()
@@ -1013,6 +1054,10 @@ class GUI(QtGui.QMainWindow) :
             self.nim.set_name( elem='fileExt', name='.max' )
             self.fileExtText.setVisible( False )
             self.nim.Input('fileExt').setVisible( False )
+        elif self.app=='Houdini' :
+            self.nim.set_name( elem='fileExt', name='.hip' )
+            self.fileExtText.setVisible( False )
+            self.nim.Input('fileExt').setVisible( False )
         
         #  Disable version picker :
         self.nim.Input('ver').setSelectionMode( QtGui.QAbstractItemView.NoSelection )
@@ -1021,6 +1066,8 @@ class GUI(QtGui.QMainWindow) :
         try : self.btn_1.clicked.disconnect()
         except : pass
         self.btn_1.clicked.connect( self.file_pub )
+        
+        self.setNimStyle()
         
         self.complete=True
         return True
@@ -1207,6 +1254,12 @@ class GUI(QtGui.QMainWindow) :
                                     if re.search( '^'+basename+'.max$', _file ) :
                                         if _file not in files :
                                             files.append( _file )
+                            if self.app=='Houdini' :
+                                temp_files=os.listdir( nimDir )
+                                for _file in temp_files :
+                                    if re.search( '^'+basename+'.hip$', _file ) :
+                                        if _file not in files :
+                                            files.append( _file )
                         if files :
                             for _file in files :
                                 item=QtGui.QListWidgetItem( self.nim.Input( elem ) )
@@ -1252,6 +1305,8 @@ class GUI(QtGui.QMainWindow) :
                                     if ext !='.c4d' : item.setFlags( QtCore.Qt.ItemIsEditable )
                                 elif self.app=='3dsMax' :
                                     if ext !='.max' : item.setFlags( QtCore.Qt.ItemIsEditable )
+                                elif self.app=='Houdini' :
+                                    if ext !='.hip' : item.setFlags( QtCore.Qt.ItemIsEditable )
                                 #  Select the item :
                                 self.nim.Input('ver').setCurrentItem( item )
                                 self.verPath.setText( fileDir )
@@ -1305,6 +1360,9 @@ class GUI(QtGui.QMainWindow) :
                                     elif self.app=='3dsMax' :
                                         if option['ext'] !='.max' :
                                             item.setFlags( QtCore.Qt.ItemIsEditable )
+                                    elif self.app=='Houdini' :
+                                        if option['ext'] !='.hip' :
+                                            item.setFlags( QtCore.Qt.ItemIsEditable )
                                     #  Select the item :
                                     #self.nim.Input( elem ).setCurrentItem( item )
                                     self.verPath.setText( nimDir )
@@ -1336,6 +1394,10 @@ class GUI(QtGui.QMainWindow) :
                                 elif self.app=='3dsMax' :
                                     ext=F.get_ext( filePath=option['filename'] )
                                     if ext !='.max' :
+                                        item.setFlags( QtCore.Qt.ItemIsEditable )
+                                elif self.app=='Houdini' :
+                                    ext=F.get_ext( filePath=option['filename'] )
+                                    if ext !='.hip' :
                                         item.setFlags( QtCore.Qt.ItemIsEditable )
                                 #  Set from preferences :
                                 if option['filename']+' - '+option['note']==self.pref_version and \
@@ -1374,6 +1436,10 @@ class GUI(QtGui.QMainWindow) :
                             elif self.app=='3dsMax' :
                                 ext=F.get_ext( filePath=option['filename'] )
                                 if ext !='.max' :
+                                    item.setFlags( QtCore.Qt.ItemIsEditable )
+                            elif self.app=='Houdini' :
+                                ext=F.get_ext( filePath=option['filename'] )
+                                if ext !='.hip' :
                                     item.setFlags( QtCore.Qt.ItemIsEditable )
                             #  Set from preferences :
                             if option['filename']+' - '+option['note']==self.pref_version and \
@@ -1545,6 +1611,8 @@ class GUI(QtGui.QMainWindow) :
                             if ext !='.c4d' : item.setFlags( QtCore.Qt.ItemIsEditable )
                         elif self.app=='3dsMax' :
                             if ext !='.max' : item.setFlags( QtCore.Qt.ItemIsEditable )
+                        elif self.app=='Houdini' :
+                            if ext !='.hip' : item.setFlags( QtCore.Qt.ItemIsEditable )
                         #  Select the item :
                         self.nim.Input('ver').setCurrentItem( item )
                         self.verPath.setText( fileDir )
@@ -1630,6 +1698,8 @@ class GUI(QtGui.QMainWindow) :
                                     if option['ext'] !='.c4d' : item.setFlags( QtCore.Qt.ItemIsEditable )
                                 elif self.app=='3dsMax' :
                                     if option['ext'] !='.max' : item.setFlags( QtCore.Qt.ItemIsEditable )
+                                elif self.app=='Houdini' :
+                                    if option['ext'] !='.hip' : item.setFlags( QtCore.Qt.ItemIsEditable )
                                 #  Select the item :
                                 self.nim.Input( elem ).setCurrentItem( item )
                                 self.verPath.setText( nimDir )
@@ -2116,6 +2186,9 @@ class GUI(QtGui.QMainWindow) :
         elif self.app=='3dsMax' :
             import MaxPlus
             filePath=MaxPlus.FileManager.GetFileNameAndPath()
+        elif self.app=='Houdini' :
+            import hou
+            filePath=hou.hipFile.name()
         
         #  Error check file path :
         if not filePath :
@@ -2185,7 +2258,8 @@ class GUI(QtGui.QMainWindow) :
         
         P.debug('file_open - filePath: %s' % filePath)
          
-        '''THIS CODE SHOULD BE DEPRICATED'''
+        # DEPRICATED ---->
+        '''
         #  Derive Server Path from File Name :
         if not self.nim.server() :
             for sp in ['winPath', 'osxPath', 'path'] :
@@ -2193,9 +2267,9 @@ class GUI(QtGui.QMainWindow) :
                 if prefix==os.path.normpath( filePath[:len(prefix)] ) :
                     self.nim.set_server( path=prefix )
                     break
-        '''END DEPRICATED'''
+        '''
+        # <---- END DEPRICATED
 
-        '''TEST: FIXING BAD PATH CALLS ABOVE'''
         # Get Server OS Path from server ID
         P.info("FileID: %s" % self.nim.ID('ver'))
         
@@ -2203,6 +2277,7 @@ class GUI(QtGui.QMainWindow) :
 
         if open_file_versionInfo:
             open_file_serverID = open_file_versionInfo[0]['serverID']
+            self.nim.set_server( ID=open_file_serverID )
             P.info("ServerID: %s" % open_file_serverID)
             serverOsPathInfo = Api.get_serverOSPath( open_file_serverID, platform.system() )
             P.info("Server OS Path Info: %s" % serverOsPathInfo)
@@ -2213,7 +2288,7 @@ class GUI(QtGui.QMainWindow) :
 
         #  Convert file path :
         filePath=F.os_filePath( path=filePath, nim=self.nim )
-        P.debug("filePath: %s" % filePath)
+        #P.info("filePath: %s" % filePath)
 
         #  Set File Version :
         ver=F.get_ver( filePath=filePath )
@@ -2378,6 +2453,47 @@ class GUI(QtGui.QMainWindow) :
                 P.error( '    %s' % traceback.print_exc() )
                 return False
 
+        #  Houdini :
+        if self.app=='Houdini' :
+            #  Open :
+            try :
+                import hou
+                import nim_houdini as Houdini
+                #TODO: check for unsaved file change RuntimeError
+                #if hou.hipFile.hasUnsavedChanges():
+                #    raise RuntimeError
+                #hou.hipFile.load(file_name=str(filePath), suppress_save_prompt=True)
+                P.error('Loading file in UI-2451')
+                filePath=filePath.replace( '\\', '/' )
+                hou.hipFile.load(file_name=str(filePath))
+            except Exception, e :
+                P.error( 'Failed reading the file: %s' % filePath )
+                P.error( '    %s' % traceback.print_exc() )
+                return False
+            
+            #  Set Project :
+            projPath=os.path.dirname( os.path.normpath( filePath ) ).replace( 'scenes', '' )
+            if _os=='windows' :
+                projPath=projPath.replace( '\\', '/' )
+            if os.path.isdir( projPath ) :
+                # update the environment variables
+                os.environ.update({"JOB": str(projPath)})
+                # update JOB using hscript
+                hou.hscript("set -g JOB = '" + str(projPath) + "'")
+                #hou.allowEnvironmentVariableToOverwriteVariable("JOB", True)
+                P.info( '\nUI - Project set to...\n    %s\n' % projPath )
+            else :
+                P.warning('\nProject was not set!\n')
+            
+            #  Set Variables :
+            try :
+                import nim_houdini as Houdini
+                Houdini.set_vars( nim=self.nim )
+            except Exception, e :
+                P.error( 'Failed adding NIM attributes to Project Settings node...' )
+                P.error( '    %s' % traceback.print_exc() )
+                return False
+
         P.info( 'File, %s, opened!' % filePath )
         self.close()
         
@@ -2385,12 +2501,26 @@ class GUI(QtGui.QMainWindow) :
 
     
     def file_import(self) :
-        'Imports elements into a Maya or Nuke scene file'
-        
+        'Imports elements into a scene file'
+
         #  Get file path :
         path=self.get_filePath()
-        filePath=F.os_filePath( path=path, nim=self.nim )
         
+        # Get Server OS Path from server ID
+        P.info("FileID: %s" % self.nim.ID('ver'))
+        
+        open_file_versionInfo = Api.get_verInfo( self.nim.ID('ver') )
+
+        open_file_serverID = None
+        if open_file_versionInfo:
+            open_file_serverID = open_file_versionInfo[0]['serverID']
+            #serverOsPathInfo = Api.get_serverOSPath( open_file_serverID, platform.system() )
+            #serverOSPath = serverOsPathInfo[0]['serverOSPath']
+
+        # TODO: check file path conversion for multiple server scenario
+        filePath=F.os_filePath( path=path, nim=self.nim, serverID=open_file_serverID )
+
+
         #  Maya Import :
         if self.app=='Maya' :
             import maya.cmds as mc
@@ -2437,12 +2567,37 @@ class GUI(QtGui.QMainWindow) :
                 P.info( '    %s' % filePath )
                 if self.checkBox.checkState() :
                     #  Import file as a group :
-                    #mc.file( filePath, i=True, force=True, groupReference=True, groupName=grpName+'_GRP' )
+                    #TODO: Group on Import
                     mpFM.Merge( filePath, True )
                 else :
                     #  Import file :
                     #mc.file( filePath, i=True, force=True )
                     mpFM.Merge( filePath, True )
+            else :
+                msg='Sorry, file to import doesn\'t exist...\n    %s' % filePath
+                P.error( msg )
+                Win.popup( title='NIM - Import Error', msg=msg )
+                return
+
+        #  Houdini Merge :
+        if self.app=='Houdini' :
+            import hou
+            #  Derive file name to use for namespace :
+            index=self.nim.Input('ver').currentItem().text().find(' - ')
+            fileName=self.nim.Input('ver').currentItem().text()[0:index]
+            grpName=os.path.splitext( fileName )[0]
+            
+            #  Import the file :
+            if os.path.isfile( filePath ) :
+                P.info('File found, importing the following file...')
+                P.info( '    %s' % filePath )
+                if self.checkBox.checkState() :
+                    #  Import file as a group :
+                    #TODO: Group on Import
+                    hou.hipFile.merge( str(filePath) )
+                else :
+                    #  Import file :
+                    hou.hipFile.merge( str(filePath) )
             else :
                 msg='Sorry, file to import doesn\'t exist...\n    %s' % filePath
                 P.error( msg )
@@ -2460,7 +2615,7 @@ class GUI(QtGui.QMainWindow) :
         
         #  Set Selected flag for saving only the selected objects :
         selected=False
-        if self.app in ['Maya', 'Nuke', '3dsMax'] :
+        if self.app in ['Maya', 'Nuke', '3dsMax','Houdini'] :
             selected=self.checkBox.checkState()
         
        
@@ -2472,6 +2627,7 @@ class GUI(QtGui.QMainWindow) :
         elif self.app=='Nuke' : ext='.nk'
         elif self.app=='C4D' : ext='.c4d'
         elif self.app=='3dsMax' : ext='.max'
+        elif self.app=='Houdini' : ext='.hip'
         
         #  Ensure that if tag has been entered, that the Basename doesn't already exist :
         if self.nim.name('tag') :
@@ -2506,6 +2662,7 @@ class GUI(QtGui.QMainWindow) :
         elif self.app=='Nuke' : ext='.nk'
         elif self.app=='C4D' : ext='.c4d'
         elif self.app=='3dsMax' : ext='.max'
+        elif self.app=='Houdini' : ext='.hip'
         #  Version Up :
         if self.nim.tab()=='SHOT' :
             Api.versionUp( projPath=self.nim.Input('server').currentText(), app=self.app, shotID=self.nim.ID('shot'), \
@@ -2525,6 +2682,7 @@ class GUI(QtGui.QMainWindow) :
         elif self.app=='Nuke' : ext='.nk'
         elif self.app=='C4D' :  ext='.c4d'
         elif self.app=='3dsMax' : ext='.max'
+        elif self.app=='Houdini' : ext='.hip'
         #  Version Up File :
         P.info('\nPublish Step #1 - Versioning Up the file...')
         ver_filePath=Api.versionUp( nim=self.nim, win_launch=True )
@@ -2567,7 +2725,17 @@ class GUI(QtGui.QMainWindow) :
                     import MaxPlus
                     mpFM = MaxPlus.FileManager
                     mpFM.Open( ver_filePath )
-            
+                if self.nim.app().lower()=='houdini' :
+                    P.info( 'Publishing Step #5 - Opening work file...\n    %s' % ver_filePath )
+                    import hou
+                    #TODO: check unsaved changed Runtime Error
+                    #if hou.hipFile.hasUnsavedChanges():
+                    #    raise RuntimeError
+                    #hou.hipFile.load(file_name=str(ver_filePath), suppress_save_prompt=True) 
+                    P.error('Loading file UI - 2706')
+                    ver_filePath=ver_filePath.replace('\\','/')
+                    hou.hipFile.load(file_name=str(ver_filePath))
+
             #  Set Variables :
             if self.nim.app().lower()=='maya' :
                 import nim_maya as M
@@ -2578,6 +2746,9 @@ class GUI(QtGui.QMainWindow) :
             elif self.nim.app().lower()=='3dsmax' :
                 import nim_3dsmax as Max
                 Max.set_vars( nim=self.nim )
+            elif self.nim.app().lower()=='houdini' :
+                import nim_houdini as Houdini
+                Houdini.set_vars( nim=self.nim )
             
             #  Close window upon completion :
             P.info('\nClosing NIM Publish Window.\n')
@@ -2613,7 +2784,7 @@ class GUI(QtGui.QMainWindow) :
         self.close()
         return
 
-    #  Maya File Operations :
+    #  3dsMax File Operations :
     def max_fileReference(self) :
         'References a given 3dsMax file'
         import MaxPlus
@@ -2653,6 +2824,54 @@ class GUI(QtGui.QMainWindow) :
         #  Close window upon completion :
         self.close()
         return
+
+    #  Houdini File Operations :
+    def houdini_fileReference(self) :
+        'References a given 3dsMax file'
+        import hou
+        #TODO: look up houdini referencing
+        #  Get File Path :
+        filePath=self.get_filePath()
+        
+        #  Derive file name to use for namespace :
+        index=self.nim.Input('ver').currentItem().text().find(' - ')
+        fileName=self.nim.Input('ver').currentItem().text()[0:index]
+        #  Remove file extension from file name :
+        fileName=os.path.splitext( fileName )[0]
+        
+        #  Reference the file :
+        if self.checkBox.checkState() :
+            #GROUPED
+            pass
+        else :
+            #NOT GROUPED
+            pass
+
+        #  Close window upon completion :
+        self.close()
+        return
+
+
+    def setNimStyle(self) :
+        if self.app=='Houdini' :
+            import hou
+            try :
+                #self.pref_styleSheetDir = self.pref_styleSheetDir.rstrip('/')
+                nimScriptPath = os.path.dirname(os.path.realpath(__file__))
+                nimScriptPath = nimScriptPath.replace('\\','/')
+                nimScriptPath = nimScriptPath.rstrip('/nim_core')
+                darkStyleSheetPath = nimScriptPath+'/css/nim_darkStyleSheet.css'
+                with open(darkStyleSheetPath, 'r') as styleSheetFile:
+                    darkStyleSheet=styleSheetFile.read().replace('\n', '')
+
+                darkStyleSheet = darkStyleSheet.replace('down_arrow.png',nimScriptPath+'/css/resources/down_arrow.png')
+                self.setStyleSheet(darkStyleSheet)
+                #self.setStyleSheet(hou.ui.qtStyleSheet())
+                #self.setStyleSheet(QtGui.QApplication.instance().styleSheet())
+            except:
+                P.info('NIM: Unable to set stylesheet')
+        return
+
 
 #  End of Class
 

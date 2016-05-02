@@ -31,7 +31,7 @@ import nim_tools
 import nim_win as Win
 
 #  Variables :
-version='v0.7.2'
+version='v1.0.3'
 winTitle='NIM_'+version
 
 
@@ -193,6 +193,10 @@ def get_app() :
     try :
         import MaxPlus
         return '3dsMax'
+    except : pass
+    try :
+        import hou
+        return 'Houdini'
     except : pass
     return None
 
@@ -766,10 +770,10 @@ def add_file( nim=None, filePath='', comment='', pub=False ) :
     
     #  Error check input :
     if not projPath or not app or not nim.name( 'task' ) or not fileBase or not ext or not ver :
-        P.error( 'api.versionUp function did not get the proper variables passed to it...  Exiting.' )
+        P.error( 'api.add_file function did not get the proper variables passed to it...  Exiting.' )
         return False
     if not nim.ID( 'asset' ) and not nim.ID( 'shot' ) :
-        P.error( 'api.versionUp function needs to be given either a shot, or asset, ID number...  Exiting.' )
+        P.error( 'api.add_file function needs to be given either a shot, or asset, ID number...  Exiting.' )
         return False
     if not nim.name( 'comment' ) :
         nim.set_name( elem='comment', name=nim_tools.get_comment( app=app, num_requests=1 ) )
@@ -905,6 +909,9 @@ def versionUp( nim=None, padding=2, selected=False, win_launch=False, pub=False,
         elif nim.app()=='3dsMax' :
             import nim_3dsmax as Max
             Max.get_vars( nim=nim )
+        elif nim.app()=='Houdini' :
+            import nim_houdini as Houdini
+            Houdini.get_vars( nim=nim )
     
     #  Error check :
     try :
@@ -1089,6 +1096,28 @@ def versionUp( nim=None, padding=2, selected=False, win_launch=False, pub=False,
                             P.info('NIM: %s \n' % verUpNim.name(elem='base'))
                             import nim_3dsmax as Max
                             Max.set_vars( nim=verUpNim )
+                            nim = verUpNim
+                            
+                        except Exception, e :
+                            P.error( 'Failed reading the file: %s' % filePath )
+                            P.error( '    %s' % traceback.print_exc() )
+                            return False
+
+                    elif nim.app()=='Houdini' :
+                        import hou
+                        try :
+                            #TODO: check unsaved changed RuntimeError
+                            #if hou.hipFile.hasUnsavedChanges():
+                            #    raise RuntimeError
+                            #hou.hipFile.load(file_name=str(filePath), suppress_save_prompt=True)
+                            P.error('Loading File in nim_api')
+                            filePath = filePath.replace('\\','/')
+                            hou.hipFile.load(file_name=str(filePath))
+                            #  Set env vars brought over from nim_file
+                            P.info('Setting Environment Variables')
+                            P.info('NIM: %s \n' % verUpNim.name(elem='base'))
+                            import nim_houdini as Houdini
+                            Houdini.set_vars( nim=verUpNim )
                             nim = verUpNim
                             
                         except Exception, e :

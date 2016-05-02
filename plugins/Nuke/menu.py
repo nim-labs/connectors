@@ -54,7 +54,9 @@ try:
 		nimWriteMenu.addCommand('MOV', lambda: nuke.createNode( 'WriteNIM_MOV' ) )
 
 		nimRootMenu.addSeparator()
-		nimRootMenu.addCommand( 'Reload Scripts', 'import nim_core.nim_file as F; F.scripts_reload()' )
+		nimSettingsMenu=nimRootMenu.addMenu("Settings")
+		nimSettingsMenu.addCommand( 'Change User', 'import nim_core.UI as UI; UI.GUI().update_user()' )
+		nimSettingsMenu.addCommand( 'Reload Scripts', 'import nim_core.nim_file as F; F.scripts_reload()' )
 except:
 	pass
 

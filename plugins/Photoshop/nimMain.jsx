@@ -256,6 +256,7 @@ function getNimMetadata() {
 			serverID: getMetadata('serverID'),
 			serverPath: getMetadata('serverPath'),
 			taskID: getMetadata('taskID'),
+			taskName: getMetadata('taskName'),
 			taskFolder: getMetadata('taskFolder'),
 			basename: getMetadata('basename'),
 			fileID: getMetadata('fileID')
@@ -335,6 +336,7 @@ function setNimMetadata(data) {
 		metaData.setProperty(schemaNS, "NIM:serverID", data.serverID);
 		metaData.setProperty(schemaNS, "NIM:serverPath", data.serverPath);
 		metaData.setProperty(schemaNS, "NIM:taskID", data.taskID);
+		metaData.setProperty(schemaNS, "NIM:taskName", data.taskName);
 		metaData.setProperty(schemaNS, "NIM:taskFolder", data.taskFolder);
 		metaData.setProperty(schemaNS, "NIM:basename", data.basename);
 		metaData.setProperty(schemaNS, "NIM:fileID", data.fileID);
@@ -573,7 +575,7 @@ function getFileSaveOptions(file) {
 
 
 // Saves a file and writes it to NIM API; className = 'ASSET' or 'SHOT', classID = assetID or shotID
-function saveFile(classID, className, serverID, serverPath, taskID, taskFolder, basename, comment, publish, elementExports, fileSettings, version) {
+function saveFile(classID, className, serverID, serverPath, taskID, taskName, taskFolder, basename, comment, publish, elementExports, fileSettings, version) {
 	var oldDocument = activeDocument,
 		path = serverPath,
 		folder,
@@ -606,6 +608,7 @@ function saveFile(classID, className, serverID, serverPath, taskID, taskFolder, 
 	}
 	path += '/' + taskFolder + '/' + basename + '/';
 	if (os == 'win') path = path.replace(/\//g, '\\');
+	else path = path.replace(/\\/g, '/');
 	folder = new Folder(path);
 	if (!folder.exists) {
 		if (!folder.create()) {
@@ -656,6 +659,7 @@ function saveFile(classID, className, serverID, serverPath, taskID, taskFolder, 
 			serverID: serverID,
 			serverPath: serverPath,
 			taskID: taskID,
+			taskName: taskName,
 			taskFolder: taskFolder,
 			basename: basename,
 			fileID: newFileID

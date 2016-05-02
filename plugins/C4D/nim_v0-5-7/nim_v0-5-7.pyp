@@ -269,7 +269,7 @@ if loadNIM:
         nim_ref_icon.InitWith( nim_ref_icon_path )
         #  Publish Icon :
         nim_pub_icon=bitmaps.BaseBitmap()
-        nim_pub_icon_path=os.path.join( nim4d_dir, 'res', 'nim_pub_icon.tif' )
+        nim_pub_icon_path=os.path.join( nim4d_dir, 'res', 'nim_pub_icon_off.tif' )
         nim_pub_icon.InitWith( nim_pub_icon_path )
         #  Version Up Icon :
         nim_verUp_icon=bitmaps.BaseBitmap()

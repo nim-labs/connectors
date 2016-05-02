@@ -26,14 +26,15 @@ import nim_win as Win
 #  Variables :
 prefs_dirName='.nim'
 prefs_fileName='prefs.nim'
-version='v0.5.6.r01'
+version='v1.0.3'
 winTitle='NIM_'+version
 nim_URL='http://hostname/nimAPI.php'
 #nim_scripts = os.path.abspath(os.path.join(os.path.dirname( __file__ ), os.pardir, 'nim_core'))
 nim_scripts = os.path.abspath(os.path.join(os.path.dirname( __file__ ), os.pardir))
 nim_user, nim_userID='', ''
 nim_img='/img/nim_logo.png'
-css_dir='/css/'
+css_dir= nim_scripts+'/css'
+css_dir= css_dir.replace('\\','/')
 #http_srch=re.compile( '^http[s]?://' )
 #ip_srch=re.compile( '[0-9\.]+' )
 equal_srch=re.compile( '=' )
@@ -208,11 +209,11 @@ def _appPrefs( app='Maya' ) :
         app+'_WinPosY': '250',
         app+'_WinWidth': '600',
         app+'_WinHeight': '675',
-        #app+'_Scripts': os.path.normpath(os.path.join( 'I:'+os.sep, 'VAULT', 'modules', app.lower() ))+os.sep,
-        app+'_StyleSheetDir': 'None',
+        #app+'_Scripts':'',
+        app+'_StyleSheetDir': css_dir,
         app+'_UseStyleSheet': 'None',
         app+'_Job': '',
-        #app+'_DefaultServerPath': 'I:/PRJ',
+        #app+'_DefaultServerPath': '',
         app+'_ServerPath': '',
         app+'_Tab': 'SHOT',
         app+'_Asset': '',
@@ -511,7 +512,6 @@ def Dbug_toggle() :
             shelf_btn=mc.shelfButton( icon, query=True, label=True )
             if shelf_btn=='Dbug' :
                 iconPath='I:/VAULT/NIM/NIM_v5.1/imgs/maya_shelf_icons/debugOff_icon.png'
-                #iconPath='C:/Users/jessec/.nim/imgs/maya_shelve_icons/debugOff_icon.png'
                 mc.shelfButton( icon, edit=True, image=iconPath )
         P.info( '  D-bug mode has been turned off!' )
     

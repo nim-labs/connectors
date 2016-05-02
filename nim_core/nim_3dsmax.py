@@ -83,11 +83,11 @@ def set_vars( nim=None ) :
                                 edittext nim_userID "NIM UserID" \n\
                                 edittext nim_class "NIM nim_class" \n\
                                 edittext nim_server "NIM nim_server" \n\
-                                edittext nim_serverID "NIM UserID" \n\
+                                edittext nim_serverID "NIM ServerID" \n\
                                 edittext nim_jobName "NIM nim_jobName" \n\
-                                edittext nim_jobID "NIM UserID" \n\
+                                edittext nim_jobID "NIM JobID" \n\
                                 edittext nim_showName "NIM nim_showName" \n\
-                                edittext nim_showID "NIM UserID" \n\
+                                edittext nim_showID "NIM ShowID" \n\
                                 edittext nim_shot "NIM nim_shot" \n\
                                 edittext nim_shotID "NIM nim_shotID" \n\
                                 edittext nim_asset "NIM nim_asset" \n\
@@ -330,14 +330,14 @@ def set_vars( nim=None ) :
     MaxPlus.Core.EvalMAXScript('rootNodeDataCA.nim_fileType="'+str(nim.fileType())+'"' )
     MaxPlus.Core.EvalMAXScript('sceneDataCA.nim_fileType="'+str(nim.fileType())+'"' )
 
-    P.info('    Completed setting NIM attributes on the defaultRenderGlobals node.')
+    P.info('    Completed setting NIM attributes root node.')
     #nim.Print()
     
     return
     
 
 def get_vars( nim=None ) :
-    'Gets NIM settings from the defaultRenderGlobals node in Maya.'
+    'Gets NIM settings from the defaultRenderGlobals node in 3dsMax.'
     P.info('3dsMax Getting information from NIM attributes on the defaultRenderGlobals node...')
     
     #  User :

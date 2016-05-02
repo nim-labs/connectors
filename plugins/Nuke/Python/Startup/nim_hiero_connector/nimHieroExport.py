@@ -23,6 +23,7 @@ import base64
 import platform
 import ntpath
 
+import nim_core.UI as nimUI
 import nim_core.nim_api as nimAPI
 import nim_core.nim_prefs as nimPrefs
 import nim_core.nim_file as nimFile
@@ -71,9 +72,18 @@ class NimHieroExport(QAction):
 
 			self.nim_OS = platform.system()
 			
-			nim_userID = nimAPI.get_userID()
-			print "NIM: userID=%s" % nim_userID
+			self.nim_userID = nimAPI.get_userID(self.user)
+			if not self.nim_userID :
+				nimUI.GUI().update_user()
+				userInfo=nim.NIM().userInfo()
+				self.user = userInfo['name']
+				self.nim_userID = userInfo['ID']
+
+			print "NIM: user=%s" % self.user
+			print "NIM: userID=%s" % self.nim_userID
 			print "NIM: default job=%s" % self.pref_job
+
+			
 
 			self.nim_jobPaths = {}
 			self.nim_showPaths = {}
@@ -85,7 +95,10 @@ class NimHieroExport(QAction):
 
 			#Get NIM Jobs
 			self.nim_jobID = None
-			self.nim_jobs = nimAPI.get_jobs(nim_userID)
+			self.nim_jobs = nimAPI.get_jobs(self.nim_userID)
+			if not self.nim_jobs :
+				print "No Jobs Found"
+				self.nim_jobs["None"]="0"
 			
 			self.nim_shows = []
 			self.nim_showDict = {}

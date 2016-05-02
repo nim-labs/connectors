@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mainMenu>
+  <menuBar>
+    <subMenu id="nimMenu">
+      <label>NIM</label>
+
+      <scriptItem id="nimOpen">
+        <label>Open</label>
+        <scriptPath>$NIM_CONNECTOR_ROOT/plugins/Houdini/scripts/nimMenu.py</scriptPath>
+        <scriptArgs>open</scriptArgs>
+      </scriptItem>
+
+      <scriptItem id="nimImport">
+        <label>Import</label>
+        <scriptPath>$NIM_CONNECTOR_ROOT/plugins/Houdini/scripts/nimMenu.py</scriptPath>
+        <scriptArgs>import</scriptArgs>
+      </scriptItem>
+
+      <separatorItem/>
+
+      <scriptItem id="nimSaveAs">
+        <label>Save As</label>
+        <scriptPath>$NIM_CONNECTOR_ROOT/plugins/Houdini/scripts/nimMenu.py</scriptPath>
+        <scriptArgs>saveas</scriptArgs>
+      </scriptItem>
+
+      <scriptItem id="nimSaveSelectedAs">
+        <label>Save Selected</label>
+        <scriptPath>$NIM_CONNECTOR_ROOT/plugins/Houdini/scripts/nimMenu.py</scriptPath>
+        <scriptArgs>savesel</scriptArgs>
+      </scriptItem>
+
+      <separatorItem/>
+      
+      <scriptItem id="nimVersion">
+        <label>Version</label>
+        <scriptPath>$NIM_CONNECTOR_ROOT/plugins/Houdini/scripts/nimMenu.py</scriptPath>
+        <scriptArgs>ver</scriptArgs>
+      </scriptItem>
+
+      <scriptItem id="nimPublish">
+        <label>Publish</label>
+        <scriptPath>$NIM_CONNECTOR_ROOT/plugins/Houdini/scripts/nimMenu.py</scriptPath>
+        <scriptArgs>pub</scriptArgs>
+      </scriptItem>
+
+      <separatorItem/>
+      
+      <scriptItem id="nimChangeUser">
+        <label>Change User</label>
+        <scriptPath>$NIM_CONNECTOR_ROOT/plugins/Houdini/scripts/nimMenu.py</scriptPath>
+        <scriptArgs>user</scriptArgs>
+      </scriptItem>
+
+      <scriptItem id="nimReload">
+        <label>Reload Scripts</label>
+        <scriptPath>$NIM_CONNECTOR_ROOT/plugins/Houdini/scripts/nimMenu.py</scriptPath>
+        <scriptArgs>reload</scriptArgs>
+      </scriptItem>
+
+    </subMenu>
+  </menuBar>
+</mainMenu>

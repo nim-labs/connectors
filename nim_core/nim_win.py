@@ -135,6 +135,31 @@ def popup( title='', msg='', type='ok', defaultInput='', pyside=False, _list=[],
             else :
                 userInput=None
 
+    #  Houdini :
+    elif app=='Houdini' :
+        import hou
+        from PySide import QtCore, QtGui
+
+        if type=='ok' :
+            dialog=QtGui.QMessageBox.information( None, title, msg, \
+                QtGui.QMessageBox.Ok)
+            if dialog==QtGui.QMessageBox.Ok :
+                userInput='OK'
+        elif type=='okCancel' :
+            dialog=QtGui.QMessageBox.question( None, title, msg, \
+                QtGui.QMessageBox.Cancel, QtGui.QMessageBox.Ok )
+            if dialog==QtGui.QMessageBox.Ok :
+                userInput='OK'
+            elif dialog==QtGui.QMessageBox.Cancel :
+                userInput='Cancel'
+        elif type=='input' :
+            dialog=QtGui.QInputDialog.getText( QtGui.QInputDialog(), title, msg, \
+                QtGui.QLineEdit.Normal )
+            if dialog[1] :
+                userInput=dialog[0]
+            else :
+                userInput=None
+
     #P.info('Returning PopUP INFO: %s' % userInput)
     return userInput
 
@@ -147,7 +172,7 @@ def userInfo( url='' ) :
     for u in users : userList.append( u['username'] )
     
     #  Create window to get user name from :
-    user=popup( title='User Name Error', msg='Pick a username to use', type='comboBox', \
+    user=popup( title='Select NIM User', msg='Pick a username to use', type='comboBox', \
         pyside=True, _list=userList )
     
     #  Get user ID :

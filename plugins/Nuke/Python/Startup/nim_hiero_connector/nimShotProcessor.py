@@ -27,6 +27,7 @@ import base64
 import platform
 import ntpath
 
+import nim_core.UI as nimUI
 import nim_core.nim_api as nimAPI
 import nim_core.nim_prefs as nimPrefs
 import nim_core.nim_file as nimFile
@@ -478,6 +479,7 @@ class NimShotProcessor(hiero.core.ProcessorBase):
           trackitem_clip = trackitem.source()
 
           ''''''
+          #print "NIM:   2.0"
           print "NIM:   resolved fulPath=", resolvedFullPath
           print "NIM:   path=",path
           print "NIM:   exportPath=",exportPath
@@ -553,8 +555,17 @@ class NimShotProcessor(hiero.core.ProcessorBase):
                        The Nuke comp will be created but not logged into NIM."
                 nim_doSave = False
               
-              userID = nimAPI.get_userID()
-              print "userID: %s" % userID
+
+              nim_prefInfo = nimPrefs.read()
+              user = nim_prefInfo['NIM_User']
+              userID = nimAPI.get_userID(user)
+              if not userID :
+                nimUI.GUI().update_user()
+                userInfo=nim.NIM().userInfo()
+                user = userInfo['name']
+                userID = userInfo['ID']
+              print "NIM: user=%s" % user
+              print "NIM: userID: %s" % userID
 
               #Derive basename from file ( TODO: give option to use shot_task_tag_ver.nk method )
               #Using filename entered in Export window
@@ -715,6 +726,9 @@ class NimShotProcessorPreset(hiero.core.ProcessorPreset):
       return nimHieroConnector.g_nim_serverOSPath.encode('ascii')
 
     def showRootPath(task):
+      nim_hiero_debug = False
+      if nim_hiero_debug:
+        print "nim_show_root: %s" % nimHieroConnector.g_nim_showFolder.encode('ascii')
       return nimHieroConnector.g_nim_showFolder.encode('ascii')
 
     def shotRootPath(task):

@@ -66,11 +66,15 @@ def get_app() :
         import MaxPlus
         return '3dsMax'
     except : pass
+    try :
+        import hou
+        return 'Houdini'
+    except : pass
     return None
 
 def get_apps() :
     'Provides a list of supported applications'
-    return ['Maya', 'Nuke', 'C4D', 'Hiero', '3dsMax']
+    return ['Maya', 'Nuke', 'C4D', 'Hiero', '3dsMax', 'Houdini']
 
 def get_ext( filePath='' ) :
     'Retrieves the extension of a given file'
@@ -99,6 +103,8 @@ def get_ext( filePath='' ) :
             ext='.hrox'
         elif app=='3dsMax' :
             ext='.max'
+        elif app=='Houdini' :
+            ext='.hip'
         if ext :
             return ext
         else :
@@ -161,6 +167,13 @@ def get_filePath() :
             fm = MaxPlus.FileManager
             filePath=fm.GetFileNameAndPath()
         except : pass
+    #   Houdini :
+    if not filePath :
+        try :
+            import hou
+            P.debug("get_filePath: Houdini Found")
+            filePath=hou.hipFile.name()
+        except : pass
 
     #  Return :
     if filePath :
@@ -168,28 +181,40 @@ def get_filePath() :
     else :
         return False
 
-def os_filePath( path='', nim=None ) :
+def os_filePath( path='', nim=None, serverID=None ) :
     'Returns the platform specific path to a filepath.'
     filePath, fp_noServer, server='', '', ''
     
+    #P.info("os_filePath PATH: %s" % path)
     #  Error Checking :
     if not nim.ID('job') :
         P.warning('Unable to find a platform specific OS path')
         return path
-    serverDict=Api.get_servers( nim.ID('job') )
-    
+
+    if not serverID :
+        serverDict=Api.get_serverInfo( nim.server(get='ID') )
+    else :
+        serverDict=Api.get_serverInfo( serverID )
+    #P.info("serverDict: %s" % serverDict)
+
     if not serverDict or not len(serverDict) :
         P.warning('Unable to find a platform specific OS path')
         return path
     
     if nim.server() :
         fp_noServer=path[len(nim.server()):]
+
+    # The following removed - redundant
+    '''
     if nim.tab()=='SHOT' :
-        serverDict=Api.get_servers( nim.ID('job') )
+        serverDict=Api.get_jobServers( nim.ID('job') )
     elif nim.tab()=='ASSET' :
-        serverDict=Api.get_servers( nim.ID('job') )
-    if serverDict and len(serverDict)>0 :      #was if serverDict and len(serverDict)==1  -  failed if more than one server found in serverDict
-        
+        serverDict=Api.get_jobServers( nim.ID('job') )
+    '''
+    
+    #if serverDict and len(serverDict)>0 :      # removed to only compare to single server  
+    if serverDict and len(serverDict)==1 :      # failed if more than one server found in serverDict
+
         #  Substitute Windows Paths :
         if serverDict[0]['winPath']:
             #P.info('Reading Window Path...')
@@ -283,7 +308,7 @@ def verUp( nim=None, padding=2, selected=False, win_launch=False, pub=False, sym
     
 
     ''' TEST SETTING THE SERVER ID HERE'''
-    #print "TEST SERVER ID: %s" % str(nim.server(get='ID'))
+    P.info("TEST SERVER ID: %s" % str(nim.server(get='ID')))
     # Get Server OS Path from server ID
     serverOsPathInfo = Api.get_serverOSPath( nim.server(get='ID'), platform.system() )
     P.info("Server OS Path: %s" % serverOsPathInfo)
@@ -316,6 +341,7 @@ def verUp( nim=None, padding=2, selected=False, win_launch=False, pub=False, sym
     
     
     #  Convert file directory :
+    #P.info("fileDir: %s" % fileDir)
     fileDir=os_filePath( path=fileDir, nim=nim )
     P.info( 'File Directory = %s' %  fileDir )
     projDir=os_filePath( path=projDir, nim=nim )
@@ -449,6 +475,16 @@ def verUp( nim=None, padding=2, selected=False, win_launch=False, pub=False, sym
             P.warning( '    Unable to create 3dsMax project directories.' )
     elif nim.app()=='3dsMax' :
         P.warning( 'Didn\'t create 3dsMax project directories.' )
+
+    #  Make Houdini Project directory :
+    if os.path.isdir( projDir ) and nim.app()=='Houdini' :
+        import nim_houdini as Houdini
+        if Houdini.mk_proj( path=projDir, renPath=renDir ) :
+            P.info( 'Created Houdini project directorires within...\n    %s' % projDir )
+        else :
+            P.warning( '    Unable to create Houdini project directories.' )
+    elif nim.app()=='Houdini' :
+        P.warning( 'Didn\'t create Houdini project directories.' )
     
     
     #  Save :
@@ -549,6 +585,23 @@ def verUp( nim=None, padding=2, selected=False, win_launch=False, pub=False, sym
             P.info( 'Saving selected items as %s \n' % new_filePath )
             maxFM.SaveSelected(new_filePath)
 
+    #  Houdini :
+    if nim.app()=='Houdini' :
+        import hou
+        #  Save File :
+        if not selected :
+            #  Set Vars :
+            import nim_houdini as Houdini
+            Houdini.set_vars( nim=nim )
+            #Save File
+            P.info( 'Saving file as %s \n' % new_filePath )
+            hou.hipFile.save(file_name=str(new_filePath))
+        else :
+            #Save Selected Items
+            #TODO: set to saveSelect items... currently saving entire scene
+            P.info( 'Saving selected items as %s \n' % new_filePath )
+            hou.hipFile.save(file_name=str(new_filePath))
+
     #  Make a copy of the file, if publishing :
     if pub and not symLink :
         pub_fileName=basename+ext
@@ -606,6 +659,9 @@ def scripts_reload() :
         elif app=='3dsMax' :
             import nim_3dsmax as Max
             reload(Max)
+        elif app=='Houdini' :
+            import nim_houdini as Houdini
+            reload(Houdini)
         P.info( '    NIM scripts. have been reloaded.' )
     except Exception, e :
         print 'Sorry, problem reloading scripts...'
