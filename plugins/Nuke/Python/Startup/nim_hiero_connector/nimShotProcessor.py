@@ -479,6 +479,7 @@ class NimShotProcessor(hiero.core.ProcessorBase):
           trackitem_clip = trackitem.source()
 
           ''''''
+          #print "NIM:   2.0"
           print "NIM:   resolved fulPath=", resolvedFullPath
           print "NIM:   path=",path
           print "NIM:   exportPath=",exportPath
@@ -725,6 +726,9 @@ class NimShotProcessorPreset(hiero.core.ProcessorPreset):
       return nimHieroConnector.g_nim_serverOSPath.encode('ascii')
 
     def showRootPath(task):
+      nim_hiero_debug = False
+      if nim_hiero_debug:
+        print "nim_show_root: %s" % nimHieroConnector.g_nim_showFolder.encode('ascii')
       return nimHieroConnector.g_nim_showFolder.encode('ascii')
 
     def shotRootPath(task):
