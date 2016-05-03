@@ -186,6 +186,7 @@ function createNimPrefsFile() {
 	if (!nimPrefsFolder.exists)
 		nimPrefsFolder.create();
 
+	nimPrefsFile.lineFeed = 'Unix';
 	nimPrefsFile.open('w');
 	
 	nimPrefsFile.writeln('NIM_URL=');

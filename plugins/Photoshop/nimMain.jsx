@@ -390,6 +390,8 @@ function setNimManualMetadata(data, path, filename) {
 		}
 	}
 
+	photoshopFile.lineFeed = 'Unix';
+
 	// Write metadata for this new file
 	photoshopFile.writeln(fileString + thisMetadataString);
 	photoshopFile.close();
@@ -441,6 +443,8 @@ function setPref(prefPrefix, prefName, prefValue) {
 	nimPrefsFileTemp = new File(nimPrefsFileTempPath);
 	if (!nimPrefsFileTemp.open('r'))
 		return false;
+
+	nimPrefsFile.lineFeed = 'Unix';
 	nimPrefsFile.open('w');
 	while (!nimPrefsFileTemp.eof) {
 		currentLine = nimPrefsFileTemp.readln();

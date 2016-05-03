@@ -325,6 +325,7 @@ function setPref(prefPrefix, prefName, prefValue) {
 	if (!nimPrefsFile.exists)
 		createNimPrefsFile();
 
+	nimPrefsFile.lineFeed = 'Unix';
 	nimPrefsFile.copy(nimPrefsFileTempPath);
 	nimPrefsFileTemp = new File(nimPrefsFileTempPath);
 	if (!nimPrefsFileTemp.open('r'))

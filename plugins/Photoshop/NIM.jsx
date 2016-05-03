@@ -158,6 +158,8 @@ function saveScriptsPathAndAPIToPrefs() {
 	nimPrefsFileTemp = new File(nimPrefsFileTempPath);
 	if (!nimPrefsFileTemp.open('r'))
 		return false;
+
+	nimPrefsFile.lineFeed = 'Unix';
 	nimPrefsFile.open('w');
 	while (!nimPrefsFileTemp.eof) {
 		currentLine = nimPrefsFileTemp.readln();
@@ -191,6 +193,7 @@ function createNimPrefsFile() {
 	if (!nimPrefsFolder.exists)
 		nimPrefsFolder.create();
 
+	nimPrefsFile.lineFeed = 'Unix';
 	nimPrefsFile.open('w');
 	
 	nimPrefsFile.writeln('NIM_URL=');
