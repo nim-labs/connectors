@@ -1,0 +1,78 @@
+#! C:/Program Files/Nuke8.0v5/nuke-8.0.v5.dll -nx
+version 8.0 v5
+Gizmo {
+ addUserKnob {20 User l "WriteNIM EXR"}
+ addUserKnob {26 outputFileText l Filename -STARTLINE T "NIM filename"}
+ addUserKnob {41 nimCompTag l "Render Tag" T WriteNIM_EXR.nimCompTag}
+ addUserKnob {41 nimFilename l INVISIBLE +INVISIBLE T WriteNIM_EXR.nimFilename}
+ addUserKnob {22 refreshFilename l "Refresh Filename" t "This is just a check to visualize the output filename.  The output filename will always be correct.  This button just refreshed the display label incase the file was versioned up or the tag changed while the preference pane was open." T "nuke.thisNode()\['outputFileText'].setValue(nuke.thisNode()\['nimFilename'].value()+'.####.exr')" +STARTLINE}
+ addUserKnob {52 pythonFilenameScript T "nuke.thisNode()\['outputFileText'].setValue(nuke.thisNode()\['nimFilename'].value()+'.####.exr')" +STARTLINE}
+ addUserKnob {26 "" +STARTLINE}
+ addUserKnob {41 channels T WriteNIM_EXR.channels}
+ addUserKnob {41 frame_mode l frame T WriteNIM_EXR.frame_mode}
+ addUserKnob {41 frame l "" -STARTLINE T WriteNIM_EXR.frame}
+ addUserKnob {41 colorspace T WriteNIM_EXR.colorspace}
+ addUserKnob {41 premultiplied T WriteNIM_EXR.premultiplied}
+ addUserKnob {41 raw l "raw data" T WriteNIM_EXR.raw}
+ addUserKnob {41 views T WriteNIM_EXR.views}
+ addUserKnob {26 "" l "exr Options"}
+ addUserKnob {41 autocrop T WriteNIM_EXR.autocrop}
+ addUserKnob {41 datatype T WriteNIM_EXR.datatype}
+ addUserKnob {41 compression T WriteNIM_EXR.compression}
+ addUserKnob {41 heroview T WriteNIM_EXR.heroview}
+ addUserKnob {41 metadata T WriteNIM_EXR.metadata}
+ addUserKnob {41 noprefix l "do not attach prefix" T WriteNIM_EXR.noprefix}
+ addUserKnob {26 "" l " "}
+ addUserKnob {41 "Standard layer name format" T "WriteNIM_EXR.Standard layer name format"}
+ addUserKnob {41 interleave T WriteNIM_EXR.interleave}
+ addUserKnob {26 "" l " "}
+ addUserKnob {41 truncateChannelNames l "Truncate channel names" T WriteNIM_EXR.truncateChannelNames}
+ addUserKnob {26 ""}
+ addUserKnob {41 render_order l "render order" T WriteNIM_EXR.render_order}
+ addUserKnob {41 Render T WriteNIM_EXR.Render}
+ addUserKnob {41 first l "frame range" T WriteNIM_EXR.first}
+ addUserKnob {41 last l "" -STARTLINE T WriteNIM_EXR.last}
+ addUserKnob {41 use_limit l "limit to range" T WriteNIM_EXR.use_limit}
+ addUserKnob {26 "" l " "}
+ addUserKnob {41 reading l "read file" T WriteNIM_EXR.reading}
+ addUserKnob {41 checkHashOnRead l "check file matches input" T WriteNIM_EXR.checkHashOnRead}
+ addUserKnob {41 on_error l "missing frames" T WriteNIM_EXR.on_error}
+ addUserKnob {41 reload l Reload T WriteNIM_EXR.reload}
+ addUserKnob {20 "" l Python}
+ addUserKnob {41 beforeRender l "before render" T WriteNIM_EXR.beforeRender}
+ addUserKnob {41 beforeFrameRender l "before each frame" T WriteNIM_EXR.beforeFrameRender}
+ addUserKnob {41 afterFrameRender l "after each frame" T WriteNIM_EXR.afterFrameRender}
+ addUserKnob {41 afterRender l "after render" T WriteNIM_EXR.afterRender}
+ addUserKnob {41 renderProgress l "render progress" T WriteNIM_EXR.renderProgress}
+ addUserKnob {41 disable_1 l INVISIBLE +INVISIBLE T WriteNIM_PNG.disable}
+}
+ Input {
+  inputs 0
+  name Input1
+  xpos 272
+  ypos 24
+ }
+ Write {
+  file "\[ value nimPath ]/\[value nimFolder]/\[value nimFilename].####.exr"
+  file_type exr
+  version 1
+  beforeRender "import nim_tools; nim_tools.CheckOutputPath();"
+  name WriteNIM_EXR
+  xpos 272
+  ypos 64
+  disable {{parent.disable}}
+  addUserKnob {20 User}
+  addUserKnob {1 nimCompTag l "Render Tag" t "A tag to append to the current filename"}
+  addUserKnob {1 nimPath l "NIM Path"}
+  nimPath "\[ value root.nim_compPath ]"
+  addUserKnob {1 nimFolder l "NIM Folder"}
+  nimFolder "\[value root.nim_basename]_v\[format %02d \[value root.nim_version]]\[ if \{ !\[string equal \[string trim \[value nimCompTag] \" \"] \"\"] \} \{return _\[string trim \[value nimCompTag] \" \"]\} ]"
+  addUserKnob {1 nimFilename l "NIM Filename"}
+  nimFilename "\[value root.nim_basename]_v\[format %02d \[value root.nim_version]]\[ if \{ !\[string equal \[string trim \[value nimCompTag] \" \"] \"\"] \} \{return _\[string trim \[value nimCompTag] \" \"]\} ]"
+ }
+ Output {
+  name Output1
+  xpos 272
+  ypos 164
+ }
+end_group
