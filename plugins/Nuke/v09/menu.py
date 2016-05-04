@@ -21,7 +21,7 @@ Prefs.mk_default( notify_success=True )
 
 try:
 	isNuke = False
-	if nuke.env['NukeVersionRelease'] > 6:
+	if nuke.env['NukeVersionMajor'] > 6:
 		if not nuke.env[ 'studio' ] and not nuke.env['hiero']:
 			isNuke = True
 	else:

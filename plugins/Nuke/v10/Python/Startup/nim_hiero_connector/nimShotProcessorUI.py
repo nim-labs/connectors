@@ -2,14 +2,8 @@
 #******************************************************************************
 #
 # Filename: Nuke/Python/Startup/nim_hiero_connector/nimShotProcessorUI.py
-# Version:  v0.7.3.150625
+# Version:  v2.0.0.160502
 #
-# Copyright (c) 2015 NIM Labs LLC
-# All rights reserved.
-#
-# Use of this software is subject to the terms of the NIM Labs license
-# agreement provided at the time of installation or download, or which
-# otherwise accompanies this software in either electronic or hard copy form.
 # *****************************************************************************
 
 import itertools
