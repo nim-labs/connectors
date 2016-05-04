@@ -1,0 +1,84 @@
+#! C:/Program Files/Nuke10.0v1/nuke-10.0.1.dll -nx
+#write_info WriteDPX file:"[ value nimPath ]/[value nimFolder]/[value nimFilename]" format:"2048 1556 1" chans:":" framerange:"1 100" fps:"0" colorspace:"default (Cineon)" datatype:"10 bit" transfer:"(auto detect)" views:"main" colorManagement:"Nuke"
+version 10.0 v1
+Gizmo {
+ addUserKnob {20 User l WriteNIM_DPX}
+ addUserKnob {26 outputFileText l Filename T "Nothing is named \"root.nim_basename\""}
+ addUserKnob {41 nimCompTag l "Render Tag" T WriteDPX.nimCompTag}
+ addUserKnob {41 nimFilename l INVISIBLE +INVISIBLE T WriteDPX.nimFilename}
+ addUserKnob {22 refreshFilename l "Refresh Filename" t "This is a check to visualize the output filename.  The output filename will always be correct.  This button just refreshed the display label incase the file was versioned up or the tag changed while the preference pane was open." T "nuke.thisNode()\['outputFileText'].setValue(nuke.thisNode()\['nimFilename'].value())" +STARTLINE}
+ addUserKnob {52 pythonFilenameScript T "nuke.thisNode()\['outputFileText'].setValue(nuke.thisNode()\['nimFilename'].value())" +STARTLINE}
+ addUserKnob {26 "" +STARTLINE}
+ addUserKnob {41 channels T WriteDPX.channels}
+ addUserKnob {41 frame_mode l frame T WriteDPX.frame_mode}
+ addUserKnob {41 frame l "" -STARTLINE T WriteDPX.frame}
+ addUserKnob {41 colorspace T WriteDPX.colorspace}
+ addUserKnob {41 premultiplied -STARTLINE T WriteDPX.premultiplied}
+ addUserKnob {41 raw l "raw data" -STARTLINE T WriteDPX.raw}
+ addUserKnob {41 views T WriteDPX.views}
+ addUserKnob {26 "" l "dpx Options"}
+ addUserKnob {41 datatype T WriteDPX.datatype}
+ addUserKnob {41 fill -STARTLINE T WriteDPX.fill}
+ addUserKnob {41 bigEndian l "big endian" -STARTLINE T WriteDPX.bigEndian}
+ addUserKnob {41 transfer T WriteDPX.transfer}
+ addUserKnob {26 ""}
+ addUserKnob {41 render_order l "render order" T WriteDPX.render_order}
+ addUserKnob {41 Render -STARTLINE T WriteDPX.Render}
+ addUserKnob {41 first l "frame range" T WriteDPX.first}
+ addUserKnob {41 last l "" -STARTLINE T WriteDPX.last}
+ addUserKnob {41 use_limit l "limit to range" T WriteDPX.use_limit}
+ addUserKnob {26 "" l " "}
+ addUserKnob {41 reading l "read file" T WriteDPX.reading}
+ addUserKnob {41 checkHashOnRead l "check file matches input" -STARTLINE T WriteDPX.checkHashOnRead}
+ addUserKnob {41 on_error l "missing frames" T WriteDPX.on_error}
+ addUserKnob {41 reload l Reload -STARTLINE T WriteDPX.reload}
+ addUserKnob {41 read_all_lines l "read all lines" -STARTLINE T WriteDPX.read_all_lines}
+ addUserKnob {20 "" l OCIO}
+ addUserKnob {26 "" l Context}
+ addUserKnob {41 key1 T WriteDPX.key1}
+ addUserKnob {41 value1 -STARTLINE T WriteDPX.value1}
+ addUserKnob {41 key2 T WriteDPX.key2}
+ addUserKnob {41 value2 -STARTLINE T WriteDPX.value2}
+ addUserKnob {41 key3 T WriteDPX.key3}
+ addUserKnob {41 value3 -STARTLINE T WriteDPX.value3}
+ addUserKnob {41 key4 T WriteDPX.key4}
+ addUserKnob {41 value4 -STARTLINE T WriteDPX.value4}
+ addUserKnob {41 in_colorspace l INVISIBLE +INVISIBLE T WriteDPX.in_colorspace}
+ addUserKnob {41 out_colorspace l INVISIBLE +INVISIBLE T WriteDPX.out_colorspace}
+ addUserKnob {41 reverse_transform l INVISIBLE +INVISIBLE T WriteDPX.reverse_transform}
+ addUserKnob {20 "" l Python}
+ addUserKnob {41 beforeRender l "before render" T WriteDPX.beforeRender}
+ addUserKnob {41 beforeFrameRender l "before each frame" T WriteDPX.beforeFrameRender}
+ addUserKnob {41 afterFrameRender l "after each frame" T WriteDPX.afterFrameRender}
+ addUserKnob {41 afterRender l "after render" T WriteDPX.afterRender}
+ addUserKnob {41 renderProgress l "render progress" T WriteDPX.renderProgress}
+}
+ Input {
+  inputs 0
+  name Input1
+  xpos 467
+  ypos -164
+ }
+ Write {
+  file "\[ value nimPath ]/\[value nimFolder]/\[value nimFilename]"
+  file_type dpx
+  checkHashOnRead false
+  beforeRender "import nim_tools; nim_tools.CheckOutputPath()"
+  name WriteDPX
+  xpos 467
+  ypos -124
+  addUserKnob {20 User}
+  addUserKnob {1 nimCompTag l "Render Tag"}
+  addUserKnob {1 nimPath l "NIM Path"}
+  nimPath "\[ value root.nim_compPath ]"
+  addUserKnob {1 nimFolder l "NIM Folder"}
+  nimFolder "\[value root.nim_basename]_v\[format %02d \[value root.nim_version]]\[ if \{ !\[string equal \[string trim \[value nimCompTag] \" \"] \"\"] \} \{return _\[string trim \[value nimCompTag] \" \"]\} ]"
+  addUserKnob {1 nimFilename l "NIM Filename"}
+  nimFilename "\[value root.nim_basename]_v\[format %02d \[value root.nim_version]]\[ if \{ !\[string equal \[string trim \[value nimCompTag] \" \"] \"\"] \} \{return _\[string trim \[value nimCompTag] \" \"]\} ].%04d.\[value file_type]"
+ }
+ Output {
+  name Output1
+  xpos 467
+  ypos -24
+ }
+end_group
