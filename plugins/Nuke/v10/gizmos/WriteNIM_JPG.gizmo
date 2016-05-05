@@ -2,13 +2,13 @@
 #write_info WriteJPG file:"[ value nimPath ]/[value nimFolder]/[value nimFilename]" format:"2048 1556 1" chans:":" framerange:"1 100" fps:"0" colorspace:"default (sRGB)" datatype:"8 bit" transfer:"unknown" views:"main" colorManagement:"Nuke"
 version 10.0 v1
 Gizmo {
- addUserKnob {20 User l WriteNIM_TIF}
- addUserKnob {26 outputFileText l Filename T "Nothing is named \"root.nim_basename\""}
+ addUserKnob {20 User l WriteNIM_JPG}
+ addUserKnob {26 nim_outputFileText l Filename T "expected integer but got \"\""}
  addUserKnob {41 nimCompTag l "Render Tag" T WriteJPG.nimCompTag}
  addUserKnob {41 nimFilename l INVISIBLE +INVISIBLE T WriteJPG.nimFilename}
- addUserKnob {22 refreshFilename l "Refresh Filename" t "This is a check to visualize the output filename.  The output filename will always be correct.  This button just refreshed the display label incase the file was versioned up or the tag changed while the preference pane was open." T "nuke.thisNode()\['outputFileText'].setValue(nuke.thisNode()\['nimFilename'].value())" +STARTLINE}
- addUserKnob {52 pythonFilenameScript T "nuke.thisNode()\['outputFileText'].setValue(nuke.thisNode()\['nimFilename'].value())" +STARTLINE}
- addUserKnob {26 "" +STARTLINE}
+ addUserKnob {22 refreshFilename l "Refresh Filename" t "This is a check to visualize the output filename.  The output filename will always be correct.  This button just refreshed the display label incase the file was versioned up or the tag changed while the preference pane was open." T "nuke.thisNode()\['nim_outputFileText'].setValue(nuke.thisNode()\['nimFilename'].value())" +STARTLINE}
+ addUserKnob {52 pythonFilenameScript T "nuke.thisNode()\['nim_outputFileText'].setValue(nuke.thisNode()\['nimFilename'].value())" +STARTLINE}
+ addUserKnob {26 ""}
  addUserKnob {41 channels T WriteJPG.channels}
  addUserKnob {41 frame_mode l frame T WriteJPG.frame_mode}
  addUserKnob {41 frame l "" -STARTLINE T WriteJPG.frame}
