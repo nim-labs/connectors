@@ -308,7 +308,7 @@ def verUp( nim=None, padding=2, selected=False, win_launch=False, pub=False, sym
     
 
     ''' TEST SETTING THE SERVER ID HERE'''
-    P.info("TEST SERVER ID: %s" % str(nim.server(get='ID')))
+    #P.info("TEST SERVER ID: %s" % str(nim.server(get='ID')))
     # Get Server OS Path from server ID
     serverOsPathInfo = Api.get_serverOSPath( nim.server(get='ID'), platform.system() )
     P.info("Server OS Path: %s" % serverOsPathInfo)

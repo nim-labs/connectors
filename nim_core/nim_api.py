@@ -934,9 +934,6 @@ def versionUp( nim=None, padding=2, selected=False, win_launch=False, pub=False,
     
     #  Version Up File :
     #  [AS] returning nim object from verUp to update if loading exported file
-    '''
-    filePath=F.verUp( nim=nim, padding=padding, selected=selected, win_launch=win_launch, pub=pub, symLink=symLink )
-    '''
     verUpResult=F.verUp( nim=nim, padding=padding, selected=selected, win_launch=win_launch, pub=pub, symLink=symLink )
     filePath = verUpResult['filepath']
     verUpNim = verUpResult['nim']

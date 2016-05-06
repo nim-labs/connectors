@@ -1,10 +1,10 @@
 #! /usr/bin/python
 #******************************************************************************
 #
-# Filename: C4D/nim_v0-5-7.py
-# Version:  v0.7.3.150625
+# Filename: C4D/nim_v2-0-0.py
+# Version:  v2.0.0.160505
 #
-# Copyright (c) 2015 NIM Labs LLC
+# Copyright (c) 2016 NIM Labs LLC
 # All rights reserved.
 #
 # Use of this software is subject to the terms of the NIM Labs license
@@ -105,7 +105,7 @@ if loadNIM:
     print 'NIM ~> Loading NIM Variables'
 
     #  Variables :
-    version='v0_5_6.r01'
+    version='v2.0.0'
     winTitle='NIM_'+version+' - '
     nim_plugin_ID=1032427
     nim_openUI_ID=1032462
