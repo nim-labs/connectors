@@ -283,26 +283,22 @@ def mk_default( recreatePrefs=False, notify_success=True ) :
     
     #  Check to see if preferences need to be re-created :
     if os.path.exists( prefsFile ) :
-        #  Attempt to re-create preferences with missing attributes :
+        #  If preferences have missing attributes, add those attributes to prefs file:
         prefs_check=check()
         if prefs_check :
-            recreate=Win.popup( title=winTitle+' - Prefs Exist', msg='Preferences already exist - However....\n'+\
-                '    You seem to be missing some preference attributes.\n'+\
-                '    Would you like to re-create?', type='okCancel' )
-            #  Delete preferences file, if specified :
-            if recreate=='OK' :
-                P.info( 'Deleting previous preferences file...' )
-                try :
-                    os.remove( prefsFile )
-                except Exception, e :
-                    P.error( 'Unable to delete preferences' )
-                    P.error( '    %s' % traceback.print_exc() )
-                    return False
-            else :
-                P.info( 'Not altering the existing NIM preferences file, this may cause problems later...' )
-                return False
-        else :
-            
+            #  Open NIM prefs file for appending :
+            _prefFile=open( prefsFile, 'a' )
+            #  Write Application Preferences :
+            _prefFile.write('\n')
+            for app in apps :
+                app_prefs=_appPrefs( app )
+                for key in prefs_check :
+                    if key in app_prefs :
+                        _prefFile.write( key+'='+app_prefs[key]+'\n' )
+                _prefFile.write('\n')
+            #  Close file :
+            _prefFile.close()
+        else :            
             #  Ask to recreate existing preferences :
             if recreatePrefs :
                 recreate=Win.popup( title=winTitle+' - Prefs Exist', \
