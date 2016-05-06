@@ -15,6 +15,9 @@
 #################################################################################################
 # NIM MENU
 
+import nim_tools
+nuke.addOnScriptSave(nim_tools.updateNimWriteNodes)
+
 #  Make prefs:
 import nim_core.nim_prefs as Prefs
 Prefs.mk_default( notify_success=True )

@@ -24,3 +24,22 @@ def CheckOutputPath():
         os.makedirs (osdir)
     except OSError:
         pass
+
+def updateNimWriteNodes():
+    import nuke
+    writeNodes = nuke.allNodes('WriteNIM_JPG')
+    writeNodes.extend(nuke.allNodes('WriteNIM_PNG'))
+    writeNodes.extend(nuke.allNodes('WriteNIM_EXR'))
+    writeNodes.extend(nuke.allNodes('WriteNIM_DPX'))
+    writeNodes.extend(nuke.allNodes('WriteNIM_TIF'))
+    writeNodes.extend(nuke.allNodes('WriteNIM_MOV'))
+    
+    # find autoFillWrite nodes
+    for n in writeNodes:
+        for k in n.knobs():
+            print k
+            if k == "nim_outputFileText":
+                try:
+                    n[k].setValue(n.knobs()['nimFilename'].value())
+                except:
+                    print("No NIM Write Nodes Found.")
