@@ -288,8 +288,17 @@ def mk_default( recreatePrefs=False, notify_success=True ) :
         if prefs_check :
             #  Open NIM prefs file for appending :
             _prefFile=open( prefsFile, 'a' )
-            #  Write Application Preferences :
             _prefFile.write('\n')
+            #  Write NIM preferences :
+            nim_prefs=_nimPrefs()
+            missing_at_least_one_nim_pref = False
+            for key in prefs_check :
+                if key in nim_prefs :
+                    missing_at_least_one_nim_pref = True
+                    _prefFile.write( key+'='+nim_prefs[key]+'\n' )
+            if missing_at_least_one_nim_pref :
+                _prefFile.write('\n')
+            #  Write Application Preferences :
             for app in apps :
                 app_prefs=_appPrefs( app )
                 for key in prefs_check :
