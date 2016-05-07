@@ -39,7 +39,8 @@ winTitle='NIM_'+version
 def get( sqlCmd=None, debug=True, nimURL=None ) :
     'Querys MySQL server and returns decoded json array'
     result=None
-    
+    #P.info('nimURL: %s' % nimURL)
+
     #  If NIM URL not given, retrieve from preferences :
     if not nimURL :
         _prefs=Prefs.read()
@@ -226,10 +227,13 @@ def get_userID( user='' ) :
         print traceback.print_exc()
         return False
 
-def get_userList( ) :
+def get_userList( url=None ) :
     'Retrieves the list of NIM Users from the NIM Preferences.'
     usrList=False
-    usrList=get( sqlCmd={'q': 'getUsers'} )
+    if url:
+        usrList=get( sqlCmd={'q': 'getUsers'}, nimURL=url )
+    else:
+        usrList=get( sqlCmd={'q': 'getUsers'} )
     return usrList
 
 def get_jobs( userID=None, folders=False ) :

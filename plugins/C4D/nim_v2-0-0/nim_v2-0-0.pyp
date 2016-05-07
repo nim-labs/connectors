@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: C4D/nim_v2-0-0.py
-# Version:  v2.0.0.160505
+# Version:  v2.0.0.160506
 #
 # Copyright (c) 2016 NIM Labs LLC
 # All rights reserved.
@@ -115,17 +115,6 @@ if loadNIM:
     nim_pubUI_ID=1032465
     nim_verUp_ID=1032466
     nim_reloadScripts_ID=1032467
-
-    '''
-    if not prefsFound:
-        P.info('C4D Creating Default Preferences')
-        pref_success = Prefs.mk_default()
-        if pref_success === False:
-            loadNIM = False
-    else:
-        P.info('C4D Reading Exising Preferences')
-        _prefs=Prefs.read()
-    '''
 
     print 'NIM ~> Reading NIM Preferences'
     _prefs=Prefs.read()

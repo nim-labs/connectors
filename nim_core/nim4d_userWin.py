@@ -28,11 +28,10 @@ import nim_print as P
 import nim_win as Win
 
 #  Variables :
-version='v0.5.7'
+version='v2.0.0'
 winTitle='NIM_'+version+' - '
 _os=platform.system().lower()
 nim_plugin_ID=1032427
-
 
 #  START - Get User dialog, for setting the Username :
 class GetUser( gui.GeDialog ) :
@@ -49,8 +48,8 @@ class GetUser( gui.GeDialog ) :
         'Creates the UI elements.'
         combo_num=self.IDs['initial']
         cur_user=F.get_user()
-        usrList=Api.get_userList()
-        url=Prefs.get_url()
+        nimURL=Prefs.get_url()
+        usrList=Api.get_userList( url=nimURL )
         
         #  Text and Combo Box :
         self.GroupBegin( self.IDs['grp1'], c4d.BFH_SCALEFIT, cols=1, rows=2 )
@@ -78,7 +77,6 @@ class GetUser( gui.GeDialog ) :
     
     def Command( self, id, msg ) :
         'Updates the user setting.'
-        
         #  Set Username :
         if id==self.IDs['combo'] :
             num=self.GetLong( id )
@@ -94,7 +92,6 @@ class GetUser( gui.GeDialog ) :
             if url : userID=Api.get( sqlCmd={ 'q': 'getUserID', 'u': self.usr }, debug=False, nimURL=url )
             else : userID=Api.get( sqlCmd={ 'q': 'getUserID', 'u': self.usr }, debug=False )
             #  Update Preferences :
-            #if userID : Prefs.update( attr='NIM_User', value=self.usr )
             if userID : Prefs.set_userInfo( userID, self.usr )
             self.Close()
         

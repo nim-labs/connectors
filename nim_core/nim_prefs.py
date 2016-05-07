@@ -58,11 +58,12 @@ def get_userInfo( url='' ) :
     
     if not userID and users :
         userList=[]
-        for u in users : userList.append( u['username'] )
+        for u in users : 
+            userList.append( u['username'] )
+        
         #  Create window to get user name from :
         if F.get_app() !='C4D' :
-            user=Win.popup( title='User Name Error', msg='Pick a username to use', type='comboBox', \
-                pyside=True, _list=userList )
+            user=Win.popup( title='User Name Error', msg='Pick a username to use', type='comboBox', pyside=True, _list=userList )
         else :
             import nim4d_userWin as W
             userWin=W.GetUser()
@@ -78,6 +79,7 @@ def get_userInfo( url='' ) :
         return (user, userID)
     else :
         return False
+
 
 def set_userInfo( ID=0, name='') :
     'Sets the user name in the NIM Prefereces'
@@ -159,11 +161,11 @@ def _inputURL() :
 def _verifyURL( url='' ) :
     'Verifies a given URL as valid'
     #  Verify URL :
-    #P.info('_verifyURL: URL=%s \n' % url)
     if not url : return False
     result=Api.get( sqlCmd={'q': 'testAPI'}, debug=False, nimURL=url )
     P.info('Validating API: %s' % result)
     if result : 
+        #setting global variable
         return url
     else : 
         return False
@@ -182,6 +184,7 @@ def _prefsFail() :
         P.info( 'NIM URL Verified: %s' % test)
         if test : return [result, url]
     return [result, False]
+
 
 def _nimPrefs() :
     'Returns a list of NIM preferences'
@@ -266,8 +269,6 @@ def check() :
 def mk_default( recreatePrefs=False, notify_success=True ) :
     'Makes default preferences'
 
-    #P.info('nim_prefs.mk_default')
-
     global apps
     global nim_api
     global nim_user, nim_userID
@@ -329,10 +330,10 @@ def mk_default( recreatePrefs=False, notify_success=True ) :
         #  Loop until valid URL found, or Cancel pressed :
         search_for_url = True
         search_for_user = False
-        while search_for_url :
+        while search_for_url:
             url=_inputURL()
             result=_verifyURL( url )
-            if result : 
+            if result: 
                 P.info('URL Valid')
                 nim_URL = url
                 search_for_url = False
@@ -344,14 +345,15 @@ def mk_default( recreatePrefs=False, notify_success=True ) :
                 if keepGoing != 'OK':
                     P.error('Exiting without setting NIM Preferences.')
                     search_for_url = False
+                    search_for_user = False
                     return False
         
         #  Verify User :
-        #if url :
         if search_for_user :
             P.info('Searching for NIM User')
             nim_userID=Api.get( sqlCmd={ 'q': 'getUserID', 'u': nim_user}, debug=False, nimURL=nim_URL )
             if not nim_userID :
+                P.info("User ID not found")
                 result=get_userInfo( url=nim_URL )
                 if type(result)==type(tuple()) and len(result)==2 :
                     nim_user=result[0]
