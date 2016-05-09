@@ -115,6 +115,7 @@ if loadNIM:
     nim_pubUI_ID=1032465
     nim_verUp_ID=1032466
     nim_reloadScripts_ID=1032467
+    nim_changeUser_ID=1032468
 
     print 'NIM ~> Reading NIM Preferences'
     _prefs=Prefs.read()
@@ -144,6 +145,7 @@ def PluginMessage(id, data) :
         #menu.InsData( c4d.MENURESOURCE_COMMAND, 'PLUGIN_CMD_1032521' )
         menu.InsData( c4d.MENURESOURCE_SEPERATOR, True )
         menu.InsData( c4d.MENURESOURCE_COMMAND, 'PLUGIN_CMD_1032467' )
+        menu.InsData( c4d.MENURESOURCE_COMMAND, 'PLUGIN_CMD_1032468' )
         
         #  Place Menu :
         if pluginMenu :
@@ -226,6 +228,23 @@ class nim_reloadScripts_cmd( plugins.CommandData ) :
         'Reloads NIM scripts.'
         F.scripts_reload()
         return True
+
+
+class nim_changeUser_cmd( plugins.CommandData ) :
+    'Registers the plugin with C4D.'
+    def Execute(self, doc) :
+        'Run whenever the user activates the plugin.'
+        P.info('Selecting User')
+        import nim_core.nim4d_userWin as W
+        userWin=W.GetUser()
+        userWin.Open( dlgtype=W.c4d.DLG_TYPE_MODAL )
+        userName=userWin.get_user()
+        P.info('User = "%s"' % userName)
+        
+        #  Update Preferences :
+        Prefs.update( attr='NIM_User', value=userName )
+        return True
+
 #  END - Classes to register plugins.
 
 
@@ -268,6 +287,10 @@ if loadNIM:
         nim_reloadScripts_icon=bitmaps.BaseBitmap()
         nim_reloadScripts_icon_path=os.path.join( nim4d_dir, 'res', 'nim_reloadScripts_icon.tif' )
         nim_reloadScripts_icon.InitWith( nim_reloadScripts_icon_path )
+        #  Change User Icon :
+        nim_changeUser_icon=bitmaps.BaseBitmap()
+        nim_changeUser_icon_path=os.path.join( nim4d_dir, 'res', 'nim_changeUser_icon.tif' )
+        nim_changeUser_icon.InitWith( nim_changeUser_icon_path )
         
         
         #  Register Plugins :
@@ -337,6 +360,15 @@ if loadNIM:
             icon=nim_reloadScripts_icon,
             help='Reloads NIM scripts.',
             dat=nim_reloadScripts_cmd()
+        )
+        #  Reload NIM Scripts :
+        plugins.RegisterCommandPlugin(
+            id=nim_changeUser_ID,
+            str='Change User',
+            info=0,
+            icon=nim_changeUser_icon,
+            help='Select a NIM user.',
+            dat=nim_changeUser_cmd()
         )
 
 #  END

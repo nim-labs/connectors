@@ -94,11 +94,12 @@ def get_url() :
     'Retrieves the NIM URL from the NIM Preferences.'
     url=False
     global nim_URL
-    '''
-    _prefs=read()
-    if _prefs and 'NIM_URL' in _prefs.keys() :
-        url=_prefs['NIM_URL']
-    '''
+    
+    if not nim_URL or nim_URL == 'http://hostname/nimAPI.php':
+        _prefs=read()
+        if _prefs and 'NIM_URL' in _prefs.keys() :
+            nim_URL=_prefs['NIM_URL']
+    
     url = nim_URL
     return url
 

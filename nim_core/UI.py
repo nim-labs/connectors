@@ -31,7 +31,7 @@ except :
 #  Variables :
 WIN=''
 startTime=''
-version='v1.0.5'
+version='v2.0.0'
 winTitle='NIM_'+version
 _os=platform.system().lower()
 _osCap=platform.system()

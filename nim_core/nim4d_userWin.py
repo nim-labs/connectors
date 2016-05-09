@@ -49,6 +49,7 @@ class GetUser( gui.GeDialog ) :
         combo_num=self.IDs['initial']
         cur_user=F.get_user()
         nimURL=Prefs.get_url()
+        P.info('CreateLayout - nimURL: %s' % nimURL)
         usrList=Api.get_userList( url=nimURL )
         
         #  Text and Combo Box :
@@ -100,7 +101,6 @@ class GetUser( gui.GeDialog ) :
     def get_user( self ) :
         'Returns the user name specified.'
         return self.usr
-
 
 #  END - Get User Dialog.
 
