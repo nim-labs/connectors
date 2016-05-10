@@ -292,12 +292,16 @@ def get_assetInfo( assetID=None ) :
     assetInfo=get( {'q': 'getAssetInfo', 'ID': assetID} )
     return assetInfo
 
+def get_jobInfo( jobID=None ) :
+    'Builds a dictionary of all shows for a given show'
+    return get( {'q': 'getJobInfo', 'ID': str(jobID)} )
+
 def get_shows( jobID=None ) :
     'Builds a dictionary of all shows for a given job'
     return get( {'q': 'getShows', 'ID': str(jobID)} )
 
 def get_showInfo( showID=None ) :
-    'Builds a dictionary of all shows for a given job'
+    'Builds a dictionary of all shows for a given show'
     return get( {'q': 'getShowInfo', 'ID': str(showID)} )
 
 def get_shots( showID=None ) :

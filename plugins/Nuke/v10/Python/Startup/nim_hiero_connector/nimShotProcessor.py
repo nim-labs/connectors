@@ -726,13 +726,54 @@ class NimShotProcessorPreset(hiero.core.ProcessorPreset):
     resolver.addResolver("{_nameindex}", "Index of the shot name in the sequence preceded by an _, for avoiding clashes with shots of the same name", lambda keyword, task: task.shotNameIndex())
 
     #NIM Keywords
+    resolver.addResolver("{nim_job_name}", "NIM Job Name", lambda keyword, task: nimJobName(task))
+    resolver.addResolver("{nim_job_number}", "NIM Job Number", lambda keyword, task: nimJobNumber(task))
+    resolver.addResolver("{nim_show_name}", "NIM Show Name", lambda keyword, task: nimShowName(task))
     resolver.addResolver("{nim_server_path}", "NIM Job Server Path", lambda keyword, task: serverOSPath(task))
-    #resolver.addResolver("{nim_job_root}", "NIM Job Root Directory", lambda keyword: self.nim_getJobRootPath())
+    #resolver.addResolver("{nim_job_root}", "NIM Job Root Directory", lambda keyword: nim_getJobRootPath())
     resolver.addResolver("{nim_show_root}", "NIM Show Root Directory", lambda keyword, task: showRootPath(task))
     resolver.addResolver("{nim_shot_root}", "NIM Shot Root Directory", lambda keyword, task: shotRootPath(task))
     resolver.addResolver("{nim_shot_plates}", "NIM Shot Plates Directory", lambda keyword, task: shotPlatesPath(task))
     resolver.addResolver("{nim_shot_render}", "NIM Shot Render Output Directory", lambda keyword, task: shotRenderPath(task))
     resolver.addResolver("{nim_shot_comp}", "NIM Shot Comp Output Directory", lambda keyword, task: shotCompPath(task))
+
+    #NOTE: Use encode('ascii') on return value to avoid PyZMQ errors
+    
+    def nimJobName(task):
+      nim_hiero_debug = False
+      nim_jobName = ''
+      jobID = nimHieroConnector.g_nim_jobID
+      nim_jobInfo = nimAPI.get_jobInfo(jobID)
+      if nim_jobInfo:
+        if len(nim_jobInfo)>0:
+          nim_jobName = nim_jobInfo[0]['jobname']
+          if nim_hiero_debug:
+            print nim_jobInfo
+      return nim_jobName.encode('ascii')
+
+    def nimJobNumber(task):
+      nim_hiero_debug = False
+      nim_jobNumber = ''
+      jobID = nimHieroConnector.g_nim_jobID
+      nim_jobInfo = nimAPI.get_jobInfo(jobID)
+      if nim_jobInfo:
+        if len(nim_jobInfo)>0:
+          nim_jobNumber = nim_jobInfo[0]['number']
+          if nim_hiero_debug:
+            print nim_jobInfo
+      return nim_jobNumber.encode('ascii')
+
+    def nimShowName(task):
+      nim_hiero_debug = False
+      nim_showName = ''
+      showID = nimHieroConnector.g_nim_showID
+      nim_showInfo = nimAPI.get_showInfo(showID)
+      if nim_showInfo:
+        if len(nim_showInfo)>0:
+          nim_showName = nim_showInfo[0]['showname']
+          if nim_hiero_debug:
+            print nim_showInfo
+      return nim_showName.encode('ascii')
 
     def serverOSPath(task):
       return nimHieroConnector.g_nim_serverOSPath.encode('ascii')
