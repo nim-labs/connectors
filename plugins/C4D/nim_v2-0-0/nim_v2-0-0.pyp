@@ -144,9 +144,9 @@ def PluginMessage(id, data) :
         #  XRef command :
         #menu.InsData( c4d.MENURESOURCE_COMMAND, 'PLUGIN_CMD_1032521' )
         menu.InsData( c4d.MENURESOURCE_SEPERATOR, True )
-        menu.InsData( c4d.MENURESOURCE_COMMAND, 'PLUGIN_CMD_1032467' )
         menu.InsData( c4d.MENURESOURCE_COMMAND, 'PLUGIN_CMD_1032468' )
-        
+        menu.InsData( c4d.MENURESOURCE_COMMAND, 'PLUGIN_CMD_1032467' )
+                
         #  Place Menu :
         if pluginMenu :
             mainMenu.InsDataAfter( c4d.MENURESOURCE_STRING, menu, pluginMenu )
@@ -233,14 +233,13 @@ class nim_reloadScripts_cmd( plugins.CommandData ) :
 class nim_changeUser_cmd( plugins.CommandData ) :
     'Registers the plugin with C4D.'
     def Execute(self, doc) :
-        'Run whenever the user activates the plugin.'
-        P.info('Selecting User')
+        'Selects a new NIM user for the connector.'
+        P.info('Selecting NIM User...')
         import nim_core.nim4d_userWin as W
         userWin=W.GetUser()
         userWin.Open( dlgtype=W.c4d.DLG_TYPE_MODAL )
         userName=userWin.get_user()
         P.info('User = "%s"' % userName)
-        
         #  Update Preferences :
         Prefs.update( attr='NIM_User', value=userName )
         return True
@@ -277,7 +276,7 @@ if loadNIM:
         nim_ref_icon.InitWith( nim_ref_icon_path )
         #  Publish Icon :
         nim_pub_icon=bitmaps.BaseBitmap()
-        nim_pub_icon_path=os.path.join( nim4d_dir, 'res', 'nim_pub_icon_off.tif' )
+        nim_pub_icon_path=os.path.join( nim4d_dir, 'res', 'nim_pub_icon.tif' )
         nim_pub_icon.InitWith( nim_pub_icon_path )
         #  Version Up Icon :
         nim_verUp_icon=bitmaps.BaseBitmap()
