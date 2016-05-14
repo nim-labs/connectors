@@ -407,7 +407,10 @@ class NIM_Node() :
                     self.nim[elem]['list'].append( 'Select...' )
                     for ver in vers :
                         print ver
-                        srch=re.search( '_[v]?[0-9]+.nk$', ver['filename'] )
+                        if nuke.env['nc'] :
+                            srch=re.search( '_[v]?[0-9]+.nknc$', ver['filename'] )
+                        else :
+                            srch=re.search( '_[v]?[0-9]+.nk$', ver['filename'] )
                         if srch :
                             verNum=re.search( '[0-9]+', srch.group() )
                             if verNum :

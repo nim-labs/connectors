@@ -795,7 +795,11 @@ class GUI(QtGui.QMainWindow) :
             self.fileExtText.setVisible( False )
             self.nim.Input('fileExt').setVisible( False )
         if self.app=='Nuke' :
-            self.nim.set_name( elem='fileExt', name='.nk' )
+            import nuke
+            if nuke.env['nc'] :
+                self.nim.set_name( elem='fileExt', name='.nknc' )
+            else :
+                self.nim.set_name( elem='fileExt', name='.nk' )
         elif self.app=='C4D' :
             self.nim.set_name( elem='fileExt', name='.c4d' )
         elif self.app=='3dsMax' :
@@ -1043,7 +1047,11 @@ class GUI(QtGui.QMainWindow) :
             self.fileExtText.setVisible( True )
             self.nim.Input('fileExt').setVisible( True )
         elif self.app=='Nuke' :
-            self.nim.set_name( elem='fileExt', name='.nk' )
+            import nuke
+            if nuke.env['nc'] :
+                self.nim.set_name( elem='fileExt', name='.nknc' )
+            else:
+                self.nim.set_name( elem='fileExt', name='.nk' )
             self.fileExtText.setVisible( False )
             self.nim.Input('fileExt').setVisible( False )
         elif self.app=='C4D' :
@@ -1239,7 +1247,7 @@ class GUI(QtGui.QMainWindow) :
                             elif self.app=='Nuke' :
                                 temp_files=os.listdir( nimDir )
                                 for _file in temp_files :
-                                    if re.search( '^'+basename+'.nk$', _file ) :
+                                    if re.search( '^'+basename+'.(nk|nknc)$', _file ) :
                                         if _file not in files :
                                             files.append( _file )
                             elif self.app=='C4D' :
@@ -1300,7 +1308,7 @@ class GUI(QtGui.QMainWindow) :
                                 if self.app=='Maya' :
                                     if ext not in ['.ma', '.mb'] : item.setFlags( QtCore.Qt.ItemIsEditable )
                                 elif self.app=='Nuke' :
-                                    if ext !='.nk' : item.setFlags( QtCore.Qt.ItemIsEditable )
+                                    if ext not in ['.nk', '.nknc'] : item.setFlags( QtCore.Qt.ItemIsEditable )
                                 elif self.app=='C4D' :
                                     if ext !='.c4d' : item.setFlags( QtCore.Qt.ItemIsEditable )
                                 elif self.app=='3dsMax' :
@@ -1352,7 +1360,7 @@ class GUI(QtGui.QMainWindow) :
                                         if option['ext'] not in ['.ma', '.mb'] :
                                             item.setFlags( QtCore.Qt.ItemIsEditable )
                                     elif self.app=='Nuke' :
-                                        if option['ext'] !='.nk' :
+                                        if option['ext'] not in ['.nk', '.nknc'] :
                                             item.setFlags( QtCore.Qt.ItemIsEditable )
                                     elif self.app=='C4D' :
                                         if option['ext'] !='.c4d' :
@@ -1385,7 +1393,7 @@ class GUI(QtGui.QMainWindow) :
                                         item.setFlags( QtCore.Qt.ItemIsEditable )
                                 elif self.app=='Nuke' :
                                     ext=F.get_ext( filePath=option['filename'] )
-                                    if ext !='.nk' :
+                                    if ext not in ['.nk', '.nknc'] :
                                         item.setFlags( QtCore.Qt.ItemIsEditable )
                                 elif self.app=='C4D' :
                                     ext=F.get_ext( filePath=option['filename'] )
@@ -1427,7 +1435,7 @@ class GUI(QtGui.QMainWindow) :
                                     item.setFlags( QtCore.Qt.ItemIsEditable )
                             elif self.app=='Nuke' :
                                 ext=F.get_ext( filePath=option['filename'] )
-                                if ext !='.nk' :
+                                if ext not in ['.nk', '.nknc'] :
                                     item.setFlags( QtCore.Qt.ItemIsEditable )
                             elif self.app=='C4D' :
                                 ext=F.get_ext( filePath=option['filename'] )
@@ -1606,7 +1614,7 @@ class GUI(QtGui.QMainWindow) :
                         if self.app=='Maya' :
                             if ext not in ['.ma', '.mb'] : item.setFlags( QtCore.Qt.ItemIsEditable )
                         elif self.app=='Nuke' :
-                            if ext !='.nk' : item.setFlags( QtCore.Qt.ItemIsEditable )
+                            if ext not in ['.nk', '.nknc'] : item.setFlags( QtCore.Qt.ItemIsEditable )
                         elif self.app=='C4D' :
                             if ext !='.c4d' : item.setFlags( QtCore.Qt.ItemIsEditable )
                         elif self.app=='3dsMax' :
@@ -1693,7 +1701,7 @@ class GUI(QtGui.QMainWindow) :
                                 if self.app=='Maya' :
                                     if option['ext'] not in ['.ma', '.mb'] : item.setFlags( QtCore.Qt.ItemIsEditable )
                                 elif self.app=='Nuke' :
-                                    if option['ext'] !='.nk' : item.setFlags( QtCore.Qt.ItemIsEditable )
+                                    if option['ext'] not in ['.nk', '.nknc'] : item.setFlags( QtCore.Qt.ItemIsEditable )
                                 elif self.app=='C4D' :
                                     if option['ext'] !='.c4d' : item.setFlags( QtCore.Qt.ItemIsEditable )
                                 elif self.app=='3dsMax' :
@@ -2624,7 +2632,12 @@ class GUI(QtGui.QMainWindow) :
         task=self.nim.Input('task').currentText()
         basename=Api.to_basename( nim=self.nim )
         if self.app=='Maya' : ext=self.nim.Input('fileExt').currentText()
-        elif self.app=='Nuke' : ext='.nk'
+        elif self.app=='Nuke' : 
+            import nuke
+            if nuke.env['nc'] :
+                ext='.nknc'
+            else :
+                ext='.nk'
         elif self.app=='C4D' : ext='.c4d'
         elif self.app=='3dsMax' : ext='.max'
         elif self.app=='Houdini' : ext='.hip'
@@ -2659,7 +2672,12 @@ class GUI(QtGui.QMainWindow) :
         'Versions up the file, when the Version Up button is pressed'
         #  Get File Extension :
         if self.app=='Maya' : ext=self.nim['fileExt']['input'].currentText()
-        elif self.app=='Nuke' : ext='.nk'
+        elif self.app=='Nuke' : 
+            import nuke
+            if nuke.env['nc'] :
+                ext='.nknc'
+            else :
+                ext='.nk'
         elif self.app=='C4D' : ext='.c4d'
         elif self.app=='3dsMax' : ext='.max'
         elif self.app=='Houdini' : ext='.hip'
@@ -2679,7 +2697,12 @@ class GUI(QtGui.QMainWindow) :
         'Publishes the current file, when the Publish button is pressed'
         #  Get File Extension :
         if self.app=='Maya' : ext=self.nim.Input('fileExt').currentText()
-        elif self.app=='Nuke' : ext='.nk'
+        elif self.app=='Nuke' : 
+            import nuke
+            if nuke.env['nc'] :
+                ext='.nknc'
+            else :
+                ext='.nk'
         elif self.app=='C4D' :  ext='.c4d'
         elif self.app=='3dsMax' : ext='.max'
         elif self.app=='Houdini' : ext='.hip'
