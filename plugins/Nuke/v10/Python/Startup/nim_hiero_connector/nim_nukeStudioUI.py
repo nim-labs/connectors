@@ -247,6 +247,10 @@ def saveDialog():
 		
 		# append extension
 		ext = ".hrox"
+		import nuke
+		if nuke.env['nc'] :
+			ext = '.hroxnc'
+		
 		projectVersion = projectBasename+version+ext
 		
 		projectOutputFullPath = os.path.join(projectOutputPath, projectVersion)
@@ -332,6 +336,10 @@ def versionDialog():
 		
 		# append extension
 		ext = ".hrox"
+		import nuke
+		if nuke.env['nc'] :
+			ext = '.hroxnc'
+
 		projectVersion = projectBasename+version+ext
 		
 		projectOutputFullPath = os.path.join(projectOutputPath, projectBasename, projectVersion)
