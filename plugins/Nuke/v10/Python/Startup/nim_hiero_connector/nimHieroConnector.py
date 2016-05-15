@@ -261,12 +261,17 @@ class NimHieroConnector():
 			print "NIM: ERROR - trackItem Missing NIM Tag"
 			return False
 
+		'''
 		# Get middle frame for thumbnail
 		trackItem_sourceIn = trackItem.sourceIn()
 		trackItem_sourceOut = trackItem.sourceOut()
 		middleFrame = (trackItem_sourceOut - trackItem_sourceIn) // 2
-
 		trackItem_thumbnail = trackItem.thumbnail(middleFrame)
+		'''
+		
+		# Get first track frame for thumbnail
+		trackItem_timelineIn = trackItem.timelineIn()
+		trackItem_thumbnail = trackItem.thumbnail(trackItem_timelineIn)
 
 		'''
 		#encode for upload
