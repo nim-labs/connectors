@@ -270,9 +270,10 @@ class NimHieroConnector():
 		'''
 		
 		# Get first track frame for thumbnail
-		trackItem_timelineIn = trackItem.timelineIn()
-		trackItem_thumbnail = trackItem.thumbnail(trackItem_timelineIn)
-
+		trackItem_sourceIn = trackItem.sourceIn()
+		trackItem_thumbnail = trackItem.thumbnail(trackItem_sourceIn)
+	
+		
 		'''
 		#encode for upload
 		byteArray = QByteArray()
