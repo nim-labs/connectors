@@ -1139,7 +1139,7 @@ def versionUp( nim=None, padding=2, selected=False, win_launch=False, pub=False,
             msg='FAILED to Version Up the file.' )
         return False
 
-def save_file( parent='SHOW', parentID=0, task_type_ID=0, task_folder='', userID=0, basename='', filename='', path='', ext='', version='', comment='', serverID=0, pub=False, work=True ):
+def save_file( parent='SHOW', parentID=0, task_type_ID=0, task_folder='', userID=0, basename='', filename='', path='', ext='', version='', comment='', serverID=0, pub=False, forceLink=1, work=True ):
     '''General Purpose Save File Function that Adds a File to the NIM Database with brute force data'''
     parent = parent.upper()
 
@@ -1181,9 +1181,9 @@ def save_file( parent='SHOW', parentID=0, task_type_ID=0, task_folder='', userID
         P.info( '      File ID = %s' % result )
 
         if pub:
-            fileID = result
+            ID = result
             #Create symlink for published files
-            pub_result = publish_symLink(fileID)
+            pub_result = publish_symLink(fileID=ID, forceLink=forceLink)
             P.error('pub_result: %s' % pub_result)
             if pub_result == True:
                 P.info('...Success')
@@ -1192,7 +1192,7 @@ def save_file( parent='SHOW', parentID=0, task_type_ID=0, task_folder='', userID
                         Please check to make sure the file exists on disk.')
     return result
 
-def update_file( ID=0, task_type_ID=0, task_folder='', userID=0, basename='', filename='', path='', ext='', version='', comment='', serverID=0, pub=False, work=True ):
+def update_file( ID=0, task_type_ID=0, task_folder='', userID=0, basename='', filename='', path='', ext='', version='', comment='', serverID=0, pub=False, forceLink=1, work=True ):
     '''General Purpose Update File Function that Updates and existing File in the NIM Database'''
     is_work = 0
     if work:
@@ -1228,7 +1228,7 @@ def update_file( ID=0, task_type_ID=0, task_folder='', userID=0, basename='', fi
         P.info( '      File ID = %s' % result )
         if pub:
             #Create symlink for published files
-            pub_result = publish_symLink(ID)
+            pub_result = publish_symLink(fileID=ID, forceLink=forceLink)
             if pub_result == 'true':
                 P.info('...Success')
             else:
@@ -1236,14 +1236,17 @@ def update_file( ID=0, task_type_ID=0, task_folder='', userID=0, basename='', fi
                         Please check to make sure the file exists on disk.')
     return result
 
-def publish_symLink( fileID=None) :
+def publish_symLink( fileID=None, elementID=None, forceLink=1 ) :
     '''Creates the symbolic link for a published file'''
     result = ''
     if fileID :
         P.info('Creating SymLink for Published File')
-        result=get( {'q': 'publishSymlink', 'fileID': str(fileID)} )
+        result=get( {'q': 'publishSymlink', 'fileID': str(fileID), 'forceLink': str(forceLink) } )
+    elif elementID :
+        P.info('Creating SymLink for Published Element')
+        result=get( {'q': 'publishSymlink', 'elementID': str(elementID), 'forceLink': str(forceLink) } )
     else :
-        P.error( 'Sorry!  Problem retrieving File ID.' )
+        P.error( 'Sorry!  Problem retrieving Item ID.' )
         return False
     return result
 

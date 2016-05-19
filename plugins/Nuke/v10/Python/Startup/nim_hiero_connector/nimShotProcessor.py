@@ -644,15 +644,16 @@ class NimShotProcessor(hiero.core.ProcessorBase):
                 nim_doSave = False
 
               pub = nimHieroConnector.g_nim_publishComp
+              forceLink = 0 # lazy symlink as files wont exist yet
               work = True # set comp as working file
 
               if nim_doSave is True:
                 if nim_doUpdate is True:
                   print "Updating file data in NIM"
-                  file_apiResult = nimAPI.update_file( nim_versionID, task_type_ID, task_folder, userID, basename, filename, filepath, ext, version, comment, serverID, pub, work )
+                  file_apiResult = nimAPI.update_file( ID=nim_versionID, task_type_ID=task_type_ID, task_folder=task_folder, userID=userID, basename=basename, filename=filename, path=filepath, ext=ext, version=version, comment=comment, serverID=serverID, pub=pub, forceLink=forceLink, work=work )
                 else:
                   print "Saving file data to NIM"
-                  file_apiResult = nimAPI.save_file( 'shot', nim_shotID, task_type_ID, task_folder, userID, basename, filename, filepath, ext, version, comment, serverID, pub, work )
+                  file_apiResult = nimAPI.save_file( parent='shot', parentID=nim_shotID, task_type_ID=task_type_ID, task_folder=task_folder, userID=userID, basename=basename, filename=filename, path=filepath, ext=ext, version=version, comment=comment, serverID=serverID, pub=pub, forceLink=forceLink, work=work )
 
           elif presetName == 'hiero.exporters.FnExternalRender.NukeRenderTask':
             #Skip - user to publish element at comp render time
