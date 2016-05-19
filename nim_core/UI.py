@@ -691,8 +691,9 @@ class GUI(QtGui.QMainWindow) :
         self.checkBox.setVisible( False )
         
         #  Buttons :
-        if self.app=='Nuke' : self.btn_1.setText('Open Comp')
-        else : self.btn_1.setText('Open')
+        #if self.app=='Nuke' : self.btn_1.setText('Open Comp')
+        #else : self.btn_1.setText('Open')
+        self.btn_1.setText('Open')
         self.btn_1.setVisible( True )
         self.btn_2.setVisible( False )
         
@@ -2280,7 +2281,7 @@ class GUI(QtGui.QMainWindow) :
 
         # Get Server OS Path from server ID
         P.info("FileID: %s" % self.nim.ID('ver'))
-        
+
         open_file_versionInfo = Api.get_verInfo( self.nim.ID('ver') )
 
         if open_file_versionInfo:
@@ -2295,8 +2296,13 @@ class GUI(QtGui.QMainWindow) :
             self.saveServerPref = True
 
         #  Convert file path :
-        filePath=F.os_filePath( path=filePath, nim=self.nim )
-        #P.info("filePath: %s" % filePath)
+        try :
+            filePath=F.os_filePath( path=filePath, nim=self.nim )
+            #P.info("filePath: %s" % filePath)
+        except:
+            P.error('Sorry, no version selected.')
+            Win.popup( title='NIM Error', msg='Sorry, no file specified.\nPlease select a version to open.' )
+            return False
 
         #  Set File Version :
         ver=F.get_ver( filePath=filePath )
@@ -2516,7 +2522,7 @@ class GUI(QtGui.QMainWindow) :
         
         # Get Server OS Path from server ID
         P.info("FileID: %s" % self.nim.ID('ver'))
-        
+
         open_file_versionInfo = Api.get_verInfo( self.nim.ID('ver') )
 
         open_file_serverID = None
@@ -2526,8 +2532,12 @@ class GUI(QtGui.QMainWindow) :
             #serverOSPath = serverOsPathInfo[0]['serverOSPath']
 
         # TODO: check file path conversion for multiple server scenario
-        filePath=F.os_filePath( path=path, nim=self.nim, serverID=open_file_serverID )
-
+        try:
+            filePath=F.os_filePath( path=path, nim=self.nim, serverID=open_file_serverID )
+        except:
+            P.error('File path not resolved.')
+            Win.popup( title='NIM Error', msg='Sorry, file path not found.\nPlease select a version to import.' )
+            return False
 
         #  Maya Import :
         if self.app=='Maya' :
