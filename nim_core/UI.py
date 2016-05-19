@@ -2801,11 +2801,16 @@ class GUI(QtGui.QMainWindow) :
         filePath=self.get_filePath()
         
         #  Derive file name to use for namespace :
-        index=self.nim.Input('ver').currentItem().text().find(' - ')
-        fileName=self.nim.Input('ver').currentItem().text()[0:index]
-        #  Remove file extension from file name :
-        fileName=os.path.splitext( fileName )[0]
-        
+        try :
+            index=self.nim.Input('ver').currentItem().text().find(' - ')        
+            fileName=self.nim.Input('ver').currentItem().text()[0:index]
+            #  Remove file extension from file name :
+            fileName=os.path.splitext( fileName )[0]
+        except:
+            P.error('Sorry, no version selected.')
+            Win.popup( title='NIM Error', msg='Sorry, no file specified.\nPlease select a version to reference.' )
+            return False
+
         #  Reference the file :
         if self.checkBox.checkState() :
             mc.file( filePath, force=True, reference=True, namespace=fileName, groupReference=True, \
@@ -2826,10 +2831,15 @@ class GUI(QtGui.QMainWindow) :
         filePath=self.get_filePath()
         
         #  Derive file name to use for namespace :
-        index=self.nim.Input('ver').currentItem().text().find(' - ')
-        fileName=self.nim.Input('ver').currentItem().text()[0:index]
-        #  Remove file extension from file name :
-        fileName=os.path.splitext( fileName )[0]
+        try :
+            index=self.nim.Input('ver').currentItem().text().find(' - ')
+            fileName=self.nim.Input('ver').currentItem().text()[0:index]
+            #  Remove file extension from file name :
+            fileName=os.path.splitext( fileName )[0]
+        except:
+            P.error('Sorry, no version selected.')
+            Win.popup( title='NIM Error', msg='Sorry, no file specified.\nPlease select a version to reference.' )
+            return False
         
         #  Reference the file :
         if self.checkBox.checkState() :
@@ -2867,10 +2877,15 @@ class GUI(QtGui.QMainWindow) :
         filePath=self.get_filePath()
         
         #  Derive file name to use for namespace :
-        index=self.nim.Input('ver').currentItem().text().find(' - ')
-        fileName=self.nim.Input('ver').currentItem().text()[0:index]
-        #  Remove file extension from file name :
-        fileName=os.path.splitext( fileName )[0]
+        try :
+            index=self.nim.Input('ver').currentItem().text().find(' - ')
+            fileName=self.nim.Input('ver').currentItem().text()[0:index]
+            #  Remove file extension from file name :
+            fileName=os.path.splitext( fileName )[0]
+        except:
+            P.error('Sorry, no version selected.')
+            Win.popup( title='NIM Error', msg='Sorry, no file specified.\nPlease select a version to reference.' )
+            return False
         
         #  Reference the file :
         if self.checkBox.checkState() :
