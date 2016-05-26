@@ -29,7 +29,8 @@ if(typeof JSON!=="object"){JSON={}}(function(){"use strict";function f(e){return
 // Returns JS Object containing server response based on query;
 // query argument is a JS object of parameters and values
 function nimAPI(query) {
-	var queryArray = [],
+	var nimAPIHostAndPort = nimAPIHost,
+		queryArray = [],
 		queryString = '',
 		reply = '',
 		conn = new Socket,
@@ -53,8 +54,11 @@ function nimAPI(query) {
 		return newKey;
 	}
 
+	if (nimAPIHostAndPort.indexOf(':') == -1)
+		nimAPIHostAndPort += ':80';
+
 	// Access NIM
-	if (conn.open(nimAPIHost + ':80')) {
+	if (conn.open(nimAPIHostAndPort)) {
 		for (var parameter in query) {
 			queryArray.push(buildQueryString(query[parameter], parameter));
 		}

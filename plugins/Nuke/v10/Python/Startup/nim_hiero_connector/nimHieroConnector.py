@@ -261,27 +261,17 @@ class NimHieroConnector():
 			print "NIM: ERROR - trackItem Missing NIM Tag"
 			return False
 
+		'''
 		# Get middle frame for thumbnail
 		trackItem_sourceIn = trackItem.sourceIn()
 		trackItem_sourceOut = trackItem.sourceOut()
 		middleFrame = (trackItem_sourceOut - trackItem_sourceIn) // 2
-
 		trackItem_thumbnail = trackItem.thumbnail(middleFrame)
-
 		'''
-		#encode for upload
-		byteArray = QByteArray()
-		buffer = QBuffer(byteArray)
-		buffer.open(QIODevice.ReadWrite)
-
-		img_size = QSize(320,180)
-		trackItem_thumbnail = trackItem_thumbnail.scaled(img_size, Qt.KeepAspectRatio)
-		trackItem_thumbnail.save(buffer, "PNG", 100) #writes image into byteArray in JPG format
-		buffer.close()
-
-		#encoded_image = base64.b64encode(byteArray.data())
-		'''
-
+		
+		# Get first track frame for thumbnail
+		trackItem_sourceIn = trackItem.sourceIn()
+		trackItem_thumbnail = trackItem.thumbnail(trackItem_sourceIn)
 		 
 		nim_hiero_home = os.path.normpath( os.path.join( nimPrefs.get_home(), 'apps', 'Hiero' ) )
 

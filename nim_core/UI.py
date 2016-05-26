@@ -691,8 +691,9 @@ class GUI(QtGui.QMainWindow) :
         self.checkBox.setVisible( False )
         
         #  Buttons :
-        if self.app=='Nuke' : self.btn_1.setText('Open Comp')
-        else : self.btn_1.setText('Open')
+        #if self.app=='Nuke' : self.btn_1.setText('Open Comp')
+        #else : self.btn_1.setText('Open')
+        self.btn_1.setText('Open')
         self.btn_1.setVisible( True )
         self.btn_2.setVisible( False )
         
@@ -795,7 +796,11 @@ class GUI(QtGui.QMainWindow) :
             self.fileExtText.setVisible( False )
             self.nim.Input('fileExt').setVisible( False )
         if self.app=='Nuke' :
-            self.nim.set_name( elem='fileExt', name='.nk' )
+            import nuke
+            if nuke.env['nc'] :
+                self.nim.set_name( elem='fileExt', name='.nknc' )
+            else :
+                self.nim.set_name( elem='fileExt', name='.nk' )
         elif self.app=='C4D' :
             self.nim.set_name( elem='fileExt', name='.c4d' )
         elif self.app=='3dsMax' :
@@ -1043,7 +1048,11 @@ class GUI(QtGui.QMainWindow) :
             self.fileExtText.setVisible( True )
             self.nim.Input('fileExt').setVisible( True )
         elif self.app=='Nuke' :
-            self.nim.set_name( elem='fileExt', name='.nk' )
+            import nuke
+            if nuke.env['nc'] :
+                self.nim.set_name( elem='fileExt', name='.nknc' )
+            else:
+                self.nim.set_name( elem='fileExt', name='.nk' )
             self.fileExtText.setVisible( False )
             self.nim.Input('fileExt').setVisible( False )
         elif self.app=='C4D' :
@@ -1239,7 +1248,7 @@ class GUI(QtGui.QMainWindow) :
                             elif self.app=='Nuke' :
                                 temp_files=os.listdir( nimDir )
                                 for _file in temp_files :
-                                    if re.search( '^'+basename+'.nk$', _file ) :
+                                    if re.search( '^'+basename+'.(nk|nknc)$', _file ) :
                                         if _file not in files :
                                             files.append( _file )
                             elif self.app=='C4D' :
@@ -1300,7 +1309,7 @@ class GUI(QtGui.QMainWindow) :
                                 if self.app=='Maya' :
                                     if ext not in ['.ma', '.mb'] : item.setFlags( QtCore.Qt.ItemIsEditable )
                                 elif self.app=='Nuke' :
-                                    if ext !='.nk' : item.setFlags( QtCore.Qt.ItemIsEditable )
+                                    if ext not in ['.nk', '.nknc'] : item.setFlags( QtCore.Qt.ItemIsEditable )
                                 elif self.app=='C4D' :
                                     if ext !='.c4d' : item.setFlags( QtCore.Qt.ItemIsEditable )
                                 elif self.app=='3dsMax' :
@@ -1352,7 +1361,7 @@ class GUI(QtGui.QMainWindow) :
                                         if option['ext'] not in ['.ma', '.mb'] :
                                             item.setFlags( QtCore.Qt.ItemIsEditable )
                                     elif self.app=='Nuke' :
-                                        if option['ext'] !='.nk' :
+                                        if option['ext'] not in ['.nk', '.nknc'] :
                                             item.setFlags( QtCore.Qt.ItemIsEditable )
                                     elif self.app=='C4D' :
                                         if option['ext'] !='.c4d' :
@@ -1385,7 +1394,7 @@ class GUI(QtGui.QMainWindow) :
                                         item.setFlags( QtCore.Qt.ItemIsEditable )
                                 elif self.app=='Nuke' :
                                     ext=F.get_ext( filePath=option['filename'] )
-                                    if ext !='.nk' :
+                                    if ext not in ['.nk', '.nknc'] :
                                         item.setFlags( QtCore.Qt.ItemIsEditable )
                                 elif self.app=='C4D' :
                                     ext=F.get_ext( filePath=option['filename'] )
@@ -1427,7 +1436,7 @@ class GUI(QtGui.QMainWindow) :
                                     item.setFlags( QtCore.Qt.ItemIsEditable )
                             elif self.app=='Nuke' :
                                 ext=F.get_ext( filePath=option['filename'] )
-                                if ext !='.nk' :
+                                if ext not in ['.nk', '.nknc'] :
                                     item.setFlags( QtCore.Qt.ItemIsEditable )
                             elif self.app=='C4D' :
                                 ext=F.get_ext( filePath=option['filename'] )
@@ -1606,7 +1615,7 @@ class GUI(QtGui.QMainWindow) :
                         if self.app=='Maya' :
                             if ext not in ['.ma', '.mb'] : item.setFlags( QtCore.Qt.ItemIsEditable )
                         elif self.app=='Nuke' :
-                            if ext !='.nk' : item.setFlags( QtCore.Qt.ItemIsEditable )
+                            if ext not in ['.nk', '.nknc'] : item.setFlags( QtCore.Qt.ItemIsEditable )
                         elif self.app=='C4D' :
                             if ext !='.c4d' : item.setFlags( QtCore.Qt.ItemIsEditable )
                         elif self.app=='3dsMax' :
@@ -1693,7 +1702,7 @@ class GUI(QtGui.QMainWindow) :
                                 if self.app=='Maya' :
                                     if option['ext'] not in ['.ma', '.mb'] : item.setFlags( QtCore.Qt.ItemIsEditable )
                                 elif self.app=='Nuke' :
-                                    if option['ext'] !='.nk' : item.setFlags( QtCore.Qt.ItemIsEditable )
+                                    if option['ext'] not in ['.nk', '.nknc'] : item.setFlags( QtCore.Qt.ItemIsEditable )
                                 elif self.app=='C4D' :
                                     if option['ext'] !='.c4d' : item.setFlags( QtCore.Qt.ItemIsEditable )
                                 elif self.app=='3dsMax' :
@@ -2272,7 +2281,7 @@ class GUI(QtGui.QMainWindow) :
 
         # Get Server OS Path from server ID
         P.info("FileID: %s" % self.nim.ID('ver'))
-        
+
         open_file_versionInfo = Api.get_verInfo( self.nim.ID('ver') )
 
         if open_file_versionInfo:
@@ -2287,8 +2296,13 @@ class GUI(QtGui.QMainWindow) :
             self.saveServerPref = True
 
         #  Convert file path :
-        filePath=F.os_filePath( path=filePath, nim=self.nim )
-        #P.info("filePath: %s" % filePath)
+        try :
+            filePath=F.os_filePath( path=filePath, nim=self.nim )
+            #P.info("filePath: %s" % filePath)
+        except:
+            P.error('Sorry, no version selected.')
+            Win.popup( title='NIM Error', msg='Sorry, no file specified.\nPlease select a version to open.' )
+            return False
 
         #  Set File Version :
         ver=F.get_ver( filePath=filePath )
@@ -2508,7 +2522,7 @@ class GUI(QtGui.QMainWindow) :
         
         # Get Server OS Path from server ID
         P.info("FileID: %s" % self.nim.ID('ver'))
-        
+
         open_file_versionInfo = Api.get_verInfo( self.nim.ID('ver') )
 
         open_file_serverID = None
@@ -2518,8 +2532,12 @@ class GUI(QtGui.QMainWindow) :
             #serverOSPath = serverOsPathInfo[0]['serverOSPath']
 
         # TODO: check file path conversion for multiple server scenario
-        filePath=F.os_filePath( path=path, nim=self.nim, serverID=open_file_serverID )
-
+        try:
+            filePath=F.os_filePath( path=path, nim=self.nim, serverID=open_file_serverID )
+        except:
+            P.error('File path not resolved.')
+            Win.popup( title='NIM Error', msg='Sorry, file path not found.\nPlease select a version to import.' )
+            return False
 
         #  Maya Import :
         if self.app=='Maya' :
@@ -2624,7 +2642,12 @@ class GUI(QtGui.QMainWindow) :
         task=self.nim.Input('task').currentText()
         basename=Api.to_basename( nim=self.nim )
         if self.app=='Maya' : ext=self.nim.Input('fileExt').currentText()
-        elif self.app=='Nuke' : ext='.nk'
+        elif self.app=='Nuke' : 
+            import nuke
+            if nuke.env['nc'] :
+                ext='.nknc'
+            else :
+                ext='.nk'
         elif self.app=='C4D' : ext='.c4d'
         elif self.app=='3dsMax' : ext='.max'
         elif self.app=='Houdini' : ext='.hip'
@@ -2659,7 +2682,12 @@ class GUI(QtGui.QMainWindow) :
         'Versions up the file, when the Version Up button is pressed'
         #  Get File Extension :
         if self.app=='Maya' : ext=self.nim['fileExt']['input'].currentText()
-        elif self.app=='Nuke' : ext='.nk'
+        elif self.app=='Nuke' : 
+            import nuke
+            if nuke.env['nc'] :
+                ext='.nknc'
+            else :
+                ext='.nk'
         elif self.app=='C4D' : ext='.c4d'
         elif self.app=='3dsMax' : ext='.max'
         elif self.app=='Houdini' : ext='.hip'
@@ -2679,7 +2707,12 @@ class GUI(QtGui.QMainWindow) :
         'Publishes the current file, when the Publish button is pressed'
         #  Get File Extension :
         if self.app=='Maya' : ext=self.nim.Input('fileExt').currentText()
-        elif self.app=='Nuke' : ext='.nk'
+        elif self.app=='Nuke' : 
+            import nuke
+            if nuke.env['nc'] :
+                ext='.nknc'
+            else :
+                ext='.nk'
         elif self.app=='C4D' :  ext='.c4d'
         elif self.app=='3dsMax' : ext='.max'
         elif self.app=='Houdini' : ext='.hip'
@@ -2768,11 +2801,16 @@ class GUI(QtGui.QMainWindow) :
         filePath=self.get_filePath()
         
         #  Derive file name to use for namespace :
-        index=self.nim.Input('ver').currentItem().text().find(' - ')
-        fileName=self.nim.Input('ver').currentItem().text()[0:index]
-        #  Remove file extension from file name :
-        fileName=os.path.splitext( fileName )[0]
-        
+        try :
+            index=self.nim.Input('ver').currentItem().text().find(' - ')        
+            fileName=self.nim.Input('ver').currentItem().text()[0:index]
+            #  Remove file extension from file name :
+            fileName=os.path.splitext( fileName )[0]
+        except:
+            P.error('Sorry, no version selected.')
+            Win.popup( title='NIM Error', msg='Sorry, no file specified.\nPlease select a version to reference.' )
+            return False
+
         #  Reference the file :
         if self.checkBox.checkState() :
             mc.file( filePath, force=True, reference=True, namespace=fileName, groupReference=True, \
@@ -2793,10 +2831,15 @@ class GUI(QtGui.QMainWindow) :
         filePath=self.get_filePath()
         
         #  Derive file name to use for namespace :
-        index=self.nim.Input('ver').currentItem().text().find(' - ')
-        fileName=self.nim.Input('ver').currentItem().text()[0:index]
-        #  Remove file extension from file name :
-        fileName=os.path.splitext( fileName )[0]
+        try :
+            index=self.nim.Input('ver').currentItem().text().find(' - ')
+            fileName=self.nim.Input('ver').currentItem().text()[0:index]
+            #  Remove file extension from file name :
+            fileName=os.path.splitext( fileName )[0]
+        except:
+            P.error('Sorry, no version selected.')
+            Win.popup( title='NIM Error', msg='Sorry, no file specified.\nPlease select a version to reference.' )
+            return False
         
         #  Reference the file :
         if self.checkBox.checkState() :
@@ -2827,17 +2870,22 @@ class GUI(QtGui.QMainWindow) :
 
     #  Houdini File Operations :
     def houdini_fileReference(self) :
-        'References a given 3dsMax file'
+        'References a given Houdini file'
         import hou
         #TODO: look up houdini referencing
         #  Get File Path :
         filePath=self.get_filePath()
         
         #  Derive file name to use for namespace :
-        index=self.nim.Input('ver').currentItem().text().find(' - ')
-        fileName=self.nim.Input('ver').currentItem().text()[0:index]
-        #  Remove file extension from file name :
-        fileName=os.path.splitext( fileName )[0]
+        try :
+            index=self.nim.Input('ver').currentItem().text().find(' - ')
+            fileName=self.nim.Input('ver').currentItem().text()[0:index]
+            #  Remove file extension from file name :
+            fileName=os.path.splitext( fileName )[0]
+        except:
+            P.error('Sorry, no version selected.')
+            Win.popup( title='NIM Error', msg='Sorry, no file specified.\nPlease select a version to reference.' )
+            return False
         
         #  Reference the file :
         if self.checkBox.checkState() :

@@ -96,7 +96,11 @@ def get_ext( filePath='' ) :
         if app=='Maya' :
             ext='.mb'
         elif app=='Nuke' :
-            ext='.nk'
+            import nuke
+            if nuke.env['nc'] :
+                ext = '.nknc'
+            else :
+                ext='.nk'
         elif app=='C4D' :
             ext='.c4d'
         elif app=='Hiero' :

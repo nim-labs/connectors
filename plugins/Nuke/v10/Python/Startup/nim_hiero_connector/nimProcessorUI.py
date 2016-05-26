@@ -393,6 +393,13 @@ class NimProcessorUIBase(IProcessorUI):
     '''
 
     # JOBS: Add dictionary in ordered list
+
+    #Get NIM Jobs
+    self.nim_jobs = nimAPI.get_jobs(self.nim_userID)
+    if not self.nim_jobs :
+      print "No Jobs Found"
+      self.nim_jobs["None"]="0"
+
     jobIndex = 0
     jobIter = 0
     if len(self.nim_jobs)>0:
