@@ -1,9 +1,9 @@
 /* ****************************************************************************
 #
 # Filename: Maya/n_nimMenu.mel
-# Version:  v0.7.3.150625
+# Version:  v2.0.0.160511
 #
-# Copyright (c) 2015 NIM Labs LLC
+# Copyright (c) 2016 NIM Labs LLC
 # All rights reserved.
 #
 # Use of this software is subject to the terms of the NIM Labs license
@@ -15,17 +15,6 @@ global proc n_nimMenu()
 {
 	print "\nAdding NIM menu drop-down...\n";
 	
-	//  Set NIM Version Strings
-	//string $nim_ver="nim.v5_4.r05";
-
-	//  Create prefs at start up, if they don't exist :
-	/*
-	string $getUser = "python \"import nim_core.nim_api as Api; Api.get_user()\"";
-	string $userName = eval($getUser);
-	print ("\nNIM Username : \""+$userName+"\"\n");
-	python( "import nim_core.nim_prefs as Prefs; Prefs.mk_default( notify_success=True )" );
-	*/
-
 	global string $gMainWindow;
 	setParent $gMainWindow;
 	

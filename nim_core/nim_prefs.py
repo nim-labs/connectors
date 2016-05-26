@@ -2,9 +2,9 @@
 #******************************************************************************
 #
 # Filename: nim_prefs.py
-# Version:  v0.7.3.150625
+# Version:  v2.0.0.160511
 #
-# Copyright (c) 2015 NIM Labs LLC
+# Copyright (c) 2016 NIM Labs LLC
 # All rights reserved.
 #
 # Use of this software is subject to the terms of the NIM Labs license
@@ -26,7 +26,7 @@ import nim_win as Win
 #  Variables :
 prefs_dirName='.nim'
 prefs_fileName='prefs.nim'
-version='v1.0.3'
+version='v2.0.0'
 winTitle='NIM_'+version
 nim_URL='http://hostname/nimAPI.php'
 #nim_scripts = os.path.abspath(os.path.join(os.path.dirname( __file__ ), os.pardir, 'nim_core'))

@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: Nuke/Python/Startup/nim_hiero_connector/nimShotProcessor.py
-# Version:  v2.0.0.160502
+# Version:  v2.0.0.160510
 #
 # *****************************************************************************
 
@@ -738,7 +738,7 @@ class NimShotProcessorPreset(hiero.core.ProcessorPreset):
     resolver.addResolver("{nim_shot_comp}", "NIM Shot Comp Output Directory", lambda keyword, task: shotCompPath(task))
 
     #NOTE: Use encode('ascii') on return value to avoid PyZMQ errors
-    
+
     def nimJobName(task):
       nim_hiero_debug = False
       nim_jobName = ''

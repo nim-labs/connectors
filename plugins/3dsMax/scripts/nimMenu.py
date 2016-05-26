@@ -1,7 +1,7 @@
 #****************************************************************************
 #
 # Filename: 3dsMax/nimMenu.py
-# Version:  v1.2.5.160209
+# Version:  v2.0.0.160511
 #
 # Copyright (c) 2016 NIM Labs LLC
 # All rights reserved.

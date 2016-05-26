@@ -1,9 +1,9 @@
 #****************************************************************************
 #
 # Filename: Houdini/nimMenu.py
-# Version:  v1.0.3.151215
+# Version:  v2.0.0.160511
 #
-# Copyright (c) 2015 NIM Labs LLC
+# Copyright (c) 2016 NIM Labs LLC
 # All rights reserved.
 #
 # Use of this software is subject to the terms of the NIM Labs license
