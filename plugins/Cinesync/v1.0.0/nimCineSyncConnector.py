@@ -29,6 +29,7 @@ __revisions__ = \
 
 # @todo:
 
+
 import sys
 import os
 import ctypes
@@ -42,8 +43,17 @@ import getpass
 from pprint import pprint
 
 # UPDATE [NIM_CONNECTOR_ROOT] with the path to your NIM Connectors root folder
+<<<<<<< HEAD
 nim_root = 'Z:/VAULT/NIM/_dev/nim_dev'
+=======
+nim_root = 'D:/Gdrive/Studios/NIM/NIM_Connectors'
+>>>>>>> 104a81867e863286d4a19e381c4632125f54bcd0
 sys.path.append(nim_root)
+
+# Add current dir to path
+path = os.path.dirname(os.path.abspath(__file__))
+if not path in sys.path:
+    sys.path.insert(0, path)
 
 # Load PySide library
 try:
@@ -153,7 +163,7 @@ class NIMImportDailies(QtGui.QMainWindow):
         try:
             user = nimApi.get_user()
             userId = nimApi.get_userID(user)
-            jobs = nimApi.get_jobs(userID=2)
+            jobs = nimApi.get_jobs(userID=userId)
 
         except Exception as err:
             self.errorDialog(err,
@@ -704,11 +714,13 @@ class NIMImportDailies(QtGui.QMainWindow):
 # MAIN
 # ===============================================================================
 if __name__ == '__main__':
+
     app = QtGui.QApplication(sys.argv)
 
     # Allow Windows to display the application icon instead of the Python icon on taskbar
-    myappid = u'nim.nimCinesyncConnector.%s' % __version__  # arbitrary string
-    ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
+    if 'win32' in sys.platform:
+        myappid = u'nim.nimCinesyncConnector.%s' % __version__  # arbitrary string
+        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
 
     # Set dark theme
     nim_darktheme()
@@ -721,7 +733,10 @@ if __name__ == '__main__':
     app.setOrganizationDomain("http://nim-labs.com/")
     app.setApplicationName("NIMCinesyncConnector")
 
+
     win = NIMImportDailies()
     win.show()
     win.raise_()
     app.exec_()
+    # print'*' * 40
+    # sys.exit()
