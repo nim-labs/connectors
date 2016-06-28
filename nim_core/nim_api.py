@@ -293,7 +293,7 @@ def get_assetInfo( assetID=None ) :
     return assetInfo
 
 def get_jobInfo( jobID=None ) :
-    'Builds a dictionary of all shows for a given show'
+    'Builds a dictionary of job information including ID, number, jobname, and folder'
     return get( {'q': 'getJobInfo', 'ID': str(jobID)} )
 
 def get_shows( jobID=None ) :
