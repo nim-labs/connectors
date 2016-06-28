@@ -1,0 +1,23 @@
+<RCC>
+  <qresource prefix="">
+    <file>ui/icons/NIM.png</file>
+    <file>ui/icons/nim_save_icon.png</file>
+    <file>ui/icons/exit.png</file>
+    <file>ui/icons/nim_user_icon.png</file>
+    <file>ui/icons/text-icon.png</file>
+    <file>ui/icons/nimLogo.png</file>
+    <file>ui/icons/nimLogo_small.png</file>
+    <file>ui/icons/jobs.png</file>
+    <file>ui/icons/shows.png</file>
+    <file>ui/icons/block.png</file>
+    <file>ui/icons/tasks.png</file>
+    <file>ui/icons/dailies.png</file>
+    <file>ui/icons/shot.png</file>
+    <file>ui/icons/asset.png</file>
+    <file>ui/icons/nim_verUp_icon.png</file>
+    <file>ui/icons/noThumbnail.png</file>
+    <file>ui/icons/reset.png</file>
+    <file>ui/icons/user.png</file>
+    <file>ui/icons/thumbnail.png</file>
+  </qresource>
+</RCC>

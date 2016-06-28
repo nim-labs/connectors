@@ -313,6 +313,16 @@ def get_shotInfo( shotID=None ) :
     shotInfo=get( {'q': 'getShotInfo', 'ID': shotID} )
     return shotInfo
 
+def get_shotIcon( shotID=None ) :
+    'Retrieves information for a given shot'
+    shotIcon=get( {'q': 'getShotIcon', 'ID': shotID} )
+    return shotIcon
+
+def get_assetIcon( assetID=None ) :
+    'Retrieves information for a given asset'
+    assetIcon=get( {'q': 'getAssetIcon', 'ID': assetID} )
+    return assetIcon
+
 def get_tasks(app='all', userType='artist') :
     'Retrieves the dictionary of available tasks from the API'
     #tasks=get( {'q': 'getTaskTypes', 'type': 'artist'} )
