@@ -42,7 +42,7 @@ import getpass
 from pprint import pprint
 
 # UPDATE [NIM_CONNECTOR_ROOT] with the path to your NIM Connectors root folder
-nim_root = '/Users/andrew/Documents/NIM Labs/Repository/nim_connectors'
+nim_root = 'Z:/VAULT/NIM/_dev/nim_dev'
 sys.path.append(nim_root)
 
 # Load PySide library
