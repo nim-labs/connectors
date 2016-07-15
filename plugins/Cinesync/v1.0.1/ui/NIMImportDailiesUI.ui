@@ -195,6 +195,11 @@ image-position: left;</string>
                   <string>Frames</string>
                  </property>
                 </column>
+                <column>
+                 <property name="text">
+                  <string>Comment</string>
+                 </property>
+                </column>
                </widget>
               </item>
              </layout>
@@ -470,15 +475,7 @@ image: url(&quot;:/ui/icons/noThumbnail.png&quot;);</string>
     <property name="title">
      <string>Edit</string>
     </property>
-    <widget class="QMenu" name="menuThumbnail_Size">
-     <property name="title">
-      <string>Daily Thumbnail Size</string>
-     </property>
-     <addaction name="actionSmall"/>
-     <addaction name="actionMedium"/>
-     <addaction name="actionLarge"/>
-    </widget>
-    <addaction name="menuThumbnail_Size"/>
+    <addaction name="actionPreferences"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -601,6 +598,11 @@ image: url(&quot;:/ui/icons/noThumbnail.png&quot;);</string>
    </property>
    <property name="text">
     <string>Nim Support</string>
+   </property>
+  </action>
+  <action name="actionPreferences">
+   <property name="text">
+    <string>Preferences</string>
    </property>
   </action>
  </widget>

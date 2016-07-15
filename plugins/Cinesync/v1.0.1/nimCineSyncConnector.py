@@ -21,13 +21,17 @@
 # *****************************************************************************
 
 __authors__ = ['Andrew Singara','Scott Ballard']
-__version__ = '1.0.0'
+__version__ = '1.0.1'
 __revisions__ = \
 """
+1.0.1 - Scott B - Fixed OSX temp dir pathing
 1.0.0 - Scott B - Initial development
 """
 
-# @todo:
+# @TODO: Make view log cross platform
+# @TODO: Make taskbar icon cross platform
+# @TODO: Present NIM config window if connection cannot be made to server
+# @TODO: For some reason when switching users through the API, on the second switch the API slows considerably
 
 
 import sys
@@ -37,22 +41,30 @@ import logging
 import tempfile
 import traceback
 import urllib
+import shutil
 import webbrowser
 from datetime import datetime, date
 import getpass
 from pprint import pprint
 
 # UPDATE [NIM_CONNECTOR_ROOT] with the path to your NIM Connectors root folder
-<<<<<<< HEAD
-nim_root = 'Z:/VAULT/NIM/_dev/nim_dev'
-=======
-nim_root = 'D:/Gdrive/Studios/NIM/NIM_Connectors'
->>>>>>> 104a81867e863286d4a19e381c4632125f54bcd0
-sys.path.append(nim_root)
+nim_root = ''
+# Windows NIM root
+if 'win32' in sys.platform:
+    nim_root = 'D:/Gdrive/Studios/NIM/NIM_Connectors'
+# OSX NIM root
+elif 'darwin' in sys.platform:
+    nim_root = '/Users/andrew/Documents/NIM Labs/Repository/nim_connectors'
+# Linux NIM root
+elif 'linux' in sys.platform:
+    nim_root = '/Volumes/NIM_Connectors'
+
+if nim_root not in sys.path:
+    sys.path.append(nim_root)
 
 # Add current dir to path
 path = os.path.dirname(os.path.abspath(__file__))
-if not path in sys.path:
+if path not in sys.path:
     sys.path.insert(0, path)
 
 # Load PySide library
@@ -71,27 +83,28 @@ except ImportError as err:
 
 # NIM Libraries
 import nim_core.nim_prefs as nimPrefs
-import nim_core.nim as nim
+# import nim_core.nim as nim
 import nim_core.nim_api as nimApi
-import nim_core.nim_file as nimFile
-import nim_core.nim_print as nimPrint
-import nim_core.nim_tools as nimTools
-import nim_core.nim_win as nimWin
+# import nim_core.nim_file as nimFile
+# import nim_core.nim_print as nimPrint
+# import nim_core.nim_tools as nimTools
+# import nim_core.nim_win as nimWin
 import nim_core.UI as nimUI
 import pyside_dynamic_ui
 from nimDarktheme import nim_darktheme
+import cinesync
 
 # ===============================================================================
 # Global Variables
 # ===============================================================================
 UI_FILE = os.path.join(os.path.dirname(sys.argv[0]), 'ui/NIMImportDailiesUI.ui')
+UIPREFSFILE = os.path.join(path, 'ui/nimCinesyncPreferences.ui')
 ASSETTAB, SHOTTAB = range(0,2)
-SERVER_ROOT = 'http://%s' % nimPrefs.get_url().split('/')[2]
 TASKNAME, TASKARTIST, TASKDESC = range(0, 3)
-THUMBNAIL, NAME, RENDERTIME, FRAMES = range(0, 4)
-THUMBNAILSMALL = 75
-THUMBNAILMEDIUM = 125
-THUMBNAILLARGE = 175
+THUMBNAIL, NAME, RENDERTIME, FRAMES, COMMENT = range(0, 5)
+THUMBNAILSMALL = QtCore.QSize(75, 42)
+THUMBNAILMEDIUM = QtCore.QSize(125, 70)
+THUMBNAILLARGE = QtCore.QSize(175, 98)
 
 
 class NIMImportDailies(QtGui.QMainWindow):
@@ -103,6 +116,7 @@ class NIMImportDailies(QtGui.QMainWindow):
         self.log = None
         self.nimUser = None
         self.thumbnailSize = THUMBNAILMEDIUM
+        self.threads = []
 
         pyside_dynamic_ui.loadUi(UI_FILE, self)
 
@@ -116,43 +130,119 @@ class NIMImportDailies(QtGui.QMainWindow):
         self.actionWarning.setChecked(True)
         self.connect(self.ag, QtCore.SIGNAL("triggered(QAction *)"), self.setLogLevel)
 
-        # Logging action group
-        self.tg = QtGui.QActionGroup(self)
-        self.tg.addAction(self.actionSmall)
-        self.tg.addAction(self.actionMedium)
-        self.tg.addAction(self.actionLarge)
-        self.actionWarning.setChecked(True)
-        self.connect(self.tg, QtCore.SIGNAL("triggered(QAction *)"), self.changeThumbnailSize)
-
         # Initiate logging
         self.logger('INFO')
         self.log.debug('Initiate: %s' % os.path.basename(__file__))
 
+        self.log.info('Using version: %s' % __version__)
+
+        self.getNIMUser()
+
+        # Preferences dialog
+        self.prefsWin = nimCinesyncPreferences(mainWindow=self)
+
         # Signals
         self.actionView_Log.triggered.connect(self.viewLog)
         self.actionClear_Log.triggered.connect(self.clearLog)
-        self.importDailiesPushButton.clicked.connect(self.importDailies)
+        self.importDailiesPushButton.clicked.connect(self.importDailiesIntoCinesync)
         self.actionAbout.triggered.connect(self.about)
         self.actionNim_Support.triggered.connect(self.openNIMSupportURL)
         self.actionChanger_User.triggered.connect(self.changeUser)
         self.resetButton.released.connect(self.resetUi)
-
         self.jobsComboBox.currentIndexChanged.connect(self.toggleExecuteButton)
         self.showsComboBox.currentIndexChanged.connect(self.toggleExecuteButton)
         self.shotsComboBox.currentIndexChanged.connect(self.toggleExecuteButton)
         self.assetsComboBox.currentIndexChanged.connect(self.toggleExecuteButton)
         self.tasksTableWidget.itemSelectionChanged.connect(self.toggleExecuteButton)
         self.dailiesTableWidget.itemSelectionChanged.connect(self.toggleExecuteButton)
-
         self.actionClose.triggered.connect(self.close)
+        self.actionPreferences.triggered.connect(self.prefsWin.exec_)
 
         self.updateJobs()
         self.toggleExecuteButton()
 
         self._restoreUserWinPrefs()
 
-    def importDailies(self):
-        self.log.info('Importing Dailies')
+    def importDailiesIntoCinesync(self):
+        self.log.info('Importing Dailies to Cinesync')
+
+        settings = QtCore.QSettings()
+
+        # Get selected Dailies
+        items = self.dailiesTableWidget.selectedItems()
+
+        exportItems = []
+        for item in items:
+            if item.column() == 0:
+                exportItems.append(item)
+
+        self.progWin = self.progressWindow('Fetching Dailies Media')
+        self.progWin.setMinimum(0)
+        self.progWin.setMaximum(len(exportItems) + 1)
+        try:
+            dailiesMedia = []
+            for exportItem in exportItems:
+                data = exportItem.data(QtCore.Qt.UserRole)
+
+                if not data.get('dailiesMP4'):
+                    self.log.warning('Dailies (%s #%s) is missing dailies media, skipping..' % (data.get('name'),
+                                                                                                data.get('ID')))
+                    continue
+
+                dailiesURL = '%s/%s' % (SERVER_ROOT, data.get('dailiesMP4'))
+                self.log.debug('dailies URL: %s' % dailiesURL)
+                # Store media in temp directory
+                if 'win32' in sys.platform:
+                    tempDir = settings.value("%s/windowsTempDir" % self.nimUser)
+
+                elif 'darwin' in sys.platform:
+                    tempDir = settings.value("%s/osxTempDir" % self.nimUser)
+
+                elif 'linux' in sys.platform:
+                    tempDir = settings.value("%s/linuxTempDir" % self.nimUser)
+
+                dstDir = '%s/NIM/%s' % (tempDir, os.path.dirname(data.get('dailiesMP4')))
+
+                if not os.path.exists(dstDir):
+                    self.log.debug('Creating folder: %s' % dstDir)
+                    os.makedirs(dstDir)
+                dstMedia = ('%s/%s' % (dstDir, os.path.basename(dailiesURL))).replace('\\', '/')
+
+                # Remove existing media
+                if os.path.exists(dstMedia):
+                    os.remove(dstMedia)
+                    self.log.debug('Remove existing media: %s' % dstMedia)
+
+                self.log.debug('Fetching dailies media: %s' % dstMedia)
+                self.progWin.setLabelText('Fetching: %s' % data.get('name'))
+                self.progWin.setValue(self.progWin.value() + 1)
+
+                urllib.urlretrieve(dailiesURL, dstMedia)
+                dailiesMedia.append(dstMedia)
+                self.log.debug('Retrieved dailies media: %s' % dstMedia)
+
+            if not dailiesMedia:
+                self.errorDialog('', '<h2>There is no media available. Please reselect dailies items.</h2>')
+                return
+
+            self.log.debug('Sending media files to Cinesync: %s' % '\n'.join(dailiesMedia))
+
+            # Create the session and add media from command-line arguments
+            session = cinesync.Session()
+            session.media = [cinesync.MediaFile(path) for path in dailiesMedia]
+
+            # Ask cineSync to add the session to its current state
+            cinesync.commands.open_session(session)
+            self.log.debug('Launched Cinesync session')
+
+        except Exception as err:
+            self.errorDialog(err, 'Failed to launch Cinesync session.')
+
+        finally:
+            self.progWin.close()
+            settings = QtCore.QSettings()
+            if settings.value('closeConnector', True):
+                self.deleteLater()
 
     def updateJobs(self):
         """Update the jobs comboBox with all NIM jobs"""
@@ -161,15 +251,15 @@ class NIMImportDailies(QtGui.QMainWindow):
         self.jobsComboBox.clear()
 
         try:
-            user = nimApi.get_user()
+            user = self.nimUser
             userId = nimApi.get_userID(user)
             jobs = nimApi.get_jobs(userID=userId)
 
         except Exception as err:
             self.errorDialog(err,
                              '<h4>Failed to get NIM Jobs</h4>' +
-                             '<p>Error: Please contact your Supervisor or NIM Support' +
-                             '(support@nim-labs.com)</p>')
+                             '<p>Error: Please contact your Supervisor or NIM Support (support@nim-labs.com)</p>')
+            self.tabWidget.setEnabled(False)
             return
 
         self.jobsComboBox.addItem(QtGui.QIcon(':/ui/icons/block.png'), 'Select Job', 0)
@@ -178,7 +268,7 @@ class NIMImportDailies(QtGui.QMainWindow):
             self.jobsComboBox.addItem(QtGui.QIcon(':/ui/icons/jobs.png'), jobName, jobID)
 
         settings = QtCore.QSettings()
-        job = settings.value('currentJob', '')
+        job = settings.value('%s/currentJob' % self.nimUser, '')
         index = self.jobsComboBox.findText(job)
         if index >= 0:
             self.jobsComboBox.setCurrentIndex(index)
@@ -212,7 +302,7 @@ class NIMImportDailies(QtGui.QMainWindow):
             self.showsComboBox.addItem(QtGui.QIcon(':/ui/icons/shows.png'), show.get('showname'), show.get('ID'))
 
         settings = QtCore.QSettings()
-        show = settings.value('currentShow', '')
+        show = settings.value('%s/currentShow' % self.nimUser, '')
         index = self.showsComboBox.findText(show)
         if index >= 0:
             self.showsComboBox.setCurrentIndex(index)
@@ -252,7 +342,7 @@ class NIMImportDailies(QtGui.QMainWindow):
                                        {'type': 'Shot', 'ID': show.get('ID')})
 
         settings = QtCore.QSettings()
-        show = settings.value('currentShot', '')
+        show = settings.value('%s/currentShot' % self.nimUser, '')
         index = self.shotsComboBox.findText(show)
         if index >= 0:
             self.shotsComboBox.setCurrentIndex(index)
@@ -292,7 +382,7 @@ class NIMImportDailies(QtGui.QMainWindow):
                                         {'type': 'Asset', 'ID': asset.get('ID')})
 
         settings = QtCore.QSettings()
-        show = settings.value('currentAsset', '')
+        show = settings.value('%s/currentAsset' % self.nimUser, '')
         index = self.assetsComboBox.findText(show)
         if index >= 0:
             self.assetsComboBox.setCurrentIndex(index)
@@ -310,6 +400,7 @@ class NIMImportDailies(QtGui.QMainWindow):
         self.tasksTableWidget.setRowCount(0)
 
         try:
+            tasks = None
             # Shot Task
             if self.shotAssetTabWidget.currentIndex() == SHOTTAB:
                 shot = self.shotsComboBox.itemData(self.shotsComboBox.currentIndex())
@@ -384,26 +475,23 @@ class NIMImportDailies(QtGui.QMainWindow):
             return
 
         self.dailiesTableWidget.setRowCount(len(dailies))
-        actualSize = None
         for row, daily in enumerate(dailies):
             for key, val in daily.iteritems():
                 if key == 'iconPath':
                     icon = (SERVER_ROOT + val)
-                    dstDir = '%s/NIM/thumbnails' % tempfile.gettempdir()
-                    if not os.path.exists(dstDir):
-                        os.makedirs(dstDir)
-                    dsticon = ('%s/%s' % (dstDir, os.path.basename(icon))).replace('\\', '/')
-                    urllib.urlretrieve(icon, dsticon)
-
-                    actualSize = QtGui.QIcon(dsticon).actualSize(QtCore.QSize(self.thumbnailSize, self.thumbnailSize))
 
                     col = THUMBNAIL
-                    item = QtGui.QTableWidgetItem('')
+                    item = nimTableWidgetItem('')
                     item.setTextAlignment(QtCore.Qt.AlignHCenter)
-                    item.setIcon(QtGui.QIcon(dsticon))
                     item.setData(QtCore.Qt.UserRole, daily)
-                    item.setSizeHint(actualSize)
+
                     self.dailiesTableWidget.setItem(row, col, item)
+
+                    # Create thread to fetch thumbnail
+                    worker = fetchThumbnail(icon)
+                    self.threads.append(worker)
+                    worker.thumbnailURL.connect(item.setThumbnail)
+                    worker.start()
 
                 elif key == 'name':
                     col = NAME
@@ -426,12 +514,26 @@ class NIMImportDailies(QtGui.QMainWindow):
                     item.setData(QtCore.Qt.UserRole, daily)
                     self.dailiesTableWidget.setItem(row, col, item)
 
+                elif key == 'comment':
+                    col = COMMENT
+                    item = QtGui.QTableWidgetItem(val)
+                    item.setTextAlignment(QtCore.Qt.AlignVCenter | QtCore.Qt.AlignHCenter)
+                    item.setData(QtCore.Qt.UserRole, daily)
+                    self.dailiesTableWidget.setItem(row, col, item)
 
-        if actualSize:
-            self.dailiesTableWidget.setIconSize(actualSize)
+        self.dailiesTableWidget.setIconSize(self.thumbnailSize)
         self.dailiesTableWidget.horizontalHeader().stretchLastSection()
         self.dailiesTableWidget.resizeRowsToContents()
         self.dailiesTableWidget.resizeColumnsToContents()
+
+        self.dailiesTableWidget.itemChanged.connect(self.updateThumbnailWidthHeight)
+
+
+    def updateThumbnailWidthHeight(self, item):
+        """Update the row/column size to fit thumbnail after being fetched"""
+        if item.column() == 0:
+            self.dailiesTableWidget.resizeRowToContents(item.row())
+            self.dailiesTableWidget.resizeColumnToContents(item.column())
 
 
     def errorDialog(self, err, message):
@@ -507,53 +609,72 @@ class NIMImportDailies(QtGui.QMainWindow):
             self.log.error(str(err))
             self.assetThumbnail.setStyleSheet('image-position: top;\nimage: url(":/ui/icons/noThumbnail.png");')
 
+    def getNIMUser(self):
+        prefs = nimPrefs.read()
+        self.nimUser = prefs.get('NIM_User')
+        self.log.debug('User set to: %s' % self.nimUser)
+        if not self.nimUser:
+            self.changeUser()
+
     def changeUser(self):
         nimUI.GUI().update_user()
+        if not self.getNIMUser():
+            self.getNIMUser()
+
         self.resetUi()
         self._restoreUserWinPrefs()
         self.updateJobs()
 
-    def changeThumbnailSize(self):
-        settings = QtCore.QSettings()
-        user = self.nimUser
+    # def changeThumbnailSize(self):
+    #     settings = QtCore.QSettings()
+    #     user = self.nimUser
+    #
+    #     index = self.tg.actions().index(self.tg.checkedAction())
+    #
+    #     if index == 0:
+    #         self.thumbnailSize = THUMBNAILSMALL
+    #         settings.setValue('%s/thumbnailSize' % user, THUMBNAILSMALL)
+    #
+    #     elif index == 1:
+    #         self.thumbnailSize = THUMBNAILMEDIUM
+    #         settings.setValue('%s/thumbnailSize' % user, THUMBNAILMEDIUM)
+    #
+    #     elif index == 2:
+    #         self.thumbnailSize = THUMBNAILLARGE
+    #         settings.setValue('%s/thumbnailSize' % user, THUMBNAILLARGE)
+    #
+    #     self.updateDailies()
 
-        index = self.tg.actions().index(self.tg.checkedAction())
+    def resetUi(self, valid=True):
+        """Set the UI back to its default state
+        @param valid: bool - True reset UI widgets, False disable UI
+        """
+        if valid:
+            self.log.debug('Reset UI widgets')
+            self.setWindowTitle('NIM Import Dailies - v%s - NIM User: %s' % (__version__, self.nimUser))
+            self.showsComboBox.setEnabled(False)
+            self.showsLabel.setEnabled(False)
+            self.shotsComboBox.setEnabled(False)
+            self.shotsLabel.setEnabled(False)
+            self.assetsComboBox.setEnabled(False)
+            self.assetsLabel.setEnabled(False)
+            self.tasksTableWidget.setEnabled(False)
+            self.dailiesTableWidget.setEnabled(False)
 
-        if index == 0:
-            self.thumbnailSize = THUMBNAILSMALL
-            settings.setValue('%s/thumbnailSize' % user, THUMBNAILSMALL)
-
-        elif index == 1:
-            self.thumbnailSize = THUMBNAILMEDIUM
-            settings.setValue('%s/thumbnailSize' % user, THUMBNAILMEDIUM)
-
-        elif index == 2:
-            self.thumbnailSize = THUMBNAILLARGE
-            settings.setValue('%s/thumbnailSize' % user, THUMBNAILLARGE)
-
-        self.updateDailies()
-
-    def resetUi(self):
-        """Set the UI back to its default state"""
-
-        self.nimUser = nimApi.get_user()
-        #@TODO: Find out why user is not changing in NIM Api
-        print self.nimUser
-        self.setWindowTitle('NIM Import Dailies - %s - user: %s' % (__version__, self.nimUser))
-
-        self.showsComboBox.setEnabled(False)
-        self.showsLabel.setEnabled(False)
-        self.shotsComboBox.setEnabled(False)
-        self.shotsLabel.setEnabled(False)
-        self.assetsComboBox.setEnabled(False)
-        self.assetsLabel.setEnabled(False)
-        self.tasksTableWidget.setEnabled(False)
-        self.dailiesTableWidget.setEnabled(False)
-
-        self.jobsComboBox.setCurrentIndex(0)
+            self.jobsComboBox.setCurrentIndex(0)
+        else:
+            self.dailiesTableWidget.setEnabled(False)
 
     def openNIMSupportURL(self):
         webbrowser.open('http://nim-labs.com/support/')
+
+    def progressWindow(self, comment):
+        progWin = QtGui.QProgressDialog(comment, None, 0, 100, parent=self)
+        progWin.setWindowModality(QtCore.Qt.WindowModal)
+        progWin.forceShow()
+        QtGui.QApplication.processEvents()
+
+        return progWin
 
     def about(self):
         msgBox = QtGui.QMessageBox(self)
@@ -604,6 +725,8 @@ class NIMImportDailies(QtGui.QMainWindow):
                 os.makedirs(os.path.dirname(logfile))
             if not os.path.exists(logfile):
                 open(logfile, 'w').close()
+            else:
+                os.remove(logfile)
 
         except IOError, err:
             print'Couldnt open log file:', err
@@ -612,8 +735,14 @@ class NIMImportDailies(QtGui.QMainWindow):
     def viewLog(self):
         if not os.path.exists(self.logfile):
             raise IOError("Can't find log file: " + self.logfile)
-
-        os.system('notepad.exe ' + self.logfile)
+            return
+        if 'win32' in sys.platform:
+            os.system('notepad.exe %s' % self.logfile)
+        elif 'darwin' in sys.platform:
+            os.system('open -a /Applications/TextEdit.app/Contents/MacOS/TextEdit %s' % self.logfile)
+        elif 'linux' in sys.platform:
+            # @TODO: Implement Linux log view handling
+            pass
 
     def clearLog(self):
         if not os.path.exists(self.logfile):
@@ -661,6 +790,9 @@ class NIMImportDailies(QtGui.QMainWindow):
         if self.assetsComboBox.currentIndex() != 0:
             settings.setValue('%s/currentAsset' % user, self.assetsComboBox.currentText())
 
+        # # Media temp dir
+        # settings.setValue('%s/mediaTempDir' % user, self.mediaTempDir)
+
         self.log.info('Saved all user preferences')
 
     def _restoreUserWinPrefs(self):
@@ -678,6 +810,9 @@ class NIMImportDailies(QtGui.QMainWindow):
 
         # Shot/Asset tab
         self.shotAssetTabWidget.setCurrentIndex(settings.value('%s/shotAssetTab' % user, 0))
+
+        # # Temp media directory
+        # self.mediaTempDir = settings.value('%s/mediaTempDir' % user, tempfile.gettempdir())
 
         # Thumbnail size
         value = settings.value('%s/thumbnailSize' % user, THUMBNAILLARGE)
@@ -698,17 +833,266 @@ class NIMImportDailies(QtGui.QMainWindow):
         value = int(settings.value('%s/logDebugLevel' % user, 1))
         if value == 0:
             self.actionDebug.setChecked(True)
+            self.setLogLevel('DEBUG')
         elif value == 1:
             self.actionInfo.setChecked(True)
+            self.setLogLevel('INFO')
         elif value == 2:
             self.actionWarning.setChecked(True)
+            self.setLogLevel('WARNING')
         elif value == 3:
             self.actionError.setChecked(True)
+            self.setLogLevel('ERROR')
         else:
             self.actionCritical.setChecked(True)
+            self.setLogLevel('CRITICAL')
 
         self.log.debug('User preferences restored')
 
+class fetchThumbnail(QtCore.QThread):
+    thumbnailURL = QtCore.Signal(str)
+
+    def __init__(self, url):
+        QtCore.QThread.__init__(self)
+        self.url = url
+
+    def run(self):
+        icon = self.url
+        # Store icon in temp directory
+        dstDir = '%s/NIM/thumbnails' % tempfile.gettempdir()
+        if not os.path.exists(dstDir):
+            os.makedirs(dstDir)
+        dsticon = ('%s/%s' % (dstDir, os.path.basename(icon))).replace('\\', '/')
+        urllib.urlretrieve(icon, dsticon)
+        self.thumbnailURL.emit(dsticon)
+
+
+class nimTableWidgetItem(QtGui.QTableWidgetItem):
+    def __init__(self, text):
+        super(nimTableWidgetItem, self).__init__(text)
+
+    def setThumbnail(self, thumbnailPath):
+        """
+        Set the stylesheet for the QTableWidgetItem
+        @param thumbnailPath: str - path to the thumbnail on disk
+        @return: None
+        """
+
+        icon = QtGui.QIcon(thumbnailPath)
+        self.setIcon(icon)
+
+# ===============================================================================
+# Preference Dialog
+# ===============================================================================
+class nimCinesyncPreferences(QtGui.QDialog):
+    def __init__(self, mainWindow, parent=None):
+        QtGui.QDialog.__init__(self, parent)
+
+        self.mainWindow = mainWindow
+
+        pyside_dynamic_ui.loadUi(UIPREFSFILE, self)
+        self.setModal(True)
+
+        # Logging action group
+        self.tg = QtGui.QButtonGroup(self)
+        self.tg.addButton(self.smallThumbnailRadioButton)
+        self.tg.addButton(self.medThumbnailRadioButton)
+        self.tg.addButton(self.largeThumbnailRadioButton)
+        self.tg.buttonReleased.connect(self.changeThumbnailSize)
+
+        settings = QtCore.QSettings()
+
+        # Hide non-current OS widgets
+        if 'win32' in sys.platform:
+            self.osxLabel.setShown(False)
+            self.osxTempDirLineEdit.setShown(False)
+            self.osxTempDirBut.setShown(False)
+
+            self.linuxLabel.setShown(False)
+            self.linuxTempDirLineEdit.setShown(False)
+            self.linuxTempDirBut.setShown(False)
+
+            self.WINDOWSTEMPDIR = tempfile.gettempdir()
+
+            value = settings.value("%s/windowsTempDir" % self.mainWindow.nimUser, self.WINDOWSTEMPDIR)
+            self.windowsTempDirLineEdit.setText(value)
+
+        elif 'darwin' in sys.platform:
+            self.linuxLabel.setShown(False)
+            self.linuxTempDirLineEdit.setShown(False)
+            self.linuxTempDirBut.setShown(False)
+
+            self.windowsLabel.setShown(False)
+            self.windowsTempDirLineEdit.setShown(False)
+            self.windowsTempDirBut.setShown(False)
+
+            self.OSXTEMPDIR = '/private/var/tmp'
+
+            value = settings.value("%s/osxTempDir" % self.mainWindow.nimUser, self.OSXTEMPDIR)
+            self.osxTempDirLineEdit.setText(value)
+
+        elif 'linux' in sys.platform:
+            self.windowsLabel.setShown(False)
+            self.windowsTempDirLineEdit.setShown(False)
+            self.windowsTempDirBut.setShown(False)
+
+            self.osxLabel.setShown(False)
+            self.osxTempDirLineEdit.setShown(False)
+            self.osxTempDirBut.setShown(False)
+
+            self.LINUXTEMPDIR = tempfile.gettempdir()
+
+            value = settings.value("%s/linuxTempDir" % self.mainWindow.nimUser, self.LINUXTEMPDIR)
+            self.linuxTempDirLineEdit.setText(value)
+
+        self.closeConnectorCheckBox.setChecked(settings.value("%s/closeConnector" % self.mainWindow.nimUser, True))
+
+        value = settings.value('%s/thumbnailSize' % self.mainWindow.nimUser)
+        if value == THUMBNAILLARGE:
+            self.largeThumbnailRadioButton.setChecked(True)
+
+        elif value == THUMBNAILSMALL:
+            self.smallThumbnailRadioButton.setChecked(True)
+
+        else:
+            self.medThumbnailRadioButton.setChecked(True)
+
+        # Signals
+        self.windowsTempDirBut.released.connect(self.browseToTempDir)
+        self.osxTempDirBut.released.connect(self.browseToTempDir)
+        self.linuxTempDirBut.released.connect(self.browseToTempDir)
+        self.resetPushButton.released.connect(self.resetToDefault)
+        self.windowsTempDirLineEdit.textChanged.connect(self.__updatePrefs)
+        self.osxTempDirLineEdit.textChanged.connect(self.__updatePrefs)
+        self.linuxTempDirLineEdit.textChanged.connect(self.__updatePrefs)
+        self.closeConnectorCheckBox.stateChanged.connect(self.__updatePrefs)
+        self.tg.buttonReleased.connect(self.__updatePrefs)
+        self.clearMediaBut.released.connect(self.clearMediaCache)
+
+        self.__updatePrefs()
+
+    def clearMediaCache(self):
+        """Remove downloaded dailies media from temp directory.
+        Note if user changes temp dir then some media will be left behind and not cleaned up"""
+
+        self.mainWindow.log.info('User initiated media cache cleaning')
+
+        settings = QtCore.QSettings()
+        user = self.mainWindow.nimUser
+
+        if 'win32' in sys.platform:
+            tempDir = settings.value('%s/windowsTempDir' % user)
+
+        elif 'darwin' in sys.platform:
+            tempDir = settings.value('%s/osxTempDir' % user)
+
+        elif 'linux' in sys.platform:
+            tempDir = settings.value('%s/linuxTempDir' % user)
+
+        tempDir += '/NIM/media'
+
+        try:
+            if os.path.exists(tempDir):
+                for root, dirs, files in os.walk(tempDir, topdown=False):
+                    for name in files:
+                        os.remove(os.path.join(root, name))
+                    for name in dirs:
+                        os.rmdir(os.path.join(root, name))
+                self.mainWindow.log.info('Media temp dir deleted: %s' % tempDir)
+        except Exception as err:
+            self.mainWindow.errorDialog(err,
+                                        '<h2>Failed to delete media cache directory:</h2>' +
+                                        '<h3>%s</h3>' % tempDir)
+
+    def browseToTempDir(self):
+        settings = QtCore.QSettings()
+        user = self.mainWindow.nimUser
+        direct = tempfile.gettempdir()
+
+        if 'win32' in sys.platform:
+            if settings.contains('%s/windowsTempDir' % user):
+                temp = settings.value('%s/windowsTempDir' % user)
+                if os.path.exists(temp):
+                    direct = temp
+
+        elif 'darwin' in sys.platform:
+            if settings.contains('%s/osxTempDir' % user):
+                temp = settings.value('%s/osxTempDir' % user)
+                if os.path.exists(temp):
+                    direct = temp
+
+        elif 'linux' in sys.platform:
+            if settings.contains('%s/linuxTempDir' % user):
+                temp = settings.value('%s/linuxTempDir' % user)
+                if os.path.exists(temp):
+                    direct = temp
+
+        dlg = QtGui.QFileDialog(self, "Choose Upload Temp Directory", direct, '')
+        dlg.setFileMode(QtGui.QFileDialog.Directory)
+        dlg.setOptions(QtGui.QFileDialog.ShowDirsOnly)
+        if dlg.exec_():
+            if self.sender().objectName() == 'windowsTempDirBut':
+                settings.setValue("%s/windowsTempDir" % user, dlg.selectedFiles()[0])
+                self.windowsTempDirLineEdit.setText(dlg.selectedFiles()[0])
+
+            elif self.sender().objectName() == 'osxTempDirBut':
+                settings.setValue("%s/osxTempDir" % user, dlg.selectedFiles()[0])
+                self.osxTempDirLineEdit.setText(dlg.selectedFiles()[0])
+
+            elif self.sender().objectName() == 'linuxTempDirBut':
+                settings.setValue("%s/linuxTempDir" % user, dlg.selectedFiles()[0])
+                self.linuxTempDirLineEdit.setText(dlg.selectedFiles()[0])
+
+    def changeThumbnailSize(self, checkedButton):
+        settings = QtCore.QSettings()
+        user = self.mainWindow.nimUser
+
+        if checkedButton.objectName() == 'smallThumbnailRadioButton':
+            self.mainWindow.thumbnailSize = THUMBNAILSMALL
+            settings.setValue('%s/thumbnailSize' % user, THUMBNAILSMALL)
+
+        elif checkedButton.objectName() == 'medThumbnailRadioButton':
+            self.mainWindow.thumbnailSize = THUMBNAILMEDIUM
+            settings.setValue('%s/thumbnailSize' % user, THUMBNAILMEDIUM)
+
+        elif checkedButton.objectName() == 'largeThumbnailRadioButton':
+            self.mainWindow.thumbnailSize = THUMBNAILLARGE
+            settings.setValue('%s/thumbnailSize' % user, THUMBNAILLARGE)
+
+        self.mainWindow.updateDailies()
+
+    def resetToDefault(self):
+        self.closeConnectorCheckBox.setChecked(True)
+        self.medThumbnailRadioButton.setChecked(True)
+
+        if 'win32' in sys.platform:
+            self.windowsTempDirLineEdit.setText(self.WINDOWSTEMPDIR)
+
+        elif 'darwin' in sys.platform:
+            self.osxTempDirLineEdit.setText(self.OSXTEMPDIR)
+
+        elif 'linux' in sys.platform:
+            self.linuxTempDirLineEdit.setText(self.LINUXTEMPDIR)
+
+        self.mainWindow.updateDailies()
+
+        self.__updatePrefs()
+
+    def __updatePrefs(self):
+        user = self.mainWindow.nimUser
+        settings = QtCore.QSettings()
+        settings.setValue("%s/windowsTempDir" % user, self.windowsTempDirLineEdit.text())
+        settings.setValue("%s/osxTempDir" % user, self.osxTempDirLineEdit.text())
+        settings.setValue("%s/linuxTempDir" % user, self.linuxTempDirLineEdit.text())
+        settings.setValue("%s/closeConnector" % user, int(self.closeConnectorCheckBox.isChecked()))
+
+        button = self.tg.checkedButton().objectName()
+        if button == 'largeThumbnailRadioButton':
+            settings.setValue('%s/thumbnailSize' % user, THUMBNAILLARGE)
+        elif button == 'smallThumbnailRadioButton':
+            settings.setValue('%s/thumbnailSize' % user, THUMBNAILSMALL)
+        else:
+            settings.setValue('%s/thumbnailSize' % user, THUMBNAILMEDIUM)
 
 # ===============================================================================
 # MAIN
@@ -716,14 +1100,15 @@ class NIMImportDailies(QtGui.QMainWindow):
 if __name__ == '__main__':
 
     app = QtGui.QApplication(sys.argv)
+    # Set dark theme
+    nim_darktheme()
+
+    SERVER_ROOT = 'http://%s' % nimPrefs.get_url().split('/')[2]
 
     # Allow Windows to display the application icon instead of the Python icon on taskbar
     if 'win32' in sys.platform:
         myappid = u'nim.nimCinesyncConnector.%s' % __version__  # arbitrary string
         ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
-
-    # Set dark theme
-    nim_darktheme()
 
     # Establish connection to NIM
     nimPrefs.mk_default(notify_success=True)
@@ -733,10 +1118,7 @@ if __name__ == '__main__':
     app.setOrganizationDomain("http://nim-labs.com/")
     app.setApplicationName("NIMCinesyncConnector")
 
-
     win = NIMImportDailies()
     win.show()
     win.raise_()
-    app.exec_()
-    # print'*' * 40
-    # sys.exit()
+    sys.exit(app.exec_())
