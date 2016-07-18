@@ -1335,7 +1335,7 @@ def get_taskDailies( taskID=None) :
     return dailies
 
 
-def upload_dailiesNote( dailiesID=None, name='', img=None, note='', frame=0, time=0, userID=None, nimURL=None ) :
+def upload_dailiesNote( dailiesID=None, name='', img=None, note='', frame=0, time=-1, userID=None, nimURL=None ) :
     'Upload dailiesNote'
     params = {}
     action = "uploadDailiesNote"
@@ -1345,7 +1345,10 @@ def upload_dailiesNote( dailiesID=None, name='', img=None, note='', frame=0, tim
     params["q"] = action.encode('ascii')
     params["dailiesID"] = shot_str.encode('ascii')
     params["name"] = name.encode('ascii')
-    params["file"] = open(img,'rb')
+    if img is not None:
+        params["file"] = open(img,'rb')
+    else :
+        params["file"] = ''
     params["note"] = note.encode('ascii')
     params["frame"] = frame
     params["time"] = time
@@ -1387,9 +1390,10 @@ def upload_dailiesNote( dailiesID=None, name='', img=None, note='', frame=0, tim
             P.error("Unanticipated error occurred uploading image: %s" % (e))
             return False
     else:
-        if not str(result).startswith("1"):
-            P.error("Could not upload file successfully, but not sure why.\nUrl: %s\nError: %s" % (nimURL, str(result)))
-            return False
+        if img is not None:
+            if not str(result).startswith("1"):
+                P.error("Could not upload file successfully, but not sure why.\nUrl: %s\nError: %s" % (nimURL, str(result)))
+                return False
     
     #return post( {'q': 'upload_shotIcon', 'dailiesID': str(dailiesID), 'name': str(name), 'img': str(img) } )
     return True
