@@ -199,6 +199,11 @@ def get_app() :
         import hou
         return 'Houdini'
     except : pass
+    try:
+        import cinesync
+        return 'Cinesync'
+    except:
+        pass
     return None
 
 def get_user() :
