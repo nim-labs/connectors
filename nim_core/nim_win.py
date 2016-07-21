@@ -40,6 +40,17 @@ def popup( title='', msg='', type='ok', defaultInput='', pyside=False, _list=[],
                     userInput=None
         except :
             P.error( 'Sorry, problem loading PySide/PyQt4' )
+            
+    elif app == 'Cinesync':
+        try:
+            from PySide import QtCore, QtGui
+            if type == 'input' or type == 'okCancel':
+                userInput, ok = QtGui.QInputDialog.getText(winPrnt, title, msg, QtGui.QLineEdit.Normal, defaultInput)
+                if not ok:
+                    userInput = None
+
+        except Exception as err:
+            P.error('Error with dialog: %s' % str(err))
     
     #  Maya Window :
     elif app=='Maya' :

@@ -199,6 +199,11 @@ def get_app() :
         import hou
         return 'Houdini'
     except : pass
+    try:
+        import cinesync
+        return 'Cinesync'
+    except:
+        pass
     return None
 
 def get_user() :
@@ -293,7 +298,7 @@ def get_assetInfo( assetID=None ) :
     return assetInfo
 
 def get_jobInfo( jobID=None ) :
-    'Builds a dictionary of all shows for a given show'
+    'Builds a dictionary of job information including ID, number, jobname, and folder'
     return get( {'q': 'getJobInfo', 'ID': str(jobID)} )
 
 def get_shows( jobID=None ) :
@@ -312,6 +317,16 @@ def get_shotInfo( shotID=None ) :
     'Retrieves information for a given shot'
     shotInfo=get( {'q': 'getShotInfo', 'ID': shotID} )
     return shotInfo
+
+def get_shotIcon( shotID=None ) :
+    'Retrieves information for a given shot'
+    shotIcon=get( {'q': 'getShotIcon', 'ID': shotID} )
+    return shotIcon
+
+def get_assetIcon( assetID=None ) :
+    'Retrieves information for a given asset'
+    assetIcon=get( {'q': 'getAssetIcon', 'ID': assetID} )
+    return assetIcon
 
 def get_tasks(app='all', userType='artist') :
     'Retrieves the dictionary of available tasks from the API'
@@ -1262,7 +1277,7 @@ def update_shot( shotID=None, duration=None) :
     return get( {'q': 'updateShot', 'shotID': str(shotID), 'duration': str(duration) } )
 
 def upload_shotIcon( shotID=None, name='', img=None, nimURL=None ) :
-    'Upload shot icon from base64 encoded image'
+    'Upload shot icon'
     params = {}
     action = "upload_shotIcon"
     shot_str = str(shotID)
@@ -1317,5 +1332,75 @@ def upload_shotIcon( shotID=None, name='', img=None, nimURL=None ) :
     #return post( {'q': 'upload_shotIcon', 'shotID': str(shotID), 'name': str(name), 'img': str(img) } )
     return True
 
+
+def get_taskDailies( taskID=None) :
+    'Retrieves the dictionary of dailies for the specified taskID from the API'
+    #tasks=get( {'q': 'getTaskTypes', 'type': 'artist'} )
+    dailies=get( {'q': 'getTaskDailies', 'taskID': taskID} )
+    return dailies
+
+
+def upload_dailiesNote( dailiesID=None, name='', img=None, note='', frame=0, time=-1, userID=None, nimURL=None ) :
+    'Upload dailiesNote'
+    params = {}
+    action = "uploadDailiesNote"
+    shot_str = str(dailiesID)
+    name = str(name)
+
+    params["q"] = action.encode('ascii')
+    params["dailiesID"] = shot_str.encode('ascii')
+    params["name"] = name.encode('ascii')
+    if img is not None:
+        params["file"] = open(img,'rb')
+    else :
+        params["file"] = ''
+    params["note"] = note.encode('ascii')
+    params["frame"] = frame
+    params["time"] = time
+    params["userID"] = userID
+
+
+    #  If NIM URL not given, retrieve from preferences :
+    if not nimURL :
+        _prefs=Prefs.read()
+        if _prefs and 'NIM_URL' in _prefs.keys() :
+            nimURL=_prefs['NIM_URL']
+        else :
+            P.info( '"NIM_URL" not found in preferences!' )
+            return False
+
+    nimURL = nimURL.encode('ascii')
+    P.info("Verifying API URL: %s" % nimURL)
+
+        
+    # Create opener with extended form post support
+    try:
+        opener = urllib2.build_opener(FormPostHandler)
+    except:
+        P.error( "Failed on build_opener")
+        P.error( traceback.format_exc() )
+        return False
+
+    #P.info("build_opener: successful")
+    # Perform the request
+    try:
+        #P.info("Try")
+        result = opener.open(nimURL, params).read()
+        P.info( "Result: %s" % result )
+    except urllib2.HTTPError, e:
+        if e.code == 500:
+            P.error("Server encountered an internal error. \n%s\n(%s)\n%s\n\n" % (nimURL, params, e))
+            return False
+        else:
+            P.error("Unanticipated error occurred uploading image: %s" % (e))
+            return False
+    else:
+        if img is not None:
+            if not str(result).startswith("1"):
+                P.error("Could not upload file successfully, but not sure why.\nUrl: %s\nError: %s" % (nimURL, str(result)))
+                return False
+    
+    #return post( {'q': 'upload_shotIcon', 'dailiesID': str(dailiesID), 'name': str(name), 'img': str(img) } )
+    return True
 #  End
 
