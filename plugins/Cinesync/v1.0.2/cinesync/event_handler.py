@@ -10,7 +10,7 @@ class EventHandler:
             self.session = cinesync.Session.load(stdin)
         except Exception:
             self.session = None
-
+            
         parser = OptionParser()
         parser.add_option('--key')
         parser.add_option('--offline-key')
@@ -20,7 +20,9 @@ class EventHandler:
         parser.add_option('--user')
         parser.add_option('--pdfPath')
         (options, rest_args) = parser.parse_args(argv[1:])
-
+            
+        print options
+            
         if options.key is None: raise cinesync.CineSyncError('--key argument is required')
         if options.save_format is None: raise cinesync.CineSyncError('--save-format argument is required')
         self.session_key = options.key if options.key != cinesync.OFFLINE_KEY else None

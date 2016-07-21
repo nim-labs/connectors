@@ -1,7 +1,7 @@
 QWidget
 { 
     font-size: 11px;
-    color: {{FOREGROUND_COLOR}};
+    color: rgb(200, 200, 200);
 }
 
 QTreeView, QTableView, QListView, QTreeWidget, QTableWidget, QListWidget, QColumnView

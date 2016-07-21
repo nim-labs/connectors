@@ -1,32 +1,34 @@
 #!/usr/bin/env python
-# ******************************************************************************
-#
-# Filename: nimCinesyncConnector
-#
-# Description:
-#
-# Notes:
-#
-# Created on: 6/22/2016
-#
-# Authors: Andrew Singara, Scott Ballard
-# Contact: support@nim-labs.com
-#
-# Copyright (c) 2016 NIM Labs LLC
-# All rights reserved.
-#
-# Use of this software is subject to the terms of the NIM Labs license
-# agreement provided at the time of installation or download, or which
-# otherwise accompanies this software in either electronic or hard copy form.
-# *****************************************************************************
+"""
+Filename: nimCinesyncConnector
 
-__authors__ = ['Andrew Singara','Scott Ballard']
-__version__ = '1.0.1'
+Description: This tool will provide bi-directional integration from NIM to Cinesync and back.
+
+Notes: This tool should be run from directly inside Cinesync. The Cinesync session metadata
+       is required to export notes from Cinesync into NIM, which is passed through sys.stdin.
+
+Created on: 6/22/2016
+
+Authors: Andrew Singara, Scott Ballard
+Contact: support@nim-labs.com
+
+Copyright (c) 2016 NIM Labs LLC
+All rights reserved.
+
+Use of this software is subject to the terms of the NIM Labs license
+agreement provided at the time of installation or download, or which
+otherwise accompanies this software in either electronic or hard copy form.
+"""
+
+__authors__ = ['Andrew Singara', 'Scott Ballard']
+__version__ = '1.0.2'
 __revisions__ = \
-"""
-1.0.1 - Scott B - Fixed OSX temp dir pathing
-1.0.0 - Scott B - Initial development
-"""
+    """
+    1.0.2 - Scott B - Fixed closing of window when importing into Cinesync
+                      Added ability to export Notes from Cinesync to NIM
+    1.0.1 - Scott B - Fixed OSX temp dir pathing
+    1.0.0 - Scott B - Initial development
+    """
 
 # @TODO: Make view log cross platform
 # @TODO: Make taskbar icon cross platform
@@ -45,7 +47,7 @@ import shutil
 import webbrowser
 from datetime import datetime, date
 import getpass
-from pprint import pprint
+from pprint import pprint, pformat
 
 # UPDATE [NIM_CONNECTOR_ROOT] with the path to your NIM Connectors root folder
 nim_root = ''
@@ -63,9 +65,9 @@ if nim_root not in sys.path:
     sys.path.append(nim_root)
 
 # Add current dir to path
-path = os.path.dirname(os.path.abspath(__file__))
-if path not in sys.path:
-    sys.path.insert(0, path)
+rootpath = os.path.dirname(os.path.abspath(__file__))
+if rootpath not in sys.path:
+    sys.path.insert(0, rootpath)
 
 # Load PySide library
 try:
@@ -74,6 +76,7 @@ try:
 
 except ImportError as err:
     import tkMessageBox
+
     tkMessageBox.showerror(title='PySide load failed',
                            message='The PySide library failed to load.\n' +
                                    'Please install PySide on this machine. '
@@ -83,13 +86,13 @@ except ImportError as err:
 
 # NIM Libraries
 import nim_core.nim_prefs as nimPrefs
-# import nim_core.nim as nim
 import nim_core.nim_api as nimApi
+import nim_core.UI as nimUI
+# import nim_core.nim as nim
 # import nim_core.nim_file as nimFile
 # import nim_core.nim_print as nimPrint
 # import nim_core.nim_tools as nimTools
 # import nim_core.nim_win as nimWin
-import nim_core.UI as nimUI
 import pyside_dynamic_ui
 from nimDarktheme import nim_darktheme
 import cinesync
@@ -97,17 +100,34 @@ import cinesync
 # ===============================================================================
 # Global Variables
 # ===============================================================================
-UI_FILE = os.path.join(os.path.dirname(sys.argv[0]), 'ui/NIMImportDailiesUI.ui')
-UIPREFSFILE = os.path.join(path, 'ui/nimCinesyncPreferences.ui')
-ASSETTAB, SHOTTAB = range(0,2)
+UI_FILE = os.path.join(rootpath, 'ui/NIMImportDailiesUI.ui')
+UIPREFSFILE = os.path.join(rootpath, 'ui/nimCinesyncPreferences.ui')
+ASSETTAB, SHOTTAB = range(0, 2)
 TASKNAME, TASKARTIST, TASKDESC = range(0, 3)
-THUMBNAIL, NAME, RENDERTIME, FRAMES, COMMENT = range(0, 5)
+THUMBNAIL, NAME, MARKREVIEW, RENDERTIME, FRAMES, COMMENT = range(0, 6)
+NOTENAME, NOTETHUMBNAIL, NOTEFRAME, NOTENOTE = range(0, 4)
 THUMBNAILSMALL = QtCore.QSize(75, 42)
 THUMBNAILMEDIUM = QtCore.QSize(125, 70)
 THUMBNAILLARGE = QtCore.QSize(175, 98)
 
 
-class NIMImportDailies(QtGui.QMainWindow):
+# Output:
+# "ID":"586",
+# "name":"TEST2 ",
+# "filepath":null,
+# "iconPath":"\/media\/jobs\/2588\/dailies\/14941\/OOPS_011_comp_v10_NIM795.jpg",
+# "dailiesMP4":"media\/jobs\/2588\/dailies\/14941\/OOPS_011_comp_v10_NIM795_source.mov",
+# "submitted":"0",
+# "renderID":"795",
+# "renderName":"OOPS_011_comp_v10",
+# "frames":"2377",
+# "avgTime":null,
+# "totalTime":null,
+# "renderDate":"2016-06-18 17:28:23",
+# "renderIconPath":"\/media\/jobs\/2588\/dailies\/14941\/OOPS_011_comp_v10_NIM795.jpg"
+
+
+class NIMCinesyncConnector(QtGui.QMainWindow):
     def __init__(self, parent=None):
         QtGui.QMainWindow.__init__(self, parent)
 
@@ -131,7 +151,7 @@ class NIMImportDailies(QtGui.QMainWindow):
         self.connect(self.ag, QtCore.SIGNAL("triggered(QAction *)"), self.setLogLevel)
 
         # Initiate logging
-        self.logger('INFO')
+        self.logger('DEBUG')
         self.log.debug('Initiate: %s' % os.path.basename(__file__))
 
         self.log.info('Using version: %s' % __version__)
@@ -140,6 +160,17 @@ class NIMImportDailies(QtGui.QMainWindow):
 
         # Preferences dialog
         self.prefsWin = nimCinesyncPreferences(mainWindow=self)
+
+        # notesTreeWidget context menu
+        actionSelectAll = QtGui.QAction(QtGui.QIcon(':/ui/icons/markedForDailies.png'), "Check All", self)
+        actionSelectAll.triggered.connect(self.checkAllRows)
+
+        actionSelectNone = QtGui.QAction(QtGui.QIcon(':/ui/icons/blueblock.png'), "Check None", self)
+        actionSelectNone.triggered.connect(self.uncheckAllRows)
+
+        self.notesTreeWidget.addAction(actionSelectAll)
+        self.notesTreeWidget.addAction(actionSelectNone)
+        self.notesTreeWidget.setContextMenuPolicy(QtCore.Qt.ActionsContextMenu)
 
         # Signals
         self.actionView_Log.triggered.connect(self.viewLog)
@@ -157,12 +188,307 @@ class NIMImportDailies(QtGui.QMainWindow):
         self.dailiesTableWidget.itemSelectionChanged.connect(self.toggleExecuteButton)
         self.actionClose.triggered.connect(self.close)
         self.actionPreferences.triggered.connect(self.prefsWin.exec_)
+        self.syncFromCinesyncBut.released.connect(self.syncNotesFromCinesync)
+        self.exportDailiesPushButton.released.connect(self.exportNotesToNim)
+        self.notesTreeWidget.itemChanged.connect(self.updateExportNotesButton)
 
         self.updateJobs()
         self.toggleExecuteButton()
 
         self._restoreUserWinPrefs()
 
+    # ===============================================================================
+    # Export Notes and Annotations From Cinesync to NIM
+    # ===============================================================================
+    def syncNotesFromCinesync(self):
+        self.log.info('Sync Notes from current Cinesync session')
+
+        self.notesTreeWidget.clear()
+
+        # Capture notes and annotations from current Cinesync sesssion
+        media = []
+        with cinesync.EventHandler() as evt:
+            self.log.debug('Got notes from Cinesync session')
+
+            if evt.is_offline():
+                self.log.debug('offline session')
+            else:
+                self.log.debug('online session')
+
+            if not evt or not evt.session or not evt.session.media:
+                self.log.info('No media found from current Cinesync session.')
+                return
+
+            annCnt = 1
+            for i, media_file in enumerate(evt.session.media):
+                # if media_file.notes:
+                self.log.debug('playlist #:%s' % i)
+                self.log.debug('playlist data:\nname:%s\nnotes:%s\nuser data:%s' % (media_file.name,
+                                                                                    media_file.notes,
+                                                                                    media_file.user_data))
+                data = {'name': media_file.name,
+                        'notes': media_file.notes,
+                        'user_data': media_file.user_data,
+                        # 'saved_frame_path': None, # No thumbnail available for playlist note
+                         'annotations': []}
+
+                # Iterate by frame in sorted order
+                # (iterating over a dict would otherwise have undefined order)
+                for frame in sorted(media_file.annotations.keys()):
+                    ann = media_file.annotations[frame]
+                    if ann.notes or evt.saved_frame_path:
+                        image_path = evt.saved_frame_path(media_file, frame)
+                        self.log.debug('annotation # %s' % i)
+                        self.log.debug('annotation data:\nname:%s\nimage:%s\nframe:%s\nnote:%s\nuser data%s' % (media_file.name,
+                                                                                                                image_path,
+                                                                                                                ann.frame,
+                                                                                                                ann.notes,
+                                                                                                                media_file.user_data))
+                        temp = {'name': media_file.name,
+                                'frame': ann.frame,
+                                'notes': ann.notes,
+                                'user_data': media_file.user_data,
+                                'saved_frame_path': image_path}
+                        data['annotations'].append(temp)
+                        annCnt += 1
+                media.append(data)
+
+        pprint(media)
+
+        # TEST DATA
+        # media = [{'name': 'ProofCam3_NIM16.mp4',
+        #           'notes': 'This shot is looking great',
+        #           'user_data': 1,
+        #           'saved_frame_path': None,
+        #           'annotations': [{'name': 'ProofCam3_NIM16.mp4',
+        #                            'frame': 1,
+        #                            'notes': 'this is a note',
+        #                            'user_data': 1,
+        #                            'saved_frame_path': r'C:\Users\scott\Desktop\cineSync-Reviews\2016-07-12-NIMLAB2891\ProofCam3_NIM16_mp4.00009.jpg'},
+        #                           {'name': 'ProofCam3_NIM16.mp4',
+        #                            'frame': 99,
+        #                            'notes': 'this is a note',
+        #                            'user_data': 1,
+        #                            'saved_frame_path': r'C:\Users\scott\Desktop\cineSync-Reviews\2016-07-12-NIMLAB2891\ProofCam3_NIM16_mp4.00009.jpg'},
+        #                           {'name': 'ProofCam3_NIM16.mp4',
+        #                            'frame': 16,
+        #                            'notes': 'this is a note',
+        #                            'user_data': 1,
+        #                            'saved_frame_path': r'C:\Users\scott\Desktop\cineSync-Reviews\2016-07-12-NIMLAB2891\ProofCam3_NIM16_mp4.00009.jpg'},
+        #                           ]
+        #           },
+        #          {'name': 'This is some test file',
+        #           'notes': 'This shot is looking great',
+        #           'user_data': 1,
+        #           'saved_frame_path': None,
+        #           'annotations': [{'name': 'ProofCam3_NIM16.mp4',
+        #                            'frame': 1,
+        #                            'notes': 'this is a note',
+        #                            'user_data': 1,
+        #                            'saved_frame_path': r'C:\Users\scott\Desktop\cineSync-Reviews\2016-07-12-NIMLAB2891\ProofCam3_NIM16_mp4.00009.jpg'},
+        #                           {'name': 'ProofCam3_NIM16.mp4',
+        #                            'frame': 99,
+        #                            'notes': 'this is a note',
+        #                            'user_data': 1,
+        #                            'saved_frame_path': r'C:\Users\scott\Desktop\cineSync-Reviews\2016-07-12-NIMLAB2891\ProofCam3_NIM16_mp4.00009.jpg'},
+        #                           {'name': 'ProofCam3_NIM16.mp4',
+        #                            'frame': 16,
+        #                            'notes': 'this is a note',
+        #                            'user_data': 1,
+        #                            'saved_frame_path': r'C:\Users\scott\Desktop\cineSync-Reviews\2016-07-12-NIMLAB2891\ProofCam3_NIM16_mp4.00009.jpg'},
+        #                           ]
+        #           },
+        #          ]
+
+        settings = QtCore.QSettings()
+        self.notesTreeWidget.setIconSize(settings.value('%s/thumbnailSize' % self.nimUser, THUMBNAILLARGE))
+
+        for data in media:
+            item = QtGui.QTreeWidgetItem(self.notesTreeWidget)
+            item.setForeground(NOTENAME, QtGui.QBrush(QtGui.QColor(103, 153, 204), QtCore.Qt.SolidPattern))
+            item.setData(NOTENAME, QtCore.Qt.UserRole, data)
+            font = QtGui.QFont('Arial', 12)
+            item.setFont(NOTENAME, font)
+            item.setText(NOTENAME, os.path.splitext(data.get('name'))[0])
+            item.setFlags(item.flags() | QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsSelectable)
+            item.setCheckState(NOTENAME, QtCore.Qt.Unchecked)
+
+            # Currently no thumbnail is available from Cinesync API for playlist
+            item.setIcon(NOTETHUMBNAIL, QtGui.QIcon(':/ui/icons/blankImage.png'))
+            item.setText(NOTENOTE, data.get('notes'))
+
+            for aData in data.get('annotations'):
+                noteItem = QtGui.QTreeWidgetItem(item)
+
+                noteItem.setFlags(noteItem.flags() | QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsSelectable)
+                noteItem.setCheckState(NOTENAME, QtCore.Qt.Unchecked)
+
+                noteItem.setData(NOTENAME, QtCore.Qt.UserRole, aData)
+
+                noteItem.setTextAlignment(NOTENAME, QtCore.Qt.AlignHCenter)
+
+                if aData.get('saved_frame_path'):
+                    noteItem.setIcon(NOTETHUMBNAIL, QtGui.QIcon(aData.get('saved_frame_path')))
+                else:
+                    noteItem.setIcon(NOTETHUMBNAIL, QtGui.QIcon(':/ui/icons/noAnnotation.png'))
+
+                noteItem.setText(NOTEFRAME, str(aData.get('frame')))
+                noteItem.setTextAlignment(NOTEFRAME, (QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter))
+
+                noteItem.setText(NOTENOTE, aData.get('notes'))
+
+        self.notesTreeWidget.expandAll()
+        for i in range(0, self.notesTreeWidget.columnCount()):
+            self.notesTreeWidget.resizeColumnToContents(i)
+
+    def exportNotesToNim(self):
+        """Export notes back to NIM from connector."""
+        self.log.info('Exporting Notes to NIM')
+
+        try:
+            # Find number of children
+            itemCnt = 0
+            for i in range(0, self.notesTreeWidget.topLevelItemCount()):
+                topItem = self.notesTreeWidget.topLevelItem(i)
+                if topItem.checkState == QtCore.Qt.Checked:
+                    itemCnt += 1
+
+                childCount = topItem.childCount()
+                for index in range(0, childCount):
+                    child = topItem.child(index)
+                    if child.checkState(NOTENAME) == QtCore.Qt.Checked:
+                        itemCnt += 1
+
+            self.progWin = self.progressWindow('Exporting Notes To NIM')
+            self.progWin.setMinimum(0)
+            self.progWin.setMaximum(itemCnt + 1)
+
+            # Get all items from notesTreeWidget
+            cnt = 0
+            for i in range(0, self.notesTreeWidget.topLevelItemCount()):
+                topItem = self.notesTreeWidget.topLevelItem(i)
+                if topItem.checkState(NOTENAME) == QtCore.Qt.Checked:
+                    cnt += 1
+                    data = topItem.data(NOTENAME, QtCore.Qt.UserRole)
+                    # {u'notes': u'this is a note', u'frame': 1,
+                    #  u'saved_frame_path': u'C:\\Users\\scott\\Desktop\\cineSync-Reviews\\2016-07-12-NIMLAB2891\\ProofCam3_NIM16_mp4.00009.jpg',
+                    #  u'name': u'ProofCam3_NIM16.mp4', u'user_data': 1}
+                    # self.log.debug('playlist data: %s' % pformat(data))
+                    # self.log.debug('dailiesId:' + data.get('user_data'))
+                    # self.log.debug('name:' + os.path.splitext(data.get('name'))[0])
+                    # self.log.debug('frame:%s' % -1)
+                    # self.log.debug('userId:' + self.nimUserId,)
+                    # self.log.debug('note:' + data.get('notes'))
+                    nimApi.upload_dailiesNote(dailiesID=data.get('user_data'),
+                                              name=os.path.splitext(data.get('name'))[0],
+                                              # img=data.get('saved_frame_path'),
+                                              frame=-1,
+                                              # time=.1,
+                                              userID=self.nimUserId,
+                                              note=data.get('notes'))
+
+                    self.log.info('Created Playlist Note:\nDailies ID:%sName:%s\n' % (data.get('user_data'),
+                                                                                      os.path.splitext(data.get('name'))[0],) +
+                                  'image:%s\nuserID:%snote:%s' % (data.get('saved_frame_path'),
+                                                                                     # data.get('frame'),
+                                                                                     # float(data.get('frame')) / 24.0,
+                                                                                     self.nimUserId,
+                                                                                     data.get('notes')))
+                    self.progWin.setLabelText('Exporting note %s of %s' % (cnt, itemCnt))
+                    self.progWin.setValue(self.progWin.value() + 1)
+
+                childCount = topItem.childCount()
+                for index in range(0, childCount):
+                    child = topItem.child(index)
+                    if child.checkState(NOTENAME) == QtCore.Qt.Checked:
+                        cnt += 1
+                        data = child.data(NOTENAME, QtCore.Qt.UserRole)
+                        # {u'notes': u'this is a note', u'frame': 1,
+                        #  u'saved_frame_path': u'C:\\Users\\scott\\Desktop\\cineSync-Reviews\\2016-07-12-NIMLAB2891\\ProofCam3_NIM16_mp4.00009.jpg',
+                        #  u'name': u'ProofCam3_NIM16.mp4', u'user_data': 1}
+                        self.log.debug('annotation data: %s' % data)
+                        nimApi.upload_dailiesNote(dailiesID=data.get('user_data'),
+                                                  name=os.path.splitext(data.get('name'))[0],
+                                                  img=data.get('saved_frame_path'),
+                                                  frame=data.get('frame'),
+                                                  time=float(data.get('frame')) / 24.0,
+                                                  userID=self.nimUserId,
+                                                  note=data.get('notes'))
+
+                        self.log.info('Created frame Note:\nDailies ID:%sName:%s\n' % (data.get('user_data'),
+                                                                                       os.path.splitext(data.get('name'))[0]) +
+                                      'image:%s\nframe:%s\ntime:%s\nuserID:%snote:%s' % (data.get('saved_frame_path'),
+                                                                                         data.get('frame'),
+                                                                                         float(data.get('frame')) / 24.0,
+                                                                                         self.nimUserId,
+                                                                                         data.get('notes')))
+
+                        self.progWin.setLabelText('Exporting note/annotation %s of %s' % (cnt, itemCnt))
+                        self.progWin.setValue(self.progWin.value() + 1)
+
+            self.notesTreeWidget.clear()
+            self.log.info('Exported %s Cinesync notes to NIM' % cnt)
+            self.updateExportNotesButton()
+            QtGui.QMessageBox.information(self,
+                                          "Success!",
+                                          '<h2>%s dailies notes have been created in NIM!</h2>' % cnt)
+
+        except Exception as err:
+            self.errorDialog(err, 'Failed to export dailies notes to NIM.')
+
+        finally:
+            self.progWin.close()
+
+    def checkAllRows(self):
+        """Check all rows in notesTreeWidget"""
+
+        for i in range(0, self.notesTreeWidget.topLevelItemCount()):
+            topItem = self.notesTreeWidget.topLevelItem(i)
+            topItem.setCheckState(NOTENAME, QtCore.Qt.Checked)
+            childCount = topItem.childCount()
+            for index in range(0, childCount):
+                child = topItem.child(index)
+                child.setCheckState(NOTENAME, QtCore.Qt.Checked)
+
+    def uncheckAllRows(self):
+        """Check all rows in notesTreeWidget"""
+
+        for i in range(0, self.notesTreeWidget.topLevelItemCount()):
+            topItem = self.notesTreeWidget.topLevelItem(i)
+            topItem.setCheckState(NOTENAME, QtCore.Qt.Unchecked)
+            childCount = topItem.childCount()
+            for index in range(0, childCount):
+                child = topItem.child(index)
+                child.setCheckState(NOTENAME, QtCore.Qt.Unchecked)
+
+    def updateExportNotesButton(self):
+        """When user checks an item then turn button green, else red."""
+
+        match = False
+        for i in range(0, self.notesTreeWidget.topLevelItemCount()):
+            topItem = self.notesTreeWidget.topLevelItem(i)
+            state = topItem.checkState(NOTENAME)
+            if state == QtCore.Qt.Checked:
+                match = True
+                break
+            childCount = topItem.childCount()
+            for index in range(0, childCount):
+                child = topItem.child(index)
+                state = child.checkState(NOTENAME)
+                if state == QtCore.Qt.Checked:
+                    match = True
+                    break
+
+        if match:
+            self.exportDailiesPushButton.setEnabled(True)
+            self.exportDailiesPushButton.setStyleSheet('border: 2px solid green;font: 75 12pt "Arial";')
+        else:
+            self.exportDailiesPushButton.setStyleSheet('border: 2px solid red;font: 75 12pt "Arial";')
+            self.exportDailiesPushButton.setEnabled(False)
+
+    # ===============================================================================
+    # Import Dailies from NIM to Cinesync
+    # ===============================================================================
     def importDailiesIntoCinesync(self):
         self.log.info('Importing Dailies to Cinesync')
 
@@ -191,6 +517,7 @@ class NIMImportDailies(QtGui.QMainWindow):
 
                 dailiesURL = '%s/%s' % (SERVER_ROOT, data.get('dailiesMP4'))
                 self.log.debug('dailies URL: %s' % dailiesURL)
+                tempDir = None
                 # Store media in temp directory
                 if 'win32' in sys.platform:
                     tempDir = settings.value("%s/windowsTempDir" % self.nimUser)
@@ -218,18 +545,25 @@ class NIMImportDailies(QtGui.QMainWindow):
                 self.progWin.setValue(self.progWin.value() + 1)
 
                 urllib.urlretrieve(dailiesURL, dstMedia)
-                dailiesMedia.append(dstMedia)
+                dailiesMedia.append({'id': data.get('ID'), 'media_path': dstMedia})
                 self.log.debug('Retrieved dailies media: %s' % dstMedia)
 
             if not dailiesMedia:
                 self.errorDialog('', '<h2>There is no media available. Please reselect dailies items.</h2>')
                 return
 
-            self.log.debug('Sending media files to Cinesync: %s' % '\n'.join(dailiesMedia))
+            self.log.debug(
+                'Sending media files to Cinesync: %s' % '\n'.join([x.get('media_path') for x in dailiesMedia]))
 
             # Create the session and add media from command-line arguments
             session = cinesync.Session()
-            session.media = [cinesync.MediaFile(path) for path in dailiesMedia]
+            media = []
+            for data in dailiesMedia:
+                obj = cinesync.MediaFile(data.get('media_path'))
+                obj.user_data = data.get('id')
+                media.append(obj)
+
+            session.media = media
 
             # Ask cineSync to add the session to its current state
             cinesync.commands.open_session(session)
@@ -241,7 +575,7 @@ class NIMImportDailies(QtGui.QMainWindow):
         finally:
             self.progWin.close()
             settings = QtCore.QSettings()
-            if settings.value('closeConnector', True):
+            if settings.value('%s/closeConnector' % self.nimUser, True):
                 self.deleteLater()
 
     def updateJobs(self):
@@ -475,11 +809,15 @@ class NIMImportDailies(QtGui.QMainWindow):
             return
 
         self.dailiesTableWidget.setRowCount(len(dailies))
+
+        # Sort dailies by timestamp
+        dailies.sort(key=lambda x: x.get('renderDate'))
+        dailies.reverse()
+
         for row, daily in enumerate(dailies):
             for key, val in daily.iteritems():
                 if key == 'iconPath':
                     icon = (SERVER_ROOT + val)
-
                     col = THUMBNAIL
                     item = nimTableWidgetItem('')
                     item.setTextAlignment(QtCore.Qt.AlignHCenter)
@@ -507,6 +845,14 @@ class NIMImportDailies(QtGui.QMainWindow):
                     item.setData(QtCore.Qt.UserRole, daily)
                     self.dailiesTableWidget.setItem(row, col, item)
 
+                elif key == 'submitted':
+                    if int(val):
+                        col = MARKREVIEW
+                        item = QtGui.QTableWidgetItem(QtGui.QIcon(':/ui/icons/markedForDailies.png'), '')
+                        item.setTextAlignment(QtCore.Qt.AlignVCenter | QtCore.Qt.AlignHCenter)
+                        item.setData(QtCore.Qt.UserRole, daily)
+                        self.dailiesTableWidget.setItem(row, col, item)
+
                 elif key == 'frames':
                     col = FRAMES
                     item = QtGui.QTableWidgetItem(val)
@@ -528,13 +874,11 @@ class NIMImportDailies(QtGui.QMainWindow):
 
         self.dailiesTableWidget.itemChanged.connect(self.updateThumbnailWidthHeight)
 
-
     def updateThumbnailWidthHeight(self, item):
         """Update the row/column size to fit thumbnail after being fetched"""
         if item.column() == 0:
             self.dailiesTableWidget.resizeRowToContents(item.row())
             self.dailiesTableWidget.resizeColumnToContents(item.column())
-
 
     def errorDialog(self, err, message):
         self.log.error(traceback.print_exc())
@@ -549,14 +893,17 @@ class NIMImportDailies(QtGui.QMainWindow):
         set, then disable the execute button."""
 
         if self.jobsComboBox.currentIndex() == 0 or self.showsComboBox.currentIndex() == 0 or \
-            (self.shotAssetTabWidget.currentIndex() == SHOTTAB and self.shotsComboBox.currentIndex() == 0) or \
+                (self.shotAssetTabWidget.currentIndex() == SHOTTAB and self.shotsComboBox.currentIndex() == 0) or \
                 (self.shotAssetTabWidget.currentIndex() == ASSETTAB and self.assetsComboBox.currentIndex() == 0) or \
-                    len(self.tasksTableWidget.selectedItems()) == 0 or len(self.dailiesTableWidget.selectedItems()) == 0:
-                self.importDailiesPushButton.setEnabled(False)
-                self.importDailiesPushButton.setStyleSheet('border: 2px solid red; border-radius: 6px; font: 75 12pt "Arial";')
+                        len(self.tasksTableWidget.selectedItems()) == 0 or len(
+            self.dailiesTableWidget.selectedItems()) == 0:
+            self.importDailiesPushButton.setEnabled(False)
+            self.importDailiesPushButton.setStyleSheet(
+                'border: 2px solid red; border-radius: 6px; font: 75 12pt "Arial";')
         else:
             self.importDailiesPushButton.setEnabled(True)
-            self.importDailiesPushButton.setStyleSheet('border: 2px solid green; border-radius: 6px; font: 75 12pt "Arial";')
+            self.importDailiesPushButton.setStyleSheet(
+                'border: 2px solid green; border-radius: 6px; font: 75 12pt "Arial";')
 
     def updateShotThumbnail(self):
         try:
@@ -582,7 +929,6 @@ class NIMImportDailies(QtGui.QMainWindow):
             self.log.error('Failed to retrieve thumbnail: %s' % icon)
             self.log.error(str(err))
             self.shotThumbnail.setStyleSheet('image-position: top;\nimage: url(":/ui/icons/noThumbnail.png");')
-
 
     def updateAssetThumbnail(self):
         try:
@@ -612,6 +958,7 @@ class NIMImportDailies(QtGui.QMainWindow):
     def getNIMUser(self):
         prefs = nimPrefs.read()
         self.nimUser = prefs.get('NIM_User')
+        self.nimUserId = nimApi.get_userID(self.nimUser)
         self.log.debug('User set to: %s' % self.nimUser)
         if not self.nimUser:
             self.changeUser()
@@ -670,6 +1017,8 @@ class NIMImportDailies(QtGui.QMainWindow):
 
     def progressWindow(self, comment):
         progWin = QtGui.QProgressDialog(comment, None, 0, 100, parent=self)
+        # font = QtGui.QFont('Arial', 24)
+        # progWin.setFont(font)
         progWin.setWindowModality(QtCore.Qt.WindowModal)
         progWin.forceShow()
         QtGui.QApplication.processEvents()
@@ -678,7 +1027,7 @@ class NIMImportDailies(QtGui.QMainWindow):
 
     def about(self):
         msgBox = QtGui.QMessageBox(self)
-        msgBox.setText('Version: %s\n\n%s' % (__version__, __revisions__))
+        msgBox.setText('%s\nVersion: %s\n\n%s' % (__doc__, __version__, __revisions__))
         msgBox.setWindowTitle('About')
         msgBox.setIconPixmap(QtGui.QPixmap(':ui/icons/nimLogo_small.png'))
         msgBox.setStandardButtons(QtGui.QMessageBox.Ok)
@@ -687,10 +1036,10 @@ class NIMImportDailies(QtGui.QMainWindow):
 
     def logger(self, level):
         # Create log
-        self.logfile = "%s/logs/nimCinesyncConnector/%s/%s_%s.log" % (tempfile.gettempdir(),
-                                                                      date.today(),
-                                                                      getpass.getuser(),
-                                                                      datetime.now().strftime('%I%M%p'))
+        self.logfile = "%s/NIM/logs/nimCinesyncConnector/%s/%s_%s.log" % (tempfile.gettempdir(),
+                                                                          date.today(),
+                                                                          getpass.getuser(),
+                                                                          datetime.now().strftime('%I%M%p'))
         self.createLogFile(self.logfile)
 
         # logging
@@ -753,11 +1102,11 @@ class NIMImportDailies(QtGui.QMainWindow):
         if isinstance(level, QtGui.QAction):
             level = level.text().upper()
 
-        log_levels = {'DEBUG':logging.DEBUG,
-                      'INFO':logging.INFO,
-                      'WARNING':logging.WARNING,
-                      'ERROR':logging.ERROR,
-                      'CRITICAL':logging.CRITICAL}
+        log_levels = {'DEBUG': logging.DEBUG,
+                      'INFO': logging.INFO,
+                      'WARNING': logging.WARNING,
+                      'ERROR': logging.ERROR,
+                      'CRITICAL': logging.CRITICAL}
 
         if level in log_levels:
             self.log.setLevel(log_levels.get(level))
@@ -774,6 +1123,9 @@ class NIMImportDailies(QtGui.QMainWindow):
         # Project
         if self.jobsComboBox.currentIndex() != 0:
             settings.setValue('%s/currentJob' % user, self.jobsComboBox.currentText())
+
+        # Import/Export tab
+        settings.setValue('%s/importExportTab' % user, self.tabWidget.currentIndex())
 
         # Shot/Asset tab
         settings.setValue('%s/shotAssetTab' % user, self.shotAssetTabWidget.currentIndex())
@@ -807,6 +1159,9 @@ class NIMImportDailies(QtGui.QMainWindow):
         state = settings.value("%s/windowState" % user)
         if state:
             self.restoreState(state)
+
+        # Import/Export tab
+        self.tabWidget.setCurrentIndex(settings.value('%s/importExportTab' % user, 0))
 
         # Shot/Asset tab
         self.shotAssetTabWidget.setCurrentIndex(settings.value('%s/shotAssetTab' % user, 0))
@@ -849,6 +1204,7 @@ class NIMImportDailies(QtGui.QMainWindow):
 
         self.log.debug('User preferences restored')
 
+
 class fetchThumbnail(QtCore.QThread):
     thumbnailURL = QtCore.Signal(str)
 
@@ -880,6 +1236,7 @@ class nimTableWidgetItem(QtGui.QTableWidgetItem):
 
         icon = QtGui.QIcon(thumbnailPath)
         self.setIcon(icon)
+
 
 # ===============================================================================
 # Preference Dialog
@@ -1094,11 +1451,11 @@ class nimCinesyncPreferences(QtGui.QDialog):
         else:
             settings.setValue('%s/thumbnailSize' % user, THUMBNAILMEDIUM)
 
+
 # ===============================================================================
 # MAIN
 # ===============================================================================
 if __name__ == '__main__':
-
     app = QtGui.QApplication(sys.argv)
     # Set dark theme
     nim_darktheme()
@@ -1118,7 +1475,7 @@ if __name__ == '__main__':
     app.setOrganizationDomain("http://nim-labs.com/")
     app.setApplicationName("NIMCinesyncConnector")
 
-    win = NIMImportDailies()
+    win = NIMCinesyncConnector()
     win.show()
     win.raise_()
     sys.exit(app.exec_())

@@ -61,11 +61,14 @@ image-position: left;</string>
      <widget class="QTabWidget" name="tabWidget">
       <property name="font">
        <font>
-        <pointsize>12</pointsize>
+        <family>Arial</family>
+        <weight>50</weight>
+        <italic>false</italic>
+        <bold>false</bold>
        </font>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <property name="iconSize">
        <size>
@@ -187,6 +190,11 @@ image-position: left;</string>
                 </column>
                 <column>
                  <property name="text">
+                  <string>Marked For Review</string>
+                 </property>
+                </column>
+                <column>
+                 <property name="text">
                   <string>Timestamp</string>
                  </property>
                 </column>
@@ -262,7 +270,7 @@ color: rgb(102, 153, 204);</string>
            <item row="3" column="0">
             <widget class="QTabWidget" name="shotAssetTabWidget">
              <property name="currentIndex">
-              <number>1</number>
+              <number>0</number>
              </property>
              <widget class="QWidget" name="tab_3">
               <attribute name="icon">
@@ -404,7 +412,7 @@ image: url(&quot;:/ui/icons/noThumbnail.png&quot;);</string>
            <string notr="true">font: 75 12pt &quot;Arial&quot;;</string>
           </property>
           <property name="text">
-           <string>Import Dailes</string>
+           <string>Import Dailes Into Cinesync</string>
           </property>
           <property name="icon">
            <iconset resource="../resources.qrc">
@@ -428,6 +436,90 @@ image: url(&quot;:/ui/icons/noThumbnail.png&quot;);</string>
        <attribute name="title">
         <string>Export Dailies</string>
        </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_3">
+        <item>
+         <widget class="QPushButton" name="syncFromCinesyncBut">
+          <property name="styleSheet">
+           <string notr="true">font: 75 12pt &quot;Arial&quot;;</string>
+          </property>
+          <property name="text">
+           <string>Sync Notes from Cinesync</string>
+          </property>
+          <property name="icon">
+           <iconset resource="../resources.qrc">
+            <normaloff>:/ui/icons/reset.png</normaloff>:/ui/icons/reset.png</iconset>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="label">
+          <property name="styleSheet">
+           <string notr="true">font: 75 12pt &quot;Arial&quot;;</string>
+          </property>
+          <property name="text">
+           <string>Playlist and Frame Notes</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QTreeWidget" name="notesTreeWidget">
+          <property name="editTriggers">
+           <set>QAbstractItemView::AllEditTriggers</set>
+          </property>
+          <property name="alternatingRowColors">
+           <bool>true</bool>
+          </property>
+          <column>
+           <property name="text">
+            <string>Dailies</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Thumbnail</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Frame</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Note</string>
+           </property>
+          </column>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_2">
+          <property name="styleSheet">
+           <string notr="true">font: 75 10pt &quot;Arial&quot;;
+color: rgb(102, 153, 204);</string>
+          </property>
+          <property name="text">
+           <string>* Check the boxes for the notes to export or right-click context menu</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="exportDailiesPushButton">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">border: 2px solid red;font: 75 12pt &quot;Arial&quot;;</string>
+          </property>
+          <property name="text">
+           <string>Export Notes and Annotations To NIM</string>
+          </property>
+          <property name="icon">
+           <iconset resource="../resources.qrc">
+            <normaloff>:/ui/icons/nim_verUp_icon.png</normaloff>:/ui/icons/nim_verUp_icon.png</iconset>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </widget>
      </widget>
     </item>
