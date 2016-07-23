@@ -50,6 +50,7 @@ from pprint import pprint, pformat
 
 
 # UPDATE [NIM_CONNECTOR_ROOT] with the path to your NIM Connectors root folder
+# @TODO: Find core by being relative to this location
 nim_root = ''
 # Windows NIM root
 if 'win32' in sys.platform:
@@ -64,7 +65,7 @@ elif 'linux' in sys.platform:
 if nim_root not in sys.path:
     sys.path.append(nim_root)
 
-    
+
 # Add current dir to path
 rootpath = os.path.dirname(os.path.abspath(__file__))
 if rootpath not in sys.path:
