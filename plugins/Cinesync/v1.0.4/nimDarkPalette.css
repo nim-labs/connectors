@@ -1,0 +1,14 @@
+QWidget
+{ 
+    font-size: 11px;
+    color: rgb(200, 200, 200);
+}
+
+QTreeView, QTableView, QListView, QTreeWidget, QTableWidget, QListWidget, QColumnView
+{
+    selection-background-color: {{HIGHLIGHT_COLOR}};
+    selection-color: #FFFFFF;
+}
+
+    
+
