@@ -1162,6 +1162,7 @@ class GUI(QtGui.QMainWindow) :
                         self.nim.set_ID( elem=elem, ID=option['ID'] )
                         P.info( '  %s Name = "%s"' % (elem.upper(), self.nim.name(elem)) )
                         P.info( '  %s ID = "%s"' % (elem.upper(), self.nim.ID()) )
+                        self.update_img()
                         if elem=='task' :
                             self.nim.set_taskFolder( folder=option['folder'] )
                 #  Shows :
@@ -1921,7 +1922,9 @@ class GUI(QtGui.QMainWindow) :
         
         # Get domain name from URL
         from urlparse import urlparse
-        parsed_uri = urlparse( self.prefs['NIM_URL'] )
+        #parsed_uri = urlparse( self.prefs['NIM_URL'] )
+        #updated to use global vars
+        parsed_uri = urlparse(Api.nimURL)   
         nim_domain = '{uri.scheme}://{uri.netloc}/'.format(uri=parsed_uri)
         print( 'NIM Domain: %s' % nim_domain)
 
@@ -1935,38 +1938,6 @@ class GUI(QtGui.QMainWindow) :
             print('Failed to build icon path')
             img_loc=''
             print('Using default img: %s' % img_loc)
-
-        #  Ensure the Thumbnail exists :
-        '''
-        #REMOVED: Directory verification to failed due to security on folder browsing
-        if _type and img and len(img) :
-            if img[0]['img_link'] :
-                httpSrch=re.search( '^http[s]?://', nim_domain )
-                if httpSrch :
-                    img_loc=nim_domain+img[0]['img_link']
-                    img_dir=os.path.dirname( img_loc )+'/'
-                    print('img_loc: %s' % img_loc)
-                    print('img_dir: %s' % img_dir)
-                    
-                    if img_loc and img_dir :
-                        #  Ensure that the image directory exists :
-                        try :
-                            urllib2.urlopen( img_dir )
-                            #  Ensure that the image exists :
-                            try :
-                                urllib2.urlopen( img_loc )
-                            except :
-                                P.debug( '%s image URL doesn\'t exist : "%s".' % \
-                                    (_type.upper(), img_loc) )
-                                img_loc=''
-                        except :
-                            P.debug( '%s image URL directory doesn\'t exist : "%s".' % \
-                                (_type.upper(), img_loc) )
-                            img_loc=''
-        '''
-        
-        print ('type: %s' % _type)
-        print ('set: %s' % _set)
 
         #  Set Shot/Asset image :
         if _type and img_loc :
@@ -2058,11 +2029,11 @@ class GUI(QtGui.QMainWindow) :
         self.nim.Input('job').activated.connect( lambda: self.update_elem('job') )
         self.jobTab.currentChanged.connect( self.update_tab )
         self.nim.Input('asset').activated.connect( lambda: self.update_elem('asset') )
-        self.nim.Input('asset').activated.connect( self.update_img )
+        #self.nim.Input('asset').activated.connect( self.update_img )
         self.nim.Input('show').activated.connect( lambda: self.update_elem('show') )
-        self.nim.Input('show').activated.connect( self.update_img )
+        #self.nim.Input('show').activated.connect( self.update_img )
         self.nim.Input('shot').activated.connect( lambda: self.update_elem('shot') )
-        self.nim.Input('shot').activated.connect( self.update_img )
+        #self.nim.Input('shot').activated.connect( self.update_img )
         self.nim.Input('filter').activated.connect( lambda: self.update_elem('filter') )
         self.nim.Input('task').activated.connect( lambda: self.update_elem('task') )
         self.nim.Input('base').itemClicked.connect( lambda: self.update_elem('base') )

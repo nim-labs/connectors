@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: nim_api.py
-# Version:  v2.0.0.160505
+# Version:  v2.5.0.160921
 #
 # Copyright (c) 2016 NIM Labs LLC
 # All rights reserved.
@@ -16,6 +16,16 @@
 #  General Imports :
 import json, os, re, sys, traceback
 import urllib, urllib2
+
+'''
+try:
+    import ssl
+except ImportError:
+    print "error: no ssl support"
+
+response = urllib2.urlopen('https://192.168.1.195') 
+print 'response headers: "%s"' % response.info()
+'''
 import mimetools, mimetypes
 import email.generator as email_gen
 import cStringIO
@@ -31,90 +41,143 @@ import nim_tools
 import nim_win as Win
 
 #  Variables :
-version='v2.0.0'
+version='v2.5.0'
 winTitle='NIM_'+version
 
 
-#  Basic API query command :
-def get( sqlCmd=None, debug=True, nimURL=None ) :
-    'Querys MySQL server and returns decoded json array'
-    result=None
-    #P.info('nimURL: %s' % nimURL)
-
-    #  If NIM URL not given, retrieve from preferences :
-    if not nimURL :
-        _prefs=Prefs.read()
-        if _prefs and 'NIM_URL' in _prefs.keys() :
-            nimURL=_prefs['NIM_URL']
-        else :
-            P.info( '"NIM_URL" not found in preferences!' )
-            return False
-    #  Execute command :
-    if sqlCmd :
-        cmd=urllib.urlencode(sqlCmd)
-        _actionURL="".join(( nimURL, cmd ))
-
-        try :
-            #P.error( 'FAILED BEFORE %s' % _actionURL)
-            _file=urllib2.urlopen( _actionURL )
-            #P.error( 'FAILED HERE')
-            fr=_file.read()
-            #  Don't run JSON load for publishing of Sym-Links :
-            try : result=json.loads( fr )
-            except Exception, e :
-
-                P.error( traceback.print_exc() )
-            _file.close()
-            return result
-        except Exception, e :
-            P.error( '\nFailed to read URL for the following command...\n    %s' % sqlCmd )
-            P.error( '   %s' % _actionURL )
-            P.error( '    %s' % traceback.print_exc() )
-            return False
+# Get NIM Connection Information
+def get_connect_info() :
+    _prefs=Prefs.read()
+    if _prefs and 'NIM_URL' in _prefs.keys() :
+        nimURL=_prefs['NIM_URL']
     else :
-        P.error( 'No SQL command provided to run.' )
+        P.info( '"NIM_URL" not found in preferences!' )
         return False
 
+    nim_useSSL = False
+
+    if _prefs and 'NIM_UseSSL' in _prefs.keys() :
+        nim_useSSL=_prefs['NIM_UseSSL']
+    else :
+        P.info( '"NIM_UseSSL" not found in preferences!' )
+
+    nim_apiKey = ''
+    if nim_useSSL :
+        P.debug( 'Connection using SSL')
+        url_list = list(nimURL)
+        protocol = "".join(url_list[:5])
+        P.debug("Prefs Protocol: %s" % protocol)
+        if protocol != 'https' :
+            address = "".join(url_list[4:])
+            nimURL = "".join(('https',address))
+            P.debug( "Using Protocol Address: %s" % nimURL )
+        nim_apiKey = get_apiKey()
+
+    connect_info = {'nimURL':nimURL, 'nim_useSSL':nim_useSSL, 'nim_apiKey':nim_apiKey}
+    return connect_info
+
+
+#  Get API Key for user
+def get_apiKey() :
+    key = '1234567890'
+    return key
+
+
+connect_info = get_connect_info()
+nimURL = connect_info['nimURL']
+nim_useSSL = connect_info['nim_useSSL']
+nim_apiKey = connect_info['nim_apiKey']
+
 
 #  Basic API query command :
+#  DEPRECATED in 2.5 in favor of connect()
+def get( sqlCmd=None, debug=True, nimURL=None ) :
+    result=False
+    result = connect( 'get', sqlCmd=sqlCmd )
+    return result
+
+#  Basic API query command :
+#  DEPRECATED in 2.5 in favor of connect()
 def post( sqlCmd=None, debug=True, nimURL=None ) :
-    'Post form data to MySQL server and returns decoded json array'
+    result=False
+    result = connect( 'post', sqlCmd=sqlCmd )
+    return result
+
+
+def connect( method='get', sqlCmd=None ) :
+    'Querys MySQL server and returns decoded json array'
     result=None
-    
-    #  If NIM URL not given, retrieve from preferences :
-    if not nimURL :
-        _prefs=Prefs.read()
-        if _prefs and 'NIM_URL' in _prefs.keys() :
-            nimURL=_prefs['NIM_URL']
-        else :
-            P.info( '"NIM_URL" not found in preferences!' )
-            return False
-    #  Execute command :
+
     if sqlCmd :
-        cmd=urllib.urlencode(sqlCmd)
-        nimURL = re.sub('[?]', '', nimURL)
+        if method == 'get':
+            cmd=urllib.urlencode(sqlCmd)
+            _actionURL="".join(( nimURL, cmd ))
+        elif method == 'post':
+            cmd=urllib.urlencode(sqlCmd)
+            _actionURL = re.sub('[?]', '', nimURL)
+        else :
+            P.error('Connection method not defined in request.')
+            Win.popup('NIM Connection Error:\n\n Connection method not defined in request.')
+            return False
 
         try :
-            request = urllib2.Request(nimURL, cmd)
+            if method == 'get':
+                request = urllib2.Request(_actionURL)
+            elif method == 'post':
+                request = urllib2.Request(_actionURL, cmd)
+                request.add_header("X-NIM-API-KEY", nim_apiKey)
             request.add_header("Content-type", "application/x-www-form-urlencoded; charset=UTF-8")
             _file = urllib2.urlopen(request)
             fr=_file.read()
-            #  Don't run JSON load for publishing of Sym-Links :
             try : result=json.loads( fr )
             except Exception, e :
                 P.error( traceback.print_exc() )
             _file.close()
             return result
-        except Exception, e :
+        except urllib2.URLError, e :
             P.error( '\nFailed to read URL for the following command...\n    %s' % sqlCmd )
-            P.error( '    %s' % nimURL)
-            P.error( '    %s' % cmd)
-            P.error( '    %s' % traceback.print_exc() )
+            P.error( '   %s' % _actionURL )
+            url_error = e.reason
+            P.error('URL ERROR: %s' % url_error)
+            err_msg = 'NIM Connection Error:\n\n %s' %  url_error;
+            Win.popup(msg=err_msg)
+            P.debug( '    %s' % traceback.print_exc() )
             return False
     else :
         P.error( 'No SQL command provided to run.' )
         return False
 
+def upload( params=None ) :
+
+    _actionURL = nimURL.encode('ascii')
+
+    P.info("Verifying API URL: %s" % _actionURL)
+
+   # Create opener with extended form post support
+    try:
+        opener = urllib2.build_opener(FormPostHandler)
+    except:
+        P.error( "Failed on build_opener")
+        P.error( traceback.format_exc() )
+        return False
+
+    try:
+        result = opener.open(_actionURL, params).read()
+        P.info( "Result: %s" % result )
+    except urllib2.HTTPError, e:
+        if e.code == 500:
+            P.error("Server encountered an internal error. \n%s\n(%s)\n%s\n\n" % (_actionURL, params, e))
+            return False
+        else:
+            P.error("Unanticipated error occurred uploading image: %s" % (e))
+            return False
+    else:
+        if img is not None:
+            if not str(result).startswith("1"):
+                P.error("Could not upload file successfully, but not sure why.\nUrl: %s\nError: %s" % (_actionURL, str(result)))
+                return False
+    
+    return True
 
 class FormPostHandler(urllib2.BaseHandler):
     """
@@ -138,6 +201,7 @@ class FormPostHandler(urllib2.BaseHandler):
                 boundary, data = self.encode(params, files)
                 content_type = 'multipart/form-data; boundary=%s' % boundary
                 request.add_unredirected_header('Content-Type', content_type)
+                request.add_header("X-NIM-API-KEY", nim_apiKey)
             request.add_data(data)
         return request
     
@@ -1287,58 +1351,15 @@ def upload_shotIcon( shotID=None, name='', img=None, nimURL=None ) :
     params["shotID"] = shot_str.encode('ascii')
     params["name"] = name.encode('ascii')
     params["file"] = open(img,'rb')
-    #params["file"] = img
 
-
-    #  If NIM URL not given, retrieve from preferences :
-    if not nimURL :
-        _prefs=Prefs.read()
-        if _prefs and 'NIM_URL' in _prefs.keys() :
-            nimURL=_prefs['NIM_URL']
-        else :
-            P.info( '"NIM_URL" not found in preferences!' )
-            return False
-
-    nimURL = nimURL.encode('ascii')
-    P.info("Verifying API URL: %s" % nimURL)
-
-        
-    # Create opener with extended form post support
-    try:
-        opener = urllib2.build_opener(FormPostHandler)
-    except:
-        P.error( "Failed on build_opener")
-        P.error( traceback.format_exc() )
-        return False
-
-    #P.info("build_opener: successful")
-    # Perform the request
-    try:
-        #P.info("Try")
-        result = opener.open(nimURL, params).read()
-        P.info( "Result: %s" % result )
-    except urllib2.HTTPError, e:
-        if e.code == 500:
-            P.error("Server encountered an internal error. \n%s\n(%s)\n%s\n\n" % (nimURL, params, e))
-            return False
-        else:
-            P.error("Unanticipated error occurred uploading image: %s" % (e))
-            return False
-    else:
-        if not str(result).startswith("1"):
-            P.error("Could not upload file successfully, but not sure why.\nUrl: %s\nError: %s" % (nimURL, str(result)))
-            return False
-    
-    #return post( {'q': 'upload_shotIcon', 'shotID': str(shotID), 'name': str(name), 'img': str(img) } )
-    return True
-
+    result = upload(params=params)
+    return result
 
 def get_taskDailies( taskID=None) :
     'Retrieves the dictionary of dailies for the specified taskID from the API'
     #tasks=get( {'q': 'getTaskTypes', 'type': 'artist'} )
     dailies=get( {'q': 'getTaskDailies', 'taskID': taskID} )
     return dailies
-
 
 def upload_dailiesNote( dailiesID=None, name='', img=None, note='', frame=0, time=-1, userID=None, nimURL=None ) :
     'Upload dailiesNote'
@@ -1359,48 +1380,8 @@ def upload_dailiesNote( dailiesID=None, name='', img=None, note='', frame=0, tim
     params["time"] = time
     params["userID"] = userID
 
+    result = upload(params=params)
+    return result
 
-    #  If NIM URL not given, retrieve from preferences :
-    if not nimURL :
-        _prefs=Prefs.read()
-        if _prefs and 'NIM_URL' in _prefs.keys() :
-            nimURL=_prefs['NIM_URL']
-        else :
-            P.info( '"NIM_URL" not found in preferences!' )
-            return False
-
-    nimURL = nimURL.encode('ascii')
-    P.info("Verifying API URL: %s" % nimURL)
-
-        
-    # Create opener with extended form post support
-    try:
-        opener = urllib2.build_opener(FormPostHandler)
-    except:
-        P.error( "Failed on build_opener")
-        P.error( traceback.format_exc() )
-        return False
-
-    #P.info("build_opener: successful")
-    # Perform the request
-    try:
-        #P.info("Try")
-        result = opener.open(nimURL, params).read()
-        P.info( "Result: %s" % result )
-    except urllib2.HTTPError, e:
-        if e.code == 500:
-            P.error("Server encountered an internal error. \n%s\n(%s)\n%s\n\n" % (nimURL, params, e))
-            return False
-        else:
-            P.error("Unanticipated error occurred uploading image: %s" % (e))
-            return False
-    else:
-        if img is not None:
-            if not str(result).startswith("1"):
-                P.error("Could not upload file successfully, but not sure why.\nUrl: %s\nError: %s" % (nimURL, str(result)))
-                return False
-    
-    #return post( {'q': 'upload_shotIcon', 'dailiesID': str(dailiesID), 'name': str(name), 'img': str(img) } )
-    return True
 #  End
 
