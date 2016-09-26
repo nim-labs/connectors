@@ -156,6 +156,7 @@ def upload( params=None ) :
    # Create opener with extended form post support
     try:
         opener = urllib2.build_opener(FormPostHandler)
+        opener.addheaders = [('X-NIM-API-KEY', nim_apiKey)]
     except:
         P.error( "Failed on build_opener")
         P.error( traceback.format_exc() )
