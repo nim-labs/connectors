@@ -18,7 +18,6 @@ import os, re, traceback
 #  NIM Imports :
 import nim_api as Api
 import nim_file as F
-#import nim_prefs as Prefs
 import nim_print as P
 import nim_win as Win
 

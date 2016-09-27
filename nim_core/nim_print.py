@@ -70,11 +70,14 @@ def warning( msg='' ) :
 
 def error( msg='' ) :
     'Custom error printer'
-    tokens=msg.rstrip().split( '\n' )
-    for toke in tokens :
-        print 'NIM.Error ~> %s' % toke
-    if msg[-1:]=='\n' :
-        print 'NIM.Error ~>'
+    if msg :
+        tokens=msg.rstrip().split( '\n' )
+        for toke in tokens :
+            print 'NIM.Error ~> %s' % toke
+        if msg[-1:]=='\n' :
+            print 'NIM.Error ~>'
+    else : 
+        print 'NIM.Error ~> An error was logged but no message was received.'
     return
 
 
