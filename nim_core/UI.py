@@ -1924,7 +1924,9 @@ class GUI(QtGui.QMainWindow) :
         from urlparse import urlparse
         #parsed_uri = urlparse( self.prefs['NIM_URL'] )
         #updated to use global vars
-        parsed_uri = urlparse(Api.nimURL)   
+        connect_info = Api.get_connect_info()
+        nimURL = connect_info['nimURL']
+        parsed_uri = urlparse(nimURL)   
         nim_domain = '{uri.scheme}://{uri.netloc}/'.format(uri=parsed_uri)
         print( 'NIM Domain: %s' % nim_domain)
 

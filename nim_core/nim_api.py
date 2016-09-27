@@ -47,14 +47,14 @@ winTitle='NIM_'+version
 
 # Get NIM Connection Information
 def get_connect_info() :
+    'Returns the connection information from preferences'
+
     _prefs=Prefs.read()
     if _prefs and 'NIM_URL' in _prefs.keys() :
         nimURL=_prefs['NIM_URL']
     else :
         P.info( '"NIM_URL" not found in preferences!' )
         return False
-
-    nim_useSSL = False
 
     if _prefs and 'NIM_UseSSL' in _prefs.keys() :
         nim_useSSL=_prefs['NIM_UseSSL']
@@ -83,12 +83,6 @@ def get_apiKey() :
     return key
 
 
-connect_info = get_connect_info()
-nimURL = connect_info['nimURL']
-nim_useSSL = connect_info['nim_useSSL']
-nim_apiKey = connect_info['nim_apiKey']
-
-
 #  Basic API query command :
 #  DEPRECATED in 2.5 in favor of connect()
 def get( sqlCmd=None, debug=True, nimURL=None ) :
@@ -107,7 +101,12 @@ def post( sqlCmd=None, debug=True, nimURL=None ) :
 def connect( method='get', sqlCmd=None ) :
     'Querys MySQL server and returns decoded json array'
     result=None
-
+    
+    connect_info = get_connect_info()
+    nimURL = connect_info['nimURL']
+    nim_useSSL = connect_info['nim_useSSL']
+    nim_apiKey = connect_info['nim_apiKey']
+    
     if sqlCmd :
         if method == 'get':
             cmd=urllib.urlencode(sqlCmd)
@@ -147,8 +146,11 @@ def connect( method='get', sqlCmd=None ) :
         P.error( 'No SQL command provided to run.' )
         return False
 
+
 def upload( params=None ) :
 
+    connect_info = get_connect_info()
+    nimURL = connect_info['nimURL']
     _actionURL = nimURL.encode('ascii')
 
     P.info("Verifying API URL: %s" % _actionURL)
