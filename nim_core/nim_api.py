@@ -62,7 +62,7 @@ def get_connect_info() :
         P.info( '"NIM_UseSSL" not found in preferences!' )
 
     nim_apiKey = ''
-    if nim_useSSL :
+    if nim_useSSL == 'True' :
         P.debug( 'Connection using SSL')
         url_list = list(nimURL)
         protocol = "".join(url_list[:5])
