@@ -151,6 +151,8 @@ def upload( params=None ) :
 
     connect_info = get_connect_info()
     nimURL = connect_info['nimURL']
+    nim_apiKey = connect_info['nim_apiKey']
+
     _actionURL = nimURL.encode('ascii')
 
     P.info("Verifying API URL: %s" % _actionURL)
@@ -175,7 +177,7 @@ def upload( params=None ) :
             P.error("Unanticipated error occurred uploading image: %s" % (e))
             return False
     else:
-        if img is not None:
+        if params["file"] is not None:
             if not str(result).startswith("1"):
                 P.error("Could not upload file successfully, but not sure why.\nUrl: %s\nError: %s" % (_actionURL, str(result)))
                 return False
@@ -204,6 +206,8 @@ class FormPostHandler(urllib2.BaseHandler):
                 boundary, data = self.encode(params, files)
                 content_type = 'multipart/form-data; boundary=%s' % boundary
                 request.add_unredirected_header('Content-Type', content_type)
+                connect_info = get_connect_info()
+                nim_apiKey = connect_info['nim_apiKey']
                 request.add_header("X-NIM-API-KEY", nim_apiKey)
             request.add_data(data)
         return request
