@@ -80,6 +80,19 @@ def get_connect_info() :
 #  Get API Key for user
 def get_apiKey() :
     key = '1234567890'
+    key_fileName = 'nim.key'
+    key_path = os.path.normpath( os.path.join( Prefs.get_home(), key_fileName ) )
+
+    if os.path.isfile( key_path ) :
+        try :
+            #  Read NIM API KEY file :
+            with open(key_path, 'r') as f:
+                key = f.readline().strip()
+        except Exception, e :
+            P.error( 'Unable to read api key.' )
+    else :
+        P.error( 'API Key not found.' )
+
     return key
 
 
