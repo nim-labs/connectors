@@ -19,10 +19,15 @@ import nim_file as F
 import nim_prefs as Prefs
 import nim_print as P
 #  Import Python GUI packages :
-try : from PySide import QtCore, QtGui
-except :
-    try : from PyQt4 import QtCore, QtGui
-    except : pass
+try : 
+    from PySide2 import QtWidgets as QtGui
+    from PySide2 import QtCore
+    print "Win: PySide2 imported"
+except ImportError :
+    try : from PySide import QtCore, QtGui
+    except :
+        try : from PyQt4 import QtCore, QtGui
+        except : pass
 
 
 def popup( title='', msg='', type='ok', defaultInput='', pyside=False, _list=[], selNum=0, winPrnt=None ) :

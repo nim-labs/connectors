@@ -13,10 +13,15 @@
 # *****************************************************************************
 
 qt_import=False
-try :
-    from PySide import QtCore, QtGui
-    qt_import=True
-except : pass
+try : 
+    from PySide2 import QtWidgets as QtGui
+    from PySide2 import QtCore
+    print "Tools: PySide2 imported"
+except ImportError :
+    try :
+        from PySide import QtCore, QtGui
+        qt_import=True
+    except : pass
 import os
 import nim_print
 import nim_win

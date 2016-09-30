@@ -23,10 +23,16 @@ import nim_prefs as Prefs
 import nim_print as P
 import nim_win as Win
 #  Import Python GUI packages :
-try : from PySide import QtCore, QtGui
+try : 
+    from PySide2 import QtWidgets as QtGui
+    from PySide2 import QtGui as QtGui2
+    from PySide2 import QtCore
+    print "UI: PySide2 imported"
 except :
-    try : from PyQt4 import QtCore, QtGui
-    except : pass
+    try : from PySide import QtCore, QtGui
+    except :
+        try : from PyQt4 import QtCore, QtGui
+        except : pass
 
 #  Variables :
 WIN=''
@@ -55,7 +61,10 @@ def mk( mode='open', _import=False, _export=False, ref=False, pub=False ) :
             try :
                 import maya.OpenMayaUI as omUI
                 import maya.cmds as mc
-                from shiboken import wrapInstance
+                try:
+                    from shiboken2 import wrapInstance
+                except :
+                    from shiboken import wrapInstance
                 import nim_maya as M
                 win_parent=M.get_mainWin()
                 WIN=GUI( parent=win_parent, mode=mode )
@@ -379,10 +388,12 @@ class GUI(QtGui.QMainWindow) :
         self.nim.Input('asset').setSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
         self.nim.Input('asset').setMinimumSize(240,20)
         #  Asset thumbnail :
-        self.nim.set_pic( elem='asset', widget=QtGui.QPixmap().fromImage( \
-            QtGui.QImage( self.pref_imgDefault ) ) )
-        self.nim.set_pic( elem='asset', widget=self.nim.pix( 'asset' ).scaled( \
-            self.img_size, self.img_size, QtCore.Qt.KeepAspectRatio ) )
+        try :
+            self.nim.set_pic( elem='asset', widget=QtGui2.QPixmap().fromImage( QtGui2.QImage( self.pref_imgDefault ) ) )
+        except :
+            self.nim.set_pic( elem='asset', widget=QtGui.QPixmap().fromImage( QtGui.QImage( self.pref_imgDefault ) ) )
+
+        self.nim.set_pic( elem='asset', widget=self.nim.pix( 'asset' ).scaled( self.img_size, self.img_size, QtCore.Qt.KeepAspectRatio ) )
         self.nim.set_label( elem='asset', widget=QtGui.QLabel() )
         self.nim.label('asset').setPixmap( self.nim.pix('asset') )
         self.nim.label('asset').setScaledContents( True )
@@ -406,8 +417,12 @@ class GUI(QtGui.QMainWindow) :
         self.nim.Input('shot').setSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
         self.nim.Input('shot').setMinimumSize(240,20)
         #  Shot thumbnail :
-        self.nim.set_pic( elem='shot', widget=QtGui.QPixmap().fromImage( \
-            QtGui.QImage( self.pref_imgDefault ) ) )
+        try :
+            self.nim.set_pic( elem='shot', widget=QtGui2.QPixmap().fromImage( \
+                QtGui2.QImage( self.pref_imgDefault ) ) )
+        except :
+            self.nim.set_pic( elem='shot', widget=QtGui.QPixmap().fromImage( \
+                QtGui.QImage( self.pref_imgDefault ) ) )
         self.nim.set_pic( elem='shot', widget=self.nim.pix( 'shot' ).scaled(
             self.img_size, self.img_size, QtCore.Qt.KeepAspectRatio ) )
         self.nim.set_label( elem='shot', widget=QtGui.QLabel() )
@@ -1912,8 +1927,12 @@ class GUI(QtGui.QMainWindow) :
         
         #  Set default image, if Shot/Asset ID's have not been set yet :
         if _type and not self.nim.ID( 'asset' ) and not self.nim.ID( 'shot' ) :
-            self.nim.set_pic( elem=_type, widget=QtGui.QPixmap().fromImage( \
-                QtGui.QImage( self.pref_imgDefault ) ) )
+            try :
+                self.nim.set_pic( elem=_type, widget=QtGui2.QPixmap().fromImage( \
+                    QtGui2.QImage( self.pref_imgDefault ) ) )
+            except :
+                self.nim.set_pic( elem=_type, widget=QtGui.QPixmap().fromImage( \
+                    QtGui.QImage( self.pref_imgDefault ) ) )
             self.nim.pix( _type ).fromImage( QtGui.QImage( self.pref_imgDefault ) )
             self.nim.set_pic( elem=_type, widget=self.nim.pix( _type ).scaled( \
                 self.img_size, self.img_size, QtCore.Qt.KeepAspectRatio ) )
@@ -1955,8 +1974,12 @@ class GUI(QtGui.QMainWindow) :
         #  Set default image :
         if _type and not _set :
             print("default image")
-            self.nim.set_pic( elem=_type, widget=QtGui.QPixmap().fromImage( \
-                QtGui.QImage( self.pref_imgDefault ) ) )
+            try :
+                self.nim.set_pic( elem=_type, widget=QtGui2.QPixmap().fromImage( \
+                    QtGui2.QImage( self.pref_imgDefault ) ) )
+            except :
+                self.nim.set_pic( elem=_type, widget=QtGui.QPixmap().fromImage( \
+                    QtGui.QImage( self.pref_imgDefault ) ) )
             self.nim.pix( _type ).fromImage( QtGui.QImage( self.pref_imgDefault ) )
             self.nim.set_pic( elem=_type, widget=self.nim.pix( _type ).scaled( \
                 self.img_size, self.img_size, QtCore.Qt.KeepAspectRatio ) )
@@ -1966,9 +1989,15 @@ class GUI(QtGui.QMainWindow) :
         if not _type and not _set :
             print("default image")
             _type = 'shot'
-            self.nim.set_pic( elem=_type, widget=QtGui.QPixmap().fromImage( \
-                QtGui.QImage( self.pref_imgDefault ) ) )
-            self.nim.pix( _type ).fromImage( QtGui.QImage( self.pref_imgDefault ) )
+            try :
+                self.nim.set_pic( elem=_type, widget=QtGui2.QPixmap().fromImage( QtGui2.QImage( self.pref_imgDefault ) ) )
+            except :
+                self.nim.set_pic( elem=_type, widget=QtGui.QPixmap().fromImage( QtGui.QImage( self.pref_imgDefault ) ) )
+            try :
+                self.nim.pix( _type ).fromImage( QtGui2.QImage( self.pref_imgDefault ) )
+            except :
+                self.nim.pix( _type ).fromImage( QtGui.QImage( self.pref_imgDefault ) )
+
             self.nim.set_pic( elem=_type, widget=self.nim.pix( _type ).scaled( \
                 self.img_size, self.img_size, QtCore.Qt.KeepAspectRatio ) )
             self.nim.label( _type ).setPixmap( self.nim.pix( _type ) )

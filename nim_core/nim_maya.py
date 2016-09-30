@@ -22,10 +22,21 @@ import nim_print as P
 import maya.cmds as mc
 import maya.mel as mm
 #  Import Python GUI packages :
-try : from PySide import QtCore, QtGui
+try : 
+    from PySide2 import QtWidgets as QtGui
+    from PySide2 import QtCore
+    print "Maya: PySide2 imported"
 except :
-    try : from PyQt4 import QtCore, QtGui
-    except : pass
+    try : 
+        from PySide import QtCore, QtGui
+        print "PySide Loaded"
+    except :
+        try : 
+            from PyQt4 import QtCore, QtGui
+            print "PyQt4 Loaded"
+        except : 
+            print "No Libraries Loaded"
+            #pass
 
 #  Variables :
 version='v2.0.0'
@@ -34,8 +45,20 @@ winTitle='NIM_'+version
 def get_mainWin() :
     'Returns the name of the main Maya window'
     import maya.OpenMayaUI as omUI
-    from PySide import QtGui
-    from shiboken import wrapInstance
+    #from PySide import QtGui
+    try : 
+        from PySide2 import QtWidgets as QtGui
+        print "Maya: PySide2 imported"
+    except :
+        try : 
+            from PySide import QtGui
+            print "PySide Loaded"
+        except:
+            pass
+    try:
+        from shiboken2 import wrapInstance
+    except :
+        from shiboken import wrapInstance
     #  Get the main maya window as a QMainWindow instance :
     mayaWin=wrapInstance( long( omUI.MQtUtil.mainWindow() ), QtGui.QWidget )
     return mayaWin
