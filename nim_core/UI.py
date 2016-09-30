@@ -27,12 +27,12 @@ try :
     from PySide2 import QtWidgets as QtGui
     from PySide2 import QtGui as QtGui2
     from PySide2 import QtCore
-    print "UI: PySide2 imported"
-except :
+except ImportError :
     try : from PySide import QtCore, QtGui
-    except :
+    except ImportError :
         try : from PyQt4 import QtCore, QtGui
-        except : pass
+        except ImportError : 
+            print "Failed to UI Modules: UI"
 
 #  Variables :
 WIN=''

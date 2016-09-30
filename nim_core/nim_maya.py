@@ -25,18 +25,14 @@ import maya.mel as mm
 try : 
     from PySide2 import QtWidgets as QtGui
     from PySide2 import QtCore
-    print "Maya: PySide2 imported"
-except :
+except ImportError :
     try : 
         from PySide import QtCore, QtGui
-        print "PySide Loaded"
-    except :
+    except ImportError :
         try : 
             from PyQt4 import QtCore, QtGui
-            print "PyQt4 Loaded"
-        except : 
-            print "No Libraries Loaded"
-            #pass
+        except ImportError : 
+            print "Failed to UI Modules: Maya"
 
 #  Variables :
 version='v2.0.0'

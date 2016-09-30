@@ -22,12 +22,13 @@ import nim_print as P
 try : 
     from PySide2 import QtWidgets as QtGui
     from PySide2 import QtCore
-    print "Win: PySide2 imported"
 except ImportError :
     try : from PySide import QtCore, QtGui
-    except :
+    except ImportError :
         try : from PyQt4 import QtCore, QtGui
-        except : pass
+        except ImportError : 
+            print "Failed to UI Modules: Win"
+
 
 
 def popup( title='', msg='', type='ok', defaultInput='', pyside=False, _list=[], selNum=0, winPrnt=None ) :
