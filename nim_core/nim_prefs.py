@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: nim_prefs.py
-# Version:  v2.0.0.160511
+# Version:  v2.5.0.160930
 #
 # Copyright (c) 2016 NIM Labs LLC
 # All rights reserved.
@@ -25,7 +25,7 @@ import nim_win as Win
 #  Variables :
 prefs_dirName='.nim'
 prefs_fileName='prefs.nim'
-version='v2.0.0'
+version='v2.5.0'
 winTitle='NIM_'+version
 nim_URL='http://hostname/nimAPI.php'
 nim_useSLL='False'
@@ -161,8 +161,10 @@ def _inputURL() :
 def _verifyURL( url='' ) :
     'Verifies a given URL as valid'
     #  Verify URL :
+    P.info('Validating URL: %s' % url)
     if not url : return False
-    result=Api.get( sqlCmd={'q': 'testAPI'}, debug=False, nimURL=url )
+    #result=Api.get( sqlCmd={'q': 'testAPI'}, debug=False, nimURL=url )
+    result=Api.testAPI(nimURL=url)
     P.info('Validating API: %s' % result)
     if result : 
         #setting global variable
@@ -334,6 +336,7 @@ def mk_default( recreatePrefs=False, notify_success=True ) :
         while search_for_url:
             url=_inputURL()
             result=_verifyURL( url )
+            print "Result: %s" % result
             if result: 
                 P.info('URL Valid')
                 nim_URL = url
@@ -413,6 +416,7 @@ def read() :
     
     #  Create preferences, if necessary :
     if not os.path.isfile( prefsFile ) :
+        P.error('NIM Preferences not found.')
         result = mk_default()
         if not result:
             P.error( 'Unable to create default preferences.' )

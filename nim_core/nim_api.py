@@ -59,8 +59,9 @@ def get_connect_info() :
     if _prefs and 'NIM_UseSSL' in _prefs.keys() :
         nim_useSSL=_prefs['NIM_UseSSL']
     else :
-        P.info( '"NIM_UseSSL" not found in preferences!' )
-
+        #P.info( '"NIM_UseSSL" not found in preferences!' )
+        nim_useSSL = 'False'
+        
     nim_apiKey = ''
     if nim_useSSL == 'True' :
         P.debug( 'Connection using SSL')
@@ -95,30 +96,61 @@ def get_apiKey() :
 
     return key
 
+def testAPI(nimURL=None) :
+    sqlCmd={'q': 'testAPI'}
+    cmd=urllib.urlencode(sqlCmd)
+    _actionURL="".join(( nimURL, cmd ))
+    request = urllib2.Request(_actionURL)
+    nim_apiKey = ''
+    try :
+        request.add_header("X-NIM-API-KEY", nim_apiKey)
+        request.add_header("Content-type", "application/x-www-form-urlencoded; charset=UTF-8")
+        _file = urllib2.urlopen(request)
+        fr=_file.read()
+        try : result=json.loads( fr )
+        except Exception, e :
+            P.error( traceback.print_exc() )
+        _file.close()
+        return result
+    except urllib2.URLError, e :
+        P.error( '\nFailed to read NIM API' )
+        P.error( '   %s' % _actionURL )
+        url_error = e.reason
+        P.error('URL ERROR: %s' % url_error)
+        err_msg = 'NIM Connection Error:\n\n %s' %  url_error;
+        Win.popup(msg=err_msg)
+        P.debug( '    %s' % traceback.print_exc() )
+        return False
 
 #  Basic API query command :
 #  DEPRECATED in 2.5 in favor of connect()
 def get( sqlCmd=None, debug=True, nimURL=None ) :
     result=False
-    result = connect( 'get', sqlCmd=sqlCmd )
+    result = connect( 'get', sqlCmd=sqlCmd, nimURL=nimURL )
     return result
 
 #  Basic API query command :
 #  DEPRECATED in 2.5 in favor of connect()
 def post( sqlCmd=None, debug=True, nimURL=None ) :
     result=False
-    result = connect( 'post', sqlCmd=sqlCmd )
+    result = connect( 'post', sqlCmd=sqlCmd, nimURL=nimURL )
     return result
 
 
-def connect( method='get', sqlCmd=None ) :
+def connect( method='get', sqlCmd=None, nimURL=None ) :
     'Querys MySQL server and returns decoded json array'
     result=None
     
-    connect_info = get_connect_info()
-    nimURL = connect_info['nimURL']
-    nim_useSSL = connect_info['nim_useSSL']
-    nim_apiKey = connect_info['nim_apiKey']
+    connect_info = None
+    if not nimURL :
+        connect_info = get_connect_info()
+    if connect_info :
+        nimURL = connect_info['nimURL']
+        nim_useSSL = connect_info['nim_useSSL']
+        nim_apiKey = connect_info['nim_apiKey']
+    else :
+        nim_useSSL = 'False'
+        nim_apiKey = ''
     
     if sqlCmd :
         if method == 'get':
@@ -137,7 +169,8 @@ def connect( method='get', sqlCmd=None ) :
                 request = urllib2.Request(_actionURL)
             elif method == 'post':
                 request = urllib2.Request(_actionURL, cmd)
-                request.add_header("X-NIM-API-KEY", nim_apiKey)
+            
+            request.add_header("X-NIM-API-KEY", nim_apiKey)
             request.add_header("Content-type", "application/x-www-form-urlencoded; charset=UTF-8")
             _file = urllib2.urlopen(request)
             fr=_file.read()
@@ -158,6 +191,7 @@ def connect( method='get', sqlCmd=None ) :
     else :
         P.error( 'No SQL command provided to run.' )
         return False
+
 
 
 def upload( params=None ) :

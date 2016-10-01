@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: nim_maya.py
-# Version:  v2.0.0.160511
+# Version:  v2.5.0.160930
 #
 # Copyright (c) 2016 NIM Labs LLC
 # All rights reserved.
@@ -32,10 +32,10 @@ except ImportError :
         try : 
             from PyQt4 import QtCore, QtGui
         except ImportError : 
-            print "Failed to UI Modules: Maya"
+            print "Failed to load UI Modules: Maya"
 
 #  Variables :
-version='v2.0.0'
+version='v2.5.0'
 winTitle='NIM_'+version
 
 def get_mainWin() :
@@ -44,16 +44,14 @@ def get_mainWin() :
     #from PySide import QtGui
     try : 
         from PySide2 import QtWidgets as QtGui
-        print "Maya: PySide2 imported"
-    except :
+    except ImportError :
         try : 
             from PySide import QtGui
-            print "PySide Loaded"
-        except:
+        except ImportError :
             pass
     try:
         from shiboken2 import wrapInstance
-    except :
+    except ImportError :
         from shiboken import wrapInstance
     #  Get the main maya window as a QMainWindow instance :
     mayaWin=wrapInstance( long( omUI.MQtUtil.mainWindow() ), QtGui.QWidget )

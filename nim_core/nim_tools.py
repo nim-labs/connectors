@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: nim_tools.py
-# Version:  v2.0.0.160511
+# Version:  v2.5.0.160930
 #
 # Copyright (c) 2016 NIM Labs LLC
 # All rights reserved.
@@ -21,7 +21,7 @@ except ImportError :
         from PySide import QtCore, QtGui
         qt_import=True
     except ImportError : 
-        print "Failed to UI Modules: Tools"
+        print "Failed to load UI Modules: Tools"
 
 import os
 import nim_print

@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: UI.py
-# Version:  v2.0.0.160511
+# Version:  v2.5.0.160930
 #
 # Copyright (c) 2016 NIM Labs LLC
 # All rights reserved.
@@ -37,7 +37,7 @@ except ImportError :
 #  Variables :
 WIN=''
 startTime=''
-version='v2.0.0'
+version='v2.5.0'
 winTitle='NIM_'+version
 _os=platform.system().lower()
 _osCap=platform.system()
@@ -106,8 +106,6 @@ def mk( mode='open', _import=False, _export=False, ref=False, pub=False ) :
         elif app=='3dsMax' :
             try :
                 import MaxPlus
-                #win_parent=MaxPlus.Win32_GetMAXHWnd()
-                #WIN=GUI( parent=win_parent, mode=mode )
                 WIN=GUI( mode=mode )
                 MaxPlus.CUI.DisableAccelerators()
             except Exception, e :
@@ -1928,14 +1926,12 @@ class GUI(QtGui.QMainWindow) :
         #  Set default image, if Shot/Asset ID's have not been set yet :
         if _type and not self.nim.ID( 'asset' ) and not self.nim.ID( 'shot' ) :
             try :
-                self.nim.set_pic( elem=_type, widget=QtGui2.QPixmap().fromImage( \
-                    QtGui2.QImage( self.pref_imgDefault ) ) )
+                self.nim.set_pic( elem=_type, widget=QtGui2.QPixmap().fromImage( QtGui2.QImage( self.pref_imgDefault ) ) )
             except :
-                self.nim.set_pic( elem=_type, widget=QtGui.QPixmap().fromImage( \
-                    QtGui.QImage( self.pref_imgDefault ) ) )
+                self.nim.set_pic( elem=_type, widget=QtGui.QPixmap().fromImage( QtGui.QImage( self.pref_imgDefault ) ) )
+           
             self.nim.pix( _type ).fromImage( QtGui.QImage( self.pref_imgDefault ) )
-            self.nim.set_pic( elem=_type, widget=self.nim.pix( _type ).scaled( \
-                self.img_size, self.img_size, QtCore.Qt.KeepAspectRatio ) )
+            self.nim.set_pic( elem=_type, widget=self.nim.pix( _type ).scaled( self.img_size, self.img_size, QtCore.Qt.KeepAspectRatio ) )
             self.nim.label( _type ).setPixmap( self.nim.pix( _type ) )
             return None
         
@@ -1965,8 +1961,7 @@ class GUI(QtGui.QMainWindow) :
             print("set image")
             _data=urllib.urlopen( img_loc ).read()
             self.nim.pix( _type ).loadFromData( _data )
-            self.nim.set_pic( elem=_type, widget=self.nim.pix( _type ).scaled( \
-                self.img_size, self.img_size, QtCore.Qt.KeepAspectRatio ) )
+            self.nim.set_pic( elem=_type, widget=self.nim.pix( _type ).scaled( self.img_size, self.img_size, QtCore.Qt.KeepAspectRatio ) )
             self.nim.label( _type ).setPixmap( self.nim.pix( _type ) )
             _set=True
             P.debug( '%s image URL = "%s"' % (_type.upper(), img_loc) )
@@ -1981,8 +1976,7 @@ class GUI(QtGui.QMainWindow) :
                 self.nim.set_pic( elem=_type, widget=QtGui.QPixmap().fromImage( \
                     QtGui.QImage( self.pref_imgDefault ) ) )
             self.nim.pix( _type ).fromImage( QtGui.QImage( self.pref_imgDefault ) )
-            self.nim.set_pic( elem=_type, widget=self.nim.pix( _type ).scaled( \
-                self.img_size, self.img_size, QtCore.Qt.KeepAspectRatio ) )
+            self.nim.set_pic( elem=_type, widget=self.nim.pix( _type ).scaled( self.img_size, self.img_size, QtCore.Qt.KeepAspectRatio ) )
             self.nim.label( _type ).setPixmap( self.nim.pix( _type ) )
             P.debug( '%s image URL set to default : "%s"' % (_type.upper(), self.pref_imgDefault) )
         

@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: nim_win.py
-# Version:  v2.0.0.160511
+# Version:  v2.5.0.160930
 #
 # Copyright (c) 2016 NIM Labs LLC
 # All rights reserved.
@@ -27,7 +27,7 @@ except ImportError :
     except ImportError :
         try : from PyQt4 import QtCore, QtGui
         except ImportError : 
-            print "Failed to UI Modules: Win"
+            print "Failed to load UI Modules: Win"
 
 
 
@@ -39,7 +39,11 @@ def popup( title='', msg='', type='ok', defaultInput='', pyside=False, _list=[],
     #  Create PySide window :
     if pyside :
         try :
-            from PySide import QtCore, QtGui
+            try : 
+                from PySide2 import QtWidgets as QtGui
+                from PySide2 import QtCore
+            except :
+                from PySide import QtCore, QtGui
             if type=='comboBox' :
                 userInput, ok=QtGui.QInputDialog.getItem( winPrnt, title, msg, _list, 0, False )
                 if not ok :
