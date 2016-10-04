@@ -20,6 +20,7 @@ import nim_prefs as Prefs
 def debug( msg='' ) :
     'Custom info printer'
     #  Get Debug setting :
+    '''
     prefs=Prefs.read()
     if prefs and type(prefs)==type(dict()) :
         if 'NIM_DebugMode' in prefs :
@@ -28,6 +29,8 @@ def debug( msg='' ) :
             debug=prefs['DebugMode']
         else : debug='False'
     else : debug='False'
+    '''
+    debug = False
     #  Print :
     if debug=='True' and msg :
         tokens=msg.rstrip().split( '\n' )
@@ -35,6 +38,7 @@ def debug( msg='' ) :
             print 'NIM.D-bug ~> %s' % toke
         if msg[-1:]=='\n' :
             print 'NIM.D-bug ~>'
+    
     return
 
 

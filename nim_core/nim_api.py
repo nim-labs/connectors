@@ -199,8 +199,8 @@ def connect( method='get', sqlCmd=None, nimURL=None ) :
                 if os.path.exists( prefsFile ) :
                     os.remove( prefsFile )
                 result = Prefs.mk_default()
-                msg = 'Preferences have been recreated. Please try your request again.'
-                Win.popup(msg=msg)
+                #msg = 'Preferences have been recreated. Please try your request again.'
+                #Win.popup(msg=msg)
                 return False
             else :
                 return

@@ -165,12 +165,16 @@ class GUI(QtGui.QMainWindow) :
         #  Instantiate Variables :
         try :
             stored=self.mk_vars()
+            '''
+            # Working for duplicate fail detection however when variables missing from Prefs this fails silently
             if stored == False :
                 #Quietly fail when mk_vars returns false
+                print 'stored failed'
                 return
+            '''              
         except Exception, e :
             P.error( 'Sorry, unable to get NIM preferences, cannot run NIM GUI' )
-            P.error( '    %s' % traceback.print_exc() )
+            P.debug( '    %s' % traceback.print_exc() )
             Win.popup( title='NIM Error', msg='Sorry, unable to get NIM preferences, cannot run NIM GUI' )
             return
         
