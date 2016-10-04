@@ -165,9 +165,13 @@ class GUI(QtGui.QMainWindow) :
         #  Instantiate Variables :
         try :
             stored=self.mk_vars()
+            if stored == False :
+                #Quietly fail when mk_vars returns false
+                return
         except Exception, e :
             P.error( 'Sorry, unable to get NIM preferences, cannot run NIM GUI' )
             P.error( '    %s' % traceback.print_exc() )
+            Win.popup( title='NIM Error', msg='Sorry, unable to get NIM preferences, cannot run NIM GUI' )
             return
         
         #  Error Check :
@@ -218,7 +222,7 @@ class GUI(QtGui.QMainWindow) :
         'Instantiates variables'
         self.app=F.get_app()
         P.debug( '\n%.3f => Starting to read preferences' % (time.time()-startTime) )
-        
+
         #  Preferences :
         self.prefs=Prefs.read()
         P.debug( '%.3f =>     Preference file done reading' % (time.time()-startTime) )
@@ -232,6 +236,8 @@ class GUI(QtGui.QMainWindow) :
         
         #  Get Show/Shot Prefs :
         try :
+            self.pref_URL=self.prefs['NIM_URL']
+            self.pref_SSL=self.prefs['NIM_UseSSL']
             self.user=self.prefs['NIM_User']
             self.pref_nimScripts=self.prefs['NIM_Scripts']
             self.pref_userScripts=self.prefs['NIM_UserScripts']
@@ -279,20 +285,23 @@ class GUI(QtGui.QMainWindow) :
             self.nimPrefs=Nim.NIM().ingest_prefs()
             #self.nimPrefs.Print()
         #  Get and set User Information :
-        info=self.nimPrefs.userInfo()
-        self.user=info['name']
-        self.userID=info['ID']
-        self.nim.set_userInfo( userName=self.user, userID=self.userID )
-        
-        P.debug( '%.3f =>     NIM Preferences Instantiated' % (time.time()-startTime) )
-        
-        #  Set mode :
-        self.nim.set_mode( self.mode )
-        
-        #  Print success :
-        P.debug( '%.3f => Preferences done reading' % (time.time()-startTime) )
-        
-        return True
+        if self.nimPrefs:
+            info=self.nimPrefs.userInfo()
+            self.user=info['name']
+            self.userID=info['ID']
+            self.nim.set_userInfo( userName=self.user, userID=self.userID )
+            
+            P.debug( '%.3f =>     NIM Preferences Instantiated' % (time.time()-startTime) )
+            
+            #  Set mode :
+            self.nim.set_mode( self.mode )
+            
+            #  Print success :
+            P.debug( '%.3f => Preferences done reading' % (time.time()-startTime) )
+            
+            return True
+        else :
+            return False
     
     
     #  GUI Element Creation :

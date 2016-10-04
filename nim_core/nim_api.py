@@ -96,6 +96,7 @@ def get_apiKey() :
 
     return key
 
+
 def testAPI(nimURL=None) :
     sqlCmd={'q': 'testAPI'}
     cmd=urllib.urlencode(sqlCmd)
@@ -185,9 +186,24 @@ def connect( method='get', sqlCmd=None, nimURL=None ) :
             url_error = e.reason
             P.error('URL ERROR: %s' % url_error)
             err_msg = 'NIM Connection Error:\n\n %s' %  url_error;
-            Win.popup(msg=err_msg)
+            #Win.popup(msg=err_msg)
             P.debug( '    %s' % traceback.print_exc() )
-            return False
+
+            err_msg +='\n\n'+\
+                '    Would you like to recreate your preferences?'
+            P.error( err_msg )
+            reply=Win.popup( title='NIM Error', msg=err_msg, type='okCancel' )
+            #  Re-create preferences, if prompted :
+            if reply=='OK' :
+                prefsFile=Prefs.get_path()
+                if os.path.exists( prefsFile ) :
+                    os.remove( prefsFile )
+                result = Prefs.mk_default()
+                msg = 'Preferences have been recreated. Please try your request again.'
+                Win.popup(msg=msg)
+                return False
+            else :
+                return
     else :
         P.error( 'No SQL command provided to run.' )
         return False

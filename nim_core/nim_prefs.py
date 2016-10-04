@@ -161,10 +161,8 @@ def _inputURL() :
 def _verifyURL( url='' ) :
     'Verifies a given URL as valid'
     #  Verify URL :
-    P.info('Validating URL: %s' % url)
     if not url : return False
-    #result=Api.get( sqlCmd={'q': 'testAPI'}, debug=False, nimURL=url )
-    result=Api.testAPI(nimURL=url)
+    result=Api.get( sqlCmd={'q': 'testAPI'}, debug=False, nimURL=url )
     P.info('Validating API: %s' % result)
     if result : 
         #setting global variable
@@ -336,7 +334,6 @@ def mk_default( recreatePrefs=False, notify_success=True ) :
         while search_for_url:
             url=_inputURL()
             result=_verifyURL( url )
-            print "Result: %s" % result
             if result: 
                 P.info('URL Valid')
                 nim_URL = url
@@ -416,7 +413,6 @@ def read() :
     
     #  Create preferences, if necessary :
     if not os.path.isfile( prefsFile ) :
-        P.error('NIM Preferences not found.')
         result = mk_default()
         if not result:
             P.error( 'Unable to create default preferences.' )
