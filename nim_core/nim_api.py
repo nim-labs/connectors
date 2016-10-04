@@ -56,31 +56,15 @@ def get_connect_info() :
         P.info( '"NIM_URL" not found in preferences!' )
         return False
 
-    if _prefs and 'NIM_UseSSL' in _prefs.keys() :
-        nim_useSSL=_prefs['NIM_UseSSL']
-    else :
-        #P.info( '"NIM_UseSSL" not found in preferences!' )
-        nim_useSSL = 'False'
-        
-    nim_apiKey = ''
-    if nim_useSSL == 'True' :
-        P.debug( 'Connection using SSL')
-        url_list = list(nimURL)
-        protocol = "".join(url_list[:5])
-        P.debug("Prefs Protocol: %s" % protocol)
-        if protocol != 'https' :
-            address = "".join(url_list[4:])
-            nimURL = "".join(('https',address))
-            P.debug( "Using Protocol Address: %s" % nimURL )
-        nim_apiKey = get_apiKey()
+    nim_apiKey = get_apiKey()
 
-    connect_info = {'nimURL':nimURL, 'nim_useSSL':nim_useSSL, 'nim_apiKey':nim_apiKey}
+    connect_info = {'nimURL':nimURL, 'nim_apiKey':nim_apiKey}
     return connect_info
 
 
 #  Get API Key for user
 def get_apiKey() :
-    key = '1234567890'
+    key = '00000000'
     key_fileName = 'nim.key'
     key_path = os.path.normpath( os.path.join( Prefs.get_home(), key_fileName ) )
 
@@ -147,11 +131,9 @@ def connect( method='get', sqlCmd=None, nimURL=None ) :
         connect_info = get_connect_info()
     if connect_info :
         nimURL = connect_info['nimURL']
-        nim_useSSL = connect_info['nim_useSSL']
         nim_apiKey = connect_info['nim_apiKey']
     else :
-        nim_useSSL = 'False'
-        nim_apiKey = ''
+        nim_apiKey = '00000000'
     
     if sqlCmd :
         if method == 'get':

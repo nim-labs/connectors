@@ -197,7 +197,6 @@ function createNimPrefsFile() {
 	nimPrefsFile.open('w');
 	
 	nimPrefsFile.writeln('NIM_URL=');
-	nimPrefsFile.writeln('NIM_UseSSL=');
 	nimPrefsFile.writeln('NIM_User=');
 	nimPrefsFile.writeln('NIM_Scripts=');
 	nimPrefsFile.writeln('NIM_UserScripts=');

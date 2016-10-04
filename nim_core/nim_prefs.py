@@ -190,7 +190,6 @@ def _nimPrefs() :
     'Returns a list of NIM preferences'
     nimDict={
         'NIM_URL': nim_URL,
-        'NIM_UseSSL': nim_useSLL,
         'NIM_User': nim_user,
         'NIM_Scripts': nim_scripts,
         'NIM_UserScripts': os.path.normpath(os.path.join( get_home(), 'scripts' ))+os.sep,
@@ -202,7 +201,7 @@ def _nimPrefs() :
 
 def _nimPrefsList() :
     'Returns a list of keys from the NIM Prefs Dictionary, for orderly printing'
-    nimList=['NIM_URL', 'NIM_UseSSL', 'NIM_User', 'NIM_Scripts', 'NIM_UserScripts', 'NIM_DebugMode', 'NIM_Thumbnail']
+    nimList=['NIM_URL', 'NIM_User', 'NIM_Scripts', 'NIM_UserScripts', 'NIM_DebugMode', 'NIM_Thumbnail']
     return nimList
 
 

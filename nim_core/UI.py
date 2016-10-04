@@ -212,10 +212,7 @@ class GUI(QtGui.QMainWindow) :
         P.debug(' ')
         
         #  Print :
-        self.nim.Print( debug=True )
-        
-        #  Make connections :
-        #self.mk_connections()
+        #self.nim.Print( debug=True )
         
         self.complete=True
         return
@@ -241,11 +238,9 @@ class GUI(QtGui.QMainWindow) :
         #  Get Show/Shot Prefs :
         try :
             self.pref_URL=self.prefs['NIM_URL']
-            self.pref_SSL=self.prefs['NIM_UseSSL']
             self.user=self.prefs['NIM_User']
             self.pref_nimScripts=self.prefs['NIM_Scripts']
             self.pref_userScripts=self.prefs['NIM_UserScripts']
-            #self.pref_appScripts=self.prefs[self.app+'_Scripts']
             self.pref_posX=self.prefs[self.app+'_WinPosX']
             self.pref_posY=self.prefs[self.app+'_WinPosY']
             self.pref_sizeX=self.prefs[self.app+'_WinWidth']
@@ -263,7 +258,6 @@ class GUI(QtGui.QMainWindow) :
             self.pref_task=self.prefs[self.app+'_Task']
             self.pref_basename=self.prefs[self.app+'_Basename']
             self.pref_version=self.prefs[self.app+'_Version']
-            #self.pref_imgDefault=self.prefs['NIM_Thumbnail']
             self.pref_imgDefault=self.pref_nimScripts+'/img/nim_logo.png'
         except : return False
         P.debug( '%.3f =>     Preferences stored' % (time.time()-startTime) )
@@ -287,7 +281,6 @@ class GUI(QtGui.QMainWindow) :
                 Houdini.get_vars( nim=self.nimPrefs )
         else :
             self.nimPrefs=Nim.NIM().ingest_prefs()
-            #self.nimPrefs.Print()
         #  Get and set User Information :
         if self.nimPrefs:
             info=self.nimPrefs.userInfo()
