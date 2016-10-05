@@ -144,7 +144,7 @@ def connect( method='get', sqlCmd=None, nimURL=None ) :
             _actionURL = re.sub('[?]', '', nimURL)
         else :
             P.error('Connection method not defined in request.')
-            Win.popup('NIM Connection Error:\n\n Connection method not defined in request.')
+            Win.popup( title='NIM Connection Error', msg='NIM Connection Error:\n\n Connection method not defined in request.')
             return False
 
         try :
@@ -161,7 +161,24 @@ def connect( method='get', sqlCmd=None, nimURL=None ) :
             except Exception, e :
                 P.error( traceback.print_exc() )
             _file.close()
+
+            # Test for failed API Validation
+            if type(result)==type(list()) and len(result)==1 :
+                try :
+                    error_msg = result[0]['error']
+                    P.error( error_msg )
+                    if(error_msg == 'Failed to validate user.') :
+                        Win.popup( title='NIM API Error', msg='Failed to validate user.\n\nNIM Security is set to require the use of API Keys. \
+                                                                Please obtain a valid NIM API KEY from your NIM Administrator.' )
+                    if(error_msg == 'API Key Expired.') :
+                        Win.popup( title='NIM API Error', msg='NIM API Key Expired.\n\nNIM Security is set to require the use of API Keys. \
+                                                                Please contact your NIM Administrator to update your NIM API KEY expiration.' )
+                        #return False <-- returning false loads reset prefs msgbox
+                except :
+                    pass
+            
             return result
+
         except urllib2.URLError, e :
             P.error( '\nFailed to read URL for the following command...\n    %s' % sqlCmd )
             P.error( '   %s' % _actionURL )
@@ -214,6 +231,23 @@ def upload( params=None ) :
     try:
         result = opener.open(_actionURL, params).read()
         P.info( "Result: %s" % result )
+
+        # Test for failed API Validation
+        if type(result)==type(list()) and len(result)==1 :
+            try :
+                error_msg = result[0]['error']
+                P.error( error_msg )
+                if(error_msg == 'Failed to validate user.') :
+                    Win.popup( title='NIM API Error', msg='Failed to validate user.\n\nNIM Security is set to require the use of API Keys. \
+                                                            Please obtain a valid NIM API KEY from your NIM Administrator.' )
+
+                if(error_msg == 'API Key Expired.') :
+                    Win.popup( title='NIM API Error', msg='NIM API Key Expired.\n\nNIM Security is set to require the use of API Keys. \
+                                                            Please contact your NIM Administrator to update your NIM API KEY expiration.' )
+                    #return False <-- returning false loads reset prefs msgbox
+            except :
+                pass
+
     except urllib2.HTTPError, e:
         if e.code == 500:
             P.error("Server encountered an internal error. \n%s\n(%s)\n%s\n\n" % (_actionURL, params, e))
