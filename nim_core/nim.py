@@ -59,7 +59,6 @@ class NIM( object ) :
         self.nim['pub']=False
         
         #  Attempt to set User information :
-        
         self.nim['user']={'name': '', 'ID': '' }
         if self.prefs :
             if 'NIM_User' in self.prefs.keys() :

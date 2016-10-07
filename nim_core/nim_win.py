@@ -12,7 +12,7 @@
 # otherwise accompanies this software in either electronic or hard copy form.
 # *****************************************************************************
 
-
+import os
 #  NIM Imports :
 import nim_api as Api
 import nim_file as F
@@ -185,30 +185,101 @@ def popup( title='', msg='', type='ok', defaultInput='', pyside=False, _list=[],
     return userInput
 
 
-def userInfo( url='' ) :
+def userInfo( url='', apiUser='' ) :
     'Retrieves the User ID to use for the window'
     
     user, userID, userList='', '', []
-    users=Api.get( sqlCmd={'q': 'getUsers'}, debug=False, nimURL=url )
-    for u in users : userList.append( u['username'] )
     
-    #  Create window to get user name from :
-    user=popup( title='Select NIM User', msg='Pick a username to use', type='comboBox', \
-        pyside=True, _list=userList )
-    
-    #  Get user ID :
-    if url :
-        userID=Api.get( sqlCmd={ 'q': 'getUserID', 'u': user}, debug=False, nimURL=url )
+    print("apiUser: %s" % apiUser)
+
+    user=popup( title='Enter NIM Login', msg='Please enter your NIM username:', type='input', defaultInput=apiUser )
+
+    if user is None :
+        return False
     else :
-        userID=Api.get( sqlCmd={ 'q': 'getUserID', 'u': user}, debug=False )
-    if type(userID)==type(list()) and len(userID)==1 :
-        userID=userID[0]['ID']
-    P.info( 'User set to "%s" (ID #%s)' % (user, userID) )
+        print("newUser: %s" % user)
+        #  Get user ID :
+        if url :
+            userID=Api.get( sqlCmd={ 'q': 'getUserID', 'u': user}, debug=False, nimURL=url )
+        else :
+            userID=Api.get( sqlCmd={ 'q': 'getUserID', 'u': user}, debug=False )
+        if type(userID)==type(list()) and len(userID)==1 :
+            try :
+                print userID
+                userID=userID[0]['ID']
+                P.info( 'User set to "%s" (ID #%s)' % (user, userID) )
+                #  Update Preferences :
+                Prefs.update( attr='NIM_User', value=user )
+                popup( title='NIM User Set', msg='The NIM user has been set to %s.' % user)
+                return (user, userID)
+            except :
+                return False
+        else :
+            P.error( 'Failed to find NIM user.' )
+            response = popup( title='User Not Found', msg='The username entered is not a valid NIM user.\n\n Would you like to enter a new username?', type='okCancel')
+            if(response=='OK'):
+                userInfo( url=url )
+            else :
+                return False
+
+
+def setApiKey( url='' ) :
+    'Sets the NIM user API Key'
+    print('setApiKey::')
+    nim_apiKey = ''
     
-    #  Update Preferences :
-    Prefs.update( attr='NIM_User', value=user )
+    connect_info = Api.get_connect_info()
+    api_url = connect_info['nim_apiURL']
+    api_user = connect_info['nim_apiUser']
+
+    api_key=popup( title='Enter NIM API Key', msg='Failed to validate user.\n\n \
+                    NIM Security is set to require the use of API Keys.\n \
+                    Please obtain a valid NIM API KEY from your NIM Administrator.\n\n \
+                    Enter the NIM API Key for your user:', type='input', defaultInput='' )
+
+    if api_key is None :
+        return False
+    else :
+        #  Get user ID :
+        if api_url :
+            testAPI = Api.testAPI(nimURL=api_url, nim_apiUser=api_user, nim_apiKey=api_key)
+            print testAPI
+            print type(testAPI)
+            if type(testAPI)==type(list()) :
+                if testAPI[0]['error'] != '':
+                    P.error( testAPI[0]['error'] )
+                    response = popup( title='NIM API Invalid', msg='The NIM API Key entered is invalid.\n\nRe-enter API Key?', type='okCancel')
+                    if(response=='OK'):
+                        setApiKey( url=url )
+                    else :
+                        return False
+                else :
+                    #  Update NIM Key File :
+                    print "Key Valid: %s" % testAPI[0]['key']
+                    try :
+                        keyFile = os.path.normpath( os.path.join( Prefs.get_home(), 'nim.key' ) )
+                        print keyFile
+                        with open(keyFile, 'r+') as f:
+                            f.seek(0)
+                            f.write(api_key)
+                            f.truncate()
+                        popup( title='NIM API Key Set', msg='The NIM API Key has been set.\n\nPlease retry your last command.')
+                        return True
+                    except :
+                        P.error('Failed writing NIM Key file.')
+                        P.error( '    %s' % traceback.print_exc() )
+                        popup(title='Error', msg='Failed writing NIM Key File.')
+                        return False
+            else :
+                P.error( 'Failed to validate NIM API.' )
+                response = popup( title='NIM API Invalid', msg='The NIM API Key entered is invalid.\n\nRe-enter API Key?', type='okCancel')
+                if(response=='OK'):
+                    setApiKey( url=url )
+                else :
+                    return False
+        else :
+            return None
     
-    return (user, userID)
 
 
 #  END

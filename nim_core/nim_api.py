@@ -16,16 +16,6 @@
 #  General Imports :
 import json, os, re, sys, traceback
 import urllib, urllib2
-
-'''
-try:
-    import ssl
-except ImportError:
-    print "error: no ssl support"
-
-response = urllib2.urlopen('https://192.168.1.195') 
-print 'response headers: "%s"' % response.info()
-'''
 import mimetools, mimetypes
 import email.generator as email_gen
 import cStringIO
@@ -50,21 +40,28 @@ def get_connect_info() :
     'Returns the connection information from preferences'
 
     _prefs=Prefs.read()
+
     if _prefs and 'NIM_URL' in _prefs.keys() :
-        nimURL=_prefs['NIM_URL']
+        nim_apiURL=_prefs['NIM_URL']
     else :
         P.info( '"NIM_URL" not found in preferences!' )
         return False
 
+    if _prefs and 'NIM_User' in _prefs.keys() :
+        nim_apiUser=_prefs['NIM_User']
+    else :
+        P.info( '"NIM_User" not found in preferences!' )
+        return False
+        
     nim_apiKey = get_apiKey()
 
-    connect_info = {'nimURL':nimURL, 'nim_apiKey':nim_apiKey}
+    connect_info = {'nim_apiURL':nim_apiURL, 'nim_apiUser':nim_apiUser, 'nim_apiKey':nim_apiKey}
     return connect_info
 
 
 #  Get API Key for user
 def get_apiKey() :
-    key = '00000000'
+    key = ''
     key_fileName = 'nim.key'
     key_path = os.path.normpath( os.path.join( Prefs.get_home(), key_fileName ) )
 
@@ -81,13 +78,13 @@ def get_apiKey() :
     return key
 
 
-def testAPI(nimURL=None) :
+def testAPI(nimURL=None, nim_apiUser='', nim_apiKey='') :
     sqlCmd={'q': 'testAPI'}
     cmd=urllib.urlencode(sqlCmd)
     _actionURL="".join(( nimURL, cmd ))
     request = urllib2.Request(_actionURL)
-    nim_apiKey = ''
     try :
+        request.add_header("X-NIM-API-USER", nim_apiUser)
         request.add_header("X-NIM-API-KEY", nim_apiKey)
         request.add_header("Content-type", "application/x-www-form-urlencoded; charset=UTF-8")
         _file = urllib2.urlopen(request)
@@ -130,10 +127,12 @@ def connect( method='get', sqlCmd=None, nimURL=None ) :
     if not nimURL :
         connect_info = get_connect_info()
     if connect_info :
-        nimURL = connect_info['nimURL']
+        nimURL = connect_info['nim_apiURL']
+        nim_apiUser = connect_info['nim_apiUser']
         nim_apiKey = connect_info['nim_apiKey']
     else :
-        nim_apiKey = '00000000'
+        nim_apiUser = ''
+        nim_apiKey = ''
     
     if sqlCmd :
         if method == 'get':
@@ -153,6 +152,7 @@ def connect( method='get', sqlCmd=None, nimURL=None ) :
             elif method == 'post':
                 request = urllib2.Request(_actionURL, cmd)
             
+            request.add_header("X-NIM-API-USER", nim_apiUser)
             request.add_header("X-NIM-API-KEY", nim_apiKey)
             request.add_header("Content-type", "application/x-www-form-urlencoded; charset=UTF-8")
             _file = urllib2.urlopen(request)
@@ -167,9 +167,15 @@ def connect( method='get', sqlCmd=None, nimURL=None ) :
                 try :
                     error_msg = result[0]['error']
                     P.error( error_msg )
+                    if(error_msg == 'API Key Not Found.') :
+                        Win.popup( title='NIM API Error', msg='NIM API Key Not Found.\n\nNIM Security is set to require the use of API Keys. \
+                                                                Please contact your NIM Administrator to obtain a NIM API KEY.' )
+
                     if(error_msg == 'Failed to validate user.') :
-                        Win.popup( title='NIM API Error', msg='Failed to validate user.\n\nNIM Security is set to require the use of API Keys. \
-                                                                Please obtain a valid NIM API KEY from your NIM Administrator.' )
+                        #Win.popup( title='NIM API Error', msg='Failed to validate user.\n\nNIM Security is set to require the use of API Keys. \
+                        #                                        Please obtain a valid NIM API KEY from your NIM Administrator.' )
+                        api_result = Win.setApiKey()
+
                     if(error_msg == 'API Key Expired.') :
                         Win.popup( title='NIM API Error', msg='NIM API Key Expired.\n\nNIM Security is set to require the use of API Keys. \
                                                                 Please contact your NIM Administrator to update your NIM API KEY expiration.' )
@@ -185,7 +191,6 @@ def connect( method='get', sqlCmd=None, nimURL=None ) :
             url_error = e.reason
             P.error('URL ERROR: %s' % url_error)
             err_msg = 'NIM Connection Error:\n\n %s' %  url_error;
-            #Win.popup(msg=err_msg)
             P.debug( '    %s' % traceback.print_exc() )
 
             err_msg +='\n\n'+\
@@ -198,8 +203,6 @@ def connect( method='get', sqlCmd=None, nimURL=None ) :
                 if os.path.exists( prefsFile ) :
                     os.remove( prefsFile )
                 result = Prefs.mk_default()
-                #msg = 'Preferences have been recreated. Please try your request again.'
-                #Win.popup(msg=msg)
                 return False
             else :
                 return
@@ -212,7 +215,8 @@ def connect( method='get', sqlCmd=None, nimURL=None ) :
 def upload( params=None ) :
 
     connect_info = get_connect_info()
-    nimURL = connect_info['nimURL']
+    nimURL = connect_info['nim_apiURL']
+    nim_apiUser = connect_info['nim_apiUser']
     nim_apiKey = connect_info['nim_apiKey']
 
     _actionURL = nimURL.encode('ascii')
@@ -222,6 +226,7 @@ def upload( params=None ) :
    # Create opener with extended form post support
     try:
         opener = urllib2.build_opener(FormPostHandler)
+        opener.addheaders = [('X-NIM-API-USER', nim_apiUser)]
         opener.addheaders = [('X-NIM-API-KEY', nim_apiKey)]
     except:
         P.error( "Failed on build_opener")
@@ -237,6 +242,9 @@ def upload( params=None ) :
             try :
                 error_msg = result[0]['error']
                 P.error( error_msg )
+                if(error_msg == 'API Key Not Found.') :
+                        Win.popup( title='NIM API Error', msg='NIM API Key Not Found.\n\nNIM Security is set to require the use of API Keys. \
+                                                                Please contact your NIM Administrator to obtain a NIM API KEY.' )
                 if(error_msg == 'Failed to validate user.') :
                     Win.popup( title='NIM API Error', msg='Failed to validate user.\n\nNIM Security is set to require the use of API Keys. \
                                                             Please obtain a valid NIM API KEY from your NIM Administrator.' )
@@ -286,7 +294,9 @@ class FormPostHandler(urllib2.BaseHandler):
                 content_type = 'multipart/form-data; boundary=%s' % boundary
                 request.add_unredirected_header('Content-Type', content_type)
                 connect_info = get_connect_info()
+                nim_apiUser = connect_info['nim_apiUser']
                 nim_apiKey = connect_info['nim_apiKey']
+                request.add_header("X-NIM-API-USER", nim_apiUser)
                 request.add_header("X-NIM-API-KEY", nim_apiKey)
             request.add_data(data)
         return request
@@ -374,6 +384,7 @@ def get_userID( user='' ) :
         user=get_user()
     try :
         userID=get( {'q': 'getUserID', 'u': str(user)} )
+        print userID
         if type(userID)==type(list()) and len(userID)==1 :
             return userID[0]['ID']
         else :

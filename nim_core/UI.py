@@ -74,7 +74,7 @@ def mk( mode='open', _import=False, _export=False, ref=False, pub=False ) :
                 #    allowedAreas=allowedAreas )
             except Exception, e :
                 P.error( 'Sorry, unable to retrieve variables from the NIM preference file.' )
-                P.error( '    %s' % traceback.print_exc() )
+                P.debug( '    %s' % traceback.print_exc() )
                 return False
         
         #  Nuke :
@@ -89,7 +89,7 @@ def mk( mode='open', _import=False, _export=False, ref=False, pub=False ) :
                 #    'usa.la.nim.fileUI' )
             except Exception, e :
                 P.error( 'Sorry, unable to retrieve variables from the NIM preference file.' )
-                P.error( '    %s' % traceback.print_exc() )
+                P.debug( '    %s' % traceback.print_exc() )
                 return False
         
         #  Hiero :
@@ -99,7 +99,7 @@ def mk( mode='open', _import=False, _export=False, ref=False, pub=False ) :
                 WIN=GUI( mode=mode )
             except Exception, e :
                 P.error( 'Sorry, unable to retrieve variables from the NIM preference file.' )
-                P.error( '    %s' % traceback.print_exc() )
+                P.debug( '    %s' % traceback.print_exc() )
                 return False
     
         # 3dsMax :
@@ -110,7 +110,7 @@ def mk( mode='open', _import=False, _export=False, ref=False, pub=False ) :
                 MaxPlus.CUI.DisableAccelerators()
             except Exception, e :
                 P.error( 'Sorry, unable to retrieve variables from the NIM preference file.' )
-                P.error( '    %s' % traceback.print_exc() )
+                P.debug( '    %s' % traceback.print_exc() )
                 return False
 
         # Houdini :
@@ -120,7 +120,7 @@ def mk( mode='open', _import=False, _export=False, ref=False, pub=False ) :
                 WIN=GUI( mode=mode )
             except Exception, e :
                 P.error( 'Sorry, unable to retrieve variables from the NIM preference file.' )
-                P.error( '    %s' % traceback.print_exc() )
+                P.debug( '    %s' % traceback.print_exc() )
                 return False
 
     #  Set the window to one of five modes :
@@ -2043,14 +2043,19 @@ class GUI(QtGui.QMainWindow) :
     def update_user(self) :
         'Updates the currently set user name and ID within NIM'
         #  Get User Information :
-        info=Win.userInfo()
-        userName=info[0]
-        userID=info[1]
-        #  Set User :
-        self.nim.set_userInfo( userName=userName, userID=userID )
-        self.nimPrefs.set_userInfo( userName=userName, userID=userID )
-        #  Update window :
-        self.update_elem('job')
+        info=Win.userInfo(apiUser=self.user)
+        if( info == False ):
+            P.info('The NIM user was not changed.')
+        elif( info == None ):
+            pass
+        else :
+            userName=info[0]
+            userID=info[1]
+            #  Set User :
+            self.nim.set_userInfo( userName=userName, userID=userID )
+            self.nimPrefs.set_userInfo( userName=userName, userID=userID )
+            #  Update window :
+            self.update_elem('job')
         return
 
     
@@ -2347,7 +2352,7 @@ class GUI(QtGui.QMainWindow) :
                 mc.file( filePath, force=True, open=True, ignoreVersion=True, prompt=False )
             except Exception, e :
                 P.error( 'Failed reading the file: %s' % filePath )
-                P.error( '    %s' % traceback.print_exc() )
+                P.debug( '    %s' % traceback.print_exc() )
                 return False
             
             #  Set Project :
@@ -2366,7 +2371,7 @@ class GUI(QtGui.QMainWindow) :
                 M.set_vars( nim=self.nim )
             except Exception, e :
                 P.error( 'Failed adding NIM attributes to Project Settings node...' )
-                P.error( '    %s' % traceback.print_exc() )
+                P.debug( '    %s' % traceback.print_exc() )
                 return False
             
         #  Nuke :
@@ -2414,7 +2419,7 @@ class GUI(QtGui.QMainWindow) :
                 knob.setValue( filePath.replace( '\\', '/' ) )
             except Exception, e :
                 P.error( 'Failed reading the file: %s' % filePath )
-                P.error( '    %s' % traceback.print_exc() )
+                P.debug( '    %s' % traceback.print_exc() )
                 return False
             
             #  Set Variables :
@@ -2423,7 +2428,7 @@ class GUI(QtGui.QMainWindow) :
                 N.set_vars( nim=self.nim )
             except Exception, e :
                 P.error( 'Failed adding NIM attributes to Project Settings node...' )
-                P.error( '    %s' % traceback.print_exc() )
+                P.debug( '    %s' % traceback.print_exc() )
                 return False
         
         #  Hiero :
@@ -2433,7 +2438,7 @@ class GUI(QtGui.QMainWindow) :
                 hiero.core.openProject( filePath )
             except Exception, e :
                 P.error( 'Failed reading the file: %s' % filePath )
-                P.error( '    %s' % traceback.print_exc() )
+                P.debug( '    %s' % traceback.print_exc() )
                 return False
         
         #  3dsMax :
@@ -2447,7 +2452,7 @@ class GUI(QtGui.QMainWindow) :
                 mpFM.Open(filePath)
             except Exception, e :
                 P.error( 'Failed reading the file: %s' % filePath )
-                P.error( '    %s' % traceback.print_exc() )
+                P.debug( '    %s' % traceback.print_exc() )
                 return False
             
             #  Set Project :
@@ -2466,7 +2471,7 @@ class GUI(QtGui.QMainWindow) :
                 Max.set_vars( nim=self.nim )
             except Exception, e :
                 P.error( 'Failed adding NIM attributes to Project Settings node...' )
-                P.error( '    %s' % traceback.print_exc() )
+                P.debug( '    %s' % traceback.print_exc() )
                 return False
 
         #  Houdini :
@@ -2484,7 +2489,7 @@ class GUI(QtGui.QMainWindow) :
                 hou.hipFile.load(file_name=str(filePath))
             except Exception, e :
                 P.error( 'Failed reading the file: %s' % filePath )
-                P.error( '    %s' % traceback.print_exc() )
+                P.debug( '    %s' % traceback.print_exc() )
                 return False
             
             #  Set Project :
@@ -2507,7 +2512,7 @@ class GUI(QtGui.QMainWindow) :
                 Houdini.set_vars( nim=self.nim )
             except Exception, e :
                 P.error( 'Failed adding NIM attributes to Project Settings node...' )
-                P.error( '    %s' % traceback.print_exc() )
+                P.debug( '    %s' % traceback.print_exc() )
                 return False
 
         P.info( 'File, %s, opened!' % filePath )
