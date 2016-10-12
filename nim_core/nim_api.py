@@ -211,7 +211,6 @@ def connect( method='get', sqlCmd=None, nimURL=None ) :
         return False
 
 
-
 def upload( params=None ) :
 
     connect_info = get_connect_info()
@@ -226,12 +225,28 @@ def upload( params=None ) :
    # Create opener with extended form post support
     try:
         opener = urllib2.build_opener(FormPostHandler)
-        opener.addheaders = [('X-NIM-API-USER', nim_apiUser)]
-        opener.addheaders = [('X-NIM-API-KEY', nim_apiKey)]
+        #opener.addheaders = [('X-NIM-API-USER', nim_apiUser)]
+        #opener.addheaders = [('X-NIM-API-KEY', nim_apiKey)]
     except:
-        P.error( "Failed on build_opener")
+        P.error( "Failed building url opener")
         P.error( traceback.format_exc() )
         return False
+
+    # Test for SSL Redirection
+    isRedirected = False
+    try:
+        testCmd = {'q': 'testAPI'}
+        cmd=urllib.urlencode(testCmd)
+        testURL="".join(( nimURL, cmd ))
+        req = urllib2.Request(testURL)
+        res = urllib2.urlopen(req)
+        finalurl = res.geturl()
+        if nimURL.startswith('http:') and finalurl.startswith('https'):
+            isRedirected = True
+            _actionURL = _actionURL.replace("http:","https:")
+            P.info("Redirect: %s" % _actionURL)
+    except:
+        P.error("Failed to test for redirect.")
 
     try:
         result = opener.open(_actionURL, params).read()
@@ -271,6 +286,7 @@ def upload( params=None ) :
     
     return True
 
+
 class FormPostHandler(urllib2.BaseHandler):
     """
     Handler for multipart form data
@@ -298,6 +314,7 @@ class FormPostHandler(urllib2.BaseHandler):
                 nim_apiKey = connect_info['nim_apiKey']
                 request.add_header("X-NIM-API-USER", nim_apiUser)
                 request.add_header("X-NIM-API-KEY", nim_apiKey)
+                
             request.add_data(data)
         return request
     
