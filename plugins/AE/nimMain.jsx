@@ -22,7 +22,7 @@ var json_parse=(function(){var d;var b;var a={'"':'"',"\\":"\\","/":"/",b:"\b",f
 
 // ------------------------------------------
 // Allow connecting to a host via SSL / HTTPS
-// From: https://forums.adobe.com/thread/798185
+// From: https://forums.adobe.com/message/5663594#5663594
 
 /*
  * @method : either "POST" or "GET"
@@ -32,19 +32,20 @@ var json_parse=(function(){var d;var b;var a={'"':'"',"\\":"\\","/":"/",b:"\b",f
 
 function webRequest(method, endpoint, query) {
 	var response = null,
-		//wincurl  = WORKING_DIR.fsName + '\\lib\\curl.vbs',  //the path to the .vbs file
+		scriptFolder = '\\',
+		wincurl = '..\\..\\nim_core\\curl.vbs',  // The path to the .vbs file
 		curlCmd = '';
 
 	try {
 		if ( getOperatingSystem() == "win" ) {
-			curlCmd = 'cscript "' + wincurl + '" /Method:' + method + ' /URL:' + endpoint + ' /Query:' + query + ' //nologo';
+			curlCmd = 'cscript "' + wincurl + '" /Method:' + method + ' /URL:' + endpoint + ' /Query:' + query + ' /ScriptFolder:' + scriptFolder + ' /Username:' + username + ' /ApiKey:' + nimKey + ' //nologo';
 		}
 		else {
 			if (method === "POST") {
-				curlCmd = 'curl --silent --insecure --header "X-NIM-API-USER: kyle" --header "X-NIM-API-KEY: ' + nimKey + '" --data "' + query + '" ' + endpoint;
+				curlCmd = 'curl --silent --insecure --header "X-NIM-API-USER: ' + username + ' --header "X-NIM-API-KEY: ' + nimKey + '" --data "' + query + '" ' + endpoint;
 			}
 			else if (method === "GET") {
-				curlCmd = 'curl --silent --get --insecure --header "X-NIM-API-USER: kyle" --header "X-NIM-API-KEY: ' + nimKey + '" --data "' + query + '" ' + endpoint;
+				curlCmd = 'curl --silent --get --insecure --header "X-NIM-API-USER: ' + username + '" --header "X-NIM-API-KEY: ' + nimKey + '" --data "' + query + '" ' + endpoint;
 			}
 		}
 		response = system.callSystem(curlCmd);
@@ -89,19 +90,26 @@ function nimAPI(query) {
 
 			// Check first item in array to see if it resembles an error object.
 			// If so, output appropriate message and return false.
-			if (jsonObject.length && typeof jsonObject[0] == 'object' && jsonObject[0].error) {
-				var error = jsonObject[0].error;
-				if (error == 'API Key Not Found.')
-					alert('NIM API Key Not Found.\n\nNIM Security is set to require the use of API Keys. Please contact your NIM Administrator to obtain a NIM API KEY.');
-				else if (error == 'Failed to validate user.')
-					alert('Failed to validate user.\n\nNIM Security is set to require the use of API Keys. Please obtain a valid NIM API KEY from your NIM Administrator.');
-				else if (error == 'API Key Expired.')
-					alert('NIM API Key Expired.\n\nNIM Security is set to require the use of API Keys. Please contact your NIM Administrator to update your NIM API KEY expiration.');
-				else
-					throw 'noResultNoError';
-				return false;
+			if (jsonObject.length && typeof jsonObject[0] == 'object') {
+				// 'API Key Not Found.' error returned on most API calls when key isn't sent but required;
+				// when calling 'testAPI', this error is not returned, but 'keyRequired' and 'keyValid' can be tested
+				if (jsonObject[0].error == 'API Key Not Found.' || (jsonObject[0].keyRequired == 'true' && jsonObject[0].keyValid == 'false')) {
+					keyDialog('NIM API key not found.', 'NIM security is set to require the use of API keys. Please contact your NIM administrator to obtain a NIM API key.');
+					return 'keyError';
+				}
+				else if (jsonObject[0].error) {
+					var error = jsonObject[0].error;
+					// If provided API key is incorrect or expired, these errors will ALWAYS be returned
+					if (error == 'Failed to validate user.')
+						keyDialog('Failed to validate user.', 'NIM security is set to require the use of API keys. Please obtain a valid NIM API key from your NIM administrator.');
+					else if (error == 'API Key Expired.')
+						keyDialog('NIM API key expired!', 'NIM security is set to require the use of API keys. Please contact your NIM administrator to update your NIM API key.');
+					else
+						throw 'noResultNoError';
+					return 'keyError';
+				}
 			}
-			
+
 			return jsonObject;
 		}
 		catch (e) {
@@ -113,54 +121,6 @@ function nimAPI(query) {
 		return false;
 }
 
-/*
-// OLD - for using ExtendScript socket object
-function nimAPI(query) {
-	var nimAPIHostAndPort = nimAPIHost,
-		queryArray = [],
-		queryString = '',
-		reply = '',
-		conn = new Socket,
-		jsonData = null,
-		jsonObject = null;
-
-	if (nimAPIHostAndPort.indexOf(':') == -1)
-		nimAPIHostAndPort += ':80';
-
-	// Access NIM
-	if (conn.open(nimAPIHostAndPort)) {
-		for (var parameter in query)
-			queryArray.push(parameter + '=' + encodeURIComponent(query[parameter]));
-		if (queryArray.length)
-			queryString = '?' + queryArray.join('&');
-		else return false;
-
-		// send a HTTP GET request
-		conn.write ('GET ' + nimAPIURL + queryString + ' HTTP/1.0\n\n');
-		// and read the server's reply
-		reply = conn.read(999999);
-		conn.close();
-		
-		reply = reply.split('\n\n');
-		if (reply.length)
-			jsonData = reply[reply.length - 1];
-		else return false;
-
-		if (jsonData) {
-			try {
-				jsonObject = json_parse(jsonData);
-				return jsonObject;
-			}
-			catch (e) {
-				alert('Error: GET request to ' + nimAPIURL + queryString + ' returned the following:\n\n' + jsonData + '\n\nIf this looks correct, your script may not be recognizing how to convert JSON into a JavaScript object. This may be caused by an older version of After Effects. NIM has been tested with After Effects CS6 and above.');
-				return false;
-			}
-		}
-		else
-			return false;
-	}
-}
-*/
 
 // Self-explanatory
 function getOperatingSystem() {
@@ -181,9 +141,10 @@ function saveKeyToPrefs() {
 }
 
 
-function keyDialog(thisObj) {
+function keyDialog(messageTitle, message) {
 	var createKeyDialog = new Window('dialog', 'NIM', undefined),
-		createKeyLabel = createKeyDialog.add('statictext', undefined, ''),
+		createKeyMessageTitle = createKeyDialog.add('statictext', undefined, messageTitle),
+		createKeyMessage = createKeyDialog.add('statictext', undefined, message),
 		keyGroup = createKeyDialog.add('group', undefined),
 		keyLabel = keyGroup.add('statictext', undefined, 'NIM API Key: '),
 		keyInput = keyGroup.add('edittext', [0, 0, 250, 20]),
@@ -198,10 +159,13 @@ function keyDialog(thisObj) {
 		nimKey = keyInput.text;
 		saveKeyToPrefs();
 		createKeyDialog.close();
+		var remoteScripts = getRemoteScripts(nimScriptsPath, thisObj);
+		if (remoteScripts !== false)
+			remoteScripts(thisObj);
 	}
 
 	cancelButton.onClick = function() {
-		alert("Your files won't be connected to NIM until you have a valid preferences file.");
+		alert("You won't be able to connect to NIM until you enter a valid API key.");
 		createKeyDialog.close();
 	}
 
@@ -398,7 +362,7 @@ function setNimMetadata(data) {
 function setNimFileIdMetadata(fileID) {
 	var proj = app.project,
 		metaData, schemaNS;
- 
+
 	if (ExternalObject.AdobeXMPScript == undefined)
 		ExternalObject.AdobeXMPScript = new ExternalObject('lib:AdobeXMPScript');
 
@@ -629,5 +593,3 @@ function saveFile(classID, className, serverID, serverPath, taskID, taskName, ta
 	return true;
 }
 
-
-var os, userID;
