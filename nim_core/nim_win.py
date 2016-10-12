@@ -225,7 +225,7 @@ def userInfo( url='', apiUser='' ) :
 
 def setApiKey( url='' ) :
     'Sets the NIM user API Key'
-    print('setApiKey::')
+    #print('setApiKey::')
     nim_apiKey = ''
     
     connect_info = Api.get_connect_info()
@@ -243,9 +243,7 @@ def setApiKey( url='' ) :
         #  Get user ID :
         if api_url :
             testAPI = Api.testAPI(nimURL=api_url, nim_apiUser=api_user, nim_apiKey=api_key)
-            print testAPI
-            print type(testAPI)
-            if type(testAPI)==type(list()) :
+            if type(testAPI[0])==type(dict()) :
                 if testAPI[0]['error'] != '':
                     P.error( testAPI[0]['error'] )
                     response = popup( title='NIM API Invalid', msg='The NIM API Key entered is invalid.\n\nRe-enter API Key?', type='okCancel')
@@ -255,21 +253,29 @@ def setApiKey( url='' ) :
                         return False
                 else :
                     #  Update NIM Key File :
-                    print "Key Valid: %s" % testAPI[0]['key']
-                    try :
-                        keyFile = os.path.normpath( os.path.join( Prefs.get_home(), 'nim.key' ) )
-                        print keyFile
-                        with open(keyFile, 'r+') as f:
-                            f.seek(0)
-                            f.write(api_key)
-                            f.truncate()
-                        popup( title='NIM API Key Set', msg='The NIM API Key has been set.\n\nPlease retry your last command.')
-                        return True
-                    except :
-                        P.error('Failed writing NIM Key file.')
-                        P.error( '    %s' % traceback.print_exc() )
-                        popup(title='Error', msg='Failed writing NIM Key File.')
-                        return False
+                    print "Key Valid: %s" % testAPI[0]['keyValid']
+                    if testAPI[0]['keyValid'] == 'true' :
+                        try :
+                            keyFile = os.path.normpath( os.path.join( Prefs.get_home(), 'nim.key' ) )
+                            print keyFile
+                            with open(keyFile, 'r+') as f:
+                                f.seek(0)
+                                f.write(api_key)
+                                f.truncate()
+                            popup( title='NIM API Key Set', msg='The NIM API Key has been set.\n\nPlease retry your last command.')
+                            return True
+                        except :
+                            P.error('Failed writing NIM Key file.')
+                            P.error( '    %s' % traceback.print_exc() )
+                            popup(title='Error', msg='Failed writing NIM Key File.')
+                            return False
+                    else :
+                        P.error( 'Failed to validate NIM API.' )
+                        response = popup( title='NIM API Invalid', msg='The NIM API Key entered is invalid.\n\nRe-enter API Key?', type='okCancel')
+                        if(response=='OK'):
+                            setApiKey( url=url )
+                        else :
+                            return False
             else :
                 P.error( 'Failed to validate NIM API.' )
                 response = popup( title='NIM API Invalid', msg='The NIM API Key entered is invalid.\n\nRe-enter API Key?', type='okCancel')

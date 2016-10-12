@@ -168,8 +168,9 @@ def connect( method='get', sqlCmd=None, nimURL=None ) :
                     error_msg = result[0]['error']
                     P.error( error_msg )
                     if(error_msg == 'API Key Not Found.') :
-                        Win.popup( title='NIM API Error', msg='NIM API Key Not Found.\n\nNIM Security is set to require the use of API Keys. \
-                                                                Please contact your NIM Administrator to obtain a NIM API KEY.' )
+                        #Win.popup( title='NIM API Error', msg='NIM API Key Not Found.\n\nNIM Security is set to require the use of API Keys. \
+                        #                                        Please contact your NIM Administrator to obtain a NIM API KEY.' )
+                        api_result = Win.setApiKey()
 
                     if(error_msg == 'Failed to validate user.') :
                         #Win.popup( title='NIM API Error', msg='Failed to validate user.\n\nNIM Security is set to require the use of API Keys. \
@@ -258,11 +259,14 @@ def upload( params=None ) :
                 error_msg = result[0]['error']
                 P.error( error_msg )
                 if(error_msg == 'API Key Not Found.') :
-                        Win.popup( title='NIM API Error', msg='NIM API Key Not Found.\n\nNIM Security is set to require the use of API Keys. \
-                                                                Please contact your NIM Administrator to obtain a NIM API KEY.' )
+                    #Win.popup( title='NIM API Error', msg='NIM API Key Not Found.\n\nNIM Security is set to require the use of API Keys. \
+                    #                                        Please contact your NIM Administrator to obtain a NIM API KEY.' )
+                    api_result = Win.setApiKey()
+
                 if(error_msg == 'Failed to validate user.') :
-                    Win.popup( title='NIM API Error', msg='Failed to validate user.\n\nNIM Security is set to require the use of API Keys. \
-                                                            Please obtain a valid NIM API KEY from your NIM Administrator.' )
+                    #Win.popup( title='NIM API Error', msg='Failed to validate user.\n\nNIM Security is set to require the use of API Keys. \
+                    #                                        Please obtain a valid NIM API KEY from your NIM Administrator.' )
+                    api_result = Win.setApiKey()
 
                 if(error_msg == 'API Key Expired.') :
                     Win.popup( title='NIM API Error', msg='NIM API Key Expired.\n\nNIM Security is set to require the use of API Keys. \
