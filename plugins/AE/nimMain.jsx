@@ -13,7 +13,7 @@
 
 
 // Declare global variables
-var os, userID;
+var os, userID, username, ranGetUserID = false;
 
 
 // Adds JSON parsing support; https://github.com/douglascrockford/JSON-js/blob/master/json_parse.js
@@ -32,20 +32,48 @@ var json_parse=(function(){var d;var b;var a={'"':'"',"\\":"\\","/":"/",b:"\b",f
 
 function webRequest(method, endpoint, query) {
 	var response = null,
-		scriptFolder = '\\',
+		scriptFolder = '~/.nim/tmp',
+		winScriptFolder = '~\\.nim\\tmp',
 		wincurl = '..\\..\\nim_core\\curl.vbs',  // The path to the .vbs file
-		curlCmd = '';
+		curlCmd = '',
+		thisUser = username;
+
+	// If no username is set, check apiKeyRequired; if false, don't worry about lack of username
+	if (!username) {
+		// If "testAPI" query, run getUserID function
+		// (which also checks the USER environment variable and tries to find a matching user in NIM)
+		if (query == 'q=testAPI') {
+			userID = getUserID();
+			thisUser = username;
+		}
+		// If "getUserID" query, ignore username
+		else if (query.indexOf('q=getUserID') != -1) {
+			username = '';
+			thisUser = "''";
+		}
+		else if (apiKeyRequired) {
+			// Get username from prefs
+			username = getPref('NIM', 'User');
+			if (!username)
+				changeUserDialog();
+			thisUser = username;
+		}
+		else {
+			username = '';
+			thisUser = "''";
+		}
+	}
 
 	try {
 		if ( getOperatingSystem() == "win" ) {
-			curlCmd = 'cscript "' + wincurl + '" /Method:' + method + ' /URL:' + endpoint + ' /Query:' + query + ' /ScriptFolder:' + scriptFolder + ' /Username:' + username + ' /ApiKey:' + nimKey + ' //nologo';
+			curlCmd = 'cscript "' + wincurl + '" /Method:' + method + ' /URL:' + endpoint + ' /Query:' + query + ' /ScriptFolder:' + winScriptFolder + ' /Username:' + thisUser + ' /ApiKey:' + nimKey + ' //nologo';
 		}
 		else {
 			if (method === "POST") {
-				curlCmd = 'curl --silent --insecure --header "X-NIM-API-USER: ' + username + ' --header "X-NIM-API-KEY: ' + nimKey + '" --data "' + query + '" ' + endpoint;
+				curlCmd = 'curl --silent --insecure --header "X-NIM-API-USER: ' + thisUser + '" --header "X-NIM-API-KEY: ' + nimKey + '" --data "' + query + '" ' + endpoint;
 			}
 			else if (method === "GET") {
-				curlCmd = 'curl --silent --get --insecure --header "X-NIM-API-USER: ' + username + '" --header "X-NIM-API-KEY: ' + nimKey + '" --data "' + query + '" ' + endpoint;
+				curlCmd = 'curl --silent --get --insecure --header "X-NIM-API-USER: ' + thisUser + '" --header "X-NIM-API-KEY: ' + nimKey + '" --data "' + query + '" ' + endpoint;
 			}
 		}
 		response = system.callSystem(curlCmd);
@@ -91,6 +119,10 @@ function nimAPI(query) {
 			// Check first item in array to see if it resembles an error object.
 			// If so, output appropriate message and return false.
 			if (jsonObject.length && typeof jsonObject[0] == 'object') {
+
+				if (jsonObject[0].keyRequired == 'true')
+					apiKeyRequired = true;
+
 				// 'API Key Not Found.' error returned on most API calls when key isn't sent but required;
 				// when calling 'testAPI', this error is not returned, but 'keyRequired' and 'keyValid' can be tested
 				if (jsonObject[0].error == 'API Key Not Found.' || (jsonObject[0].keyRequired == 'true' && jsonObject[0].keyValid == 'false')) {
@@ -100,8 +132,12 @@ function nimAPI(query) {
 				else if (jsonObject[0].error) {
 					var error = jsonObject[0].error;
 					// If provided API key is incorrect or expired, these errors will ALWAYS be returned
-					if (error == 'Failed to validate user.')
-						keyDialog('Failed to validate user.', 'NIM security is set to require the use of API keys. Please obtain a valid NIM API key from your NIM administrator.');
+					if (error == 'Failed to validate user.') {
+						alert('Failed to validate user.\n\nPlease verify that both your username and API key are correct.');
+						username = getPref('NIM', 'User');
+						changeUserDialog();
+						keyDialog();
+					}
 					else if (error == 'API Key Expired.')
 						keyDialog('NIM API key expired!', 'NIM security is set to require the use of API keys. Please contact your NIM administrator to update your NIM API key.');
 					else
@@ -142,10 +178,15 @@ function saveKeyToPrefs() {
 
 
 function keyDialog(messageTitle, message) {
-	var createKeyDialog = new Window('dialog', 'NIM', undefined),
-		createKeyMessageTitle = createKeyDialog.add('statictext', undefined, messageTitle),
-		createKeyMessage = createKeyDialog.add('statictext', undefined, message),
-		keyGroup = createKeyDialog.add('group', undefined),
+	var createKeyDialog = new Window('dialog', 'NIM', undefined);
+
+	if (messageTitle)
+		var createKeyMessageTitle = createKeyDialog.add('statictext', undefined, messageTitle);
+	
+	if (message)
+		var createKeyMessage = createKeyDialog.add('statictext', undefined, message);
+		
+	var keyGroup = createKeyDialog.add('group', undefined),
 		keyLabel = keyGroup.add('statictext', undefined, 'NIM API Key: '),
 		keyInput = keyGroup.add('edittext', [0, 0, 250, 20]),
 		buttonGroup = createKeyDialog.add('group', undefined),
@@ -178,33 +219,44 @@ function keyDialog(messageTitle, message) {
 // passes 'buttonsToDisable' along to 'changeUserDialog' if no user is selected
 function getUserID(buttonsToDisable) {
 	var prefUser = getPref('NIM', 'User'),
-		envUser,
-		allUsers = nimAPI({ q: 'getUsers' }),
-		allUsersLength = allUsers.length,
-		guessedUserID = null;
+		envUser;
+
+	if (!buttonsToDisable) buttonsToDisable = [];
 
 	if (prefUser) {
-		for (var x = 0; x < allUsersLength; x++) {
-			if (allUsers[x].username == prefUser)
-				return allUsers[x].ID;
+		var users = nimAPI({ q: 'getUserID', u: prefUser });
+		if (users.length && users[0].ID) {
+			ranGetUserID = true;
+			username = prefUser;
+			return users[0].ID;
 		}
 	}
-	
-	try { envUser = $.getenv('USER').toLowerCase(); }
-	catch (e) { envUser = null; }
 
-	if (envUser) {
-		for (var x = 0; x < allUsersLength; x++) {
-			if (envUser == allUsers[x].username.toLowerCase() || envUser == allUsers[x].full_name.toLowerCase()) {
-				guessedUserID = allUsers[x].ID;
+	// If getUserID hasn't been run before, try to figure out user by looking at environment variables and by prompting user
+	if (!ranGetUserID) {
+		ranGetUserID = true;
+
+		try { envUser = $.getenv('USER').toLowerCase(); }
+		catch (e) { envUser = null; }
+
+		if (envUser) {
+			var users = nimAPI({ q: 'getUserID', u: envUser });
+			if (users.length && users[0].ID) {
 				setPref('NIM', 'User', envUser);
-				alert('NIM has detected that you might be ' + allUsers[x].full_name + '; if not, manually select your username via the "Change Users" menu item.');
-				return guessedUserID;
+				username = envUser;
+				alert('NIM has detected that you might be user "' + envUser + '"; if not, you can manually change your user.');
+				return users[0].ID;
 			}
 		}
+
+		changeUserDialog(buttonsToDisable);
+	}
+	else {
+		var buttonsToDisableLength = buttonsToDisable.length;
+		for (var x = 0; x < buttonsToDisableLength; x++)
+			buttonsToDisable[x].enabled = false;
 	}
 
-	changeUserDialog(buttonsToDisable);
 	return false;
 }
 
@@ -235,52 +287,51 @@ function commentDialog(callback) {
 // Prompts the user to select a username from a dropdown of all users;
 // if passed an array of buttons, will disable them if no user has been selected
 function changeUserDialog(buttonsToDisable) {
+	if (!buttonsToDisable) buttonsToDisable = [];
+
 	function noUserSelected() {
 		var buttonsToDisableLength = buttonsToDisable.length;
-		alert("You'll need to select a user before you can use NIM.");
+		alert("You'll need to enter your username before you can use NIM.");
 		for (var x = 0; x < buttonsToDisableLength; x++)
 			buttonsToDisable[x].enabled = false;
 	}
 
 	function userSelected() {
 		var buttonsToDisableLength = buttonsToDisable.length;
-		alert('User changed to: ' + changeUserDropdown.selection.text);
+		alert('User changed to: ' + changeUserInput.text);
 		for (var x = 0; x < buttonsToDisableLength; x++)
 			buttonsToDisable[x].enabled = true;
 	}
 
-	var allUsers = nimAPI({ q: 'getUsers' }),
-		allUsersLength = allUsers.length,
-		allUsernames = [],
-		currentUserIndex = null,
-		changeUserDialog = new Window('dialog', 'NIM', undefined),
+	if (!username) username = '';
+
+	var changeUserDialog = new Window('dialog', 'NIM', undefined),
 		changeUserGroup = changeUserDialog.add('group', undefined),
 		changeUserLabel = changeUserGroup.add('statictext', undefined, 'Change user: '),
-		changeUserDropdown,
+		changeUserInput = changeUserGroup.add('edittext', [0, 0, 250, 20], username),
 		buttonGroup = changeUserDialog.add('group', undefined),
 		confirmButton = buttonGroup.add('button', undefined, 'OK'),
 		cancelButton = buttonGroup.add('button', undefined, 'Cancel');
 
-	for (var x = 0; x < allUsersLength; x++) {
-		var thisUser = allUsers[x];
-		allUsernames.push(thisUser.username);
-		if (thisUser.ID == userID)
-			currentUserIndex = x;
-	}
-
-	changeUserDropdown = changeUserGroup.add('dropdownlist', undefined, '', { items: allUsernames });
-	changeUserDropdown.selection = currentUserIndex;
-
 	confirmButton.onClick = function() {
-		if (changeUserDropdown.selection === null) {
+		if (!changeUserInput.text) {
 			noUserSelected();
+			username = '';
+			setPref('NIM', 'User', '');
+			changeUserDialog.close();
 			return;
 		}
-		var newUser = allUsers[changeUserDropdown.selection.index];
-		userID = newUser.ID;
-		setPref('NIM', 'User', newUser.username);
-		userSelected();
-		changeUserDialog.close();
+
+		var users = nimAPI({ q: 'getUserID', u: changeUserInput.text });
+		if (users.length && users[0].ID) {
+			userID = users[0].ID;
+			userSelected();
+			username = changeUserInput.text;
+			setPref('NIM', 'User', username);
+			changeUserDialog.close();
+		}
+		else
+			alert("User not found!");
 	}
 
 	cancelButton.onClick = function() {
