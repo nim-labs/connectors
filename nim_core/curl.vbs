@@ -7,15 +7,18 @@ set objFSO = CreateObject("Scripting.FileSystemObject")
 sMethod = namedArgs.Item("Method")
 sUrl = namedArgs.Item("URL")
 sRequest = namedArgs.Item("Query")
+tempFilePath = namedArgs.Item("TempFilePath")
+username = namedArgs.Item("Username")
+apiKey = namedArgs.Item("ApiKey")
 
-scriptPath = WScript.ScriptFullName
-set objFSO = CreateObject("Scripting.FileSystemObject")
-set objFile = objFSO.GetFile(scriptPath)
-scriptFolder = objFSO.GetParentFolderName(objFile)
+' scriptPath = WScript.ScriptFullName
+' set objFSO = CreateObject("Scripting.FileSystemObject")
+' set objFile = objFSO.GetFile(scriptPath)
+' scriptFolder = objFSO.GetParentFolderName(objFile)
 
-HTTPPost sMethod, sUrl, sRequest, scriptFolder, username, apiKey
+HTTPPost sMethod, sUrl, sRequest, tempFilePath, username, apiKey
 
-Function HTTPPost(sMethod, sUrl, sRequest, scriptFolder, username, apiKey)
+Function HTTPPost(sMethod, sUrl, sRequest, tempFilePath, username, apiKey)
 
     set oHTTP = CreateObject("Microsoft.XMLHTTP")
 
@@ -27,6 +30,8 @@ Function HTTPPost(sMethod, sUrl, sRequest, scriptFolder, username, apiKey)
 
     oHTTP.setRequestHeader "Content-Type", "text/plain"
     oHTTP.setRequestHeader "Content-Length", Len(sRequest)
+    oHTTP.setRequestHeader "X-NIM-API-USER", username
+    oHTTP.setRequestHeader "X-NIM-API-KEY", apiKey
 
     If sMethod = "POST" Then
         oHTTP.send sRequest
@@ -36,7 +41,7 @@ Function HTTPPost(sMethod, sUrl, sRequest, scriptFolder, username, apiKey)
 
     HTTPPost = oHTTP.responseText
 
-    outputFile = scriptFolder & "\response.out"
+    outputFile = tempFilePath
     set objFileOut = objFSO.CreateTextFile(outputFile,True)
     objFileOut.Write HTTPPost
     objFileOut.Close

@@ -32,8 +32,8 @@ var json_parse=(function(){var d;var b;var a={'"':'"',"\\":"\\","/":"/",b:"\b",f
 
 function webRequest(method, endpoint, query) {
 	var response = null,
-		scriptFolder = '~/.nim/tmp',
-		winScriptFolder = '~\\.nim\\tmp',
+		tempFolderPath = '~/.nim/tmp/',
+		winTempFolderPath = '~\\.nim\\tmp\\',
 		wincurl = '..\\..\\nim_core\\curl.vbs',  // The path to the .vbs file
 		curlCmd = '',
 		thisUser = username;
@@ -65,18 +65,29 @@ function webRequest(method, endpoint, query) {
 	}
 
 	try {
-		if ( getOperatingSystem() == "win" ) {
-			curlCmd = 'cscript "' + wincurl + '" /Method:' + method + ' /URL:' + endpoint + ' /Query:' + query + ' /ScriptFolder:' + winScriptFolder + ' /Username:' + thisUser + ' /ApiKey:' + nimKey + ' //nologo';
+		var timestamp = Date.now(),
+			nimTempFolder = new Folder(tempFolderPath),
+			tempFilePath = tempFolderPath + timestamp,
+			tempFile = new File(tempFilePath),
+			winTempFilePath = winTempFolderPath + timestamp;
+
+		if (!nimTempFolder.exists)
+			nimTempFolder.create();
+
+		if (getOperatingSystem() == "win") {
+			curlCmd = 'cscript "' + wincurl + '" /Method:' + method + ' /URL:' + endpoint + ' /Query:' + query + ' /TempFilePath:' + winTempFilePath + ' /Username:' + thisUser + ' /ApiKey:' + nimKey + ' //nologo';
 		}
 		else {
 			if (method === "POST") {
-				curlCmd = 'curl --silent --insecure --header "X-NIM-API-USER: ' + thisUser + '" --header "X-NIM-API-KEY: ' + nimKey + '" --data "' + query + '" ' + endpoint;
+				curlCmd = 'curl --silent --insecure --header "X-NIM-API-USER: ' + thisUser + '" --header "X-NIM-API-KEY: ' + nimKey + '" --data "' + query + '" ' + endpoint + ' > ' + tempFilePath;
 			}
 			else if (method === "GET") {
-				curlCmd = 'curl --silent --get --insecure --header "X-NIM-API-USER: ' + thisUser + '" --header "X-NIM-API-KEY: ' + nimKey + '" --data "' + query + '" ' + endpoint;
+				curlCmd = 'curl --silent --get --insecure --header "X-NIM-API-USER: ' + thisUser + '" --header "X-NIM-API-KEY: ' + nimKey + '" --data "' + query + '" ' + endpoint + ' > ' + tempFilePath;
 			}
 		}
-		response = system.callSystem(curlCmd);
+		system.callSystem(curlCmd);
+		response = readFile(tempFilePath);
+		tempFile.remove();
 	}
 	catch (err) {
 		alert(err);
