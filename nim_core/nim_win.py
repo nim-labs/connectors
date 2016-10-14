@@ -246,7 +246,6 @@ def setApiKey( url='' ) :
     if api_key is None :
         return False
     elif api_key == 'Cancel' :
-        print "cancel pressed"
         return False
     else :
         #  Get user ID :

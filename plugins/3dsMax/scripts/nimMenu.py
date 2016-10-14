@@ -1,7 +1,7 @@
 #****************************************************************************
 #
 # Filename: 3dsMax/nimMenu.py
-# Version:  v2.0.0.160511
+# Version:  2.5.0.161013
 #
 # Copyright (c) 2016 NIM Labs LLC
 # All rights reserved.
@@ -23,10 +23,12 @@ sys.path.append(nimScriptPath)
 import nim_core.UI as nimUI
 import nim_core.nim_api as nimAPI
 import nim_core.nim_file as nimFile
+import nim_core.nim_win as nimWin
 
 reload(nimUI)
 reload(nimAPI)
 reload(nimFile)
+reload(nimWin)
 
 def outputMenuItem(item, recurse = True, indent = ''):
     text = item.GetTitle() 
@@ -69,7 +71,7 @@ def publishAction():
 def changeUserAction():
     print 'NIM: changeUserAction'
     try:
-        nimUI.GUI().update_user()
+        nimWin.userInfo()
     except Exception, e :
         print 'Sorry, there was a problem choosing NIM user...'
         print '    %s' % traceback.print_exc()

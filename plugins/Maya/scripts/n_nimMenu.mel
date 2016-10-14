@@ -1,7 +1,7 @@
 /* ****************************************************************************
 #
 # Filename: Maya/n_nimMenu.mel
-# Version:  v2.0.0.160511
+# Version:  v2.5.0.161013
 #
 # Copyright (c) 2016 NIM Labs LLC
 # All rights reserved.
@@ -27,7 +27,7 @@ global proc n_nimMenu()
 	string $nimVersionUp = "python(\"import nim_core.nim_api as Api; Api.versionUp()\")";
 	string $nimPublish = "python(\"import nim_core.UI as UI; UI.mk('PUB')\")";
 	string $nimReload = "python( \"import nim_core.nim_file as F; F.scripts_reload()\")";
-	string $nimChangeUser = "python( \"import nim_core.UI as UI; UI.GUI().update_user()\")";
+	string $nimChangeUser = "python( \"import nim_core.nim_win as Win; Win.userInfo()\")";
 
 	string $name = "NIM";
 	$nimMenuCtrl = `menu -p MayaWindow -to true -l $name`;

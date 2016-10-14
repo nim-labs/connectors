@@ -53,13 +53,15 @@ def get_userInfo( url='' ) :
     'Retrieves the User ID to use for the window'
     user=Api.get_user()
     userID=Api.get( sqlCmd={ 'q': 'getUserID', 'u': user}, debug=False, nimURL=url )
+    '''
     users=Api.get( sqlCmd={'q': 'getUsers'}, debug=False, nimURL=url )
-    
+        
     if not userID and users :
+        
         userList=[]
         for u in users : 
             userList.append( u['username'] )
-        
+                
         #  Create window to get user name from :
         if F.get_app() !='C4D' :
             user=Win.popup( title='User Name Error', msg='Pick a username to use', type='comboBox', pyside=True, _list=userList )
@@ -69,13 +71,16 @@ def get_userInfo( url='' ) :
             userWin.Open( dlgtype=W.c4d.DLG_TYPE_MODAL )
             user=userWin.get_user()
             print 'User = "%s"' % user
-        
-        #  Get user ID :
-        userID=Api.get( sqlCmd={ 'q': 'getUserID', 'u': user}, debug=False, nimURL=url )
-        if type(userID)==type(list()) and len(userID)==1 :
-            userID=userID[0]['ID']
-        P.info( 'User set to "%s" (ID #%s)' % (user, userID) )
-        return (user, userID)
+    '''
+    if not userID :
+        user = Win.userInfo()
+        if user :
+            #  Get user ID :
+            userID=Api.get( sqlCmd={ 'q': 'getUserID', 'u': user}, debug=False, nimURL=url )
+            if type(userID)==type(list()) and len(userID)==1 :
+                userID=userID[0]['ID']
+            P.info( 'User set to "%s" (ID #%s)' % (user, userID) )
+            return (user, userID)
     else :
         return False
 

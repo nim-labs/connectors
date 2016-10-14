@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: Nuke/menu.py
-# Version:  2.0.0.160502
+# Version:  2.5.0.161013
 #
 # Copyright (c) 2015 NIM Labs LLC
 # All rights reserved.
@@ -58,7 +58,6 @@ try:
 
 		nimRootMenu.addSeparator()
 		nimSettingsMenu=nimRootMenu.addMenu("Settings")
-		#nimSettingsMenu.addCommand( 'Change User', 'import nim_core.UI as UI; UI.GUI().update_user()' )
 		nimSettingsMenu.addCommand( 'Change User', 'import nim_core.nim_win as Win; Win.userInfo()' )
 		nimSettingsMenu.addCommand( 'Reload Scripts', 'import nim_core.nim_file as F; F.scripts_reload()' )
 except:
