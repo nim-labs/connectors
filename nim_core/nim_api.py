@@ -16,6 +16,11 @@
 #  General Imports :
 import json, os, re, sys, traceback
 import urllib, urllib2
+try :
+    import ssl
+except :
+    pass
+    
 import mimetools, mimetypes
 import email.generator as email_gen
 import cStringIO
@@ -87,7 +92,13 @@ def testAPI(nimURL=None, nim_apiUser='', nim_apiKey='') :
         request.add_header("X-NIM-API-USER", nim_apiUser)
         request.add_header("X-NIM-API-KEY", nim_apiKey)
         request.add_header("Content-type", "application/x-www-form-urlencoded; charset=UTF-8")
-        _file = urllib2.urlopen(request)
+        try :
+            myssl = ssl.create_default_context()
+            myssl.check_hostname=False
+            myssl.verify_mode=ssl.CERT_NONE
+            _file = urllib2.urlopen(request,context=myssl)
+        except :
+            _file = urllib2.urlopen(request)
         fr=_file.read()
         try : result=json.loads( fr )
         except Exception, e :
@@ -155,7 +166,13 @@ def connect( method='get', sqlCmd=None, nimURL=None ) :
             request.add_header("X-NIM-API-USER", nim_apiUser)
             request.add_header("X-NIM-API-KEY", nim_apiKey)
             request.add_header("Content-type", "application/x-www-form-urlencoded; charset=UTF-8")
-            _file = urllib2.urlopen(request)
+            try :
+                myssl = ssl.create_default_context()
+                myssl.check_hostname=False
+                myssl.verify_mode=ssl.CERT_NONE
+                _file = urllib2.urlopen(request,context=myssl)
+            except :
+                _file = urllib2.urlopen(request)
             fr=_file.read()
             try : result=json.loads( fr )
             except Exception, e :

@@ -15,6 +15,11 @@
 
 #  General Imports :
 import glob, os, platform, re, sys, traceback, urllib, urllib2, time
+try:
+    import ssl
+except :
+    pass
+
 #  NIM Imports :
 import nim as Nim
 import nim_api as Api
@@ -1970,7 +1975,13 @@ class GUI(QtGui.QMainWindow) :
         #  Set Shot/Asset image :
         if _type and img_loc :
             print("set image")
-            _data=urllib.urlopen( img_loc ).read()
+            try :
+                myssl = ssl.create_default_context()
+                myssl.check_hostname=False
+                myssl.verify_mode=ssl.CERT_NONE
+                _data=urllib.urlopen( img_loc,context=myssl ).read()
+            except :
+                _data=urllib.urlopen( img_loc ).read()
             self.nim.pix( _type ).loadFromData( _data )
             self.nim.set_pic( elem=_type, widget=self.nim.pix( _type ).scaled( self.img_size, self.img_size, QtCore.Qt.KeepAspectRatio ) )
             self.nim.label( _type ).setPixmap( self.nim.pix( _type ) )
