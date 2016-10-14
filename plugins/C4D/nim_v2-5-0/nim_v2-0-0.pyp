@@ -235,10 +235,12 @@ class nim_changeUser_cmd( plugins.CommandData ) :
     def Execute(self, doc) :
         'Selects a new NIM user for the connector.'
         P.info('Selecting NIM User...')
-        import nim_core.nim4d_userWin as W
-        userWin=W.GetUser()
-        userWin.Open( dlgtype=W.c4d.DLG_TYPE_MODAL )
-        userName=userWin.get_user()
+        #import nim_core.nim4d_userWin as W
+        #userWin=W.GetUser()
+        import nim_core.nim_win as Win
+        userName = Win.userInfo()
+        #userWin.Open( dlgtype=W.c4d.DLG_TYPE_MODAL )
+        #userName=userWin.get_user()
         P.info('User = "%s"' % userName)
         #  Update Preferences :
         Prefs.update( attr='NIM_User', value=userName )

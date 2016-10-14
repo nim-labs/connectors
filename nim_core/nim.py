@@ -66,7 +66,6 @@ class NIM( object ) :
                 if self.nim['user']['name'] :
                     self.nim['user']['ID']=Api.get_userID( user=self.nim['user']['name'] )
         
-        
         #  App Specific :
         if self.nim['app']=='C4D' :
             #  Group ID's :
@@ -184,10 +183,9 @@ class NIM( object ) :
         
         if not self.prefs :
             return False
-        debug=self.prefs['NIM_DebugMode']
-        if debug :
-            P.debug( 'Preferences being read...' )
-        
+
+        P.info( 'Preferences being read...' )
+
         #  Set User Information :
         user=self.prefs['NIM_User']
         userID=Api.get( sqlCmd={ 'q': 'getUserID', 'u': user}, debug=False )
@@ -225,7 +223,9 @@ class NIM( object ) :
         taskFound, basenameFound, versionFound=False, False, False
         jobs, assets, shows, shots, tasks, basenames, version={}, {}, {}, {}, {}, {}, {}
         #  Get and set jobs dictionary :
+        
         jobs=Api.get_jobs( userID=self.nim['user']['ID'], folders=True )
+        #P.info('ingest_filePath')
         self.set_dict('job')
         
         #  Verify file path structure :
@@ -534,6 +534,9 @@ class NIM( object ) :
             #  Only update Job if the dictionary hasn't been set yet :
             if not self.nim[elem]['Dict'] or not len(self.nim[elem]['Dict']) :
                 self.nim[elem]['Dict']=Api.get_jobs( userID=self.nim['user']['ID'] )
+                if self.nim[elem]['Dict'] == False :
+                    P.error("Failed to Set NIM Dictionary")
+                    return False
         elif elem=='asset' :
             if self.nim['job']['ID'] :
                 self.nim[elem]['Dict']=Api.get_assets( self.nim['job']['ID'] )

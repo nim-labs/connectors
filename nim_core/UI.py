@@ -1119,8 +1119,13 @@ class GUI(QtGui.QMainWindow) :
         
         #  Clear and Set Dictionaries :
         self.nim.clear( elem )
-        self.nim.set_dict( elem )
-        
+        response = self.nim.set_dict( elem )
+        if response == False:
+            P.error('Failed to populate elements.')
+            #QtGui.QMainWindow.close(self)
+            raise Exception("Failed to populate elements")
+            return
+
         #  Clear Fields for Empty Dictionaries :
         if not self.nim.Dict( elem ) or not len(self.nim.Dict( elem )) :
             if elem in self.nim.comboBoxes :
@@ -1946,7 +1951,7 @@ class GUI(QtGui.QMainWindow) :
         #parsed_uri = urlparse( self.prefs['NIM_URL'] )
         #updated to use global vars
         connect_info = Api.get_connect_info()
-        nimURL = connect_info['nimURL']
+        nimURL = connect_info['nim_apiURL']
         parsed_uri = urlparse(nimURL)   
         nim_domain = '{uri.scheme}://{uri.netloc}/'.format(uri=parsed_uri)
         print( 'NIM Domain: %s' % nim_domain)
@@ -2055,7 +2060,10 @@ class GUI(QtGui.QMainWindow) :
             self.nim.set_userInfo( userName=userName, userID=userID )
             self.nimPrefs.set_userInfo( userName=userName, userID=userID )
             #  Update window :
-            self.update_elem('job')
+            try:
+                self.update_elem('job')
+            except:
+                pass
         return
 
     

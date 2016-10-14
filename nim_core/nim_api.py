@@ -166,7 +166,7 @@ def connect( method='get', sqlCmd=None, nimURL=None ) :
             if type(result)==type(list()) and len(result)==1 :
                 try :
                     error_msg = result[0]['error']
-                    P.error( error_msg )
+                    P.error( "API Error %s" % error_msg )
                     if(error_msg == 'API Key Not Found.') :
                         #Win.popup( title='NIM API Error', msg='NIM API Key Not Found.\n\nNIM Security is set to require the use of API Keys. \
                         #                                        Please contact your NIM Administrator to obtain a NIM API KEY.' )
@@ -428,12 +428,16 @@ def get_jobs( userID=None, folders=False ) :
     jobDict={}
     #  Build dictionary of jobs :
     _jobs=get( {'q': 'getUserJobs', 'u': userID} )
-    for job in _jobs :
-        if not folders :
-            jobDict[str(job['number'])+'_'+str(job['jobname'])]=str(job['ID'])
-        else :
-            jobDict[str(job['number'])+'_'+str(job['folder'])]=str(job['ID'])
-    return jobDict
+    try:
+        for job in _jobs :
+            if not folders :
+                jobDict[str(job['number'])+'_'+str(job['jobname'])]=str(job['ID'])
+            else :
+                jobDict[str(job['number'])+'_'+str(job['folder'])]=str(job['ID'])
+        return jobDict
+    except :
+        P.error("Failed to get jobs")
+        return False
 
 def get_servers( ID=None ) :
     'Retrieves servers associated with a specified job ID - does not match phpAPI'

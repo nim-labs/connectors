@@ -50,7 +50,8 @@ def popup( title='', msg='', type='ok', defaultInput='', pyside=False, _list=[],
                     userInput=None
         except :
             P.error( 'Sorry, problem loading PySide/PyQt4' )
-            
+    
+    # Cinesync Window :        
     elif app == 'Cinesync':
         try:
             from PySide import QtCore, QtGui
@@ -232,12 +233,20 @@ def setApiKey( url='' ) :
     api_url = connect_info['nim_apiURL']
     api_user = connect_info['nim_apiUser']
 
-    api_key=popup( title='Enter NIM API Key', msg='Failed to validate user.\n\n \
-                    NIM Security is set to require the use of API Keys.\n \
-                    Please obtain a valid NIM API KEY from your NIM Administrator.\n\n \
-                    Enter the NIM API Key for your user:', type='input', defaultInput='' )
+    app=F.get_app()
+
+    if app == 'C4D' :
+        api_key=popup( title='Enter NIM API Key', msg='Enter the NIM API Key for your user:', type='input', defaultInput='' )
+    else :
+        api_key=popup( title='Enter NIM API Key', msg='Failed to validate user.\n\n \
+                        NIM Security is set to require the use of API Keys.\n \
+                        Please obtain a valid NIM API KEY from your NIM Administrator.\n\n \
+                        Enter the NIM API Key for your user:', type='input', defaultInput='' )
 
     if api_key is None :
+        return False
+    elif api_key == 'Cancel' :
+        print "cancel pressed"
         return False
     else :
         #  Get user ID :
@@ -258,10 +267,18 @@ def setApiKey( url='' ) :
                         try :
                             keyFile = os.path.normpath( os.path.join( Prefs.get_home(), 'nim.key' ) )
                             print keyFile
+                            ''' #Python 2.7
                             with open(keyFile, 'r+') as f:
                                 f.seek(0)
                                 f.write(api_key)
                                 f.truncate()
+                            '''
+                            # Using Python2.6 for compatibiity
+                            keyFO = open(keyFile, "w")
+                            keyFO.seek(0)
+                            keyFO.write(api_key)
+                            keyFO.truncate()
+                            keyFO.close()
                             popup( title='NIM API Key Set', msg='The NIM API Key has been set.\n\nPlease retry your last command.')
                             return True
                         except :

@@ -356,8 +356,8 @@ class nim_fileUI( gui.GeDialog ) :
         
         #  Populate UI Elements :
         for elem in self.nim.elements :
-            self.populate_elem( elem=elem )
-        
+            response = self.populate_elem( elem=elem )
+
         #  Lock Elements :
         if self.mode.lower() in ['pub', 'publish', 'verup', 'ver', 'version'] :
             for elem in self.nim.elements :
@@ -386,9 +386,6 @@ class nim_fileUI( gui.GeDialog ) :
         
         #  Update drop-down menu elements :
         if elem in self.nim.elements :
-            
-            #print 'NIM Dictionary before updating.'
-            #self.nim.Print()
             
             #  Clear variables :
             self.nim.clear(elem)
@@ -476,7 +473,7 @@ class nim_fileUI( gui.GeDialog ) :
             self.FreeChildren( self.nim.inputIDs["server"] )
             jobServers=Api.get_servers( self.nim.ID('job') )
             self.nim.set_server( Dict=jobServers )
-            P.info("NIM jobServers: %s" % jobServers)
+            #P.info("NIM jobServers: %s" % jobServers)
             serverOptNum=self.serverChildIndex
             if jobServers and len(jobServers) :
                 for js in jobServers :
@@ -620,8 +617,11 @@ class nim_fileUI( gui.GeDialog ) :
         #  Initialize dictionary and fields :
         self.nim.clear( elem )
         self.FreeChildren( self.nim.inputIDs[elem] )
-        self.nim.set_dict( elem )
-        
+        response = self.nim.set_dict( elem )
+        if response == False:
+            print 'Failed to populate elements.'
+            self.Close()
+
         #  Clear fields :
         if not self.nim.Dict( elem ) or not len(self.nim.Dict( elem )) :
             P.debug( 'No %s dictionary!' % elem )
@@ -748,7 +748,7 @@ class nim_fileUI( gui.GeDialog ) :
                             if elem=='task' :
                                 self.nim.set_taskFolder( folder=item['folder'] )
                                 if self.nim.name('task')=='Asset Master' : 
-                                    print 'hallelujah!'
+                                    print 'Asset Master Found'
                     #  Shows :
                     elif 'showname' in item :
                         self.AddChild( self.nim.inputIDs[elem], itemNum, item['showname'] )

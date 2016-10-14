@@ -32,13 +32,12 @@ def debug( msg='' ) :
     '''
     debug = False
     #  Print :
-    if debug=='True' and msg :
+    if debug =='True' and msg :
         tokens=msg.rstrip().split( '\n' )
         for toke in tokens :
             print 'NIM.D-bug ~> %s' % toke
         if msg[-1:]=='\n' :
             print 'NIM.D-bug ~>'
-    
     return
 
 
