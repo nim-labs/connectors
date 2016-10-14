@@ -18,6 +18,7 @@ import glob, os, platform, re, sys, traceback, urllib, urllib2, time
 try:
     import ssl
 except :
+    print "NIM: Failed to load SSL - UI"
     pass
 
 #  NIM Imports :
@@ -37,7 +38,7 @@ except ImportError :
     except ImportError :
         try : from PyQt4 import QtCore, QtGui
         except ImportError : 
-            print "Failed to UI Modules: UI"
+            print "NIM: Failed to UI Modules - UI"
 
 #  Variables :
 WIN=''

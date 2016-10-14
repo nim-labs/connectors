@@ -21,7 +21,7 @@ except ImportError :
         from PySide import QtCore, QtGui
         qt_import=True
     except ImportError : 
-        print "Failed to load UI Modules: Tools"
+        print "NIM: Failed to load UI Modules - Tools"
 
 import os
 import nim_print

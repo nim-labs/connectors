@@ -19,8 +19,9 @@ import urllib, urllib2
 try :
     import ssl
 except :
+    print "NIM: Failed to load SSL - API"
     pass
-    
+
 import mimetools, mimetypes
 import email.generator as email_gen
 import cStringIO

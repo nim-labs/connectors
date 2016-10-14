@@ -32,7 +32,7 @@ except ImportError :
         try : 
             from PyQt4 import QtCore, QtGui
         except ImportError : 
-            print "Failed to load UI Modules: Maya"
+            print "NIM: Failed to load UI Modules - Maya"
 
 #  Variables :
 version='v2.5.0'

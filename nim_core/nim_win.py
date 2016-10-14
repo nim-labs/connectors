@@ -27,7 +27,7 @@ except ImportError :
     except ImportError :
         try : from PyQt4 import QtCore, QtGui
         except ImportError : 
-            print "Failed to load UI Modules: Win"
+            print "NIM: Failed to load UI Modules - Win"
 
 
 
