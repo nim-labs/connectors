@@ -1,9 +1,9 @@
 /* *****************************************************************************
 #
 # Filename: Photoshop/NIM.jsx
-# Version:  v2.0.0.160511
+# Version:  v0.7.3.150625
 #
-# Copyright (c) 2016 NIM Labs LLC
+# Copyright (c) 2015 NIM Labs LLC
 # All rights reserved.
 #
 # Use of this software is subject to the terms of the NIM Labs license
@@ -246,8 +246,6 @@ function getRemoteScripts(scriptsPath, thisObj) {
 		missingScripts.push(nimMainPath);
 	if (nimPanelContents === false)
 		missingScripts.push(nimPanelPath);
-	if (nimMenuContents === false)
-		missingScripts.push(nimMenuPath);
 
 	missingScriptsLength = missingScripts.length;
 	if (missingScriptsLength) {
@@ -271,10 +269,37 @@ function getRemoteScripts(scriptsPath, thisObj) {
 			prefsDialog(nimPrefs, thisObj);
 			return false;
 		}
-		if (typeof buildPanelUI != 'undefined')
-			eval(nimMenuContents);
-		if (typeof buildMenuUI != 'undefined')
-			return buildMenuUI(thisObj);
+		if (typeof buildPanelUI != 'undefined') {
+
+
+// ===================================================================================================================
+
+			try { activeDocument; }
+			catch(e) {
+				alert('No file open! Please open a file before attempting to publish.');
+				return;
+			}
+			var metadata = getNimMetadata(),
+				comment;
+			if (!metadata.classID) {
+				alert("Error: This file doesn't have any NIM metadata; please save it through the NIM menu before attempting to publish.");
+				return;
+			}
+
+			/*
+			commentDialog(function(comment, addElement) {
+				if (comment === false) return;
+				if (!saveFile(metadata.classID, metadata.className, metadata.serverID, metadata.serverPath, metadata.taskID, metadata.taskFolder, metadata.basename, comment, true, addElement))
+					alert('Error: Publish failed!');
+			});
+			*/
+
+			return buildPanelUI(userID, 'publish', metadata);
+
+// ===================================================================================================================
+
+
+		}
 		else {
 			alert('Error: Script loading failed!');
 			return false;
@@ -316,3 +341,4 @@ if (testSocket) {
 		}
 	}
 }
+
