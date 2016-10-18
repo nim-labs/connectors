@@ -1,7 +1,7 @@
 /* *****************************************************************************
 #
 # Filename: Photoshop/NIM.jsx
-# Version:  v0.7.3.150625
+# Version:  v2.5.0.161015
 #
 # Copyright (c) 2015 NIM Labs LLC
 # All rights reserved.
@@ -11,10 +11,12 @@
 # otherwise accompanies this software in either electronic or hard copy form.
 # *************************************************************************** */
 
+
 // Shorter way of calling app.stringIDToTypeID
 function s2t(stringID) {
   return app.stringIDToTypeID(stringID);
 }
+
 
 // Reads a file, returns its contents or false if it doesn't exist
 function readFile(path) {
@@ -29,21 +31,6 @@ function readFile(path) {
 	else return false;
 }
 
-// Given a full URL (from NIM prefs or user input), split it into the nimAPIHost and nimAPIURL (excluding host);
-// return object containing 'host' and 'url'
-function splitAPIHostAndURL(nimPrefsAPI) {
-	var host, url;
-	url = nimPrefsAPI.replace(/^\s*https?:\/\//, '').split('/');
-	host = url[0];
-	url.shift();
-	url = '/' + url.join('/');
-	while (url.slice(-1) == '?')
-		url = url.slice(0, -1);
-	return {
-		host: host,
-		url: url
-	};
-}
 
 // Gives user a dialogue box to enter a scripts path and API URL; verifies that both are valid or warns user that NIM won't work;
 // pass it 'nimPrefs', an object containing 'error' (error message for user) and optionally either 'scriptsPath' or 'API';
@@ -208,8 +195,28 @@ function createNimPrefsFile() {
 }
 
 
+function getKeyFromPrefs() {
+	var nimKeyFile = new File(nimKeyPath),
+		nimKey = '',
+		foundScripts = false,
+		foundAPI = false;
+
+	if (!nimKeyFile.exists)
+		return '';
+
+	nimKeyFile.open('r');
+	nimKey = nimKeyFile.readln();    
+	nimKeyFile.close();
+
+	if (!nimKey)
+		nimKey = '';
+
+	return nimKey;
+}
+
+
 // Returns a function that takes one argument (thisObj) and generates the NIM menu / contains all NIM functions
-function getRemoteScripts(scriptsPath, thisObj) {
+function getRemoteScripts(scriptsPath) {
 	var nimMainPath = 'nimMain.jsx',
 		nimPanelPath = 'nimPanel.jsx',
 		nimMenuPath = 'nimMenu.jsx',
@@ -262,7 +269,9 @@ function getRemoteScripts(scriptsPath, thisObj) {
 		eval(nimMainContents);
 		if (typeof nimAPI != 'undefined')
 			apiTest = nimAPI({ q: 'testAPI' });
-		if (typeof apiTest == 'object' && apiTest.nim == 'API')
+		if (apiTest == 'keyError')
+			return false;  // If we have an error with API key, error will be triggered from nimAPI function
+		if (typeof apiTest == 'object' && apiTest.length && typeof apiTest[0] == 'object' && apiTest[0].error == '')
 			eval(nimPanelContents);
 		else {
 			nimPrefs.error = "The NIM API was not found at given URL; please provide a valid URL to NIM's API.";
@@ -318,18 +327,25 @@ catch (e) {
 if (testSocket) {
 	var nimPrefsFolderPath = '~/.nim/',
 		nimPrefsPath = nimPrefsFolderPath + 'prefs.nim',
+		nimKeyPath = nimPrefsFolderPath + 'nim.key',
 		nimPrefs = getScriptsPathAndAPIFromPrefs(),
+		nimKey = getKeyFromPrefs(),
 		remoteScripts,
-		nimAPIHost,
+		nimScriptsPath,
 		nimAPIURL,
+		thisObj = this;
+
 		menuClosed = false;
 
 	if (nimPrefs.error)
 		prefsDialog(nimPrefs, this);
 	else {
-		var nimAPIHostAndURL = splitAPIHostAndURL(nimPrefs.API);
-		nimAPIHost = nimAPIHostAndURL.host;
-		nimAPIURL = nimAPIHostAndURL.url;
+		nimScriptsPath = nimPrefs.scriptsPath;
+		nimAPIURL = nimPrefs.API;
+
+		// Remove question mark(s) from end of API URL
+		while (nimAPIURL.slice(-1) == '?')
+			nimAPIURL = nimAPIURL.slice(0, -1);
 
 		remoteScripts = getRemoteScripts(nimPrefs.scriptsPath, this);
 
