@@ -20,7 +20,9 @@ HTTPPost sMethod, sUrl, sRequest, tempFilePath, username, apiKey
 
 Function HTTPPost(sMethod, sUrl, sRequest, tempFilePath, username, apiKey)
 
-    set oHTTP = CreateObject("Microsoft.XMLHTTP")
+    set oHTTP = CreateObject("MSXML2.ServerXMLHTTP.6.0")
+
+    oHTTP.SetOption 2, oHTTP.GetOption(2) - SXH_SERVER_CERT_IGNORE_UNKNOWN_CA
 
     If sMethod = "POST" Then
         oHTTP.open "POST", sUrl,false
@@ -30,8 +32,14 @@ Function HTTPPost(sMethod, sUrl, sRequest, tempFilePath, username, apiKey)
 
     oHTTP.setRequestHeader "Content-Type", "text/plain"
     oHTTP.setRequestHeader "Content-Length", Len(sRequest)
-    oHTTP.setRequestHeader "X-NIM-API-USER", username
-    oHTTP.setRequestHeader "X-NIM-API-KEY", apiKey
+
+    If VarType(username) = 8 Then
+        oHTTP.setRequestHeader "X-NIM-API-USER", username
+    End If
+
+    If VarType(apiKey) = 8 Then
+        oHTTP.setRequestHeader "X-NIM-API-KEY", apiKey
+    End If
 
     If sMethod = "POST" Then
         oHTTP.send sRequest
