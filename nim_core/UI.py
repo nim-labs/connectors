@@ -1505,11 +1505,23 @@ class GUI(QtGui.QMainWindow) :
         index=0
         #  Get Server Dictionary :
         serverDict=Api.get_servers( self.nim.ID('job') )
-        self.nim.set_server( Dict=serverDict )
+        
+        if serverDict :
+            if 'success' in serverDict :
+                if serverDict['success'] == 'false' :
+                    P.warning(serverDict['error'])
+                    self.nim.Input('server').clear()
+                    self.nim.Input('server').addItem('None')
+                    self.nim.Input('server').setEnabled( False )
+                    self.nim.set_server( name='', path='', Dict={}, ID='' )
+                    return
         
         #  Populate the combo box :
         if serverDict and len(serverDict) :
             P.debug( '   Job Servers = %s' % serverDict )
+
+            self.nim.set_server( Dict=serverDict )
+            
             #  Populate drop box :
             self.nim.Input('server').setEnabled( True )
             self.nim.Input('server').clear()
