@@ -285,12 +285,14 @@ function getRemoteScripts(scriptsPath) {
 
 			try { activeDocument; }
 			catch(e) {
+				if (loadingPanel) loadingPanel.close();
 				alert('No file open! Please open a file before attempting to version up.');
 				return;
 			}
 			var metadata = getNimMetadata(),
 				comment;
 			if (!metadata.classID) {
+				if (loadingPanel) loadingPanel.close();
 				alert("Error: This file doesn't have any NIM metadata; please save it through the NIM menu before attempting to version up.");
 				return;
 			}

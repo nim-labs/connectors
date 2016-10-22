@@ -13,13 +13,16 @@
 
 
 // Declare global variables
-var os = getOperatingSystem(),
+var loadingPanel = new Window('palette', 'Loading...', undefined),
+	loadingLabel = loadingPanel.add('statictext', undefined, 'Loading NIM Connector...'),
+	os = getOperatingSystem(),
 	userID,
 	username,
 	ranGetUserID = false,
 	winUserPath = '';
 
 if (os == 'win') {
+	loadingPanel.show();
 	try { winUserPath = $.getenv('userprofile'); }
 	catch (e) { winUserPath = ''; }
 }
@@ -114,21 +117,47 @@ function webRequest(method, endpoint, query) {
 
 			// Create apiQuery VBScript to run our curl VBScript instead of using app.system;
 			// app.system flashes a command prompt (once for each query, which can occur frequently)
+
 			var apiQueryFile = new File(winTempFolderPath + 'apiQuery.vbs'),
-				winTempFile = new File(winTempFilePath);
+				winTempFile = new File(winTempFilePath),
+				failedToSeeFile = false;
+
 			apiQueryFile.open('w');
 			apiQueryFile.writeln('Set WshShell = CreateObject("WScript.Shell")');
 			apiQueryFile.writeln('WshShell.Run "' + curlCmd + '", 0, True');
 			apiQueryFile.close();
 			apiQueryFile.execute();
-			$.sleep(50);
-			while (!winTempFile.exists) {
-				//alert(query);
-				$.sleep(100);
+			$.sleep(75);  // Wait 75 milliseconds
+
+			if (!winTempFile.exists) {
+				$.sleep(75);  // If file hasn't been written yet, wait 75 more
+				var x = 0;
+				while (!winTempFile.exists) {
+					//alert(query);
+					x++;
+					if (x <= 5) $.sleep(100);  // If it still hasn't been written, wait 100 (1/10 of a second) before next try
+					else if (x <= 10) $.sleep(250);  // After 5 tries, wait 250 (1/4 of a second)
+					else if (x <= 40) $.sleep(500);  // After 5 more tries, wait 500 (half a second)
+					else {
+						failedToSeeFile = true;
+						break;  // After 30 more tries (15 more seconds), give up
+					}
+				}
 			}
-			$.sleep(10);
-			response = readFile(winTempFilePath);
-			apiQueryFile.remove();
+			
+			if (!failedToSeeFile) {
+				response = readFile(winTempFilePath);  // If we didn't fail to see the file, read it
+
+				var x = 0;
+				while (!response) {
+					$.sleep(50);  // If the read fails, try again after 50 ms
+					response = readFile(winTempFilePath);
+					x++;
+					if (x > 20) break;  // After 20 of those (1 second), give up
+				}
+
+				apiQueryFile.remove();
+			}
 		}
 		else {
 			app.system(curlCmd);
@@ -269,13 +298,15 @@ function keyDialog(messageTitle, message) {
 		createKeyDialog.close();
 	}
 
+	if (loadingPanel) loadingPanel.close();
 	createKeyDialog.show();
 }
 
 
 // Looks first in preferences for userID; if not found, compares username (taken from "USER" environment variable)
-// to all usernames and full_names in database; if match, save userID to prefs and return it; if not found, return false
-function getUserID() {
+// to all usernames and full_names in database; if match, save userID to prefs and return it; if not found, return false;
+// passes 'buttonsToDisable' along to 'changeUserDialog' if no user is selected
+function getUserID(buttonsToDisable) {
 	var prefUser = getPref('NIM', 'User'),
 		envUser;
 
@@ -340,12 +371,13 @@ function commentDialog(callback) {
 		commentDialog.close();
 	}
 
+	if (loadingPanel) loadingPanel.close();
 	commentDialog.show();
 }
 
 // Prompts the user to select a username from a dropdown of all users;
 // if passed an array of buttons, will disable them if no user has been selected
-function changeUserDialog() {
+function changeUserDialog(buttonsToDisable) {
 	if (!buttonsToDisable) buttonsToDisable = [];
 
 	function noUserSelected() {
@@ -393,6 +425,7 @@ function changeUserDialog() {
 		changeUserDialog.close();
 	}
 
+	if (loadingPanel) loadingPanel.close();
 	changeUserDialog.show();
 }
 
@@ -439,8 +472,15 @@ function getNimMetadata() {
 	}
 	// If not, look in NIM Photoshop metadata file
 	else {
-		var thisNimFolderPath = activeDocument.path.absoluteURI + '/.nim/',
-			photoshopFilePath = thisNimFolderPath + 'photoshop-metadata.nim',
+		try {
+			// This line will fail if the file hasn't been saved yet (activeDocument.path won't exist)
+			var thisNimFolderPath = activeDocument.path.absoluteURI + '/.nim/';
+		}
+		catch(e) {
+			return false;
+		}
+
+		var photoshopFilePath = thisNimFolderPath + 'photoshop-metadata.nim',
 			thisNimFolder = new Folder(thisNimFolderPath),
 			photoshopFile = new File(photoshopFilePath),
 			fileString = activeDocument.name + ':',
@@ -1022,7 +1062,6 @@ function saveFile(classID, className, serverID, serverPath, taskID, taskName, ta
 	return true;
 }
 
-os = getOperatingSystem();
 var foundUserID = getUserID();
 if (foundUserID)
 	userID = foundUserID;

@@ -1716,6 +1716,7 @@ function buildPanelUI(userID, action, metadata) {
 		basename = metadata.basename;
 	}
 
+	if (loadingPanel) loadingPanel.close();
 	nimPanel.show();
 	return nimPanel;
 }

@@ -285,6 +285,7 @@ function getRemoteScripts(scriptsPath) {
 
 			try { activeDocument; }
 			catch(e) {
+				if (loadingPanel) loadingPanel.close();
 				alert('No file open! Please open a file before attempting to save as.');
 				return;
 			}
