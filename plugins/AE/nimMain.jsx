@@ -13,7 +13,16 @@
 
 
 // Declare global variables
-var os, userID, username, ranGetUserID = false;
+var os = getOperatingSystem(),
+	userID,
+	username,
+	ranGetUserID = false,
+	winUserPath = '';
+
+if (os == 'win') {
+	try { winUserPath = $.getenv('userprofile'); }
+	catch (e) { winUserPath = ''; }
+}
 
 
 // Adds JSON parsing support; https://github.com/douglascrockford/JSON-js/blob/master/json_parse.js
@@ -33,35 +42,29 @@ var json_parse=(function(){var d;var b;var a={'"':'"',"\\":"\\","/":"/",b:"\b",f
 function webRequest(method, endpoint, query) {
 	var response = null,
 		tempFolderPath = '~/.nim/tmp/',
-		winTempFolderPath = '~\\.nim\\tmp\\',
-		wincurl = '..\\..\\nim_core\\curl.vbs',  // The path to the .vbs file
+		winTempFolderPath = winUserPath + '\\.nim\\tmp\\',
+		wincurl = nimScriptsPath + '\\nim_core\\curl.vbs',  // The path to the .vbs file
 		curlCmd = '',
-		thisUser = username;
+		userHeader,
+		keyHeader;
 
 	// If no username is set, check apiKeyRequired; if false, don't worry about lack of username
 	if (!username) {
 		// If "testAPI" query, run getUserID function
 		// (which also checks the USER environment variable and tries to find a matching user in NIM)
-		if (query == 'q=testAPI') {
+		if (query == 'q=testAPI')
 			userID = getUserID();
-			thisUser = username;
-		}
 		// If "getUserID" query, ignore username
-		else if (query.indexOf('q=getUserID') != -1) {
+		else if (query.indexOf('q=getUserID') != -1)
 			username = '';
-			thisUser = "''";
-		}
 		else if (apiKeyRequired) {
 			// Get username from prefs
 			username = getPref('NIM', 'User');
 			if (!username)
 				changeUserDialog();
-			thisUser = username;
 		}
-		else {
+		else
 			username = '';
-			thisUser = "''";
-		}
 	}
 
 	try {
@@ -74,19 +77,35 @@ function webRequest(method, endpoint, query) {
 		if (!nimTempFolder.exists)
 			nimTempFolder.create();
 
-		if (getOperatingSystem() == "win") {
-			curlCmd = 'cscript "' + wincurl + '" /Method:' + method + ' /URL:' + endpoint + ' /Query:' + query + ' /TempFilePath:' + winTempFilePath + ' /Username:' + thisUser + ' /ApiKey:' + nimKey + ' //nologo';
+		if (os == 'win') {
+			if (username) userHeader = '/Username:' + username + ' ';
+			else userHeader = '';
+			if (nimKey) keyHeader = '/ApiKey:' + nimKey + ' ';
+			else keyHeader = '';
+
+			curlCmd = 'cscript "' + wincurl + '" /Method:' + method + ' /URL:' + endpoint + ' /Query:' + query + ' /TempFilePath:' + winTempFilePath + ' ' + userHeader + keyHeader + '//nologo';
 		}
 		else {
+			if (username) userHeader = '--header "X-NIM-API-USER: ' + username + '" ';
+			else userHeader = '';
+			if (nimKey) keyHeader = '--header "X-NIM-API-KEY: ' + nimKey + '" ';
+			else keyHeader = '';
+
 			if (method === "POST") {
-				curlCmd = 'curl --silent --insecure --header "X-NIM-API-USER: ' + thisUser + '" --header "X-NIM-API-KEY: ' + nimKey + '" --data "' + query + '" ' + endpoint + ' > ' + tempFilePath;
+				curlCmd = 'curl --silent --insecure ' + userHeader + keyHeader + '--data "' + query + '" ' + endpoint + ' > ' + tempFilePath;
 			}
 			else if (method === "GET") {
-				curlCmd = 'curl --silent --get --insecure --header "X-NIM-API-USER: ' + thisUser + '" --header "X-NIM-API-KEY: ' + nimKey + '" --data "' + query + '" ' + endpoint + ' > ' + tempFilePath;
+				curlCmd = 'curl --silent --get --insecure ' + userHeader + keyHeader + '--data "' + query + '" ' + endpoint + ' > ' + tempFilePath;
 			}
 		}
+
 		system.callSystem(curlCmd);
-		response = readFile(tempFilePath);
+
+		if (os == 'win')
+			response = readFile(winTempFilePath);
+		else
+			response = readFile(tempFilePath);
+
 		tempFile.remove();
 	}
 	catch (err) {
