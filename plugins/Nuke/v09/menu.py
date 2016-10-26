@@ -55,7 +55,7 @@ try:
 
 		nimRootMenu.addSeparator()
 		nimSettingsMenu=nimRootMenu.addMenu("Settings")
-		nimSettingsMenu.addCommand( 'Change User', 'import nim_core.UI as UI; UI.GUI().update_user()' )
+		nimSettingsMenu.addCommand( 'Change User', 'import nim_core.nim_win as Win; Win.userInfo()' )
 		nimSettingsMenu.addCommand( 'Reload Scripts', 'import nim_core.nim_file as F; F.scripts_reload()' )
 except:
 	pass
