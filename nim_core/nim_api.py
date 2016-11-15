@@ -1516,12 +1516,11 @@ def get_taskDailies( taskID=None) :
     dailies=get( {'q': 'getTaskDailies', 'taskID': taskID} )
     return dailies
 
-def upload_dailies( jobID=0, taskID=0, renderKey='', path=None ) :
-    'Upload Dailies'
+def upload_dailies( taskID=0, renderKey='', path=None ) :
+    'Upload Dailies - 2 required fields: (taskID or renderKey) and path'
     params = {}
 
     params["q"] = "uploadMovie"
-    params["jobID"] = jobID
     params["taskID"] = taskID
     params["renderKey"] = renderKey
     if path is not None:
