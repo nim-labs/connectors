@@ -34,6 +34,7 @@ num_srch=re.compile( '[0-9]+' )
 
 def get_user() :
     'Retrieves the current user\'s username'
+    # TODO : Check if this function can be removed as redundant
     #  Get username :
     if os.getenv( 'USER' ) :
         _usr=os.getenv( 'USER' )
@@ -46,6 +47,7 @@ def get_user() :
 
 def get_app() :
     'Gets the application by attempting various import statements'
+    # TODO: Check if this function can be removed as redundant
     try :
         import maya.cmds as mc
         return 'Maya'

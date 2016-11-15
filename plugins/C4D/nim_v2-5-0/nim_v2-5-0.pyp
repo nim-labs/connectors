@@ -236,7 +236,8 @@ class nim_changeUser_cmd( plugins.CommandData ) :
     def Execute(self, doc) :
         'Selects a new NIM user for the connector.'
         P.info('Selecting NIM User...')
-        userName = Win.userInfo()
+        userInfo = Win.userInfo()
+        userName = userInfo[0]
         P.info('User = "%s"' % userName)
         #  Update Preferences :
         Prefs.update( attr='NIM_User', value=userName )

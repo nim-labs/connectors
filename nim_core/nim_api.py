@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: nim_api.py
-# Version:  v2.5.0.160921
+# Version:  v2.5.1.161111
 #
 # Copyright (c) 2016 NIM Labs LLC
 # All rights reserved.
@@ -79,7 +79,7 @@ def get_apiKey() :
         except Exception, e :
             P.error( 'Unable to read api key.' )
     else :
-        P.error( 'API Key not found.' )
+        P.warning( 'API Key not found.' )
 
     return key
 
@@ -419,6 +419,7 @@ def get_user() :
 
 def get_userID( user='' ) :
     'Retrieves the current user\'s user ID'
+    print "get_userID: %s" % user
     if not user :
         user=get_user()
     try :
@@ -1495,11 +1496,42 @@ def upload_shotIcon( shotID=None, name='', img=None, nimURL=None ) :
     result = upload(params=params)
     return result
 
+def add_render( jobID=0, itemType='shot', taskID=0, fileID=0, \
+    renderKey='', renderName='', renderType='', renderComment='', \
+    outputDirs=None, outputFiles=None, elementTypeID=0, start_datetime=None, end_datetime=None, \
+    avgTime='', totalTime='', frame=0 ) :
+    'Add a render to a task'
+
+    sqlCmd = {'q': 'addRender', 'jobID': str(jobID), 'class': str(itemType), 'taskID': str(taskID), 'fileID': str(fileID), \
+                'renderKey':str(renderKey), 'renderName':str(renderName), 'renderType':str(renderType), 'renderComment':str(renderComment), \
+                'outputDirs':str(outputDirs), 'outputFiles':str(outputFiles), 'elementTypeID':str(elementTypeID), \
+                'start_datetime':str(start_datetime), 'end_datetime':str(end_datetime), \
+                'avgTime':str(avgTime), 'totalTime':str(totalTime), 'frame':str(frame) }
+    result = connect( method='get', sqlCmd=sqlCmd )
+    return result
+
 def get_taskDailies( taskID=None) :
     'Retrieves the dictionary of dailies for the specified taskID from the API'
     #tasks=get( {'q': 'getTaskTypes', 'type': 'artist'} )
     dailies=get( {'q': 'getTaskDailies', 'taskID': taskID} )
     return dailies
+
+def upload_dailies( jobID=0, taskID=0, renderKey='', path=None ) :
+    'Upload Dailies'
+    params = {}
+
+    params["q"] = "uploadMovie"
+    params["jobID"] = jobID
+    params["taskID"] = taskID
+    params["renderKey"] = renderKey
+    if path is not None:
+        path = os.path.normpath( path )
+        params["file"] = open(path,'rb')
+    else :
+        params["file"] = ''
+
+    result = upload(params=params)
+    return result
 
 def upload_dailiesNote( dailiesID=None, name='', img=None, note='', frame=0, time=-1, userID=None, nimURL=None ) :
     'Upload dailiesNote'

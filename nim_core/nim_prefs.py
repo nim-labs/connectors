@@ -51,8 +51,11 @@ def get_user() :
 
 def get_userInfo( url='' ) :
     'Retrieves the User ID to use for the window'
-    user=Api.get_user()
-    userID=Api.get( sqlCmd={ 'q': 'getUserID', 'u': user}, debug=False, nimURL=url )
+    #print "get_userInfo(%s)" % url
+    #user=Api.get_user()
+    #userID=Api.get( sqlCmd={ 'q': 'getUserID', 'u': user}, debug=False, nimURL=url )
+    user=None
+    userID=None
     '''
     users=Api.get( sqlCmd={'q': 'getUsers'}, debug=False, nimURL=url )
         
@@ -73,16 +76,25 @@ def get_userInfo( url='' ) :
             print 'User = "%s"' % user
     '''
     if not userID :
-        user = Win.userInfo()
-        if user :
+        userInfo = Win.userInfo(url=url, newUser=True)
+        if userInfo :
             #  Get user ID :
-            userID=Api.get( sqlCmd={ 'q': 'getUserID', 'u': user}, debug=False, nimURL=url )
-            if type(userID)==type(list()) and len(userID)==1 :
-                userID=userID[0]['ID']
-            P.info( 'User set to "%s" (ID #%s)' % (user, userID) )
-            return (user, userID)
+            print(userInfo)
+            user=userInfo[0]
+            userID=userInfo[1]
+
+            if not userID :
+                userResult=Api.get( sqlCmd={ 'q': 'getUserID', 'u': user}, debug=False, nimURL=url )
+
+                if type(userResult)==type(list()) and len(userResult)==1 :
+                    userID=userResult[0]['ID']
+                    return (user, userID)
+                else :
+                    return False
+            else :
+                return (user, userID)
     else :
-        return False
+        return (user, userID)
 
 
 def set_userInfo( ID=0, name='') :
@@ -281,7 +293,7 @@ def mk_default( recreatePrefs=False, notify_success=True ) :
     nimHome=mk_home()
     prefsFile=get_path()
     apps=F.get_apps()
-    nim_user=F.get_user()
+    #nim_user=F.get_user()
     url, userID=1, ''
     
     #  Create home dir, if necessary :
@@ -356,6 +368,7 @@ def mk_default( recreatePrefs=False, notify_success=True ) :
         #  Verify User :
         if search_for_user :
             P.info('Searching for NIM User')
+            '''
             nim_userID=Api.get( sqlCmd={ 'q': 'getUserID', 'u': nim_user}, debug=False, nimURL=nim_URL )
             if not nim_userID :
                 P.info("User ID not found")
@@ -363,7 +376,12 @@ def mk_default( recreatePrefs=False, notify_success=True ) :
                 if type(result)==type(tuple()) and len(result)==2 :
                     nim_user=result[0]
                     nim_userID=result[1]
-        
+            '''
+            #Force input of username at preference creation
+            result=get_userInfo( url=nim_URL )
+            if type(result)==type(tuple()) and len(result)==2 :
+                nim_user=result[0]
+                nim_userID=result[1]
 
         #  Notify of failure if there is information missing :
         if not nim_URL or not nim_user or not nim_userID :

@@ -186,7 +186,7 @@ def popup( title='', msg='', type='ok', defaultInput='', pyside=False, _list=[],
     return userInput
 
 
-def userInfo( url='', apiUser='' ) :
+def userInfo( url='', apiUser='', newUser=False ) :
     'Retrieves the User ID to use for the window'
     
     user, userID, userList='', '', []
@@ -202,16 +202,19 @@ def userInfo( url='', apiUser='' ) :
         #  Get user ID :
         if url :
             userID=Api.get( sqlCmd={ 'q': 'getUserID', 'u': user}, debug=False, nimURL=url )
+            print("userID: %s" % userID)
         else :
             userID=Api.get( sqlCmd={ 'q': 'getUserID', 'u': user}, debug=False )
+            print("userID: %s" % userID)
+
         if type(userID)==type(list()) and len(userID)==1 :
             try :
-                print userID
                 userID=userID[0]['ID']
                 P.info( 'User set to "%s" (ID #%s)' % (user, userID) )
-                #  Update Preferences :
-                Prefs.update( attr='NIM_User', value=user )
-                popup( title='NIM User Set', msg='The NIM user has been set to %s.' % user)
+                if newUser == False:
+                    #  Update Preferences :
+                    Prefs.update( attr='NIM_User', value=user )
+                    popup( title='NIM User Set', msg='The NIM user has been set to %s.' % user)
                 return (user, userID)
             except :
                 return False
@@ -219,7 +222,7 @@ def userInfo( url='', apiUser='' ) :
             P.error( 'Failed to find NIM user.' )
             response = popup( title='User Not Found', msg='The username entered is not a valid NIM user.\n\n Would you like to enter a new username?', type='okCancel')
             if(response=='OK'):
-                userInfo( url=url )
+                userInfo( url=url, newUser=newUser )
             else :
                 return False
 
