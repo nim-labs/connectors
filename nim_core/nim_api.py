@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: nim_api.py
-# Version:  v2.5.1.161111
+# Version:  v2.5.1.161115
 #
 # Copyright (c) 2016 NIM Labs LLC
 # All rights reserved.
@@ -1517,7 +1517,7 @@ def get_taskDailies( taskID=None) :
     return dailies
 
 def upload_dailies( taskID=0, renderKey='', path=None ) :
-    'Upload Dailies - 2 required fields: (taskID or renderKey) and path'
+    'Upload Dailies - 2 required fields: (taskID or renderKey) and path to movie'
     params = {}
 
     params["q"] = "uploadMovie"
