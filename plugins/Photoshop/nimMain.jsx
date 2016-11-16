@@ -186,8 +186,25 @@ function nimAPI(query) {
 		jsonData = null,
 		jsonObject = null;
 
+	function buildQueryString(value, key, subKey) {
+		if (!key) key = '';
+		if (!subKey) subKey = key;
+		var newKey = key;
+
+		if (typeof value == 'object') {
+			for (var newSubKey in value) {
+				newKey += '[' + newSubKey + ']' + buildQueryString( value[newSubKey], '', key + '[' + newSubKey + ']' ) + '&' + subKey;
+//alert(newKey);
+			}
+			newKey = newKey.slice(0, -(1 + subKey.length));
+		}
+		else newKey += '=' + encodeURIComponent(value);
+		
+		return newKey;
+	}
+
 	for (var parameter in query)
-		queryArray.push(parameter + '=' + encodeURIComponent(query[parameter]));
+		queryArray.push(buildQueryString(query[parameter], parameter));
 	if (queryArray.length)
 		queryString = queryArray.join('&');
 	else return false;
