@@ -1481,16 +1481,27 @@ def update_shot( shotID=None, duration=None) :
     'Update current shot information'
     return get( {'q': 'updateShot', 'shotID': str(shotID), 'duration': str(duration) } )
 
-def upload_shotIcon( shotID=None, name='', img=None, nimURL=None ) :
+def upload_shotIcon( shotID=None, img=None ) :
     'Upload shot icon'
     params = {}
-    action = "upload_shotIcon"
+    action = "uploadShotIcon"
     shot_str = str(shotID)
-    name = str(name)
 
     params["q"] = action.encode('ascii')
     params["shotID"] = shot_str.encode('ascii')
-    params["name"] = name.encode('ascii')
+    params["file"] = open(img,'rb')
+
+    result = upload(params=params)
+    return result
+
+def upload_assetIcon( assetID=None, img=None ) :
+    'Upload asset icon'
+    params = {}
+    action = "uploadAssetIcon"
+    asset_str = str(assetID)
+
+    params["q"] = action.encode('ascii')
+    params["assetID"] = asset_str.encode('ascii')
     params["file"] = open(img,'rb')
 
     result = upload(params=params)

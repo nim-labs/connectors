@@ -292,7 +292,7 @@ class NimHieroConnector():
 
 		trackItem_thumbnail.save( image_path, "PNG",-1)
 
-		apiInfo = nimAPI.upload_shotIcon( nim_shotID, img_name, image_path )
+		apiInfo = nimAPI.upload_shotIcon( nim_shotID, image_path )
 
 		#print apiInfo
 		if apiInfo == True:
