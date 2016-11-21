@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: Nuke/Python/Startup/nim_hiero_connector/nimShotProcessor.py
-# Version:  v2.0.0.160510
+# Version:  v2.5.10.161121
 #
 # *****************************************************************************
 
@@ -12,7 +12,12 @@ import hiero.core.FnExporterBase as FnExporterBase
 import itertools
 
 from hiero.core.VersionScanner import VersionScanner
-from hiero.exporters.FnExportKeywords import kFileBaseKeyword, kFileHeadKeyword, KeywordTooltips
+try:
+  # Try for < 10.0v5 compatibility
+  from hiero.exporters.FnExportKeywords import kFileBaseKeyword, kFileHeadKeyword, kFilePathKeyword, KeywordTooltips
+except:
+  from hiero.exporters.FnExportKeywords import kFileBaseKeyword, kFileHeadKeyword, KeywordTooltips
+
 from hiero.exporters.FnEffectHelpers import ensureEffectsNodesCreated
 
 #NIM
@@ -118,8 +123,6 @@ class NimShotProcessor(hiero.core.ProcessorBase):
     self._tags = []
 
     self.setPreset(preset)
-
-    #NIM VARS REMOVED
 
   def preset (self):
     return self._preset
@@ -717,6 +720,11 @@ class NimShotProcessorPreset(hiero.core.ProcessorPreset):
     resolver.addResolver("{filename}", "Filename of the media being processed", lambda keyword, task: task.fileName())
     resolver.addResolver(kFileBaseKeyword, KeywordTooltips[kFileBaseKeyword], lambda keyword, task: task.filebase())
     resolver.addResolver(kFileHeadKeyword, KeywordTooltips[kFileHeadKeyword], lambda keyword, task: task.filehead())
+    try:
+      #Try for <10.0v5 compatibility
+      resolver.addResolver(kFilePathKeyword, KeywordTooltips[kFilePathKeyword], lambda keyword, task: task.filepath())
+    except:
+      pass
     resolver.addResolver("{filepadding}", "Source Filename padding for formatting frame indices", lambda keyword, task: task.filepadding())
     resolver.addResolver("{fileext}", "Filename extension part of the media being processed", lambda keyword, task: task.fileext())
     resolver.addResolver("{clip}", "Name of the clip used in the shot being processed", lambda keyword, task: task.clipName())

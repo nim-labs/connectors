@@ -2,19 +2,27 @@
 #******************************************************************************
 #
 # Filename: Nuke/Python/Startup/nim_hiero_connector/nimProcessorUI.py
-# Version:  v2.0.0.160502
+# Version:  v2.5.10.161121
+#
+# Nuke 10.0v5
 #
 # *****************************************************************************
 
 import itertools
 import ui
 import os
+import errno
 import hiero.core
 import hiero.core.FnExporterBase as FnExporterBase
 
 from PySide import QtGui, QtCore
 from ui import IProcessorUI
 from hiero.core.FnCompSourceInfo import CompSourceInfo
+try:
+  # Try for < 10.0v5 compatibility
+  from hiero.core.util import filesystem
+except:
+  pass
 
 #NIM
 import os.path
@@ -45,13 +53,34 @@ def isCompItemMissingRenders(compItem):
       startFrame = int(compItem.sourceIn() + info.firstFrame)
       endFrame = int(compItem.sourceOut() + info.firstFrame)
 
-    # Iterate over the frame range and check if any files are missing
-    for frame in xrange(startFrame, endFrame):
-      framePath = info.writePath % frame
-      if not os.path.exists(framePath):
-        return True
+    try:
+      # Try for < 10.0v5 compatibility
+      # Get the script modified time. Note rounding, as comparisons to nearest
+      # second are fine for this purpose
+      scriptModTime = round(filesystem.stat(info.nkPath).st_mtime)
+
+      # Iterate over the frame range and check if any files are missing
+      for frame in xrange(startFrame, endFrame):
+        framePath = info.writePath % frame
+        try:
+          frameModTime = round(filesystem.stat(framePath).st_mtime)
+          if frameModTime < scriptModTime:
+            return True
+        except OSError, e:
+          # Check if file doesn't exist
+          if e.errno == errno.ENOENT:
+            return True
+          else:
+            raise
+    except:
+      # Iterate over the frame range and check if any files are missing
+      for frame in xrange(startFrame, endFrame):
+        framePath = info.writePath % frame
+        if not os.path.exists(framePath):
+          return True
   except:
-    pass
+    # Catch all: log, and false will be returned
+    hiero.core.log.exception("isCompItemMissingRenders unexpected error")
 
   return False
 
@@ -350,7 +379,6 @@ class NimProcessorUIBase(IProcessorUI):
       editMode = IProcessorUI.ReadOnly
 
     self._editMode = editMode
-
 
     '''
     #######################################################
@@ -1030,3 +1058,4 @@ class NimProcessorUIBase(IProcessorUI):
   # END NIM FUNCTIONS
   #######################################################
   '''
+
