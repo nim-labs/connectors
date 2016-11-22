@@ -1492,6 +1492,22 @@ def can_bringOnline( item='shot', jobID=0, assetID=0, showID=0, shotID=0 ) :
     result = connect( method='get', params=params )
     return result
 
+def bring_online( item='shot', assetID=0, shotID=0 ) :
+    'Brings assets and shots online creating folders from project structure'
+    'Item types can be asset or shot'
+    '   -if asset, assetID must be passed'
+    '   -if shot, shotID must be passed'
+
+    params = {}
+    params["q"] = 'bringOnline'
+    params["type"] = str(item)
+    if assetID > 0 :
+        params["assetID"] = str(assetID)
+    if shotID > 0 :
+        params["shotID"] = str(shotID)
+    result = connect( method='get', params=params )
+    return result
+
 def add_shot( showID=None, shotName=None, shotDuration=None ) :
     'Adds a shot to a show and returns the new ID'
     return get( {'q': 'addShot', 'showID': str(showID), 'name': str(shotName), 'duration': str(shotDuration) } )

@@ -483,6 +483,16 @@ class NimShotProcessor(hiero.core.ProcessorBase):
               if success == False:
                 print 'NIM: Failed to upload icon for trackitem %s' % name
 
+        ''' BRING SHOT ONLINE AND CREATE PROJECT STRUCTURE FOLDERS '''
+        bringOnline_result = nimAPI.bring_online( item='shot', shotID=nim_shotID )
+        if bringOnline_result['success'] == 'false':
+          print 'NIM: Failed to bring shot online'
+          print 'NIM: %s' % bringOnline_result['error']
+        elif bringOnline_result['success'] == 'true':
+          print 'NIM: Shot brought online %s' % name
+        else :
+          print 'NIM: bringOnline returned and invalid status'
+
         ''' GET UPDATED NIM TAG AND COPY TO CLONE '''
         nim_tag = nimConnect.getNimTag(trackitem)
         if nim_tag != False:
