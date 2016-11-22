@@ -31,6 +31,7 @@ import nim_core.UI as nimUI
 import nim_core.nim_api as nimAPI
 import nim_core.nim_prefs as nimPrefs
 import nim_core.nim_file as nimFile
+import nim_core.nim_win as nimWin
 import nim_core.nim as nim
 
 import nimHieroConnector
@@ -348,6 +349,52 @@ class NimShotProcessor(hiero.core.ProcessorBase):
         for item in trackItemsToRemove:
           trackCopy.removeItem(item)
 
+    ''' ****************** NIM START CHECK SHOTS FOR VBPS ****************** '''
+    # Iterate through track items and find NIM associations
+    # Check for any shots that can not be brought online due to a variable based project structure
+
+    print 'NIM: Checking for variable based project structure items'
+    is_vbps = 0
+    is_vbps = nimAPI.can_bringOnline(item='shot',showID=nimHieroConnector.g_nim_showID)
+    if is_vbps == 0 :
+      # The show uses project variables so check the shots  
+      for trackitem, trackitemCopy in exportTrackItems:
+        if trackitem in ignoredTrackItems:
+         continue
+
+        #Test for video track
+        exportTrackItem = False
+        trackItem_mediaType = trackitem.mediaType()
+        if trackItem_mediaType == hiero.core.TrackItem.MediaType.kVideo:
+          print "Processing Video TrackItem"
+          exportTrackItem = True
+
+        #SKIP IF NOT VIDEO TRACK ITEM
+        if exportTrackItem:
+          nim_shotID = None
+
+          nimConnect = nimHieroConnector.NimHieroConnector()
+          nim_tag = nimConnect.getNimTag(trackitem)
+          if nim_tag != False:
+            #print "NIM: Tag Found"
+            nim_shotID = nim_tag.metadata().value("tag.shotID")
+            is_vbps = nimAPI.can_bringOnline(item='shot',shotID=nim_shotID)
+            if is_vbps == 0 :
+              # If any shot requires variable break
+              break
+
+
+    if is_vbps == 0 :
+      message = 'NIM Warning:\n\n'
+      message += 'The NIM job selected uses a variable based project structure which requires '
+      message += 'specific fields on each shot to be set prior to being brought online. \n\n'
+      message += 'Shots can be made using the "Update Selected Shots in NIM" context menu in the timeline. '
+      message += 'After making shots go to the NIM Job\'s Production/Config/Offline tab to resolve any required fields.'
+      nimWin.popup( title='NIM Error', msg=message)
+      return False
+
+
+    ''' ****************** NIM END CHECK SHOTS FOR VBPS ****************** '''
 
     allTasks = []
 

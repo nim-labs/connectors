@@ -232,6 +232,28 @@ class NimHieroConnector():
 
 				if shotInfo['success']:
 					print "NIM: Updated corresponding shot in NIM"
+
+					''' GET UPDATED PATHS '''
+					nim_shotPath = nim_tag.metadata().value("tag.shotPath")
+					nim_platesPath = nim_tag.metadata().value("tag.platesPath")
+					nim_renderPath = nim_tag.metadata().value("tag.renderPath")
+					nim_compPath = nim_tag.metadata().value("tag.compPath")
+					
+					nim_shotPaths = nimAPI.get_paths('shot', nim_shotID)
+					if nim_shotPaths:
+						if len(nim_shotPaths)>0:
+							print "NIM: Shot Paths"
+							print nim_shotPaths
+							nim_shotPath = nim_shotPaths['root']
+							nim_platesPath = nim_shotPaths['plates']
+							nim_renderPath = nim_shotPaths['renders']
+							nim_compPath = nim_shotPaths['comps']
+							
+							print '		Updating NIM Paths for shot %s' % trackItem.name()
+							nim_tag.metadata().setValue("tag.shotPath" , nim_shotPath)
+							nim_tag.metadata().setValue("tag.platesPath" , nim_platesPath)
+							nim_tag.metadata().setValue("tag.renderPath" , nim_renderPath)
+							nim_tag.metadata().setValue("tag.compPath" , nim_compPath)
 					return True
 				else:
 					print "NIM: Failed to update shot details"

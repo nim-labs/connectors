@@ -120,18 +120,18 @@ def testAPI(nimURL=None, nim_apiUser='', nim_apiKey='') :
 #  DEPRECATED in 2.5 in favor of connect()
 def get( sqlCmd=None, debug=True, nimURL=None ) :
     result=False
-    result = connect( 'get', sqlCmd=sqlCmd, nimURL=nimURL )
+    result = connect( method='get', params=sqlCmd, nimURL=nimURL )
     return result
 
 #  Basic API query command :
 #  DEPRECATED in 2.5 in favor of connect()
 def post( sqlCmd=None, debug=True, nimURL=None ) :
     result=False
-    result = connect( 'post', sqlCmd=sqlCmd, nimURL=nimURL )
+    result = connect( method='post', params=sqlCmd, nimURL=nimURL )
     return result
 
 
-def connect( method='get', sqlCmd=None, nimURL=None ) :
+def connect( method='get', params=None, nimURL=None ) :
     'Querys MySQL server and returns decoded json array'
     result=None
     
@@ -146,12 +146,12 @@ def connect( method='get', sqlCmd=None, nimURL=None ) :
         nim_apiUser = ''
         nim_apiKey = ''
     
-    if sqlCmd :
+    if params :
         if method == 'get':
-            cmd=urllib.urlencode(sqlCmd)
+            cmd=urllib.urlencode(params)
             _actionURL="".join(( nimURL, cmd ))
         elif method == 'post':
-            cmd=urllib.urlencode(sqlCmd)
+            cmd=urllib.urlencode(params)
             _actionURL = re.sub('[?]', '', nimURL)
         else :
             P.error('Connection method not defined in request.')
@@ -205,7 +205,7 @@ def connect( method='get', sqlCmd=None, nimURL=None ) :
             return result
 
         except urllib2.URLError, e :
-            P.error( '\nFailed to read URL for the following command...\n    %s' % sqlCmd )
+            P.error( '\nFailed to read URL for the following command...\n    %s' % params )
             P.error( '   %s' % _actionURL )
             url_error = e.reason
             P.error('URL ERROR: %s' % url_error)
@@ -1472,6 +1472,25 @@ def publish_symLink( fileID=None, elementID=None, forceLink=1 ) :
 
 #  Shots :
 #===------
+def can_bringOnline( item='shot', jobID=0, assetID=0, showID=0, shotID=0 ) :
+    'Tests item against variable based project structure to see if it can be brought online'
+    'Item types can be asset or shot'
+    '   -if asset, jobID OR assetID must be passed'
+    '   -if shot, showID or shotID must be passed'
+
+    params = {}
+    params["q"] = 'canBringOnline'
+    params["type"] = str(item)
+    if jobID > 0 :
+        params["jobID"] = str(jobID)
+    if assetID > 0 :
+        params["assetID"] = str(assetID)
+    if showID > 0 :
+        params["showID"] = str(showID)
+    if shotID > 0 :
+        params["shotID"] = str(shotID)
+    result = connect( method='get', params=params )
+    return result
 
 def add_shot( showID=None, shotName=None, shotDuration=None ) :
     'Adds a shot to a show and returns the new ID'
@@ -1513,12 +1532,12 @@ def add_render( jobID=0, itemType='shot', taskID=0, fileID=0, \
     avgTime='', totalTime='', frame=0 ) :
     'Add a render to a task'
 
-    sqlCmd = {'q': 'addRender', 'jobID': str(jobID), 'class': str(itemType), 'taskID': str(taskID), 'fileID': str(fileID), \
+    params = {'q': 'addRender', 'jobID': str(jobID), 'class': str(itemType), 'taskID': str(taskID), 'fileID': str(fileID), \
                 'renderKey':str(renderKey), 'renderName':str(renderName), 'renderType':str(renderType), 'renderComment':str(renderComment), \
                 'outputDirs':str(outputDirs), 'outputFiles':str(outputFiles), 'elementTypeID':str(elementTypeID), \
                 'start_datetime':str(start_datetime), 'end_datetime':str(end_datetime), \
                 'avgTime':str(avgTime), 'totalTime':str(totalTime), 'frame':str(frame) }
-    result = connect( method='get', sqlCmd=sqlCmd )
+    result = connect( method='get', params=params )
     return result
 
 def get_taskDailies( taskID=None) :

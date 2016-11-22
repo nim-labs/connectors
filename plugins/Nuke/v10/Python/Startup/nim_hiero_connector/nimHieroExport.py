@@ -104,7 +104,7 @@ class NimHieroExport(QAction):
 			self.nim_showDict = {}
 			self.nim_showID = None
 			
-			self.setWindowTitle("NIM Export")
+			self.setWindowTitle("NIM Update Selected Shots")
 			self.setSizeGripEnabled(True)
 
 			self._exportTemplate = None
@@ -234,7 +234,7 @@ class NimHieroExport(QAction):
 
 			# Add the standard ok/cancel buttons, default to ok.
 			self._buttonbox = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
-			self._buttonbox.button(QDialogButtonBox.StandardButton.Ok).setText("Export")
+			self._buttonbox.button(QDialogButtonBox.StandardButton.Ok).setText("Update")
 			self._buttonbox.button(QDialogButtonBox.StandardButton.Ok).setDefault(True)
 			self._buttonbox.button(QDialogButtonBox.StandardButton.Ok).setToolTip("Executes exports on selection for each selected preset")
 			self._buttonbox.accepted.connect(self.acceptTest)
