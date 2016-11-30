@@ -13,6 +13,25 @@
 # *****************************************************************************
 
 
+# EXAMPLE:
+#   Adding a render to a task
+#   uploading an icon to the render
+#   uploading dialies to a render
+#   adding elements to a render
+#
+# import nim_core.nim_api as nimAPI
+# result = nimAPI.add_render(taskID=14941, renderName='myRender')
+# if result['success'] == 'true':
+#    nimAPI.upload_renderIcon(renderID=result['ID'],img='/path/to/icon.jpeg')
+#    nimAPI.upload_dailies(renderID=result['ID'],path='/path/to/movie/myImages.mov')
+#    nimAPI.add_element( parent='render', parentID=result['ID'], path='/path/to/frames/myImage.####.exr', name='myImage', \
+#                           startFrame=1, endFrame=128, handles=12, isPublished=False )
+#    nimAPI.add_element( parent='render', parentID=result['ID'], path='/path/to/frames/myImage_matte.####.exr', name='myImage_matte', \
+#                           startFrame=1, endFrame=128, handles=12, isPublished=False )
+#
+
+
+
 #  General Imports :
 import json, os, re, sys, traceback
 import urllib, urllib2
@@ -37,7 +56,7 @@ import nim_tools
 import nim_win as Win
 
 #  Variables :
-version='v2.5.0'
+version='v2.5.1'
 winTitle='NIM_'+version
 
 
