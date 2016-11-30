@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: nim_api.py
-# Version:  v2.5.1.161115
+# Version:  v2.5.1.161130
 #
 # Copyright (c) 2016 NIM Labs LLC
 # All rights reserved.
@@ -39,6 +39,39 @@ import nim_win as Win
 #  Variables :
 version='v2.5.0'
 winTitle='NIM_'+version
+
+
+def testAPI(nimURL=None, nim_apiUser='', nim_apiKey='') :
+    sqlCmd={'q': 'testAPI'}
+    cmd=urllib.urlencode(sqlCmd)
+    _actionURL="".join(( nimURL, cmd ))
+    request = urllib2.Request(_actionURL)
+    try :
+        request.add_header("X-NIM-API-USER", nim_apiUser)
+        request.add_header("X-NIM-API-KEY", nim_apiKey)
+        request.add_header("Content-type", "application/x-www-form-urlencoded; charset=UTF-8")
+        try :
+            myssl = ssl.create_default_context()
+            myssl.check_hostname=False
+            myssl.verify_mode=ssl.CERT_NONE
+            _file = urllib2.urlopen(request,context=myssl)
+        except :
+            _file = urllib2.urlopen(request)
+        fr=_file.read()
+        try : result=json.loads( fr )
+        except Exception, e :
+            P.error( traceback.print_exc() )
+        _file.close()
+        return result
+    except urllib2.URLError, e :
+        P.error( '\nFailed to read NIM API' )
+        P.error( '   %s' % _actionURL )
+        url_error = e.reason
+        P.error('URL ERROR: %s' % url_error)
+        err_msg = 'NIM Connection Error:\n\n %s' %  url_error;
+        Win.popup(msg=err_msg)
+        P.debug( '    %s' % traceback.print_exc() )
+        return False
 
 
 # Get NIM Connection Information
@@ -84,46 +117,13 @@ def get_apiKey() :
     return key
 
 
-def testAPI(nimURL=None, nim_apiUser='', nim_apiKey='') :
-    sqlCmd={'q': 'testAPI'}
-    cmd=urllib.urlencode(sqlCmd)
-    _actionURL="".join(( nimURL, cmd ))
-    request = urllib2.Request(_actionURL)
-    try :
-        request.add_header("X-NIM-API-USER", nim_apiUser)
-        request.add_header("X-NIM-API-KEY", nim_apiKey)
-        request.add_header("Content-type", "application/x-www-form-urlencoded; charset=UTF-8")
-        try :
-            myssl = ssl.create_default_context()
-            myssl.check_hostname=False
-            myssl.verify_mode=ssl.CERT_NONE
-            _file = urllib2.urlopen(request,context=myssl)
-        except :
-            _file = urllib2.urlopen(request)
-        fr=_file.read()
-        try : result=json.loads( fr )
-        except Exception, e :
-            P.error( traceback.print_exc() )
-        _file.close()
-        return result
-    except urllib2.URLError, e :
-        P.error( '\nFailed to read NIM API' )
-        P.error( '   %s' % _actionURL )
-        url_error = e.reason
-        P.error('URL ERROR: %s' % url_error)
-        err_msg = 'NIM Connection Error:\n\n %s' %  url_error;
-        Win.popup(msg=err_msg)
-        P.debug( '    %s' % traceback.print_exc() )
-        return False
-
-#  Basic API query command :
 #  DEPRECATED in 2.5 in favor of connect()
 def get( sqlCmd=None, debug=True, nimURL=None ) :
     result=False
     result = connect( method='get', params=sqlCmd, nimURL=nimURL )
     return result
 
-#  Basic API query command :
+
 #  DEPRECATED in 2.5 in favor of connect()
 def post( sqlCmd=None, debug=True, nimURL=None ) :
     result=False
@@ -131,6 +131,13 @@ def post( sqlCmd=None, debug=True, nimURL=None ) :
     return result
 
 
+#  API Query command - nimURL optional
+#       method options: get or post
+#       params['q'] is required to define the HTML API query
+#           params = {}
+#           params['q'] = 'getShots'
+#           params['showID'] = '100'
+#
 def connect( method='get', params=None, nimURL=None ) :
     'Querys MySQL server and returns decoded json array'
     result=None
@@ -230,6 +237,22 @@ def connect( method='get', params=None, nimURL=None ) :
         return False
 
 
+#  API Upload command
+#       Used with all commands HTML API commands that require a file to be uploaded
+#           uploadShotIcon
+#           uploadAssetIcon
+#           uploadRenderIcon
+#           uploadDailies
+#           uploadDailiesNote
+#
+#       params['q'] is required to define the HTML API query
+#       To upload a file params['file'] must be passed a file using open(myFile,'rb')
+#            params = {}
+#            params['q'] = 'uploadDailiesNote'
+#            params['dailiesID'] = '100'
+#            params['name'] = 'note name'
+#            params['file'] = open(imageFile,'rb')
+#
 def upload( params=None ) :
 
     connect_info = get_connect_info()
