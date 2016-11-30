@@ -126,6 +126,7 @@ class NimHieroConnector():
 					print "		WARNING: %s" % shotInfo['error']
 
 				''' IF SHOT IS ONLINE GET PATHS '''
+				nim_shotPath = trackItem.name()
 				nim_platesPath = 'PLATES'
 				nim_compPath = 'COMP'
 				nim_renderPath = 'RENDER'

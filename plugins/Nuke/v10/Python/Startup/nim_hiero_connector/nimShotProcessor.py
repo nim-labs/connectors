@@ -349,7 +349,7 @@ class NimShotProcessor(hiero.core.ProcessorBase):
         for item in trackItemsToRemove:
           trackCopy.removeItem(item)
 
-    ''' ****************** NIM START CHECK SHOTS FOR VBPS ****************** '''
+    ''' ****************** NIM START CHECK ONLINE STATUS AND VBPS ****************** '''
     # Iterate through track items and find NIM associations
     # Check for any shots that can not be brought online due to a variable based project structure
 
@@ -366,17 +366,16 @@ class NimShotProcessor(hiero.core.ProcessorBase):
         exportTrackItem = False
         trackItem_mediaType = trackitem.mediaType()
         if trackItem_mediaType == hiero.core.TrackItem.MediaType.kVideo:
-          print "Processing Video TrackItem"
           exportTrackItem = True
 
-        #SKIP IF NOT VIDEO TRACK ITEM
+        #Skip if not video track item
         if exportTrackItem:
           nim_shotID = None
 
           nimConnect = nimHieroConnector.NimHieroConnector()
           nim_tag = nimConnect.getNimTag(trackitem)
           if nim_tag != False:
-            #print "NIM: Tag Found"
+            #NIM Tag Found
             nim_shotID = nim_tag.metadata().value("tag.shotID")
             is_vbps = nimAPI.can_bringOnline(item='shot',shotID=nim_shotID)
             if is_vbps == 0 :
@@ -393,8 +392,7 @@ class NimShotProcessor(hiero.core.ProcessorBase):
       nimWin.popup( title='NIM Error', msg=message)
       return False
 
-
-    ''' ****************** NIM END CHECK SHOTS FOR VBPS ****************** '''
+    ''' ****************** NIM END CHECK ONLINE STATUS AND VBPS ****************** '''
 
     allTasks = []
 
@@ -425,9 +423,6 @@ class NimShotProcessor(hiero.core.ProcessorBase):
       trackItemVersion = "v%s" % format(int(trackItemVersionIndex), "0%id" % int(versionPadding))
 
       ''' ****************** NIM START UPDATE TRACKITEM ****************** '''
-      # TODO: Need to check if job is online... if not raise warning before exporting plates *********
-      #       *If forcing to be online in NIM before exporting plates then paths will always resolve
-
       print "exporting trackItem: %s" % trackitem.name()
 
       #Test for video track
@@ -483,7 +478,7 @@ class NimShotProcessor(hiero.core.ProcessorBase):
               if success == False:
                 print 'NIM: Failed to upload icon for trackitem %s' % name
 
-        ''' BRING SHOT ONLINE AND CREATE PROJECT STRUCTURE FOLDERS '''
+        #BRING SHOT ONLINE AND CREATE PROJECT STRUCTURE FOLDERS
         bringOnline_result = nimAPI.bring_online( item='shot', shotID=nim_shotID )
         if bringOnline_result['success'] == 'false':
           print 'NIM: Failed to bring shot online'
@@ -493,7 +488,7 @@ class NimShotProcessor(hiero.core.ProcessorBase):
         else :
           print 'NIM: bringOnline returned and invalid status'
 
-        ''' GET UPDATED NIM TAG AND COPY TO CLONE '''
+        #GET UPDATED NIM TAG AND COPY TO CLONE
         nim_tag = nimConnect.getNimTag(trackitem)
         if nim_tag != False:
           print 'NIM: Copying nim_tag to clone'
