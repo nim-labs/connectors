@@ -1556,18 +1556,37 @@ def add_render( jobID=0, itemType='shot', taskID=0, fileID=0, \
     result = connect( method='get', params=params )
     return result
 
+def upload_renderIcon( renderID=None, renderKey='', img=None ) :
+    'Upload Render Icon'
+    #  2 required fields:
+    #      renderID or renderKey
+    #      img
+
+    params = {}
+    params["q"] = "uploadRenderIcon"
+    params["renderID"] = renderID
+    params["renderKey"] = renderKey
+    if img is not None:
+        params["file"] = open(img,'rb')
+    else :
+        params["file"] = ''
+
+    result = upload(params=params)
+    return result
+
 def get_taskDailies( taskID=None) :
     'Retrieves the dictionary of dailies for the specified taskID from the API'
     #tasks=get( {'q': 'getTaskTypes', 'type': 'artist'} )
     dailies=get( {'q': 'getTaskDailies', 'taskID': taskID} )
     return dailies
 
-def upload_dailies( taskID=0, renderKey='', path=None ) :
-    'Upload Dailies - 2 required fields: (taskID or renderKey) and path to movie'
+def upload_dailies( taskID=None, renderID=None, renderKey='', path=None ) :
+    'Upload Dailies - 2 required fields: (taskID, renderID, or renderKey) and path to movie'
     params = {}
 
     params["q"] = "uploadMovie"
     params["taskID"] = taskID
+    params["renderID"] = renderID
     params["renderKey"] = renderKey
     if path is not None:
         path = os.path.normpath( path )
