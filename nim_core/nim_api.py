@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: nim_api.py
-# Version:  v2.5.15.161128
+# Version:  v2.5.16.161207
 #
 # Copyright (c) 2016 NIM Labs LLC
 # All rights reserved.
@@ -56,7 +56,7 @@ import nim_tools
 import nim_win as Win
 
 #  Variables :
-version='v2.5.1'
+version='v2.5.16'
 winTitle='NIM_'+version
 
 
@@ -150,14 +150,17 @@ def post( sqlCmd=None, debug=True, nimURL=None ) :
     return result
 
 
-#  API Query command - nimURL optional
+#  API Query command
 #       method options: get or post
 #       params['q'] is required to define the HTML API query
+#           Example:
 #           params = {}
 #           params['q'] = 'getShots'
 #           params['showID'] = '100'
+#       nimURL optional (not passing the nimURL will trigger a prefs read)
+#       apiKey optional (required if passing nimURL and Require API Keys is enabled)
 #
-def connect( method='get', params=None, nimURL=None ) :
+def connect( method='get', params=None, nimURL=None, apiKey=None ) :
     'Querys MySQL server and returns decoded json array'
     result=None
     
@@ -172,6 +175,9 @@ def connect( method='get', params=None, nimURL=None ) :
         nim_apiUser = ''
         nim_apiKey = ''
     
+    if apiKey :
+        nim_apiKey = apiKey
+
     if params :
         if method == 'get':
             cmd=urllib.urlencode(params)
@@ -266,18 +272,30 @@ def connect( method='get', params=None, nimURL=None ) :
 #
 #       params['q'] is required to define the HTML API query
 #       To upload a file params['file'] must be passed a file using open(myFile,'rb')
+#            Example:
 #            params = {}
 #            params['q'] = 'uploadDailiesNote'
 #            params['dailiesID'] = '100'
 #            params['name'] = 'note name'
 #            params['file'] = open(imageFile,'rb')
+#       nimURL optional (not passing the nimURL will trigger a prefs read)
+#       apiKey optional (required if passing nimURL and Require API Keys is enabled)
 #
-def upload( params=None ) :
+def upload( params=None, nimURL=None, apiKey=None ) :
 
-    connect_info = get_connect_info()
-    nimURL = connect_info['nim_apiURL']
-    nim_apiUser = connect_info['nim_apiUser']
-    nim_apiKey = connect_info['nim_apiKey']
+    connect_info = None
+    if not nimURL :
+        connect_info = get_connect_info()
+    if connect_info :
+        nimURL = connect_info['nim_apiURL']
+        nim_apiUser = connect_info['nim_apiUser']
+        nim_apiKey = connect_info['nim_apiKey']
+    else :
+        nim_apiUser = ''
+        nim_apiKey = ''
+    
+    if apiKey :
+        nim_apiKey = apiKey
 
     _actionURL = nimURL.encode('ascii')
 
@@ -767,8 +785,12 @@ def get_elements( parent='shot', parentID=None, elementTypeID=None, getLastEleme
     publishedElements=get( {'q': 'getElements', 'parent': parent, 'parentID': parentID, 'elementTypeID': elementTypeID, 'getLastElement': getLastElement, 'isPublished': isPublished} )
     return publishedElements
 
-def add_element( parent='shot', parentID=None, typeID='', path='', name='', startFrame=None, endFrame=None, handles=None, isPublished=False ):
-    result=get( {'q': 'addElement', 'parent': parent, 'typeID': typeID, 'parentID': parentID, 'path': path, 'name': name, 'startFrame': startFrame, 'endFrame': endFrame, 'handles': handles, 'isPublished': isPublished} )
+def add_element( parent='shot', parentID=None, typeID='', path='', name='', startFrame=None, endFrame=None, handles=None, isPublished=False, nimURL=None, apiKey=None ):
+    'Adds an element to an asset, shot, task, or render'
+    # nimURL and apiKey are optional for Render API Key overrride
+    params = {'q': 'addElement', 'parent': parent, 'typeID': typeID, 'parentID': parentID, 'path': path, \
+                'name': name, 'startFrame': startFrame, 'endFrame': endFrame, 'handles': handles, 'isPublished': isPublished}
+    result = connect( method='get', params=params, nimURL=nimURL, apiKey=apiKey )
     return result
 
 #  Files :
@@ -1587,20 +1609,21 @@ def upload_assetIcon( assetID=None, img=None ) :
 def add_render( jobID=0, itemType='shot', taskID=0, fileID=0, \
     renderKey='', renderName='', renderType='', renderComment='', \
     outputDirs=None, outputFiles=None, elementTypeID=0, start_datetime=None, end_datetime=None, \
-    avgTime='', totalTime='', frame=0 ) :
+    avgTime='', totalTime='', frame=0, nimURL=None, apiKey=None ) :
     'Add a render to a task'
-
+    # nimURL and apiKey are optional for Render API Key overrride
     params = {'q': 'addRender', 'jobID': str(jobID), 'class': str(itemType), 'taskID': str(taskID), 'fileID': str(fileID), \
                 'renderKey':str(renderKey), 'renderName':str(renderName), 'renderType':str(renderType), 'renderComment':str(renderComment), \
                 'outputDirs':str(outputDirs), 'outputFiles':str(outputFiles), 'elementTypeID':str(elementTypeID), \
                 'start_datetime':str(start_datetime), 'end_datetime':str(end_datetime), \
                 'avgTime':str(avgTime), 'totalTime':str(totalTime), 'frame':str(frame) }
-    result = connect( method='get', params=params )
+    result = connect( method='get', params=params, nimURL=nimURL, apiKey=apiKey )
     return result
 
-def upload_renderIcon( renderID=None, renderKey='', img=None ) :
+def upload_renderIcon( renderID=None, renderKey='', img=None, nimURL=None, apiKey=None ) :
     'Upload Render Icon'
-    #  2 required fields:
+    # nimURL and apiKey are optional for Render API Key overrride
+    # 2 required fields:
     #      renderID or renderKey
     #      img
 
@@ -1613,7 +1636,7 @@ def upload_renderIcon( renderID=None, renderKey='', img=None ) :
     else :
         params["file"] = ''
 
-    result = upload(params=params)
+    result = upload(params=params, nimURL=nimURL, apiKey=apiKey)
     return result
 
 def get_taskDailies( taskID=None) :
@@ -1622,8 +1645,9 @@ def get_taskDailies( taskID=None) :
     dailies=get( {'q': 'getTaskDailies', 'taskID': taskID} )
     return dailies
 
-def upload_dailies( taskID=None, renderID=None, renderKey='', path=None ) :
+def upload_dailies( taskID=None, renderID=None, renderKey='', path=None, nimURL=None, apiKey=None ) :
     'Upload Dailies - 2 required fields: (taskID, renderID, or renderKey) and path to movie'
+    # nimURL and apiKey are optional for Render API Key overrride
     params = {}
 
     params["q"] = "uploadMovie"
@@ -1636,7 +1660,7 @@ def upload_dailies( taskID=None, renderID=None, renderKey='', path=None ) :
     else :
         params["file"] = ''
 
-    result = upload(params=params)
+    result = upload(params=params, nimURL=nimURL, apiKey=apiKey)
     return result
 
 def upload_dailiesNote( dailiesID=None, name='', img=None, note='', frame=0, time=-1, userID=None, nimURL=None ) :
