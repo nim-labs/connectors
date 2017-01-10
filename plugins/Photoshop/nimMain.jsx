@@ -87,6 +87,13 @@ function webRequest(method, endpoint, query) {
 			nimTempFolder.create();
 
 		if (os == 'win') {
+			var winTempFolder = new Folder(winTempFolderPath);
+
+			if (!winTempFolder.exists)
+				winTempFolder.create();
+
+			tempFile = new File(winTempFilePath);
+			
 			//if (username) userHeader = '/Username:"' + username + '" ';
 			if (username) userHeader = '/Username:""' + username + '"" ';  // Double quotes needed for apiQuery VBScript
 			else userHeader = '';

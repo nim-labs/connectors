@@ -78,6 +78,13 @@ function webRequest(method, endpoint, query) {
 			nimTempFolder.create();
 
 		if (os == 'win') {
+			var winTempFolder = new Folder(winTempFolderPath);
+
+			if (!winTempFolder.exists)
+				winTempFolder.create();
+
+			tempFile = new File(winTempFilePath);
+
 			if (username) userHeader = '/Username:' + username + ' ';
 			else userHeader = '';
 			if (nimKey) keyHeader = '/ApiKey:' + nimKey + ' ';
