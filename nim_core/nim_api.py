@@ -131,8 +131,8 @@ def get_apiKey() :
         except Exception, e :
             P.error( 'Unable to read api key.' )
     else :
-        P.warning( 'API Key not found.' )
-
+        # P.warning( 'API Key not found.' )
+        pass
     return key
 
 
