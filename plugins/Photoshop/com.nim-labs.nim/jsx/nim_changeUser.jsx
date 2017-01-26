@@ -56,13 +56,11 @@ function prefsDialog(nimPrefs, thisObj) {
 	confirmButton.onClick = function() {
 		nimPrefs.scriptsPath = scriptsPathInput.text;
 		nimPrefs.API = APIPathInput.text;
+		nimAPIURL = nimPrefs.API;
 		saveScriptsPathAndAPIToPrefs();
-		var nimAPIHostAndURL = splitAPIHostAndURL(nimPrefs.API),
-			remoteScripts = getRemoteScripts(scriptsPathInput.text, thisObj),
-			nimMenuPanel;
 
-		nimAPIHost = nimAPIHostAndURL.host;
-		nimAPIURL = nimAPIHostAndURL.url;
+		var remoteScripts = getRemoteScripts(scriptsPathInput.text, thisObj),
+			nimMenuPanel;
 		
 		if (remoteScripts !== false) {
 			nimMenuPanel = remoteScripts(thisObj);
