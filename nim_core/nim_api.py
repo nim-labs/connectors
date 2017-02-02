@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: nim_api.py
-# Version:  v2.5.16.161207
+# Version:  v2.5.22.170202
 #
 # Copyright (c) 2016 NIM Labs LLC
 # All rights reserved.
@@ -56,7 +56,7 @@ import nim_tools
 import nim_win as Win
 
 #  Variables :
-version='v2.5.16'
+version='v2.5.22'
 winTitle='NIM_'+version
 
 
@@ -304,8 +304,8 @@ def upload( params=None, nimURL=None, apiKey=None ) :
    # Create opener with extended form post support
     try:
         opener = urllib2.build_opener(FormPostHandler)
-        #opener.addheaders = [('X-NIM-API-USER', nim_apiUser)]
-        #opener.addheaders = [('X-NIM-API-KEY', nim_apiKey)]
+        opener.addheaders = [('X-NIM-API-USER', nim_apiUser)]
+        opener.addheaders = [('X-NIM-API-KEY', nim_apiKey)]
     except:
         P.error( "Failed building url opener")
         P.error( traceback.format_exc() )
@@ -391,11 +391,6 @@ class FormPostHandler(urllib2.BaseHandler):
                 boundary, data = self.encode(params, files)
                 content_type = 'multipart/form-data; boundary=%s' % boundary
                 request.add_unredirected_header('Content-Type', content_type)
-                connect_info = get_connect_info()
-                nim_apiUser = connect_info['nim_apiUser']
-                nim_apiKey = connect_info['nim_apiKey']
-                request.add_header("X-NIM-API-USER", nim_apiUser)
-                request.add_header("X-NIM-API-KEY", nim_apiKey)
                 
             request.add_data(data)
         return request
