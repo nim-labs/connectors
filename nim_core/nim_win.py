@@ -2,9 +2,9 @@
 #******************************************************************************
 #
 # Filename: nim_win.py
-# Version:  v0.7.3.150625
+# Version:  v2.5.0.160930
 #
-# Copyright (c) 2015 NIM Labs LLC
+# Copyright (c) 2016 NIM Labs LLC
 # All rights reserved.
 #
 # Use of this software is subject to the terms of the NIM Labs license
@@ -12,17 +12,23 @@
 # otherwise accompanies this software in either electronic or hard copy form.
 # *****************************************************************************
 
-
+import os
 #  NIM Imports :
 import nim_api as Api
 import nim_file as F
 import nim_prefs as Prefs
 import nim_print as P
 #  Import Python GUI packages :
-try : from PySide import QtCore, QtGui
-except :
-    try : from PyQt4 import QtCore, QtGui
-    except : pass
+try : 
+    from PySide2 import QtWidgets as QtGui
+    from PySide2 import QtCore
+except ImportError :
+    try : from PySide import QtCore, QtGui
+    except ImportError :
+        try : from PyQt4 import QtCore, QtGui
+        except ImportError : 
+            print "NIM: Failed to load UI Modules - Win"
+
 
 
 def popup( title='', msg='', type='ok', defaultInput='', pyside=False, _list=[], selNum=0, winPrnt=None ) :
@@ -33,13 +39,29 @@ def popup( title='', msg='', type='ok', defaultInput='', pyside=False, _list=[],
     #  Create PySide window :
     if pyside :
         try :
-            from PySide import QtCore, QtGui
+            try : 
+                from PySide2 import QtWidgets as QtGui
+                from PySide2 import QtCore
+            except :
+                from PySide import QtCore, QtGui
             if type=='comboBox' :
                 userInput, ok=QtGui.QInputDialog.getItem( winPrnt, title, msg, _list, 0, False )
                 if not ok :
                     userInput=None
         except :
             P.error( 'Sorry, problem loading PySide/PyQt4' )
+    
+    # Cinesync Window :        
+    elif app == 'Cinesync':
+        try:
+            from PySide import QtCore, QtGui
+            if type == 'input' or type == 'okCancel':
+                userInput, ok = QtGui.QInputDialog.getText(winPrnt, title, msg, QtGui.QLineEdit.Normal, defaultInput)
+                if not ok:
+                    userInput = None
+
+        except Exception as err:
+            P.error('Error with dialog: %s' % str(err))
     
     #  Maya Window :
     elif app=='Maya' :
@@ -164,30 +186,125 @@ def popup( title='', msg='', type='ok', defaultInput='', pyside=False, _list=[],
     return userInput
 
 
-def userInfo( url='' ) :
+def userInfo( url='', apiUser='', newUser=False ) :
     'Retrieves the User ID to use for the window'
     
     user, userID, userList='', '', []
-    users=Api.get( sqlCmd={'q': 'getUsers'}, debug=False, nimURL=url )
-    for u in users : userList.append( u['username'] )
     
-    #  Create window to get user name from :
-    user=popup( title='Select NIM User', msg='Pick a username to use', type='comboBox', \
-        pyside=True, _list=userList )
-    
-    #  Get user ID :
-    if url :
-        userID=Api.get( sqlCmd={ 'q': 'getUserID', 'u': user}, debug=False, nimURL=url )
+    print("apiUser: %s" % apiUser)
+
+    user=popup( title='Enter NIM Login', msg='Please enter your NIM username:', type='input', defaultInput=apiUser )
+
+    if user is None :
+        return False
     else :
-        userID=Api.get( sqlCmd={ 'q': 'getUserID', 'u': user}, debug=False )
-    if type(userID)==type(list()) and len(userID)==1 :
-        userID=userID[0]['ID']
-    P.info( 'User set to "%s" (ID #%s)' % (user, userID) )
+        print("newUser: %s" % user)
+        #  Get user ID :
+        if url :
+            userID=Api.get( sqlCmd={ 'q': 'getUserID', 'u': user}, debug=False, nimURL=url )
+            print("userID: %s" % userID)
+        else :
+            userID=Api.get( sqlCmd={ 'q': 'getUserID', 'u': user}, debug=False )
+            print("userID: %s" % userID)
+
+        if type(userID)==type(list()) and len(userID)==1 :
+            try :
+                userID=userID[0]['ID']
+                P.info( 'User set to "%s" (ID #%s)' % (user, userID) )
+                if newUser == False:
+                    #  Update Preferences :
+                    Prefs.update( attr='NIM_User', value=user )
+                    popup( title='NIM User Set', msg='The NIM user has been set to %s.' % user)
+                return (user, userID)
+            except :
+                return False
+        else :
+            P.error( 'Failed to find NIM user.' )
+            response = popup( title='User Not Found', msg='The username entered is not a valid NIM user.\n\n Would you like to enter a new username?', type='okCancel')
+            if(response=='OK'):
+                userInfo( url=url, newUser=newUser )
+            else :
+                return False
+
+
+def setApiKey( url='' ) :
+    'Sets the NIM user API Key'
+    #print('setApiKey::')
+    nim_apiKey = ''
     
-    #  Update Preferences :
-    Prefs.update( attr='NIM_User', value=user )
+    connect_info = Api.get_connect_info()
+    api_url = connect_info['nim_apiURL']
+    api_user = connect_info['nim_apiUser']
+
+    app=F.get_app()
+
+    if app == 'C4D' :
+        api_key=popup( title='Enter NIM API Key', msg='Enter the NIM API Key for your user:', type='input', defaultInput='' )
+    else :
+        api_key=popup( title='Enter NIM API Key', msg='Failed to validate user.\n\n \
+                        NIM Security is set to require the use of API Keys.\n \
+                        Please obtain a valid NIM API KEY from your NIM Administrator.\n\n \
+                        Enter the NIM API Key for your user:', type='input', defaultInput='' )
+
+    if api_key is None :
+        return False
+    elif api_key == 'Cancel' :
+        return False
+    else :
+        #  Get user ID :
+        if api_url :
+            testAPI = Api.testAPI(nimURL=api_url, nim_apiUser=api_user, nim_apiKey=api_key)
+            if type(testAPI[0])==type(dict()) :
+                if testAPI[0]['error'] != '':
+                    P.error( testAPI[0]['error'] )
+                    response = popup( title='NIM API Invalid', msg='The NIM API Key entered is invalid.\n\nRe-enter API Key?', type='okCancel')
+                    if(response=='OK'):
+                        setApiKey( url=url )
+                    else :
+                        return False
+                else :
+                    #  Update NIM Key File :
+                    print "Key Valid: %s" % testAPI[0]['keyValid']
+                    if testAPI[0]['keyValid'] == 'true' :
+                        try :
+                            keyFile = os.path.normpath( os.path.join( Prefs.get_home(), 'nim.key' ) )
+                            print keyFile
+                            ''' #Python 2.7
+                            with open(keyFile, 'r+') as f:
+                                f.seek(0)
+                                f.write(api_key)
+                                f.truncate()
+                            '''
+                            # Using Python2.6 for compatibiity
+                            keyFO = open(keyFile, "w")
+                            keyFO.seek(0)
+                            keyFO.write(api_key)
+                            keyFO.truncate()
+                            keyFO.close()
+                            popup( title='NIM API Key Set', msg='The NIM API Key has been set.\n\nPlease retry your last command.')
+                            return True
+                        except :
+                            P.error('Failed writing NIM Key file.')
+                            P.error( '    %s' % traceback.print_exc() )
+                            popup(title='Error', msg='Failed writing NIM Key File.')
+                            return False
+                    else :
+                        P.error( 'Failed to validate NIM API.' )
+                        response = popup( title='NIM API Invalid', msg='The NIM API Key entered is invalid.\n\nRe-enter API Key?', type='okCancel')
+                        if(response=='OK'):
+                            setApiKey( url=url )
+                        else :
+                            return False
+            else :
+                P.error( 'Failed to validate NIM API.' )
+                response = popup( title='NIM API Invalid', msg='The NIM API Key entered is invalid.\n\nRe-enter API Key?', type='okCancel')
+                if(response=='OK'):
+                    setApiKey( url=url )
+                else :
+                    return False
+        else :
+            return None
     
-    return (user, userID)
 
 
 #  END

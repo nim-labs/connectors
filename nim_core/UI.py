@@ -2,9 +2,9 @@
 #******************************************************************************
 #
 # Filename: UI.py
-# Version:  v1.0.5.160328
+# Version:  v2.5.0.160930
 #
-# Copyright (c) 2015 NIM Labs LLC
+# Copyright (c) 2016 NIM Labs LLC
 # All rights reserved.
 #
 # Use of this software is subject to the terms of the NIM Labs license
@@ -15,6 +15,12 @@
 
 #  General Imports :
 import glob, os, platform, re, sys, traceback, urllib, urllib2, time
+try:
+    import ssl
+except :
+    print "NIM: Failed to load SSL - UI"
+    pass
+
 #  NIM Imports :
 import nim as Nim
 import nim_api as Api
@@ -23,15 +29,21 @@ import nim_prefs as Prefs
 import nim_print as P
 import nim_win as Win
 #  Import Python GUI packages :
-try : from PySide import QtCore, QtGui
-except :
-    try : from PyQt4 import QtCore, QtGui
-    except : pass
+try : 
+    from PySide2 import QtWidgets as QtGui
+    from PySide2 import QtGui as QtGui2
+    from PySide2 import QtCore
+except ImportError :
+    try : from PySide import QtCore, QtGui
+    except ImportError :
+        try : from PyQt4 import QtCore, QtGui
+        except ImportError : 
+            print "NIM: Failed to UI Modules - UI"
 
 #  Variables :
 WIN=''
 startTime=''
-version='v1.0.5'
+version='v2.5.0'
 winTitle='NIM_'+version
 _os=platform.system().lower()
 _osCap=platform.system()
@@ -55,7 +67,10 @@ def mk( mode='open', _import=False, _export=False, ref=False, pub=False ) :
             try :
                 import maya.OpenMayaUI as omUI
                 import maya.cmds as mc
-                from shiboken import wrapInstance
+                try:
+                    from shiboken2 import wrapInstance
+                except :
+                    from shiboken import wrapInstance
                 import nim_maya as M
                 win_parent=M.get_mainWin()
                 WIN=GUI( parent=win_parent, mode=mode )
@@ -65,7 +80,7 @@ def mk( mode='open', _import=False, _export=False, ref=False, pub=False ) :
                 #    allowedAreas=allowedAreas )
             except Exception, e :
                 P.error( 'Sorry, unable to retrieve variables from the NIM preference file.' )
-                P.error( '    %s' % traceback.print_exc() )
+                P.debug( '    %s' % traceback.print_exc() )
                 return False
         
         #  Nuke :
@@ -80,7 +95,7 @@ def mk( mode='open', _import=False, _export=False, ref=False, pub=False ) :
                 #    'usa.la.nim.fileUI' )
             except Exception, e :
                 P.error( 'Sorry, unable to retrieve variables from the NIM preference file.' )
-                P.error( '    %s' % traceback.print_exc() )
+                P.debug( '    %s' % traceback.print_exc() )
                 return False
         
         #  Hiero :
@@ -90,20 +105,18 @@ def mk( mode='open', _import=False, _export=False, ref=False, pub=False ) :
                 WIN=GUI( mode=mode )
             except Exception, e :
                 P.error( 'Sorry, unable to retrieve variables from the NIM preference file.' )
-                P.error( '    %s' % traceback.print_exc() )
+                P.debug( '    %s' % traceback.print_exc() )
                 return False
     
         # 3dsMax :
         elif app=='3dsMax' :
             try :
                 import MaxPlus
-                #win_parent=MaxPlus.Win32_GetMAXHWnd()
-                #WIN=GUI( parent=win_parent, mode=mode )
                 WIN=GUI( mode=mode )
                 MaxPlus.CUI.DisableAccelerators()
             except Exception, e :
                 P.error( 'Sorry, unable to retrieve variables from the NIM preference file.' )
-                P.error( '    %s' % traceback.print_exc() )
+                P.debug( '    %s' % traceback.print_exc() )
                 return False
 
         # Houdini :
@@ -113,7 +126,7 @@ def mk( mode='open', _import=False, _export=False, ref=False, pub=False ) :
                 WIN=GUI( mode=mode )
             except Exception, e :
                 P.error( 'Sorry, unable to retrieve variables from the NIM preference file.' )
-                P.error( '    %s' % traceback.print_exc() )
+                P.debug( '    %s' % traceback.print_exc() )
                 return False
 
     #  Set the window to one of five modes :
@@ -158,9 +171,17 @@ class GUI(QtGui.QMainWindow) :
         #  Instantiate Variables :
         try :
             stored=self.mk_vars()
+            '''
+            # Working for duplicate fail detection however when variables missing from Prefs this fails silently
+            if stored == False :
+                #Quietly fail when mk_vars returns false
+                print 'stored failed'
+                return
+            '''              
         except Exception, e :
             P.error( 'Sorry, unable to get NIM preferences, cannot run NIM GUI' )
-            P.error( '    %s' % traceback.print_exc() )
+            P.debug( '    %s' % traceback.print_exc() )
+            Win.popup( title='NIM Error', msg='Sorry, unable to get NIM preferences, cannot run NIM GUI' )
             return
         
         #  Error Check :
@@ -197,10 +218,7 @@ class GUI(QtGui.QMainWindow) :
         P.debug(' ')
         
         #  Print :
-        self.nim.Print( debug=True )
-        
-        #  Make connections :
-        #self.mk_connections()
+        #self.nim.Print( debug=True )
         
         self.complete=True
         return
@@ -211,7 +229,7 @@ class GUI(QtGui.QMainWindow) :
         'Instantiates variables'
         self.app=F.get_app()
         P.debug( '\n%.3f => Starting to read preferences' % (time.time()-startTime) )
-        
+
         #  Preferences :
         self.prefs=Prefs.read()
         P.debug( '%.3f =>     Preference file done reading' % (time.time()-startTime) )
@@ -225,10 +243,10 @@ class GUI(QtGui.QMainWindow) :
         
         #  Get Show/Shot Prefs :
         try :
+            self.pref_URL=self.prefs['NIM_URL']
             self.user=self.prefs['NIM_User']
             self.pref_nimScripts=self.prefs['NIM_Scripts']
             self.pref_userScripts=self.prefs['NIM_UserScripts']
-            #self.pref_appScripts=self.prefs[self.app+'_Scripts']
             self.pref_posX=self.prefs[self.app+'_WinPosX']
             self.pref_posY=self.prefs[self.app+'_WinPosY']
             self.pref_sizeX=self.prefs[self.app+'_WinWidth']
@@ -246,7 +264,6 @@ class GUI(QtGui.QMainWindow) :
             self.pref_task=self.prefs[self.app+'_Task']
             self.pref_basename=self.prefs[self.app+'_Basename']
             self.pref_version=self.prefs[self.app+'_Version']
-            #self.pref_imgDefault=self.prefs['NIM_Thumbnail']
             self.pref_imgDefault=self.pref_nimScripts+'/img/nim_logo.png'
         except : return False
         P.debug( '%.3f =>     Preferences stored' % (time.time()-startTime) )
@@ -270,22 +287,24 @@ class GUI(QtGui.QMainWindow) :
                 Houdini.get_vars( nim=self.nimPrefs )
         else :
             self.nimPrefs=Nim.NIM().ingest_prefs()
-            #self.nimPrefs.Print()
         #  Get and set User Information :
-        info=self.nimPrefs.userInfo()
-        self.user=info['name']
-        self.userID=info['ID']
-        self.nim.set_userInfo( userName=self.user, userID=self.userID )
-        
-        P.debug( '%.3f =>     NIM Preferences Instantiated' % (time.time()-startTime) )
-        
-        #  Set mode :
-        self.nim.set_mode( self.mode )
-        
-        #  Print success :
-        P.debug( '%.3f => Preferences done reading' % (time.time()-startTime) )
-        
-        return True
+        if self.nimPrefs:
+            info=self.nimPrefs.userInfo()
+            self.user=info['name']
+            self.userID=info['ID']
+            self.nim.set_userInfo( userName=self.user, userID=self.userID )
+            
+            P.debug( '%.3f =>     NIM Preferences Instantiated' % (time.time()-startTime) )
+            
+            #  Set mode :
+            self.nim.set_mode( self.mode )
+            
+            #  Print success :
+            P.debug( '%.3f => Preferences done reading' % (time.time()-startTime) )
+            
+            return True
+        else :
+            return False
     
     
     #  GUI Element Creation :
@@ -379,10 +398,12 @@ class GUI(QtGui.QMainWindow) :
         self.nim.Input('asset').setSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
         self.nim.Input('asset').setMinimumSize(240,20)
         #  Asset thumbnail :
-        self.nim.set_pic( elem='asset', widget=QtGui.QPixmap().fromImage( \
-            QtGui.QImage( self.pref_imgDefault ) ) )
-        self.nim.set_pic( elem='asset', widget=self.nim.pix( 'asset' ).scaled( \
-            self.img_size, self.img_size, QtCore.Qt.KeepAspectRatio ) )
+        try :
+            self.nim.set_pic( elem='asset', widget=QtGui2.QPixmap().fromImage( QtGui2.QImage( self.pref_imgDefault ) ) )
+        except :
+            self.nim.set_pic( elem='asset', widget=QtGui.QPixmap().fromImage( QtGui.QImage( self.pref_imgDefault ) ) )
+
+        self.nim.set_pic( elem='asset', widget=self.nim.pix( 'asset' ).scaled( self.img_size, self.img_size, QtCore.Qt.KeepAspectRatio ) )
         self.nim.set_label( elem='asset', widget=QtGui.QLabel() )
         self.nim.label('asset').setPixmap( self.nim.pix('asset') )
         self.nim.label('asset').setScaledContents( True )
@@ -406,8 +427,12 @@ class GUI(QtGui.QMainWindow) :
         self.nim.Input('shot').setSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
         self.nim.Input('shot').setMinimumSize(240,20)
         #  Shot thumbnail :
-        self.nim.set_pic( elem='shot', widget=QtGui.QPixmap().fromImage( \
-            QtGui.QImage( self.pref_imgDefault ) ) )
+        try :
+            self.nim.set_pic( elem='shot', widget=QtGui2.QPixmap().fromImage( \
+                QtGui2.QImage( self.pref_imgDefault ) ) )
+        except :
+            self.nim.set_pic( elem='shot', widget=QtGui.QPixmap().fromImage( \
+                QtGui.QImage( self.pref_imgDefault ) ) )
         self.nim.set_pic( elem='shot', widget=self.nim.pix( 'shot' ).scaled(
             self.img_size, self.img_size, QtCore.Qt.KeepAspectRatio ) )
         self.nim.set_label( elem='shot', widget=QtGui.QLabel() )
@@ -691,8 +716,9 @@ class GUI(QtGui.QMainWindow) :
         self.checkBox.setVisible( False )
         
         #  Buttons :
-        if self.app=='Nuke' : self.btn_1.setText('Open Comp')
-        else : self.btn_1.setText('Open')
+        #if self.app=='Nuke' : self.btn_1.setText('Open Comp')
+        #else : self.btn_1.setText('Open')
+        self.btn_1.setText('Open')
         self.btn_1.setVisible( True )
         self.btn_2.setVisible( False )
         
@@ -795,7 +821,11 @@ class GUI(QtGui.QMainWindow) :
             self.fileExtText.setVisible( False )
             self.nim.Input('fileExt').setVisible( False )
         if self.app=='Nuke' :
-            self.nim.set_name( elem='fileExt', name='.nk' )
+            import nuke
+            if nuke.env['nc'] :
+                self.nim.set_name( elem='fileExt', name='.nknc' )
+            else :
+                self.nim.set_name( elem='fileExt', name='.nk' )
         elif self.app=='C4D' :
             self.nim.set_name( elem='fileExt', name='.c4d' )
         elif self.app=='3dsMax' :
@@ -1043,7 +1073,11 @@ class GUI(QtGui.QMainWindow) :
             self.fileExtText.setVisible( True )
             self.nim.Input('fileExt').setVisible( True )
         elif self.app=='Nuke' :
-            self.nim.set_name( elem='fileExt', name='.nk' )
+            import nuke
+            if nuke.env['nc'] :
+                self.nim.set_name( elem='fileExt', name='.nknc' )
+            else:
+                self.nim.set_name( elem='fileExt', name='.nk' )
             self.fileExtText.setVisible( False )
             self.nim.Input('fileExt').setVisible( False )
         elif self.app=='C4D' :
@@ -1091,8 +1125,13 @@ class GUI(QtGui.QMainWindow) :
         
         #  Clear and Set Dictionaries :
         self.nim.clear( elem )
-        self.nim.set_dict( elem )
-        
+        response = self.nim.set_dict( elem )
+        if response == False:
+            P.error('Failed to populate elements.')
+            #QtGui.QMainWindow.close(self)
+            raise Exception("Failed to populate elements")
+            return
+
         #  Clear Fields for Empty Dictionaries :
         if not self.nim.Dict( elem ) or not len(self.nim.Dict( elem )) :
             if elem in self.nim.comboBoxes :
@@ -1153,6 +1192,7 @@ class GUI(QtGui.QMainWindow) :
                         self.nim.set_ID( elem=elem, ID=option['ID'] )
                         P.info( '  %s Name = "%s"' % (elem.upper(), self.nim.name(elem)) )
                         P.info( '  %s ID = "%s"' % (elem.upper(), self.nim.ID()) )
+                        self.update_img()
                         if elem=='task' :
                             self.nim.set_taskFolder( folder=option['folder'] )
                 #  Shows :
@@ -1239,7 +1279,7 @@ class GUI(QtGui.QMainWindow) :
                             elif self.app=='Nuke' :
                                 temp_files=os.listdir( nimDir )
                                 for _file in temp_files :
-                                    if re.search( '^'+basename+'.nk$', _file ) :
+                                    if re.search( '^'+basename+'.(nk|nknc)$', _file ) :
                                         if _file not in files :
                                             files.append( _file )
                             elif self.app=='C4D' :
@@ -1300,7 +1340,7 @@ class GUI(QtGui.QMainWindow) :
                                 if self.app=='Maya' :
                                     if ext not in ['.ma', '.mb'] : item.setFlags( QtCore.Qt.ItemIsEditable )
                                 elif self.app=='Nuke' :
-                                    if ext !='.nk' : item.setFlags( QtCore.Qt.ItemIsEditable )
+                                    if ext not in ['.nk', '.nknc'] : item.setFlags( QtCore.Qt.ItemIsEditable )
                                 elif self.app=='C4D' :
                                     if ext !='.c4d' : item.setFlags( QtCore.Qt.ItemIsEditable )
                                 elif self.app=='3dsMax' :
@@ -1352,7 +1392,7 @@ class GUI(QtGui.QMainWindow) :
                                         if option['ext'] not in ['.ma', '.mb'] :
                                             item.setFlags( QtCore.Qt.ItemIsEditable )
                                     elif self.app=='Nuke' :
-                                        if option['ext'] !='.nk' :
+                                        if option['ext'] not in ['.nk', '.nknc'] :
                                             item.setFlags( QtCore.Qt.ItemIsEditable )
                                     elif self.app=='C4D' :
                                         if option['ext'] !='.c4d' :
@@ -1385,7 +1425,7 @@ class GUI(QtGui.QMainWindow) :
                                         item.setFlags( QtCore.Qt.ItemIsEditable )
                                 elif self.app=='Nuke' :
                                     ext=F.get_ext( filePath=option['filename'] )
-                                    if ext !='.nk' :
+                                    if ext not in ['.nk', '.nknc'] :
                                         item.setFlags( QtCore.Qt.ItemIsEditable )
                                 elif self.app=='C4D' :
                                     ext=F.get_ext( filePath=option['filename'] )
@@ -1427,7 +1467,7 @@ class GUI(QtGui.QMainWindow) :
                                     item.setFlags( QtCore.Qt.ItemIsEditable )
                             elif self.app=='Nuke' :
                                 ext=F.get_ext( filePath=option['filename'] )
-                                if ext !='.nk' :
+                                if ext not in ['.nk', '.nknc'] :
                                     item.setFlags( QtCore.Qt.ItemIsEditable )
                             elif self.app=='C4D' :
                                 ext=F.get_ext( filePath=option['filename'] )
@@ -1465,11 +1505,23 @@ class GUI(QtGui.QMainWindow) :
         index=0
         #  Get Server Dictionary :
         serverDict=Api.get_servers( self.nim.ID('job') )
-        self.nim.set_server( Dict=serverDict )
+        
+        if serverDict :
+            if 'success' in serverDict :
+                if serverDict['success'] == 'false' :
+                    P.warning(serverDict['error'])
+                    self.nim.Input('server').clear()
+                    self.nim.Input('server').addItem('None')
+                    self.nim.Input('server').setEnabled( False )
+                    self.nim.set_server( name='', path='', Dict={}, ID='' )
+                    return
         
         #  Populate the combo box :
         if serverDict and len(serverDict) :
             P.debug( '   Job Servers = %s' % serverDict )
+
+            self.nim.set_server( Dict=serverDict )
+            
             #  Populate drop box :
             self.nim.Input('server').setEnabled( True )
             self.nim.Input('server').clear()
@@ -1606,7 +1658,7 @@ class GUI(QtGui.QMainWindow) :
                         if self.app=='Maya' :
                             if ext not in ['.ma', '.mb'] : item.setFlags( QtCore.Qt.ItemIsEditable )
                         elif self.app=='Nuke' :
-                            if ext !='.nk' : item.setFlags( QtCore.Qt.ItemIsEditable )
+                            if ext not in ['.nk', '.nknc'] : item.setFlags( QtCore.Qt.ItemIsEditable )
                         elif self.app=='C4D' :
                             if ext !='.c4d' : item.setFlags( QtCore.Qt.ItemIsEditable )
                         elif self.app=='3dsMax' :
@@ -1693,7 +1745,7 @@ class GUI(QtGui.QMainWindow) :
                                 if self.app=='Maya' :
                                     if option['ext'] not in ['.ma', '.mb'] : item.setFlags( QtCore.Qt.ItemIsEditable )
                                 elif self.app=='Nuke' :
-                                    if option['ext'] !='.nk' : item.setFlags( QtCore.Qt.ItemIsEditable )
+                                    if option['ext'] not in ['.nk', '.nknc'] : item.setFlags( QtCore.Qt.ItemIsEditable )
                                 elif self.app=='C4D' :
                                     if option['ext'] !='.c4d' : item.setFlags( QtCore.Qt.ItemIsEditable )
                                 elif self.app=='3dsMax' :
@@ -1902,17 +1954,23 @@ class GUI(QtGui.QMainWindow) :
         
         #  Set default image, if Shot/Asset ID's have not been set yet :
         if _type and not self.nim.ID( 'asset' ) and not self.nim.ID( 'shot' ) :
-            self.nim.set_pic( elem=_type, widget=QtGui.QPixmap().fromImage( \
-                QtGui.QImage( self.pref_imgDefault ) ) )
+            try :
+                self.nim.set_pic( elem=_type, widget=QtGui2.QPixmap().fromImage( QtGui2.QImage( self.pref_imgDefault ) ) )
+            except :
+                self.nim.set_pic( elem=_type, widget=QtGui.QPixmap().fromImage( QtGui.QImage( self.pref_imgDefault ) ) )
+           
             self.nim.pix( _type ).fromImage( QtGui.QImage( self.pref_imgDefault ) )
-            self.nim.set_pic( elem=_type, widget=self.nim.pix( _type ).scaled( \
-                self.img_size, self.img_size, QtCore.Qt.KeepAspectRatio ) )
+            self.nim.set_pic( elem=_type, widget=self.nim.pix( _type ).scaled( self.img_size, self.img_size, QtCore.Qt.KeepAspectRatio ) )
             self.nim.label( _type ).setPixmap( self.nim.pix( _type ) )
             return None
         
         # Get domain name from URL
         from urlparse import urlparse
-        parsed_uri = urlparse( self.prefs['NIM_URL'] )
+        #parsed_uri = urlparse( self.prefs['NIM_URL'] )
+        #updated to use global vars
+        connect_info = Api.get_connect_info()
+        nimURL = connect_info['nim_apiURL']
+        parsed_uri = urlparse(nimURL)   
         nim_domain = '{uri.scheme}://{uri.netloc}/'.format(uri=parsed_uri)
         print( 'NIM Domain: %s' % nim_domain)
 
@@ -1927,45 +1985,18 @@ class GUI(QtGui.QMainWindow) :
             img_loc=''
             print('Using default img: %s' % img_loc)
 
-        #  Ensure the Thumbnail exists :
-        '''
-        #REMOVED: Directory verification to failed due to security on folder browsing
-        if _type and img and len(img) :
-            if img[0]['img_link'] :
-                httpSrch=re.search( '^http[s]?://', nim_domain )
-                if httpSrch :
-                    img_loc=nim_domain+img[0]['img_link']
-                    img_dir=os.path.dirname( img_loc )+'/'
-                    print('img_loc: %s' % img_loc)
-                    print('img_dir: %s' % img_dir)
-                    
-                    if img_loc and img_dir :
-                        #  Ensure that the image directory exists :
-                        try :
-                            urllib2.urlopen( img_dir )
-                            #  Ensure that the image exists :
-                            try :
-                                urllib2.urlopen( img_loc )
-                            except :
-                                P.debug( '%s image URL doesn\'t exist : "%s".' % \
-                                    (_type.upper(), img_loc) )
-                                img_loc=''
-                        except :
-                            P.debug( '%s image URL directory doesn\'t exist : "%s".' % \
-                                (_type.upper(), img_loc) )
-                            img_loc=''
-        '''
-        
-        print ('type: %s' % _type)
-        print ('set: %s' % _set)
-
         #  Set Shot/Asset image :
         if _type and img_loc :
             print("set image")
-            _data=urllib.urlopen( img_loc ).read()
+            try :
+                myssl = ssl.create_default_context()
+                myssl.check_hostname=False
+                myssl.verify_mode=ssl.CERT_NONE
+                _data=urllib.urlopen( img_loc,context=myssl ).read()
+            except :
+                _data=urllib.urlopen( img_loc ).read()
             self.nim.pix( _type ).loadFromData( _data )
-            self.nim.set_pic( elem=_type, widget=self.nim.pix( _type ).scaled( \
-                self.img_size, self.img_size, QtCore.Qt.KeepAspectRatio ) )
+            self.nim.set_pic( elem=_type, widget=self.nim.pix( _type ).scaled( self.img_size, self.img_size, QtCore.Qt.KeepAspectRatio ) )
             self.nim.label( _type ).setPixmap( self.nim.pix( _type ) )
             _set=True
             P.debug( '%s image URL = "%s"' % (_type.upper(), img_loc) )
@@ -1973,20 +2004,29 @@ class GUI(QtGui.QMainWindow) :
         #  Set default image :
         if _type and not _set :
             print("default image")
-            self.nim.set_pic( elem=_type, widget=QtGui.QPixmap().fromImage( \
-                QtGui.QImage( self.pref_imgDefault ) ) )
+            try :
+                self.nim.set_pic( elem=_type, widget=QtGui2.QPixmap().fromImage( \
+                    QtGui2.QImage( self.pref_imgDefault ) ) )
+            except :
+                self.nim.set_pic( elem=_type, widget=QtGui.QPixmap().fromImage( \
+                    QtGui.QImage( self.pref_imgDefault ) ) )
             self.nim.pix( _type ).fromImage( QtGui.QImage( self.pref_imgDefault ) )
-            self.nim.set_pic( elem=_type, widget=self.nim.pix( _type ).scaled( \
-                self.img_size, self.img_size, QtCore.Qt.KeepAspectRatio ) )
+            self.nim.set_pic( elem=_type, widget=self.nim.pix( _type ).scaled( self.img_size, self.img_size, QtCore.Qt.KeepAspectRatio ) )
             self.nim.label( _type ).setPixmap( self.nim.pix( _type ) )
             P.debug( '%s image URL set to default : "%s"' % (_type.upper(), self.pref_imgDefault) )
         
         if not _type and not _set :
             print("default image")
             _type = 'shot'
-            self.nim.set_pic( elem=_type, widget=QtGui.QPixmap().fromImage( \
-                QtGui.QImage( self.pref_imgDefault ) ) )
-            self.nim.pix( _type ).fromImage( QtGui.QImage( self.pref_imgDefault ) )
+            try :
+                self.nim.set_pic( elem=_type, widget=QtGui2.QPixmap().fromImage( QtGui2.QImage( self.pref_imgDefault ) ) )
+            except :
+                self.nim.set_pic( elem=_type, widget=QtGui.QPixmap().fromImage( QtGui.QImage( self.pref_imgDefault ) ) )
+            try :
+                self.nim.pix( _type ).fromImage( QtGui2.QImage( self.pref_imgDefault ) )
+            except :
+                self.nim.pix( _type ).fromImage( QtGui.QImage( self.pref_imgDefault ) )
+
             self.nim.set_pic( elem=_type, widget=self.nim.pix( _type ).scaled( \
                 self.img_size, self.img_size, QtCore.Qt.KeepAspectRatio ) )
             self.nim.label( _type ).setPixmap( self.nim.pix( _type ) )
@@ -2032,14 +2072,22 @@ class GUI(QtGui.QMainWindow) :
     def update_user(self) :
         'Updates the currently set user name and ID within NIM'
         #  Get User Information :
-        info=Win.userInfo()
-        userName=info[0]
-        userID=info[1]
-        #  Set User :
-        self.nim.set_userInfo( userName=userName, userID=userID )
-        self.nimPrefs.set_userInfo( userName=userName, userID=userID )
-        #  Update window :
-        self.update_elem('job')
+        info=Win.userInfo(apiUser=self.user)
+        if( info == False ):
+            P.info('The NIM user was not changed.')
+        elif( info == None ):
+            pass
+        else :
+            userName=info[0]
+            userID=info[1]
+            #  Set User :
+            self.nim.set_userInfo( userName=userName, userID=userID )
+            self.nimPrefs.set_userInfo( userName=userName, userID=userID )
+            #  Update window :
+            try:
+                self.update_elem('job')
+            except:
+                pass
         return
 
     
@@ -2272,7 +2320,7 @@ class GUI(QtGui.QMainWindow) :
 
         # Get Server OS Path from server ID
         P.info("FileID: %s" % self.nim.ID('ver'))
-        
+
         open_file_versionInfo = Api.get_verInfo( self.nim.ID('ver') )
 
         if open_file_versionInfo:
@@ -2287,8 +2335,13 @@ class GUI(QtGui.QMainWindow) :
             self.saveServerPref = True
 
         #  Convert file path :
-        filePath=F.os_filePath( path=filePath, nim=self.nim )
-        #P.info("filePath: %s" % filePath)
+        try :
+            filePath=F.os_filePath( path=filePath, nim=self.nim )
+            #P.info("filePath: %s" % filePath)
+        except:
+            P.error('Sorry, no version selected.')
+            Win.popup( title='NIM Error', msg='Sorry, no file specified.\nPlease select a version to open.' )
+            return False
 
         #  Set File Version :
         ver=F.get_ver( filePath=filePath )
@@ -2331,7 +2384,7 @@ class GUI(QtGui.QMainWindow) :
                 mc.file( filePath, force=True, open=True, ignoreVersion=True, prompt=False )
             except Exception, e :
                 P.error( 'Failed reading the file: %s' % filePath )
-                P.error( '    %s' % traceback.print_exc() )
+                P.debug( '    %s' % traceback.print_exc() )
                 return False
             
             #  Set Project :
@@ -2350,7 +2403,7 @@ class GUI(QtGui.QMainWindow) :
                 M.set_vars( nim=self.nim )
             except Exception, e :
                 P.error( 'Failed adding NIM attributes to Project Settings node...' )
-                P.error( '    %s' % traceback.print_exc() )
+                P.debug( '    %s' % traceback.print_exc() )
                 return False
             
         #  Nuke :
@@ -2398,7 +2451,7 @@ class GUI(QtGui.QMainWindow) :
                 knob.setValue( filePath.replace( '\\', '/' ) )
             except Exception, e :
                 P.error( 'Failed reading the file: %s' % filePath )
-                P.error( '    %s' % traceback.print_exc() )
+                P.debug( '    %s' % traceback.print_exc() )
                 return False
             
             #  Set Variables :
@@ -2407,7 +2460,7 @@ class GUI(QtGui.QMainWindow) :
                 N.set_vars( nim=self.nim )
             except Exception, e :
                 P.error( 'Failed adding NIM attributes to Project Settings node...' )
-                P.error( '    %s' % traceback.print_exc() )
+                P.debug( '    %s' % traceback.print_exc() )
                 return False
         
         #  Hiero :
@@ -2417,7 +2470,7 @@ class GUI(QtGui.QMainWindow) :
                 hiero.core.openProject( filePath )
             except Exception, e :
                 P.error( 'Failed reading the file: %s' % filePath )
-                P.error( '    %s' % traceback.print_exc() )
+                P.debug( '    %s' % traceback.print_exc() )
                 return False
         
         #  3dsMax :
@@ -2431,7 +2484,7 @@ class GUI(QtGui.QMainWindow) :
                 mpFM.Open(filePath)
             except Exception, e :
                 P.error( 'Failed reading the file: %s' % filePath )
-                P.error( '    %s' % traceback.print_exc() )
+                P.debug( '    %s' % traceback.print_exc() )
                 return False
             
             #  Set Project :
@@ -2450,7 +2503,7 @@ class GUI(QtGui.QMainWindow) :
                 Max.set_vars( nim=self.nim )
             except Exception, e :
                 P.error( 'Failed adding NIM attributes to Project Settings node...' )
-                P.error( '    %s' % traceback.print_exc() )
+                P.debug( '    %s' % traceback.print_exc() )
                 return False
 
         #  Houdini :
@@ -2468,7 +2521,7 @@ class GUI(QtGui.QMainWindow) :
                 hou.hipFile.load(file_name=str(filePath))
             except Exception, e :
                 P.error( 'Failed reading the file: %s' % filePath )
-                P.error( '    %s' % traceback.print_exc() )
+                P.debug( '    %s' % traceback.print_exc() )
                 return False
             
             #  Set Project :
@@ -2491,7 +2544,7 @@ class GUI(QtGui.QMainWindow) :
                 Houdini.set_vars( nim=self.nim )
             except Exception, e :
                 P.error( 'Failed adding NIM attributes to Project Settings node...' )
-                P.error( '    %s' % traceback.print_exc() )
+                P.debug( '    %s' % traceback.print_exc() )
                 return False
 
         P.info( 'File, %s, opened!' % filePath )
@@ -2508,7 +2561,7 @@ class GUI(QtGui.QMainWindow) :
         
         # Get Server OS Path from server ID
         P.info("FileID: %s" % self.nim.ID('ver'))
-        
+
         open_file_versionInfo = Api.get_verInfo( self.nim.ID('ver') )
 
         open_file_serverID = None
@@ -2518,8 +2571,12 @@ class GUI(QtGui.QMainWindow) :
             #serverOSPath = serverOsPathInfo[0]['serverOSPath']
 
         # TODO: check file path conversion for multiple server scenario
-        filePath=F.os_filePath( path=path, nim=self.nim, serverID=open_file_serverID )
-
+        try:
+            filePath=F.os_filePath( path=path, nim=self.nim, serverID=open_file_serverID )
+        except:
+            P.error('File path not resolved.')
+            Win.popup( title='NIM Error', msg='Sorry, file path not found.\nPlease select a version to import.' )
+            return False
 
         #  Maya Import :
         if self.app=='Maya' :
@@ -2624,7 +2681,12 @@ class GUI(QtGui.QMainWindow) :
         task=self.nim.Input('task').currentText()
         basename=Api.to_basename( nim=self.nim )
         if self.app=='Maya' : ext=self.nim.Input('fileExt').currentText()
-        elif self.app=='Nuke' : ext='.nk'
+        elif self.app=='Nuke' : 
+            import nuke
+            if nuke.env['nc'] :
+                ext='.nknc'
+            else :
+                ext='.nk'
         elif self.app=='C4D' : ext='.c4d'
         elif self.app=='3dsMax' : ext='.max'
         elif self.app=='Houdini' : ext='.hip'
@@ -2659,7 +2721,12 @@ class GUI(QtGui.QMainWindow) :
         'Versions up the file, when the Version Up button is pressed'
         #  Get File Extension :
         if self.app=='Maya' : ext=self.nim['fileExt']['input'].currentText()
-        elif self.app=='Nuke' : ext='.nk'
+        elif self.app=='Nuke' : 
+            import nuke
+            if nuke.env['nc'] :
+                ext='.nknc'
+            else :
+                ext='.nk'
         elif self.app=='C4D' : ext='.c4d'
         elif self.app=='3dsMax' : ext='.max'
         elif self.app=='Houdini' : ext='.hip'
@@ -2679,7 +2746,12 @@ class GUI(QtGui.QMainWindow) :
         'Publishes the current file, when the Publish button is pressed'
         #  Get File Extension :
         if self.app=='Maya' : ext=self.nim.Input('fileExt').currentText()
-        elif self.app=='Nuke' : ext='.nk'
+        elif self.app=='Nuke' : 
+            import nuke
+            if nuke.env['nc'] :
+                ext='.nknc'
+            else :
+                ext='.nk'
         elif self.app=='C4D' :  ext='.c4d'
         elif self.app=='3dsMax' : ext='.max'
         elif self.app=='Houdini' : ext='.hip'
@@ -2768,11 +2840,16 @@ class GUI(QtGui.QMainWindow) :
         filePath=self.get_filePath()
         
         #  Derive file name to use for namespace :
-        index=self.nim.Input('ver').currentItem().text().find(' - ')
-        fileName=self.nim.Input('ver').currentItem().text()[0:index]
-        #  Remove file extension from file name :
-        fileName=os.path.splitext( fileName )[0]
-        
+        try :
+            index=self.nim.Input('ver').currentItem().text().find(' - ')        
+            fileName=self.nim.Input('ver').currentItem().text()[0:index]
+            #  Remove file extension from file name :
+            fileName=os.path.splitext( fileName )[0]
+        except:
+            P.error('Sorry, no version selected.')
+            Win.popup( title='NIM Error', msg='Sorry, no file specified.\nPlease select a version to reference.' )
+            return False
+
         #  Reference the file :
         if self.checkBox.checkState() :
             mc.file( filePath, force=True, reference=True, namespace=fileName, groupReference=True, \
@@ -2793,10 +2870,15 @@ class GUI(QtGui.QMainWindow) :
         filePath=self.get_filePath()
         
         #  Derive file name to use for namespace :
-        index=self.nim.Input('ver').currentItem().text().find(' - ')
-        fileName=self.nim.Input('ver').currentItem().text()[0:index]
-        #  Remove file extension from file name :
-        fileName=os.path.splitext( fileName )[0]
+        try :
+            index=self.nim.Input('ver').currentItem().text().find(' - ')
+            fileName=self.nim.Input('ver').currentItem().text()[0:index]
+            #  Remove file extension from file name :
+            fileName=os.path.splitext( fileName )[0]
+        except:
+            P.error('Sorry, no version selected.')
+            Win.popup( title='NIM Error', msg='Sorry, no file specified.\nPlease select a version to reference.' )
+            return False
         
         #  Reference the file :
         if self.checkBox.checkState() :
@@ -2827,17 +2909,22 @@ class GUI(QtGui.QMainWindow) :
 
     #  Houdini File Operations :
     def houdini_fileReference(self) :
-        'References a given 3dsMax file'
+        'References a given Houdini file'
         import hou
         #TODO: look up houdini referencing
         #  Get File Path :
         filePath=self.get_filePath()
         
         #  Derive file name to use for namespace :
-        index=self.nim.Input('ver').currentItem().text().find(' - ')
-        fileName=self.nim.Input('ver').currentItem().text()[0:index]
-        #  Remove file extension from file name :
-        fileName=os.path.splitext( fileName )[0]
+        try :
+            index=self.nim.Input('ver').currentItem().text().find(' - ')
+            fileName=self.nim.Input('ver').currentItem().text()[0:index]
+            #  Remove file extension from file name :
+            fileName=os.path.splitext( fileName )[0]
+        except:
+            P.error('Sorry, no version selected.')
+            Win.popup( title='NIM Error', msg='Sorry, no file specified.\nPlease select a version to reference.' )
+            return False
         
         #  Reference the file :
         if self.checkBox.checkState() :

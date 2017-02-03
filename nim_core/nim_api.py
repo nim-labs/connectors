@@ -2,9 +2,9 @@
 #******************************************************************************
 #
 # Filename: nim_api.py
-# Version:  v0.7.3.150625
+# Version:  v2.5.22.170202
 #
-# Copyright (c) 2015 NIM Labs LLC
+# Copyright (c) 2016 NIM Labs LLC
 # All rights reserved.
 #
 # Use of this software is subject to the terms of the NIM Labs license
@@ -13,9 +13,34 @@
 # *****************************************************************************
 
 
+# EXAMPLE:
+#   Adding a render to a task
+#   uploading an icon to the render
+#   uploading dialies to a render
+#   adding elements to a render
+#
+# import nim_core.nim_api as nimAPI
+# result = nimAPI.add_render(taskID=14941, renderName='myRender')
+# if result['success'] == 'true':
+#    nimAPI.upload_renderIcon(renderID=result['ID'],img='/path/to/icon.jpeg')
+#    nimAPI.upload_dailies(renderID=result['ID'],path='/path/to/movie/myImages.mov')
+#    nimAPI.add_element( parent='render', parentID=result['ID'], path='/path/to/frames/myImage.####.exr', name='myImage', \
+#                           startFrame=1, endFrame=128, handles=12, isPublished=False )
+#    nimAPI.add_element( parent='render', parentID=result['ID'], path='/path/to/frames/myImage_matte.####.exr', name='myImage_matte', \
+#                           startFrame=1, endFrame=128, handles=12, isPublished=False )
+#
+
+
+
 #  General Imports :
 import json, os, re, sys, traceback
 import urllib, urllib2
+try :
+    import ssl
+except :
+    print "NIM: Failed to load SSL - API"
+    pass
+
 import mimetools, mimetypes
 import email.generator as email_gen
 import cStringIO
@@ -31,88 +56,317 @@ import nim_tools
 import nim_win as Win
 
 #  Variables :
-version='v1.0.3'
+version='v2.5.22'
 winTitle='NIM_'+version
 
 
-#  Basic API query command :
+def testAPI(nimURL=None, nim_apiUser='', nim_apiKey='') :
+    sqlCmd={'q': 'testAPI'}
+    cmd=urllib.urlencode(sqlCmd)
+    _actionURL="".join(( nimURL, cmd ))
+    request = urllib2.Request(_actionURL)
+    try :
+        request.add_header("X-NIM-API-USER", nim_apiUser)
+        request.add_header("X-NIM-API-KEY", nim_apiKey)
+        request.add_header("Content-type", "application/x-www-form-urlencoded; charset=UTF-8")
+        try :
+            myssl = ssl.create_default_context()
+            myssl.check_hostname=False
+            myssl.verify_mode=ssl.CERT_NONE
+            _file = urllib2.urlopen(request,context=myssl)
+        except :
+            _file = urllib2.urlopen(request)
+        fr=_file.read()
+        try : result=json.loads( fr )
+        except Exception, e :
+            P.error( traceback.print_exc() )
+        _file.close()
+        return result
+    except urllib2.URLError, e :
+        P.error( '\nFailed to read NIM API' )
+        P.error( '   %s' % _actionURL )
+        url_error = e.reason
+        P.error('URL ERROR: %s' % url_error)
+        err_msg = 'NIM Connection Error:\n\n %s' %  url_error;
+        Win.popup(msg=err_msg)
+        P.debug( '    %s' % traceback.print_exc() )
+        return False
+
+
+# Get NIM Connection Information
+def get_connect_info() :
+    'Returns the connection information from preferences'
+
+    _prefs=Prefs.read()
+
+    if _prefs and 'NIM_URL' in _prefs.keys() :
+        nim_apiURL=_prefs['NIM_URL']
+    else :
+        P.info( '"NIM_URL" not found in preferences!' )
+        return False
+
+    if _prefs and 'NIM_User' in _prefs.keys() :
+        nim_apiUser=_prefs['NIM_User']
+    else :
+        P.info( '"NIM_User" not found in preferences!' )
+        return False
+        
+    nim_apiKey = get_apiKey()
+
+    connect_info = {'nim_apiURL':nim_apiURL, 'nim_apiUser':nim_apiUser, 'nim_apiKey':nim_apiKey}
+    return connect_info
+
+
+#  Get API Key for user
+def get_apiKey() :
+    key = ''
+    key_fileName = 'nim.key'
+    key_path = os.path.normpath( os.path.join( Prefs.get_home(), key_fileName ) )
+
+    if os.path.isfile( key_path ) :
+        try :
+            #  Read NIM API KEY file :
+            with open(key_path, 'r') as f:
+                key = f.readline().strip()
+        except Exception, e :
+            P.error( 'Unable to read api key.' )
+    else :
+        # P.warning( 'API Key not found.' )
+        pass
+    return key
+
+
+#  DEPRECATED in 2.5 in favor of connect()
 def get( sqlCmd=None, debug=True, nimURL=None ) :
+    result=False
+    result = connect( method='get', params=sqlCmd, nimURL=nimURL )
+    return result
+
+
+#  DEPRECATED in 2.5 in favor of connect()
+def post( sqlCmd=None, debug=True, nimURL=None ) :
+    result=False
+    result = connect( method='post', params=sqlCmd, nimURL=nimURL )
+    return result
+
+
+#  API Query command
+#       method options: get or post
+#       params['q'] is required to define the HTML API query
+#           Example:
+#           params = {}
+#           params['q'] = 'getShots'
+#           params['showID'] = '100'
+#       nimURL optional (not passing the nimURL will trigger a prefs read)
+#       apiKey optional (required if passing nimURL and Require API Keys is enabled)
+#
+def connect( method='get', params=None, nimURL=None, apiKey=None ) :
     'Querys MySQL server and returns decoded json array'
     result=None
     
-    #  If NIM URL not given, retrieve from preferences :
+    connect_info = None
     if not nimURL :
-        _prefs=Prefs.read()
-        if _prefs and 'NIM_URL' in _prefs.keys() :
-            nimURL=_prefs['NIM_URL']
-        else :
-            P.info( '"NIM_URL" not found in preferences!' )
-            return False
-    #  Execute command :
-    if sqlCmd :
-        cmd=urllib.urlencode(sqlCmd)
-        _actionURL="".join(( nimURL, cmd ))
-
-        try :
-            #P.error( 'FAILED BEFORE %s' % _actionURL)
-            _file=urllib2.urlopen( _actionURL )
-            #P.error( 'FAILED HERE')
-            fr=_file.read()
-            #  Don't run JSON load for publishing of Sym-Links :
-            try : result=json.loads( fr )
-            except Exception, e :
-
-                P.error( traceback.print_exc() )
-            _file.close()
-            return result
-        except Exception, e :
-            P.error( '\nFailed to read URL for the following command...\n    %s' % sqlCmd )
-            P.error( '   %s' % _actionURL )
-            P.error( '    %s' % traceback.print_exc() )
-            return False
+        connect_info = get_connect_info()
+    if connect_info :
+        nimURL = connect_info['nim_apiURL']
+        nim_apiUser = connect_info['nim_apiUser']
+        nim_apiKey = connect_info['nim_apiKey']
     else :
-        P.error( 'No SQL command provided to run.' )
-        return False
-
-
-#  Basic API query command :
-def post( sqlCmd=None, debug=True, nimURL=None ) :
-    'Post form data to MySQL server and returns decoded json array'
-    result=None
+        nim_apiUser = ''
+        nim_apiKey = ''
     
-    #  If NIM URL not given, retrieve from preferences :
-    if not nimURL :
-        _prefs=Prefs.read()
-        if _prefs and 'NIM_URL' in _prefs.keys() :
-            nimURL=_prefs['NIM_URL']
+    if apiKey :
+        nim_apiKey = apiKey
+
+    if params :
+        if method == 'get':
+            cmd=urllib.urlencode(params)
+            _actionURL="".join(( nimURL, cmd ))
+        elif method == 'post':
+            cmd=urllib.urlencode(params)
+            _actionURL = re.sub('[?]', '', nimURL)
         else :
-            P.info( '"NIM_URL" not found in preferences!' )
+            P.error('Connection method not defined in request.')
+            Win.popup( title='NIM Connection Error', msg='NIM Connection Error:\n\n Connection method not defined in request.')
             return False
-    #  Execute command :
-    if sqlCmd :
-        cmd=urllib.urlencode(sqlCmd)
-        nimURL = re.sub('[?]', '', nimURL)
 
         try :
-            request = urllib2.Request(nimURL, cmd)
+            if method == 'get':
+                request = urllib2.Request(_actionURL)
+            elif method == 'post':
+                request = urllib2.Request(_actionURL, cmd)
+            
+            request.add_header("X-NIM-API-USER", nim_apiUser)
+            request.add_header("X-NIM-API-KEY", nim_apiKey)
             request.add_header("Content-type", "application/x-www-form-urlencoded; charset=UTF-8")
-            _file = urllib2.urlopen(request)
+            try :
+                myssl = ssl.create_default_context()
+                myssl.check_hostname=False
+                myssl.verify_mode=ssl.CERT_NONE
+                _file = urllib2.urlopen(request,context=myssl)
+            except :
+                _file = urllib2.urlopen(request)
             fr=_file.read()
-            #  Don't run JSON load for publishing of Sym-Links :
             try : result=json.loads( fr )
             except Exception, e :
                 P.error( traceback.print_exc() )
             _file.close()
+
+            # Test for failed API Validation
+            if type(result)==type(list()) and len(result)==1 :
+                try :
+                    error_msg = result[0]['error']
+                    P.error( "API Error %s" % error_msg )
+                    if(error_msg == 'API Key Not Found.') :
+                        #Win.popup( title='NIM API Error', msg='NIM API Key Not Found.\n\nNIM Security is set to require the use of API Keys. \
+                        #                                        Please contact your NIM Administrator to obtain a NIM API KEY.' )
+                        api_result = Win.setApiKey()
+
+                    if(error_msg == 'Failed to validate user.') :
+                        #Win.popup( title='NIM API Error', msg='Failed to validate user.\n\nNIM Security is set to require the use of API Keys. \
+                        #                                        Please obtain a valid NIM API KEY from your NIM Administrator.' )
+                        api_result = Win.setApiKey()
+
+                    if(error_msg == 'API Key Expired.') :
+                        Win.popup( title='NIM API Error', msg='NIM API Key Expired.\n\nNIM Security is set to require the use of API Keys. \
+                                                                Please contact your NIM Administrator to update your NIM API KEY expiration.' )
+                        #return False <-- returning false loads reset prefs msgbox
+                except :
+                    pass
+            
             return result
-        except Exception, e :
-            P.error( '\nFailed to read URL for the following command...\n    %s' % sqlCmd )
-            P.error( '    %s' % nimURL)
-            P.error( '    %s' % cmd)
-            P.error( '    %s' % traceback.print_exc() )
-            return False
+
+        except urllib2.URLError, e :
+            P.error( '\nFailed to read URL for the following command...\n    %s' % params )
+            P.error( '   %s' % _actionURL )
+            url_error = e.reason
+            P.error('URL ERROR: %s' % url_error)
+            err_msg = 'NIM Connection Error:\n\n %s' %  url_error;
+            P.debug( '    %s' % traceback.print_exc() )
+
+            err_msg +='\n\n'+\
+                '    Would you like to recreate your preferences?'
+            P.error( err_msg )
+            reply=Win.popup( title='NIM Error', msg=err_msg, type='okCancel' )
+            #  Re-create preferences, if prompted :
+            if reply=='OK' :
+                prefsFile=Prefs.get_path()
+                if os.path.exists( prefsFile ) :
+                    os.remove( prefsFile )
+                result = Prefs.mk_default()
+                return False
+            else :
+                return
     else :
         P.error( 'No SQL command provided to run.' )
         return False
+
+
+#  API Upload command
+#       Used with all commands HTML API commands that require a file to be uploaded
+#           uploadShotIcon
+#           uploadAssetIcon
+#           uploadRenderIcon
+#           uploadDailies
+#           uploadDailiesNote
+#
+#       params['q'] is required to define the HTML API query
+#       To upload a file params['file'] must be passed a file using open(myFile,'rb')
+#            Example:
+#            params = {}
+#            params['q'] = 'uploadDailiesNote'
+#            params['dailiesID'] = '100'
+#            params['name'] = 'note name'
+#            params['file'] = open(imageFile,'rb')
+#       nimURL optional (not passing the nimURL will trigger a prefs read)
+#       apiKey optional (required if passing nimURL and Require API Keys is enabled)
+#
+def upload( params=None, nimURL=None, apiKey=None ) :
+
+    connect_info = None
+    if not nimURL :
+        connect_info = get_connect_info()
+    if connect_info :
+        nimURL = connect_info['nim_apiURL']
+        nim_apiUser = connect_info['nim_apiUser']
+        nim_apiKey = connect_info['nim_apiKey']
+    else :
+        nim_apiUser = ''
+        nim_apiKey = ''
+    
+    if apiKey :
+        nim_apiKey = apiKey
+
+    _actionURL = nimURL.encode('ascii')
+
+    P.info("Verifying API URL: %s" % _actionURL)
+
+   # Create opener with extended form post support
+    try:
+        opener = urllib2.build_opener(FormPostHandler)
+        opener.addheaders = [('X-NIM-API-USER', nim_apiUser)]
+        opener.addheaders = [('X-NIM-API-KEY', nim_apiKey)]
+    except:
+        P.error( "Failed building url opener")
+        P.error( traceback.format_exc() )
+        return False
+
+    # Test for SSL Redirection
+    isRedirected = False
+    try:
+        testCmd = {'q': 'testAPI'}
+        cmd=urllib.urlencode(testCmd)
+        testURL="".join(( nimURL, cmd ))
+        req = urllib2.Request(testURL)
+        res = urllib2.urlopen(req)
+        finalurl = res.geturl()
+        if nimURL.startswith('http:') and finalurl.startswith('https'):
+            isRedirected = True
+            _actionURL = _actionURL.replace("http:","https:")
+            P.info("Redirect: %s" % _actionURL)
+    except:
+        P.error("Failed to test for redirect.")
+
+    try:
+        result = opener.open(_actionURL, params).read()
+        P.info( "Result: %s" % result )
+
+        # Test for failed API Validation
+        if type(result)==type(list()) and len(result)==1 :
+            try :
+                error_msg = result[0]['error']
+                P.error( error_msg )
+                if(error_msg == 'API Key Not Found.') :
+                    #Win.popup( title='NIM API Error', msg='NIM API Key Not Found.\n\nNIM Security is set to require the use of API Keys. \
+                    #                                        Please contact your NIM Administrator to obtain a NIM API KEY.' )
+                    api_result = Win.setApiKey()
+
+                if(error_msg == 'Failed to validate user.') :
+                    #Win.popup( title='NIM API Error', msg='Failed to validate user.\n\nNIM Security is set to require the use of API Keys. \
+                    #                                        Please obtain a valid NIM API KEY from your NIM Administrator.' )
+                    api_result = Win.setApiKey()
+
+                if(error_msg == 'API Key Expired.') :
+                    Win.popup( title='NIM API Error', msg='NIM API Key Expired.\n\nNIM Security is set to require the use of API Keys. \
+                                                            Please contact your NIM Administrator to update your NIM API KEY expiration.' )
+                    #return False <-- returning false loads reset prefs msgbox
+            except :
+                pass
+
+    except urllib2.HTTPError, e:
+        if e.code == 500:
+            P.error("Server encountered an internal error. \n%s\n(%s)\n%s\n\n" % (_actionURL, params, e))
+            return False
+        else:
+            P.error("Unanticipated error occurred uploading image: %s" % (e))
+            return False
+    else:
+        if params["file"] is not None:
+            if not str(result).startswith("1"):
+                P.error("Could not upload file successfully, but not sure why.\nUrl: %s\nError: %s" % (_actionURL, str(result)))
+                return False
+    
+    return True
 
 
 class FormPostHandler(urllib2.BaseHandler):
@@ -137,6 +391,7 @@ class FormPostHandler(urllib2.BaseHandler):
                 boundary, data = self.encode(params, files)
                 content_type = 'multipart/form-data; boundary=%s' % boundary
                 request.add_unredirected_header('Content-Type', content_type)
+                
             request.add_data(data)
         return request
     
@@ -198,6 +453,11 @@ def get_app() :
         import hou
         return 'Houdini'
     except : pass
+    try:
+        import cinesync
+        return 'Cinesync'
+    except:
+        pass
     return None
 
 def get_user() :
@@ -214,10 +474,12 @@ def get_user() :
 
 def get_userID( user='' ) :
     'Retrieves the current user\'s user ID'
+    print "get_userID: %s" % user
     if not user :
         user=get_user()
     try :
         userID=get( {'q': 'getUserID', 'u': str(user)} )
+        print userID
         if type(userID)==type(list()) and len(userID)==1 :
             return userID[0]['ID']
         else :
@@ -226,10 +488,13 @@ def get_userID( user='' ) :
         print traceback.print_exc()
         return False
 
-def get_userList( ) :
+def get_userList( url=None ) :
     'Retrieves the list of NIM Users from the NIM Preferences.'
     usrList=False
-    usrList=get( sqlCmd={'q': 'getUsers'} )
+    if url:
+        usrList=get( sqlCmd={'q': 'getUsers'}, nimURL=url )
+    else:
+        usrList=get( sqlCmd={'q': 'getUsers'} )
     return usrList
 
 def get_jobs( userID=None, folders=False ) :
@@ -237,12 +502,16 @@ def get_jobs( userID=None, folders=False ) :
     jobDict={}
     #  Build dictionary of jobs :
     _jobs=get( {'q': 'getUserJobs', 'u': userID} )
-    for job in _jobs :
-        if not folders :
-            jobDict[str(job['number'])+'_'+str(job['jobname'])]=str(job['ID'])
-        else :
-            jobDict[str(job['number'])+'_'+str(job['folder'])]=str(job['ID'])
-    return jobDict
+    try:
+        for job in _jobs :
+            if not folders :
+                jobDict[str(job['number'])+'_'+str(job['jobname'])]=str(job['ID'])
+            else :
+                jobDict[str(job['number'])+'_'+str(job['folder'])]=str(job['ID'])
+        return jobDict
+    except :
+        P.error("Failed to get jobs")
+        return False
 
 def get_servers( ID=None ) :
     'Retrieves servers associated with a specified job ID - does not match phpAPI'
@@ -288,12 +557,16 @@ def get_assetInfo( assetID=None ) :
     assetInfo=get( {'q': 'getAssetInfo', 'ID': assetID} )
     return assetInfo
 
+def get_jobInfo( jobID=None ) :
+    'Builds a dictionary of job information including ID, number, jobname, and folder'
+    return get( {'q': 'getJobInfo', 'ID': str(jobID)} )
+
 def get_shows( jobID=None ) :
     'Builds a dictionary of all shows for a given job'
     return get( {'q': 'getShows', 'ID': str(jobID)} )
 
 def get_showInfo( showID=None ) :
-    'Builds a dictionary of all shows for a given job'
+    'Builds a dictionary of all shows for a given show'
     return get( {'q': 'getShowInfo', 'ID': str(showID)} )
 
 def get_shots( showID=None ) :
@@ -304,6 +577,16 @@ def get_shotInfo( shotID=None ) :
     'Retrieves information for a given shot'
     shotInfo=get( {'q': 'getShotInfo', 'ID': shotID} )
     return shotInfo
+
+def get_shotIcon( shotID=None ) :
+    'Retrieves information for a given shot'
+    shotIcon=get( {'q': 'getShotIcon', 'ID': shotID} )
+    return shotIcon
+
+def get_assetIcon( assetID=None ) :
+    'Retrieves information for a given asset'
+    assetIcon=get( {'q': 'getAssetIcon', 'ID': assetID} )
+    return assetIcon
 
 def get_tasks(app='all', userType='artist') :
     'Retrieves the dictionary of available tasks from the API'
@@ -497,8 +780,12 @@ def get_elements( parent='shot', parentID=None, elementTypeID=None, getLastEleme
     publishedElements=get( {'q': 'getElements', 'parent': parent, 'parentID': parentID, 'elementTypeID': elementTypeID, 'getLastElement': getLastElement, 'isPublished': isPublished} )
     return publishedElements
 
-def add_element( parent='shot', parentID=None, typeID='', path='', name='', startFrame=None, endFrame=None, handles=None, isPublished=False ):
-    result=get( {'q': 'addElement', 'parent': parent, 'typeID': typeID, 'parentID': parentID, 'path': path, 'name': name, 'startFrame': startFrame, 'endFrame': endFrame, 'handles': handles, 'isPublished': isPublished} )
+def add_element( parent='shot', parentID=None, typeID='', path='', name='', startFrame=None, endFrame=None, handles=None, isPublished=False, nimURL=None, apiKey=None ):
+    'Adds an element to an asset, shot, task, or render'
+    # nimURL and apiKey are optional for Render API Key overrride
+    params = {'q': 'addElement', 'parent': parent, 'typeID': typeID, 'parentID': parentID, 'path': path, \
+                'name': name, 'startFrame': startFrame, 'endFrame': endFrame, 'handles': handles, 'isPublished': isPublished}
+    result = connect( method='get', params=params, nimURL=nimURL, apiKey=apiKey )
     return result
 
 #  Files :
@@ -934,9 +1221,6 @@ def versionUp( nim=None, padding=2, selected=False, win_launch=False, pub=False,
     
     #  Version Up File :
     #  [AS] returning nim object from verUp to update if loading exported file
-    '''
-    filePath=F.verUp( nim=nim, padding=padding, selected=selected, win_launch=win_launch, pub=pub, symLink=symLink )
-    '''
     verUpResult=F.verUp( nim=nim, padding=padding, selected=selected, win_launch=win_launch, pub=pub, symLink=symLink )
     filePath = verUpResult['filepath']
     verUpNim = verUpResult['nim']
@@ -1134,7 +1418,7 @@ def versionUp( nim=None, padding=2, selected=False, win_launch=False, pub=False,
             msg='FAILED to Version Up the file.' )
         return False
 
-def save_file( parent='SHOW', parentID=0, task_type_ID=0, task_folder='', userID=0, basename='', filename='', path='', ext='', version='', comment='', serverID=0, pub=False, work=True ):
+def save_file( parent='SHOW', parentID=0, task_type_ID=0, task_folder='', userID=0, basename='', filename='', path='', ext='', version='', comment='', serverID=0, pub=False, forceLink=1, work=True ):
     '''General Purpose Save File Function that Adds a File to the NIM Database with brute force data'''
     parent = parent.upper()
 
@@ -1176,9 +1460,9 @@ def save_file( parent='SHOW', parentID=0, task_type_ID=0, task_folder='', userID
         P.info( '      File ID = %s' % result )
 
         if pub:
-            fileID = result
+            ID = result
             #Create symlink for published files
-            pub_result = publish_symLink(fileID)
+            pub_result = publish_symLink(fileID=ID, forceLink=forceLink)
             P.error('pub_result: %s' % pub_result)
             if pub_result == True:
                 P.info('...Success')
@@ -1187,7 +1471,7 @@ def save_file( parent='SHOW', parentID=0, task_type_ID=0, task_folder='', userID
                         Please check to make sure the file exists on disk.')
     return result
 
-def update_file( ID=0, task_type_ID=0, task_folder='', userID=0, basename='', filename='', path='', ext='', version='', comment='', serverID=0, pub=False, work=True ):
+def update_file( ID=0, task_type_ID=0, task_folder='', userID=0, basename='', filename='', path='', ext='', version='', comment='', serverID=0, pub=False, forceLink=1, work=True ):
     '''General Purpose Update File Function that Updates and existing File in the NIM Database'''
     is_work = 0
     if work:
@@ -1223,7 +1507,7 @@ def update_file( ID=0, task_type_ID=0, task_folder='', userID=0, basename='', fi
         P.info( '      File ID = %s' % result )
         if pub:
             #Create symlink for published files
-            pub_result = publish_symLink(ID)
+            pub_result = publish_symLink(fileID=ID, forceLink=forceLink)
             if pub_result == 'true':
                 P.info('...Success')
             else:
@@ -1231,19 +1515,57 @@ def update_file( ID=0, task_type_ID=0, task_folder='', userID=0, basename='', fi
                         Please check to make sure the file exists on disk.')
     return result
 
-def publish_symLink( fileID=None) :
+def publish_symLink( fileID=None, elementID=None, forceLink=1 ) :
     '''Creates the symbolic link for a published file'''
     result = ''
     if fileID :
         P.info('Creating SymLink for Published File')
-        result=get( {'q': 'publishSymlink', 'fileID': str(fileID)} )
+        result=get( {'q': 'publishSymlink', 'fileID': str(fileID), 'forceLink': str(forceLink) } )
+    elif elementID :
+        P.info('Creating SymLink for Published Element')
+        result=get( {'q': 'publishSymlink', 'elementID': str(elementID), 'forceLink': str(forceLink) } )
     else :
-        P.error( 'Sorry!  Problem retrieving File ID.' )
+        P.error( 'Sorry!  Problem retrieving Item ID.' )
         return False
     return result
 
 #  Shots :
 #===------
+def can_bringOnline( item='shot', jobID=0, assetID=0, showID=0, shotID=0 ) :
+    'Tests item against variable based project structure to see if it can be brought online'
+    'Item types can be asset or shot'
+    '   -if asset, jobID OR assetID must be passed'
+    '   -if shot, showID or shotID must be passed'
+
+    params = {}
+    params["q"] = 'canBringOnline'
+    params["type"] = str(item)
+    if jobID > 0 :
+        params["jobID"] = str(jobID)
+    if assetID > 0 :
+        params["assetID"] = str(assetID)
+    if showID > 0 :
+        params["showID"] = str(showID)
+    if shotID > 0 :
+        params["shotID"] = str(shotID)
+    result = connect( method='get', params=params )
+    return result
+
+def bring_online( item='shot', assetID=0, shotID=0 ) :
+    'Brings assets and shots online creating folders from project structure'
+    'Item types can be asset or shot'
+    '   -if asset, assetID must be passed'
+    '   -if shot, shotID must be passed'
+
+    params = {}
+    params["q"] = 'bringOnline'
+    params["type"] = str(item)
+    if assetID > 0 :
+        params["assetID"] = str(assetID)
+    if shotID > 0 :
+        params["shotID"] = str(shotID)
+    result = connect( method='get', params=params )
+    return result
 
 def add_shot( showID=None, shotName=None, shotDuration=None ) :
     'Adds a shot to a show and returns the new ID'
@@ -1253,61 +1575,110 @@ def update_shot( shotID=None, duration=None) :
     'Update current shot information'
     return get( {'q': 'updateShot', 'shotID': str(shotID), 'duration': str(duration) } )
 
-def upload_shotIcon( shotID=None, name='', img=None, nimURL=None ) :
-    'Upload shot icon from base64 encoded image'
+def upload_shotIcon( shotID=None, img=None ) :
+    'Upload shot icon'
     params = {}
-    action = "upload_shotIcon"
+    action = "uploadShotIcon"
     shot_str = str(shotID)
-    name = str(name)
 
     params["q"] = action.encode('ascii')
     params["shotID"] = shot_str.encode('ascii')
-    params["name"] = name.encode('ascii')
     params["file"] = open(img,'rb')
-    #params["file"] = img
 
+    result = upload(params=params)
+    return result
 
-    #  If NIM URL not given, retrieve from preferences :
-    if not nimURL :
-        _prefs=Prefs.read()
-        if _prefs and 'NIM_URL' in _prefs.keys() :
-            nimURL=_prefs['NIM_URL']
-        else :
-            P.info( '"NIM_URL" not found in preferences!' )
-            return False
+def upload_assetIcon( assetID=None, img=None ) :
+    'Upload asset icon'
+    params = {}
+    action = "uploadAssetIcon"
+    asset_str = str(assetID)
 
-    nimURL = nimURL.encode('ascii')
-    P.info("Verifying API URL: %s" % nimURL)
+    params["q"] = action.encode('ascii')
+    params["assetID"] = asset_str.encode('ascii')
+    params["file"] = open(img,'rb')
 
-        
-    # Create opener with extended form post support
-    try:
-        opener = urllib2.build_opener(FormPostHandler)
-    except:
-        P.error( "Failed on build_opener")
-        P.error( traceback.format_exc() )
-        return False
+    result = upload(params=params)
+    return result
 
-    #P.info("build_opener: successful")
-    # Perform the request
-    try:
-        #P.info("Try")
-        result = opener.open(nimURL, params).read()
-        P.info( "Result: %s" % result )
-    except urllib2.HTTPError, e:
-        if e.code == 500:
-            P.error("Server encountered an internal error. \n%s\n(%s)\n%s\n\n" % (nimURL, params, e))
-            return False
-        else:
-            P.error("Unanticipated error occurred uploading image: %s" % (e))
-            return False
-    else:
-        if not str(result).startswith("1"):
-            P.error("Could not upload file successfully, but not sure why.\nUrl: %s\nError: %s" % (nimURL, str(result)))
-            return False
-    
-    #return post( {'q': 'upload_shotIcon', 'shotID': str(shotID), 'name': str(name), 'img': str(img) } )
-    return True
+def add_render( jobID=0, itemType='shot', taskID=0, fileID=0, \
+    renderKey='', renderName='', renderType='', renderComment='', \
+    outputDirs=None, outputFiles=None, elementTypeID=0, start_datetime=None, end_datetime=None, \
+    avgTime='', totalTime='', frame=0, nimURL=None, apiKey=None ) :
+    'Add a render to a task'
+    # nimURL and apiKey are optional for Render API Key overrride
+    params = {'q': 'addRender', 'jobID': str(jobID), 'class': str(itemType), 'taskID': str(taskID), 'fileID': str(fileID), \
+                'renderKey':str(renderKey), 'renderName':str(renderName), 'renderType':str(renderType), 'renderComment':str(renderComment), \
+                'outputDirs':str(outputDirs), 'outputFiles':str(outputFiles), 'elementTypeID':str(elementTypeID), \
+                'start_datetime':str(start_datetime), 'end_datetime':str(end_datetime), \
+                'avgTime':str(avgTime), 'totalTime':str(totalTime), 'frame':str(frame) }
+    result = connect( method='get', params=params, nimURL=nimURL, apiKey=apiKey )
+    return result
+
+def upload_renderIcon( renderID=None, renderKey='', img=None, nimURL=None, apiKey=None ) :
+    'Upload Render Icon'
+    # nimURL and apiKey are optional for Render API Key overrride
+    # 2 required fields:
+    #      renderID or renderKey
+    #      img
+
+    params = {}
+    params["q"] = "uploadRenderIcon"
+    params["renderID"] = renderID
+    params["renderKey"] = renderKey
+    if img is not None:
+        params["file"] = open(img,'rb')
+    else :
+        params["file"] = ''
+
+    result = upload(params=params, nimURL=nimURL, apiKey=apiKey)
+    return result
+
+def get_taskDailies( taskID=None) :
+    'Retrieves the dictionary of dailies for the specified taskID from the API'
+    #tasks=get( {'q': 'getTaskTypes', 'type': 'artist'} )
+    dailies=get( {'q': 'getTaskDailies', 'taskID': taskID} )
+    return dailies
+
+def upload_dailies( taskID=None, renderID=None, renderKey='', path=None, nimURL=None, apiKey=None ) :
+    'Upload Dailies - 2 required fields: (taskID, renderID, or renderKey) and path to movie'
+    # nimURL and apiKey are optional for Render API Key overrride
+    params = {}
+
+    params["q"] = "uploadMovie"
+    params["taskID"] = taskID
+    params["renderID"] = renderID
+    params["renderKey"] = renderKey
+    if path is not None:
+        path = os.path.normpath( path )
+        params["file"] = open(path,'rb')
+    else :
+        params["file"] = ''
+
+    result = upload(params=params, nimURL=nimURL, apiKey=apiKey)
+    return result
+
+def upload_dailiesNote( dailiesID=None, name='', img=None, note='', frame=0, time=-1, userID=None, nimURL=None ) :
+    'Upload dailiesNote'
+    params = {}
+    action = "uploadDailiesNote"
+    shot_str = str(dailiesID)
+    name = str(name)
+
+    params["q"] = action.encode('ascii')
+    params["dailiesID"] = shot_str.encode('ascii')
+    params["name"] = name.encode('ascii')
+    if img is not None:
+        params["file"] = open(img,'rb')
+    else :
+        params["file"] = ''
+    params["note"] = note.encode('ascii')
+    params["frame"] = frame
+    params["time"] = time
+    params["userID"] = userID
+
+    result = upload(params=params)
+    return result
 
 #  End
 

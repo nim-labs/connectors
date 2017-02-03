@@ -1,9 +1,9 @@
 /* ****************************************************************************
 #
 # Filename: AE/nimMenu.jsx
-# Version:  v0.7.3.150625
+# Version:  v2.0.0.160511
 #
-# Copyright (c) 2015 NIM Labs LLC
+# Copyright (c) 2016 NIM Labs LLC
 # All rights reserved.
 #
 # Use of this software is subject to the terms of the NIM Labs license
@@ -12,6 +12,17 @@
 # *************************************************************************** */
 
 function buildMenuUI(thisObj) {
+
+	// If this panel already exists...
+	if (thisObj instanceof Panel) {
+		var menuButtons = thisObj.children,
+			menuButtonsLength = menuButtons.length;
+
+		// Remove any children (buttons) that already exist in the panel since we're rebuilding it
+		for (var x = 0; x < menuButtonsLength; x++)
+			thisObj.remove(menuButtons[0]);  // menuButtons[0] instead of [x] because when we remove the first item, 0 becomes the next
+	}
+
 	var nimMenuPanel = (thisObj instanceof Panel) ? thisObj : new Window('palette', 'NIM', undefined),
 		nimPanel = null,
 		openButton = nimMenuPanel.add('button', undefined, 'Open'),

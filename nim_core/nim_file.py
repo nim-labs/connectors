@@ -2,9 +2,9 @@
 #******************************************************************************
 #
 # Filename: nim_file.py
-# Version:  v1.0.3.151112
+# Version:  v2.5.0.161015
 #
-# Copyright (c) 2015 NIM Labs LLC
+# Copyright (c) 2016 NIM Labs LLC
 # All rights reserved.
 #
 # Use of this software is subject to the terms of the NIM Labs license
@@ -23,7 +23,7 @@ import nim as Nim
 
 
 #  Variables :
-version='v1.0.3'
+version='v2.5.0'
 winTitle='NIM_'+version
 _os=platform.system().lower()
 #  Compiled REGEX Searches :
@@ -34,6 +34,7 @@ num_srch=re.compile( '[0-9]+' )
 
 def get_user() :
     'Retrieves the current user\'s username'
+    # TODO : Check if this function can be removed as redundant
     #  Get username :
     if os.getenv( 'USER' ) :
         _usr=os.getenv( 'USER' )
@@ -46,6 +47,7 @@ def get_user() :
 
 def get_app() :
     'Gets the application by attempting various import statements'
+    # TODO: Check if this function can be removed as redundant
     try :
         import maya.cmds as mc
         return 'Maya'
@@ -70,6 +72,11 @@ def get_app() :
         import hou
         return 'Houdini'
     except : pass
+    try:
+        import cinesync
+        return 'Cinesync'
+    except:
+        pass
     return None
 
 def get_apps() :
@@ -96,7 +103,11 @@ def get_ext( filePath='' ) :
         if app=='Maya' :
             ext='.mb'
         elif app=='Nuke' :
-            ext='.nk'
+            import nuke
+            if nuke.env['nc'] :
+                ext = '.nknc'
+            else :
+                ext='.nk'
         elif app=='C4D' :
             ext='.c4d'
         elif app=='Hiero' :
@@ -308,7 +319,7 @@ def verUp( nim=None, padding=2, selected=False, win_launch=False, pub=False, sym
     
 
     ''' TEST SETTING THE SERVER ID HERE'''
-    P.info("TEST SERVER ID: %s" % str(nim.server(get='ID')))
+    #P.info("TEST SERVER ID: %s" % str(nim.server(get='ID')))
     # Get Server OS Path from server ID
     serverOsPathInfo = Api.get_serverOSPath( nim.server(get='ID'), platform.system() )
     P.info("Server OS Path: %s" % serverOsPathInfo)

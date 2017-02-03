@@ -1,0 +1,131 @@
+#! C:/Program Files/Nuke10.0v1/nuke-10.0.1.dll -nx
+#write_info WriteMOV file:"[ value nimPath ]/[value nimFolder]/[value nimFilename]" format:"2048 1556 1" chans:":" framerange:"1 100" fps:"0" colorspace:"default (Gamma1.8)" datatype:"unknown" transfer:"unknown" views:"main" colorManagement:"Nuke"
+version 10.0 v1
+Gizmo {
+ addUserKnob {20 User l WriteNIM_MOV}
+ addUserKnob {26 nim_outputFileText l Filename T "expected integer but got \"\""}
+ addUserKnob {41 nimCompTag l "Render Tag" T WriteMOV.nimCompTag}
+ addUserKnob {41 nimFilename l INVISIBLE +INVISIBLE T WriteMOV.nimFilename}
+ addUserKnob {22 refreshFilename l "Refresh Filename" t "This is a check to visualize the output filename.  The output filename will always be correct.  This button just refreshed the display label incase the file was versioned up or the tag changed while the preference pane was open." T "nuke.thisNode()\['nim_outputFileText'].setValue(nuke.thisNode()\['nimFilename'].value())" +STARTLINE}
+ addUserKnob {52 pythonFilenameScript T "nuke.thisNode()\['nim_outputFileText'].setValue(nuke.thisNode()\['nimFilename'].value())" +STARTLINE}
+ addUserKnob {26 ""}
+ addUserKnob {41 channels T WriteMOV.channels}
+ addUserKnob {41 frame_mode l frame T WriteMOV.frame_mode}
+ addUserKnob {41 frame l "" -STARTLINE T WriteMOV.frame}
+ addUserKnob {41 colorspace T WriteMOV.colorspace}
+ addUserKnob {41 premultiplied -STARTLINE T WriteMOV.premultiplied}
+ addUserKnob {41 raw l "raw data" -STARTLINE T WriteMOV.raw}
+ addUserKnob {41 views T WriteMOV.views}
+ addUserKnob {26 "" l "mov Options"}
+ addUserKnob {41 meta_codec l codec T WriteMOV.meta_codec}
+ addUserKnob {41 meta_encoder l encoder -STARTLINE T WriteMOV.meta_encoder}
+ addUserKnob {41 mov32_codec l INVISIBLE +INVISIBLE T WriteMOV.mov32_codec}
+ addUserKnob {41 mov64_dnxhd_codec_profile l "codec profile" T WriteMOV.mov64_dnxhd_codec_profile}
+ addUserKnob {41 mov32_fps l fps T WriteMOV.mov32_fps}
+ addUserKnob {41 mov32_audiofile l "audio file" T WriteMOV.mov32_audiofile}
+ addUserKnob {41 mov32_audio_offset l "audio offset" T WriteMOV.mov32_audio_offset}
+ addUserKnob {41 mov32_units l units T WriteMOV.mov32_units}
+ addUserKnob {41 mov32_write_timecode l "write time code" -STARTLINE T WriteMOV.mov32_write_timecode}
+ addUserKnob {20 mov32_advanced l Advanced n 2}
+ mov32_advanced 1
+ addUserKnob {41 mov32_codecoptions l "codec options" T WriteMOV.mov32_codecoptions}
+ addUserKnob {41 mov32_flatten l "fast start" -STARTLINE T WriteMOV.mov32_flatten}
+ addUserKnob {41 mov32_use_format_aspect l "use format aspect" -STARTLINE T WriteMOV.mov32_use_format_aspect}
+ addUserKnob {41 mov32_ycbcr_matrix_type l "ycbcr matrix" T WriteMOV.mov32_ycbcr_matrix_type}
+ addUserKnob {41 mov32_pixel_format l "pixel format" T WriteMOV.mov32_pixel_format}
+ addUserKnob {41 mov32_write_nclc l "write nclc" -STARTLINE T WriteMOV.mov32_write_nclc}
+ addUserKnob {41 mov32_write_gamma l "write gamma" -STARTLINE T WriteMOV.mov32_write_gamma}
+ addUserKnob {41 mov32_write_prores l "write prores" -STARTLINE T WriteMOV.mov32_write_prores}
+ addUserKnob {20 "" n -1}
+ addUserKnob {41 mov64_format l INVISIBLE +INVISIBLE T WriteMOV.mov64_format}
+ addUserKnob {41 mov64_codec l INVISIBLE +INVISIBLE T WriteMOV.mov64_codec}
+ addUserKnob {41 mov64_fps l INVISIBLE +INVISIBLE T WriteMOV.mov64_fps}
+ addUserKnob {41 mov64_audiofile l INVISIBLE +INVISIBLE T WriteMOV.mov64_audiofile}
+ addUserKnob {41 mov64_audio_offset l INVISIBLE +INVISIBLE T WriteMOV.mov64_audio_offset}
+ addUserKnob {41 mov64_units l INVISIBLE +INVISIBLE T WriteMOV.mov64_units}
+ addUserKnob {41 mov64_write_timecode l INVISIBLE -STARTLINE +INVISIBLE T WriteMOV.mov64_write_timecode}
+ addUserKnob {20 mov64_advanced l Advanced +HIDDEN n 2}
+ mov64_advanced 1
+ addUserKnob {41 mov64_dnxhd_encode_video_range l "output range" T WriteMOV.mov64_dnxhd_encode_video_range}
+ addUserKnob {41 mov64_bitrate l bitrate T WriteMOV.mov64_bitrate}
+ addUserKnob {41 mov64_bitrate_tolerance l "bitrate tolerance" T WriteMOV.mov64_bitrate_tolerance}
+ addUserKnob {41 mov64_quality_min l "quality min" T WriteMOV.mov64_quality_min}
+ addUserKnob {41 mov64_quality_max l max T WriteMOV.mov64_quality_max}
+ addUserKnob {41 mov64_gop_size l "gop size" T WriteMOV.mov64_gop_size}
+ addUserKnob {41 mov64_b_frames l "b frames" T WriteMOV.mov64_b_frames}
+ addUserKnob {41 mov64_write_nclc l "write nclc" T WriteMOV.mov64_write_nclc}
+ addUserKnob {20 "" n -1}
+ addUserKnob {26 ""}
+ addUserKnob {41 render_order l "render order" T WriteMOV.render_order}
+ addUserKnob {41 Render -STARTLINE T WriteMOV.Render}
+ addUserKnob {41 first l "frame range" T WriteMOV.first}
+ addUserKnob {41 last l "" -STARTLINE T WriteMOV.last}
+ addUserKnob {41 use_limit l "limit to range" T WriteMOV.use_limit}
+ addUserKnob {26 "" l " "}
+ addUserKnob {41 reading l "read file" T WriteMOV.reading}
+ addUserKnob {41 checkHashOnRead l "check file matches input" -STARTLINE T WriteMOV.checkHashOnRead}
+ addUserKnob {41 on_error l "missing frames" T WriteMOV.on_error}
+ addUserKnob {41 reload l Reload -STARTLINE T WriteMOV.reload}
+ addUserKnob {41 read_all_lines l "read all lines" -STARTLINE T WriteMOV.read_all_lines}
+ addUserKnob {20 "" l OCIO}
+ addUserKnob {26 "" l Context}
+ addUserKnob {41 key1 T WriteMOV.key1}
+ addUserKnob {41 value1 -STARTLINE T WriteMOV.value1}
+ addUserKnob {41 key2 T WriteMOV.key2}
+ addUserKnob {41 value2 -STARTLINE T WriteMOV.value2}
+ addUserKnob {41 key3 T WriteMOV.key3}
+ addUserKnob {41 value3 -STARTLINE T WriteMOV.value3}
+ addUserKnob {41 key4 T WriteMOV.key4}
+ addUserKnob {41 value4 -STARTLINE T WriteMOV.value4}
+ addUserKnob {41 in_colorspace l INVISIBLE +INVISIBLE T WriteMOV.in_colorspace}
+ addUserKnob {41 out_colorspace l INVISIBLE +INVISIBLE T WriteMOV.out_colorspace}
+ addUserKnob {41 reverse_transform l INVISIBLE +INVISIBLE T WriteMOV.reverse_transform}
+ addUserKnob {20 "" l Python}
+ addUserKnob {41 beforeRender l "before render" T WriteMOV.beforeRender}
+ addUserKnob {41 beforeFrameRender l "before each frame" T WriteMOV.beforeFrameRender}
+ addUserKnob {41 afterFrameRender l "after each frame" T WriteMOV.afterFrameRender}
+ addUserKnob {41 afterRender l "after render" T WriteMOV.afterRender}
+ addUserKnob {41 renderProgress l "render progress" T WriteMOV.renderProgress}
+}
+ Input {
+  inputs 0
+  name Input1
+  xpos 486
+  ypos -159
+ }
+ Write {
+  file "\[ value nimPath ]/\[value nimFolder]/\[value nimFilename]"
+  file_type mov
+  meta_codec "rle "
+  meta_encoder mov32
+  mov32_codec "rle "
+  mov32_pixel_format {{0} "default (RGBA  8-bit)" "RGBA  8-bit"}
+  mov64_codec "rle "
+  mov64_bitrate 20000
+  mov64_bitrate_tolerance 40000000
+  mov64_quality_min 2
+  mov64_quality_max 31
+  mov64_gop_size 12
+  mov64_b_frames 0
+  checkHashOnRead false
+  beforeRender "import nim_tools; nim_tools.CheckOutputPath()"
+  name WriteMOV
+  knobChanged "\nn = nuke.thisNode()\nk = nuke.thisKnob()\nif k.name()=='meta_encoder':\n    nParent = nuke.toNode( '.'.join( n.fullName().split('.')\[:-1] ) ) or nuke.root()\n    if n\['meta_encoder'].getValue()==0:\n        nParent\['mov64_dnxhd_codec_profile'].setVisible(True)\n        nParent\['mov64_advanced'].setVisible(True)\n        nParent\['mov32_advanced'].setVisible(False)\n    else:\n        nParent\['mov64_dnxhd_codec_profile'].setVisible(False)\n        nParent\['mov32_advanced'].setVisible(True)\n        nParent\['mov64_advanced'].setVisible(False)\n        \n"
+  selected true
+  xpos 486
+  ypos -119
+  addUserKnob {20 User}
+  addUserKnob {1 nimCompTag l "Render Tag"}
+  addUserKnob {1 nimPath l "NIM Path"}
+  nimPath "\[ value root.nim_compPath ]"
+  addUserKnob {1 nimFolder l "NIM Folder"}
+  nimFolder "\[value root.nim_basename]_v\[format %02d \[value root.nim_version]]\[ if \{ !\[string equal \[string trim \[value nimCompTag] \" \"] \"\"] \} \{return _\[string trim \[value nimCompTag] \" \"]\} ]"
+  addUserKnob {1 nimFilename l "NIM Filename"}
+  nimFilename "\[value root.nim_basename]_v\[format %02d \[value root.nim_version]]\[ if \{ !\[string equal \[string trim \[value nimCompTag] \" \"] \"\"] \} \{return _\[string trim \[value nimCompTag] \" \"]\} ].%04d.\[value file_type]"
+ }
+ Output {
+  name Output1
+  xpos 486
+  ypos -19
+ }
+end_group

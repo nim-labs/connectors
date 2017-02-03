@@ -1,9 +1,9 @@
 /* ****************************************************************************
 #
 # Filename: Photoshop/nimPanel.jsx
-# Version:  v0.7.3.150625
+# Version:  v2.0.0.160511
 #
-# Copyright (c) 2015 NIM Labs LLC
+# Copyright (c) 2016 NIM Labs LLC
 # All rights reserved.
 #
 # Use of this software is subject to the terms of the NIM Labs license
@@ -1716,6 +1716,7 @@ function buildPanelUI(userID, action, metadata) {
 		basename = metadata.basename;
 	}
 
+	if (loadingPanel) loadingPanel.close();
 	nimPanel.show();
 	return nimPanel;
 }

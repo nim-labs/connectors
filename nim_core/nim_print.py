@@ -2,9 +2,9 @@
 #******************************************************************************
 #
 # Filename: nim_print.py
-# Version:  v0.7.3.150625
+# Version:  v2.5.0.161015
 #
-# Copyright (c) 2015 NIM Labs LLC
+# Copyright (c) 2016 NIM Labs LLC
 # All rights reserved.
 #
 # Use of this software is subject to the terms of the NIM Labs license
@@ -20,6 +20,7 @@ import nim_prefs as Prefs
 def debug( msg='' ) :
     'Custom info printer'
     #  Get Debug setting :
+    '''
     prefs=Prefs.read()
     if prefs and type(prefs)==type(dict()) :
         if 'NIM_DebugMode' in prefs :
@@ -28,8 +29,10 @@ def debug( msg='' ) :
             debug=prefs['DebugMode']
         else : debug='False'
     else : debug='False'
+    '''
+    debug = False
     #  Print :
-    if debug=='True' and msg :
+    if debug =='True' and msg :
         tokens=msg.rstrip().split( '\n' )
         for toke in tokens :
             print 'NIM.D-bug ~> %s' % toke
@@ -70,11 +73,14 @@ def warning( msg='' ) :
 
 def error( msg='' ) :
     'Custom error printer'
-    tokens=msg.rstrip().split( '\n' )
-    for toke in tokens :
-        print 'NIM.Error ~> %s' % toke
-    if msg[-1:]=='\n' :
-        print 'NIM.Error ~>'
+    if msg :
+        tokens=msg.rstrip().split( '\n' )
+        for toke in tokens :
+            print 'NIM.Error ~> %s' % toke
+        if msg[-1:]=='\n' :
+            print 'NIM.Error ~>'
+    else : 
+        print 'NIM.Error ~> An error was logged but no message was received.'
     return
 
 

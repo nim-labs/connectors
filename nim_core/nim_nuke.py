@@ -2,9 +2,9 @@
 #******************************************************************************
 #
 # Filename: nim_nuke.py
-# Version:  v0.7.3.150625
+# Version:  v2.5.0.161015
 #
-# Copyright (c) 2015 NIM Labs LLC
+# Copyright (c) 2016 NIM Labs LLC
 # All rights reserved.
 #
 # Use of this software is subject to the terms of the NIM Labs license
@@ -407,7 +407,10 @@ class NIM_Node() :
                     self.nim[elem]['list'].append( 'Select...' )
                     for ver in vers :
                         print ver
-                        srch=re.search( '_[v]?[0-9]+.nk$', ver['filename'] )
+                        if nuke.env['nc'] :
+                            srch=re.search( '_[v]?[0-9]+.nknc$', ver['filename'] )
+                        else :
+                            srch=re.search( '_[v]?[0-9]+.nk$', ver['filename'] )
                         if srch :
                             verNum=re.search( '[0-9]+', srch.group() )
                             if verNum :

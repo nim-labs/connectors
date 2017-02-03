@@ -2,9 +2,9 @@
 #******************************************************************************
 #
 # Filename: nim_prefs.py
-# Version:  v0.7.3.150625
+# Version:  v2.5.0.160930
 #
-# Copyright (c) 2015 NIM Labs LLC
+# Copyright (c) 2016 NIM Labs LLC
 # All rights reserved.
 #
 # Use of this software is subject to the terms of the NIM Labs license
@@ -18,7 +18,6 @@ import os, re, traceback
 #  NIM Imports :
 import nim_api as Api
 import nim_file as F
-#import nim_prefs as Prefs
 import nim_print as P
 import nim_win as Win
 
@@ -26,10 +25,10 @@ import nim_win as Win
 #  Variables :
 prefs_dirName='.nim'
 prefs_fileName='prefs.nim'
-version='v1.0.3'
+version='v2.5.0'
 winTitle='NIM_'+version
 nim_URL='http://hostname/nimAPI.php'
-#nim_scripts = os.path.abspath(os.path.join(os.path.dirname( __file__ ), os.pardir, 'nim_core'))
+nim_useSLL='False'
 nim_scripts = os.path.abspath(os.path.join(os.path.dirname( __file__ ), os.pardir))
 nim_user, nim_userID='', ''
 nim_img='/img/nim_logo.png'
@@ -52,32 +51,51 @@ def get_user() :
 
 def get_userInfo( url='' ) :
     'Retrieves the User ID to use for the window'
-    user=Api.get_user()
-    userID=Api.get( sqlCmd={ 'q': 'getUserID', 'u': user}, debug=False, nimURL=url )
+    #print "get_userInfo(%s)" % url
+    #user=Api.get_user()
+    #userID=Api.get( sqlCmd={ 'q': 'getUserID', 'u': user}, debug=False, nimURL=url )
+    user=None
+    userID=None
+    '''
     users=Api.get( sqlCmd={'q': 'getUsers'}, debug=False, nimURL=url )
-    
+        
     if not userID and users :
+        
         userList=[]
-        for u in users : userList.append( u['username'] )
+        for u in users : 
+            userList.append( u['username'] )
+                
         #  Create window to get user name from :
         if F.get_app() !='C4D' :
-            user=Win.popup( title='User Name Error', msg='Pick a username to use', type='comboBox', \
-                pyside=True, _list=userList )
+            user=Win.popup( title='User Name Error', msg='Pick a username to use', type='comboBox', pyside=True, _list=userList )
         else :
             import nim4d_userWin as W
             userWin=W.GetUser()
             userWin.Open( dlgtype=W.c4d.DLG_TYPE_MODAL )
             user=userWin.get_user()
             print 'User = "%s"' % user
-        
-        #  Get user ID :
-        userID=Api.get( sqlCmd={ 'q': 'getUserID', 'u': user}, debug=False, nimURL=url )
-        if type(userID)==type(list()) and len(userID)==1 :
-            userID=userID[0]['ID']
-        P.info( 'User set to "%s" (ID #%s)' % (user, userID) )
-        return (user, userID)
+    '''
+    if not userID :
+        userInfo = Win.userInfo(url=url, newUser=True)
+        if userInfo :
+            #  Get user ID :
+            print(userInfo)
+            user=userInfo[0]
+            userID=userInfo[1]
+
+            if not userID :
+                userResult=Api.get( sqlCmd={ 'q': 'getUserID', 'u': user}, debug=False, nimURL=url )
+
+                if type(userResult)==type(list()) and len(userResult)==1 :
+                    userID=userResult[0]['ID']
+                    return (user, userID)
+                else :
+                    return False
+            else :
+                return (user, userID)
     else :
-        return False
+        return (user, userID)
+
 
 def set_userInfo( ID=0, name='') :
     'Sets the user name in the NIM Prefereces'
@@ -92,11 +110,12 @@ def get_url() :
     'Retrieves the NIM URL from the NIM Preferences.'
     url=False
     global nim_URL
-    '''
-    _prefs=read()
-    if _prefs and 'NIM_URL' in _prefs.keys() :
-        url=_prefs['NIM_URL']
-    '''
+    
+    if not nim_URL or nim_URL == 'http://hostname/nimAPI.php':
+        _prefs=read()
+        if _prefs and 'NIM_URL' in _prefs.keys() :
+            nim_URL=_prefs['NIM_URL']
+    
     url = nim_URL
     return url
 
@@ -159,11 +178,11 @@ def _inputURL() :
 def _verifyURL( url='' ) :
     'Verifies a given URL as valid'
     #  Verify URL :
-    #P.info('_verifyURL: URL=%s \n' % url)
     if not url : return False
     result=Api.get( sqlCmd={'q': 'testAPI'}, debug=False, nimURL=url )
     P.info('Validating API: %s' % result)
     if result : 
+        #setting global variable
         return url
     else : 
         return False
@@ -182,6 +201,7 @@ def _prefsFail() :
         P.info( 'NIM URL Verified: %s' % test)
         if test : return [result, url]
     return [result, False]
+
 
 def _nimPrefs() :
     'Returns a list of NIM preferences'
@@ -266,8 +286,6 @@ def check() :
 def mk_default( recreatePrefs=False, notify_success=True ) :
     'Makes default preferences'
 
-    #P.info('nim_prefs.mk_default')
-
     global apps
     global nim_api
     global nim_user, nim_userID
@@ -275,7 +293,7 @@ def mk_default( recreatePrefs=False, notify_success=True ) :
     nimHome=mk_home()
     prefsFile=get_path()
     apps=F.get_apps()
-    nim_user=F.get_user()
+    #nim_user=F.get_user()
     url, userID=1, ''
     
     #  Create home dir, if necessary :
@@ -283,26 +301,31 @@ def mk_default( recreatePrefs=False, notify_success=True ) :
     
     #  Check to see if preferences need to be re-created :
     if os.path.exists( prefsFile ) :
-        #  Attempt to re-create preferences with missing attributes :
+        #  If preferences have missing attributes, add those attributes to prefs file:
         prefs_check=check()
         if prefs_check :
-            recreate=Win.popup( title=winTitle+' - Prefs Exist', msg='Preferences already exist - However....\n'+\
-                '    You seem to be missing some preference attributes.\n'+\
-                '    Would you like to re-create?', type='okCancel' )
-            #  Delete preferences file, if specified :
-            if recreate=='OK' :
-                P.info( 'Deleting previous preferences file...' )
-                try :
-                    os.remove( prefsFile )
-                except Exception, e :
-                    P.error( 'Unable to delete preferences' )
-                    P.error( '    %s' % traceback.print_exc() )
-                    return False
-            else :
-                P.info( 'Not altering the existing NIM preferences file, this may cause problems later...' )
-                return False
-        else :
-            
+            #  Open NIM prefs file for appending :
+            _prefFile=open( prefsFile, 'a' )
+            _prefFile.write('\n')
+            #  Write NIM preferences :
+            nim_prefs=_nimPrefs()
+            missing_at_least_one_nim_pref = False
+            for key in prefs_check :
+                if key in nim_prefs :
+                    missing_at_least_one_nim_pref = True
+                    _prefFile.write( key+'='+nim_prefs[key]+'\n' )
+            if missing_at_least_one_nim_pref :
+                _prefFile.write('\n')
+            #  Write Application Preferences :
+            for app in apps :
+                app_prefs=_appPrefs( app )
+                for key in prefs_check :
+                    if key in app_prefs :
+                        _prefFile.write( key+'='+app_prefs[key]+'\n' )
+                _prefFile.write('\n')
+            #  Close file :
+            _prefFile.close()
+        else :            
             #  Ask to recreate existing preferences :
             if recreatePrefs :
                 recreate=Win.popup( title=winTitle+' - Prefs Exist', \
@@ -324,10 +347,10 @@ def mk_default( recreatePrefs=False, notify_success=True ) :
         #  Loop until valid URL found, or Cancel pressed :
         search_for_url = True
         search_for_user = False
-        while search_for_url :
+        while search_for_url:
             url=_inputURL()
             result=_verifyURL( url )
-            if result : 
+            if result: 
                 P.info('URL Valid')
                 nim_URL = url
                 search_for_url = False
@@ -339,19 +362,26 @@ def mk_default( recreatePrefs=False, notify_success=True ) :
                 if keepGoing != 'OK':
                     P.error('Exiting without setting NIM Preferences.')
                     search_for_url = False
+                    search_for_user = False
                     return False
         
         #  Verify User :
-        #if url :
         if search_for_user :
             P.info('Searching for NIM User')
+            '''
             nim_userID=Api.get( sqlCmd={ 'q': 'getUserID', 'u': nim_user}, debug=False, nimURL=nim_URL )
             if not nim_userID :
+                P.info("User ID not found")
                 result=get_userInfo( url=nim_URL )
                 if type(result)==type(tuple()) and len(result)==2 :
                     nim_user=result[0]
                     nim_userID=result[1]
-        
+            '''
+            #Force input of username at preference creation
+            result=get_userInfo( url=nim_URL )
+            if type(result)==type(tuple()) and len(result)==2 :
+                nim_user=result[0]
+                nim_userID=result[1]
 
         #  Notify of failure if there is information missing :
         if not nim_URL or not nim_user or not nim_userID :

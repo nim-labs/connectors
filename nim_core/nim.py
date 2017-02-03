@@ -2,9 +2,9 @@
 #******************************************************************************
 #
 # Filename: nim.py
-# Version:  v0.7.3.150625
+# Version:  v2.5.0.161015
 #
-# Copyright (c) 2015 NIM Labs LLC
+# Copyright (c) 2016 NIM Labs LLC
 # All rights reserved.
 #
 # Use of this software is subject to the terms of the NIM Labs license
@@ -57,6 +57,7 @@ class NIM( object ) :
         self.nim['class']=None
         self.nim['mode']=None
         self.nim['pub']=False
+        
         #  Attempt to set User information :
         self.nim['user']={'name': '', 'ID': '' }
         if self.prefs :
@@ -182,37 +183,39 @@ class NIM( object ) :
         
         if not self.prefs :
             return False
-        debug=self.prefs['NIM_DebugMode']
-        if debug :
-            P.debug( 'Preferences being read...' )
-        
+
+        P.info( 'Preferences being read...' )
+
         #  Set User Information :
         user=self.prefs['NIM_User']
         userID=Api.get( sqlCmd={ 'q': 'getUserID', 'u': user}, debug=False )
-        if type(userID)==type(list()) and len(userID)==1 :
-            userID=userID[0]['ID']
-        try : self.nim['user']={'name': user, 'ID': str(userID) }
-        except :
-            self.nim['user']={'name': '', 'ID': ''}
-            P.warning( 'Unable to set User information in NIM!' )
-        
-        #  Get Show/Shot Prefs :
-        try :
-            self.set_name( elem='job', name=self.prefs[self.app+'_Job'] )
-            self.set_name( elem='asset', name=self.prefs[self.app+'_Asset'] )
-            self.set_tab( _type=self.prefs[self.app+'_Tab'] )
-            self.set_name( elem='show', name=self.prefs[self.app+'_Show'] )
-            self.set_name( elem='shot', name=self.prefs[self.app+'_Shot'] )
-            self.set_name( elem='filter', name=self.prefs[self.app+'_Filter'] )
-            self.set_name( elem='task', name=self.prefs[self.app+'_Task'] )
-            self.set_name( elem='base', name=self.prefs[self.app+'_Basename'] )
-            self.set_name( elem='ver', name=self.prefs[self.app+'_Version'] )
-        except :
-            P.error( 'Sorry, unable to get NIM preferences, cannot run NIM GUI' )
-            P.error( '    %s' % traceback.print_exc() )
-            win.popup( title='NIM Error', msg='Sorry, unable to get NIM preferences, cannot run NIM GUI' )
+        if userID :
+            if type(userID)==type(list()) and len(userID)==1 :
+                userID=userID[0]['ID']
+            try : self.nim['user']={'name': user, 'ID': str(userID) }
+            except :
+                self.nim['user']={'name': '', 'ID': ''}
+                P.warning( 'Unable to set User information in NIM!' )
+            
+            #  Get Show/Shot Prefs :
+            try :
+                self.set_name( elem='job', name=self.prefs[self.app+'_Job'] )
+                self.set_name( elem='asset', name=self.prefs[self.app+'_Asset'] )
+                self.set_tab( _type=self.prefs[self.app+'_Tab'] )
+                self.set_name( elem='show', name=self.prefs[self.app+'_Show'] )
+                self.set_name( elem='shot', name=self.prefs[self.app+'_Shot'] )
+                self.set_name( elem='filter', name=self.prefs[self.app+'_Filter'] )
+                self.set_name( elem='task', name=self.prefs[self.app+'_Task'] )
+                self.set_name( elem='base', name=self.prefs[self.app+'_Basename'] )
+                self.set_name( elem='ver', name=self.prefs[self.app+'_Version'] )
+            except :
+                P.error( 'Sorry, unable to get NIM preferences, cannot run NIM GUI' )
+                P.error( '    %s' % traceback.print_exc() )
+                win.popup( title='NIM Error', msg='Sorry, unable to get NIM preferences, cannot run NIM GUI' )
+                return False
+            return self
+        else :
             return False
-        return self
     
     def ingest_filePath( self, filePath='', pub=False ) :
         'Sets NIM dictionary from current file path'
@@ -220,7 +223,9 @@ class NIM( object ) :
         taskFound, basenameFound, versionFound=False, False, False
         jobs, assets, shows, shots, tasks, basenames, version={}, {}, {}, {}, {}, {}, {}
         #  Get and set jobs dictionary :
+        
         jobs=Api.get_jobs( userID=self.nim['user']['ID'], folders=True )
+        #P.info('ingest_filePath')
         self.set_dict('job')
         
         #  Verify file path structure :
@@ -529,6 +534,9 @@ class NIM( object ) :
             #  Only update Job if the dictionary hasn't been set yet :
             if not self.nim[elem]['Dict'] or not len(self.nim[elem]['Dict']) :
                 self.nim[elem]['Dict']=Api.get_jobs( userID=self.nim['user']['ID'] )
+                if self.nim[elem]['Dict'] == False :
+                    P.error("Failed to Set NIM Dictionary")
+                    return False
         elif elem=='asset' :
             if self.nim['job']['ID'] :
                 self.nim[elem]['Dict']=Api.get_assets( self.nim['job']['ID'] )

@@ -1,9 +1,9 @@
 #****************************************************************************
 #
 # Filename: Houdini/nimMenu.py
-# Version:  v1.0.3.151215
+# Version:  2.5.0.161013
 #
-# Copyright (c) 2015 NIM Labs LLC
+# Copyright (c) 2016 NIM Labs LLC
 # All rights reserved.
 #
 # Use of this software is subject to the terms of the NIM Labs license
@@ -24,10 +24,12 @@ print "NIM Script Path: %s" % nimScriptPath
 import nim_core.UI as nimUI
 import nim_core.nim_api as nimAPI
 import nim_core.nim_file as nimFile
+import nim_core.nim_win as nimWin
 
 reload(nimUI)
 reload(nimAPI)
 reload(nimFile)
+reload(nimWin)
 
 def openFileAction():
     nimUI.mk('FILE')
@@ -59,7 +61,7 @@ def publishAction():
 
 def changeUserAction():
     try:
-        nimUI.GUI().update_user()
+        nimWin.userInfo()
     except Exception, e :
         print 'Sorry, there was a problem choosing NIM user...'
         print '    %s' % traceback.print_exc()

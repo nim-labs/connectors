@@ -1,9 +1,9 @@
 /* ****************************************************************************
 #
 # Filename: AE/nimMain.jsx
-# Version:  v0.7.3.150625
+# Version:  v2.0.0.160511
 #
-# Copyright (c) 2015 NIM Labs LLC
+# Copyright (c) 2016 NIM Labs LLC
 # All rights reserved.
 #
 # Use of this software is subject to the terms of the NIM Labs license
@@ -13,11 +13,117 @@
 
 
 // Declare global variables
-var os, userID;
+var os = getOperatingSystem(),
+	userID,
+	username,
+	ranGetUserID = false,
+	winUserPath = '';
+
+if (os == 'win') {
+	try { winUserPath = $.getenv('userprofile'); }
+	catch (e) { winUserPath = ''; }
+}
 
 
-// Adds JSON parsing support; https://github.com/douglascrockford/JSON-js/blob/master/json2.js
-if(typeof JSON!=="object"){JSON={}}(function(){"use strict";function f(e){return e<10?"0"+e:e}function quote(e){escapable.lastIndex=0;return escapable.test(e)?'"'+e.replace(escapable,function(e){var t=meta[e];return typeof t==="string"?t:"\\u"+("0000"+e.charCodeAt(0).toString(16)).slice(-4)})+'"':'"'+e+'"'}function str(e,t){var n,r,i,s,o=gap,u,a=t[e];if(a&&typeof a==="object"&&typeof a.toJSON==="function"){a=a.toJSON(e)}if(typeof rep==="function"){a=rep.call(t,e,a)}switch(typeof a){case"string":return quote(a);case"number":return isFinite(a)?String(a):"null";case"boolean":case"null":return String(a);case"object":if(!a){return"null"}gap+=indent;u=[];if(Object.prototype.toString.apply(a)==="[object Array]"){s=a.length;for(n=0;n<s;n+=1){u[n]=str(n,a)||"null"}i=u.length===0?"[]":gap?"[\n"+gap+u.join(",\n"+gap)+"\n"+o+"]":"["+u.join(",")+"]";gap=o;return i}if(rep&&typeof rep==="object"){s=rep.length;for(n=0;n<s;n+=1){if(typeof rep[n]==="string"){r=rep[n];i=str(r,a);if(i){u.push(quote(r)+(gap?": ":":")+i)}}}}else{for(r in a){if(Object.prototype.hasOwnProperty.call(a,r)){i=str(r,a);if(i){u.push(quote(r)+(gap?": ":":")+i)}}}}i=u.length===0?"{}":gap?"{\n"+gap+u.join(",\n"+gap)+"\n"+o+"}":"{"+u.join(",")+"}";gap=o;return i}}if(typeof Date.prototype.toJSON!=="function"){Date.prototype.toJSON=function(){return isFinite(this.valueOf())?this.getUTCFullYear()+"-"+f(this.getUTCMonth()+1)+"-"+f(this.getUTCDate())+"T"+f(this.getUTCHours())+":"+f(this.getUTCMinutes())+":"+f(this.getUTCSeconds())+"Z":null};String.prototype.toJSON=Number.prototype.toJSON=Boolean.prototype.toJSON=function(){return this.valueOf()}}var cx,escapable,gap,indent,meta,rep;if(typeof JSON.stringify!=="function"){escapable=/[\\\"\x00-\x1f\x7f-\x9f\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g;meta={"\b":"\\b","  ":"\\t","\n":"\\n","\f":"\\f","\r":"\\r",'"':'\\"',"\\":"\\\\"};JSON.stringify=function(e,t,n){var r;gap="";indent="";if(typeof n==="number"){for(r=0;r<n;r+=1){indent+=" "}}else if(typeof n==="string"){indent=n}rep=t;if(t&&typeof t!=="function"&&(typeof t!=="object"||typeof t.length!=="number")){throw new Error("JSON.stringify")}return str("",{"":e})}}if(typeof JSON.parse!=="function"){cx=/[\u0000\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g;JSON.parse=function(text,reviver){function walk(e,t){var n,r,i=e[t];if(i&&typeof i==="object"){for(n in i){if(Object.prototype.hasOwnProperty.call(i,n)){r=walk(i,n);if(r!==undefined){i[n]=r}else{delete i[n]}}}}return reviver.call(e,t,i)}var j;text=String(text);cx.lastIndex=0;if(cx.test(text)){text=text.replace(cx,function(e){return"\\u"+("0000"+e.charCodeAt(0).toString(16)).slice(-4)})}if(/^[\],:{}\s]*$/.test(text.replace(/\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g,"@").replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g,"]").replace(/(?:^|:|,)(?:\s*\[)+/g,""))){j=eval("("+text+")");return typeof reviver==="function"?walk({"":j},""):j}throw new SyntaxError("JSON.parse")}}})()
+// Adds JSON parsing support; https://github.com/douglascrockford/JSON-js/blob/master/json_parse.js
+var json_parse=(function(){var d;var b;var a={'"':'"',"\\":"\\","/":"/",b:"\b",f:"\f",n:"\n",r:"\r",t:"\t"};var m;var k=function(n){throw {name:"SyntaxError",message:n,at:d,text:m};};var g=function(n){if(n&&n!==b){k("Expected '"+n+"' instead of '"+b+"'");}b=m.charAt(d);d+=1;return b;};var f=function(){var o;var n="";if(b==="-"){n="-";g("-");}while(b>="0"&&b<="9"){n+=b;g();}if(b==="."){n+=".";while(g()&&b>="0"&&b<="9"){n+=b;}}if(b==="e"||b==="E"){n+=b;g();if(b==="-"||b==="+"){n+=b;g();}while(b>="0"&&b<="9"){n+=b;g();}}o=+n;if(!isFinite(o)){k("Bad number");}else{return o;}};var h=function(){var p;var o;var q="";var n;if(b==='"'){while(g()){if(b==='"'){g();return q;}if(b==="\\"){g();if(b==="u"){n=0;for(o=0;o<4;o+=1){p=parseInt(g(),16);if(!isFinite(p)){break;}n=n*16+p;}q+=String.fromCharCode(n);}else{if(typeof a[b]==="string"){q+=a[b];}else{break;}}}else{q+=b;}}}k("Bad string");};var j=function(){while(b&&b<=" "){g();}};var c=function(){switch(b){case"t":g("t");g("r");g("u");g("e");return true;case"f":g("f");g("a");g("l");g("s");g("e");return false;case"n":g("n");g("u");g("l");g("l");return null;}k("Unexpected '"+b+"'");};var l;var i=function(){var n=[];if(b==="["){g("[");j();if(b==="]"){g("]");return n;}while(b){n.push(l());j();if(b==="]"){g("]");return n;}g(",");j();}}k("Bad array");};var e=function(){var n;var o={};if(b==="{"){g("{");j();if(b==="}"){g("}");return o;}while(b){n=h();j();g(":");if(Object.hasOwnProperty.call(o,n)){k("Duplicate key '"+n+"'");}o[n]=l();j();if(b==="}"){g("}");return o;}g(",");j();}}k("Bad object");};l=function(){j();switch(b){case"{":return e();case"[":return i();case'"':return h();case"-":return f();default:return(b>="0"&&b<="9")?f():c();}};return function(q,o){var n;m=q;d=0;b=" ";n=l();j();if(b){k("Syntax error");}return(typeof o==="function")?(function p(u,t){var s;var r;var w=u[t];if(w&&typeof w==="object"){for(s in w){if(Object.prototype.hasOwnProperty.call(w,s)){r=p(w,s);if(r!==undefined){w[s]=r;}else{delete w[s];}}}}return o.call(u,t,w);}({"":n},"")):n;};}());
+
+
+// ------------------------------------------
+// Allow connecting to a host via SSL / HTTPS
+// From: https://forums.adobe.com/message/5663594#5663594
+
+/*
+ * @method : either "POST" or "GET"
+ * @endpoint:  a string representing an URI endpoint for any given API
+ * @query: a string to be sent with the request (i.e. 'firstName=Arie&lastName=Stavchansky').
+ */
+
+function webRequest(method, endpoint, query) {
+	var response = null,
+		tempFolderPath = '~/.nim/tmp/',
+		winTempFolderPath = winUserPath + '\\.nim\\tmp\\',
+		wincurl = nimScriptsPath + '\\nim_core\\curl.vbs',  // The path to the .vbs file
+		curlCmd = '',
+		userHeader,
+		keyHeader;
+
+	// If no username is set, check apiKeyRequired; if false, don't worry about lack of username
+	if (!username) {
+		// If "testAPI" query, run getUserID function
+		// (which also checks the USER environment variable and tries to find a matching user in NIM)
+		if (query == 'q=testAPI')
+			userID = getUserID();
+		// If "getUserID" query, ignore username
+		else if (query.indexOf('q=getUserID') != -1)
+			username = '';
+		else if (apiKeyRequired) {
+			// Get username from prefs
+			username = getPref('NIM', 'User');
+			if (!username)
+				changeUserDialog();
+		}
+		else
+			username = '';
+	}
+
+	try {
+		var timestamp = Date.now(),
+			nimTempFolder = new Folder(tempFolderPath),
+			tempFilePath = tempFolderPath + timestamp,
+			tempFile = new File(tempFilePath),
+			winTempFilePath = winTempFolderPath + timestamp;
+
+		if (!nimTempFolder.exists)
+			nimTempFolder.create();
+
+		if (os == 'win') {
+			var winTempFolder = new Folder(winTempFolderPath);
+
+			if (!winTempFolder.exists)
+				winTempFolder.create();
+
+			tempFile = new File(winTempFilePath);
+
+			if (username) userHeader = '/Username:' + username + ' ';
+			else userHeader = '';
+			if (nimKey) keyHeader = '/ApiKey:' + nimKey + ' ';
+			else keyHeader = '';
+
+			curlCmd = 'cscript "' + wincurl + '" /Method:' + method + ' /URL:' + endpoint + ' /Query:' + query + ' /TempFilePath:' + winTempFilePath + ' ' + userHeader + keyHeader + '//nologo';
+		}
+		else {
+			if (username) userHeader = '--header "X-NIM-API-USER: ' + username + '" ';
+			else userHeader = '';
+			if (nimKey) keyHeader = '--header "X-NIM-API-KEY: ' + nimKey + '" ';
+			else keyHeader = '';
+
+			if (method === "POST") {
+				curlCmd = 'curl --silent --insecure ' + userHeader + keyHeader + '--data "' + query + '" ' + endpoint + ' > ' + tempFilePath;
+			}
+			else if (method === "GET") {
+				curlCmd = 'curl --silent --get --insecure ' + userHeader + keyHeader + '--data "' + query + '" ' + endpoint + ' > ' + tempFilePath;
+			}
+		}
+
+		system.callSystem(curlCmd);
+
+		if (os == 'win')
+			response = readFile(winTempFilePath);
+		else
+			response = readFile(tempFilePath);
+
+		tempFile.remove();
+	}
+	catch (err) {
+		alert(err);
+		alert("Error\nUnable to make a `"+ method +"` request to the network endpoint.  Please try again.");
+	}
+
+	return response;
+}
+
+// ------------------------------------------
 
 
 // Returns JS Object containing server response based on query;
@@ -26,42 +132,83 @@ function nimAPI(query) {
 	var queryArray = [],
 		queryString = '',
 		reply = '',
-		conn = new Socket,
 		jsonData = null,
 		jsonObject = null;
 
-	// Access NIM
-	if (conn.open(nimAPIHost + ':80')) {
-		for (var parameter in query)
-			queryArray.push(parameter + '=' + encodeURIComponent(query[parameter]));
-		if (queryArray.length)
-			queryString = '?' + queryArray.join('&');
-		else return false;
+	function buildQueryString(value, key, subKey) {
+		if (!key) key = '';
+		if (!subKey) subKey = key;
+		var newKey = key;
 
-		// send a HTTP GET request
-		conn.write ('GET ' + nimAPIURL + queryString + ' HTTP/1.0\n\n');
-		// and read the server's reply
-		reply = conn.read(999999);
-		conn.close();
-		
-		reply = reply.split('\n\n');
-		if (reply.length)
-			jsonData = reply[reply.length - 1];
-		else return false;
-
-		if (jsonData) {
-			try {
-				jsonObject = JSON.parse(jsonData);
-				return jsonObject;
+		if (typeof value == 'object') {
+			for (var newSubKey in value) {
+				newKey += '[' + newSubKey + ']' + buildQueryString( value[newSubKey], '', key + '[' + newSubKey + ']' ) + '&' + subKey;
+//alert(newKey);
 			}
-			catch (e) {
-				alert('Error: GET request to ' + nimAPIURL + queryString + ' returned the following:\n\n' + jsonData + '\n\nIf this looks correct, your script may not be recognizing how to convert JSON into a JavaScript object. This may be caused by an older version of After Effects. NIM has been tested with After Effects CS6 and above.');
-				return false;
-			}
+			newKey = newKey.slice(0, -(1 + subKey.length));
 		}
-		else
-			return false;
+		else newKey += '=' + encodeURIComponent(value);
+		
+		return newKey;
 	}
+
+	for (var parameter in query)
+		queryArray.push(buildQueryString(query[parameter], parameter));
+	if (queryArray.length)
+		queryString = queryArray.join('&');
+	else return false;
+
+	var reply = webRequest('GET', nimAPIURL, queryString);
+	if (!reply) return false;
+
+	reply = reply.split('\n\n');
+	if (reply.length)
+		jsonData = reply[reply.length - 1];
+	else return false;
+
+	if (jsonData) {
+		try {
+			jsonObject = json_parse(jsonData);
+
+			// Check first item in array to see if it resembles an error object.
+			// If so, output appropriate message and return false.
+			if (jsonObject.length && typeof jsonObject[0] == 'object') {
+
+				if (jsonObject[0].keyRequired == 'true')
+					apiKeyRequired = true;
+
+				// 'API Key Not Found.' error returned on most API calls when key isn't sent but required;
+				// when calling 'testAPI', this error is not returned, but 'keyRequired' and 'keyValid' can be tested
+				if (jsonObject[0].error == 'API Key Not Found.' || (jsonObject[0].keyRequired == 'true' && jsonObject[0].keyValid == 'false')) {
+					keyDialog('NIM API key not found.', 'NIM security is set to require the use of API keys. Please contact your NIM administrator to obtain a NIM API key.');
+					return 'keyError';
+				}
+				else if (jsonObject[0].error) {
+					var error = jsonObject[0].error;
+					// If provided API key is incorrect or expired, these errors will ALWAYS be returned
+					if (error == 'Failed to validate user.') {
+						alert('Failed to validate user.\n\nPlease verify that both your username and API key are correct.');
+						username = getPref('NIM', 'User');
+						changeUserDialog();
+						keyDialog();
+					}
+					else if (error == 'API Key Expired.')
+						keyDialog('NIM API key expired!', 'NIM security is set to require the use of API keys. Please contact your NIM administrator to update your NIM API key.');
+					else
+						throw 'noResultNoError';
+					return 'keyError';
+				}
+			}
+
+			return jsonObject;
+		}
+		catch (e) {
+			alert('Error: GET request to ' + nimAPIURL + '?' + queryString + ' returned the following:\n\n' + jsonData + '\n\nIf this looks correct, your script may not be recognizing how to convert JSON into a JavaScript object. This may be caused by an older version of After Effects. NIM has been tested with After Effects CS6 and above.');
+			return false;
+		}
+	}
+	else
+		return false;
 }
 
 
@@ -75,38 +222,95 @@ function getOperatingSystem() {
 }
 
 
+function saveKeyToPrefs() {
+	var nimKeyFile = new File(nimKeyPath);
+	nimKeyFile.open('w');
+	nimKeyFile.writeln(nimKey);
+	nimKeyFile.close();
+	return true;
+}
+
+
+function keyDialog(messageTitle, message) {
+	var createKeyDialog = new Window('dialog', 'NIM', undefined);
+
+	if (messageTitle)
+		var createKeyMessageTitle = createKeyDialog.add('statictext', undefined, messageTitle);
+	
+	if (message)
+		var createKeyMessage = createKeyDialog.add('statictext', undefined, message);
+		
+	var keyGroup = createKeyDialog.add('group', undefined),
+		keyLabel = keyGroup.add('statictext', undefined, 'NIM API Key: '),
+		keyInput = keyGroup.add('edittext', [0, 0, 250, 20]),
+		buttonGroup = createKeyDialog.add('group', undefined),
+		confirmButton = buttonGroup.add('button', undefined, 'OK'),
+		cancelButton = buttonGroup.add('button', undefined, 'Cancel');
+
+	//if (nimKey)
+	//	keyInput.text = nimKey;
+
+	confirmButton.onClick = function() {
+		nimKey = keyInput.text;
+		saveKeyToPrefs();
+		createKeyDialog.close();
+		var remoteScripts = getRemoteScripts(nimScriptsPath, thisObj);
+		if (remoteScripts !== false)
+			remoteScripts(thisObj);
+	}
+
+	cancelButton.onClick = function() {
+		alert("You won't be able to connect to NIM until you enter a valid API key.");
+		createKeyDialog.close();
+	}
+
+	createKeyDialog.show();
+}
+
+
 // Looks first in preferences for userID; if not found, compares username (taken from "USER" environment variable)
 // to all usernames and full_names in database; if match, save userID to prefs and return it; if not found, return false;
 // passes 'buttonsToDisable' along to 'changeUserDialog' if no user is selected
 function getUserID(buttonsToDisable) {
 	var prefUser = getPref('NIM', 'User'),
-		envUser,
-		allUsers = nimAPI({ q: 'getUsers' }),
-		allUsersLength = allUsers.length,
-		guessedUserID = null;
+		envUser;
+
+	if (!buttonsToDisable) buttonsToDisable = [];
 
 	if (prefUser) {
-		for (var x = 0; x < allUsersLength; x++) {
-			if (allUsers[x].username == prefUser)
-				return allUsers[x].ID;
+		var users = nimAPI({ q: 'getUserID', u: prefUser });
+		if (users.length && users[0].ID) {
+			ranGetUserID = true;
+			username = prefUser;
+			return users[0].ID;
 		}
 	}
-	
-	try { envUser = $.getenv('USER').toLowerCase(); }
-	catch (e) { envUser = null; }
 
-	if (envUser) {
-		for (var x = 0; x < allUsersLength; x++) {
-			if (envUser == allUsers[x].username.toLowerCase() || envUser == allUsers[x].full_name.toLowerCase()) {
-				guessedUserID = allUsers[x].ID;
+	// If getUserID hasn't been run before, try to figure out user by looking at environment variables and by prompting user
+	if (!ranGetUserID) {
+		ranGetUserID = true;
+
+		try { envUser = $.getenv('USER').toLowerCase(); }
+		catch (e) { envUser = null; }
+
+		if (envUser) {
+			var users = nimAPI({ q: 'getUserID', u: envUser });
+			if (users.length && users[0].ID) {
 				setPref('NIM', 'User', envUser);
-				alert('NIM has detected that you might be ' + allUsers[x].full_name + '; if not, manually select your username via the "Change Users" menu item.');
-				return guessedUserID;
+				username = envUser;
+				alert('NIM has detected that you might be user "' + envUser + '"; if not, you can manually change your user.');
+				return users[0].ID;
 			}
 		}
+
+		changeUserDialog(buttonsToDisable);
+	}
+	else {
+		var buttonsToDisableLength = buttonsToDisable.length;
+		for (var x = 0; x < buttonsToDisableLength; x++)
+			buttonsToDisable[x].enabled = false;
 	}
 
-	changeUserDialog(buttonsToDisable);
 	return false;
 }
 
@@ -137,52 +341,51 @@ function commentDialog(callback) {
 // Prompts the user to select a username from a dropdown of all users;
 // if passed an array of buttons, will disable them if no user has been selected
 function changeUserDialog(buttonsToDisable) {
+	if (!buttonsToDisable) buttonsToDisable = [];
+
 	function noUserSelected() {
 		var buttonsToDisableLength = buttonsToDisable.length;
-		alert("You'll need to select a user before you can use NIM.");
+		alert("You'll need to enter your username before you can use NIM.");
 		for (var x = 0; x < buttonsToDisableLength; x++)
 			buttonsToDisable[x].enabled = false;
 	}
 
 	function userSelected() {
 		var buttonsToDisableLength = buttonsToDisable.length;
-		alert('User changed to: ' + changeUserDropdown.selection.text);
+		alert('User changed to: ' + changeUserInput.text);
 		for (var x = 0; x < buttonsToDisableLength; x++)
 			buttonsToDisable[x].enabled = true;
 	}
 
-	var allUsers = nimAPI({ q: 'getUsers' }),
-		allUsersLength = allUsers.length,
-		allUsernames = [],
-		currentUserIndex = null,
-		changeUserDialog = new Window('dialog', 'NIM', undefined),
+	if (!username) username = '';
+
+	var changeUserDialog = new Window('dialog', 'NIM', undefined),
 		changeUserGroup = changeUserDialog.add('group', undefined),
 		changeUserLabel = changeUserGroup.add('statictext', undefined, 'Change user: '),
-		changeUserDropdown,
+		changeUserInput = changeUserGroup.add('edittext', [0, 0, 250, 20], username),
 		buttonGroup = changeUserDialog.add('group', undefined),
 		confirmButton = buttonGroup.add('button', undefined, 'OK'),
 		cancelButton = buttonGroup.add('button', undefined, 'Cancel');
 
-	for (var x = 0; x < allUsersLength; x++) {
-		var thisUser = allUsers[x];
-		allUsernames.push(thisUser.username);
-		if (thisUser.ID == userID)
-			currentUserIndex = x;
-	}
-
-	changeUserDropdown = changeUserGroup.add('dropdownlist', undefined, '', { items: allUsernames });
-	changeUserDropdown.selection = currentUserIndex;
-
 	confirmButton.onClick = function() {
-		if (changeUserDropdown.selection === null) {
+		if (!changeUserInput.text) {
 			noUserSelected();
+			username = '';
+			setPref('NIM', 'User', '');
+			changeUserDialog.close();
 			return;
 		}
-		var newUser = allUsers[changeUserDropdown.selection.index];
-		userID = newUser.ID;
-		setPref('NIM', 'User', newUser.username);
-		userSelected();
-		changeUserDialog.close();
+
+		var users = nimAPI({ q: 'getUserID', u: changeUserInput.text });
+		if (users.length && users[0].ID) {
+			userID = users[0].ID;
+			userSelected();
+			username = changeUserInput.text;
+			setPref('NIM', 'User', username);
+			changeUserDialog.close();
+		}
+		else
+			alert("User not found!");
 	}
 
 	cancelButton.onClick = function() {
@@ -264,7 +467,7 @@ function setNimMetadata(data) {
 function setNimFileIdMetadata(fileID) {
 	var proj = app.project,
 		metaData, schemaNS;
- 
+
 	if (ExternalObject.AdobeXMPScript == undefined)
 		ExternalObject.AdobeXMPScript = new ExternalObject('lib:AdobeXMPScript');
 
@@ -325,6 +528,7 @@ function setPref(prefPrefix, prefName, prefValue) {
 	if (!nimPrefsFile.exists)
 		createNimPrefsFile();
 
+	nimPrefsFile.lineFeed = 'Unix';
 	nimPrefsFile.copy(nimPrefsFileTempPath);
 	nimPrefsFileTemp = new File(nimPrefsFileTempPath);
 	if (!nimPrefsFileTemp.open('r'))
@@ -494,5 +698,3 @@ function saveFile(classID, className, serverID, serverPath, taskID, taskName, ta
 	return true;
 }
 
-
-var os, userID;
