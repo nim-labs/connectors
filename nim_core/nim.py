@@ -438,7 +438,12 @@ class NIM( object ) :
     
     def pix( self, elem='asset' ) :
         'Retrieves the pixmap image associated with an element (only assets and shots)'
-        return self.nim[elem]['img_pix']
+        img_pix = None
+        try:
+            img_pix = self.nim[elem]['img_pix']
+        except:
+            pass
+        return img_pix
     
     def label( self, elem='asset' ) :
         'Retrieves the label that a pixmap is assigned to, for a given element (only assets and shots)'

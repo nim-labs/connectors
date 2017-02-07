@@ -1956,10 +1956,11 @@ class GUI(QtGui.QMainWindow) :
         if _type and not self.nim.ID( 'asset' ) and not self.nim.ID( 'shot' ) :
             try :
                 self.nim.set_pic( elem=_type, widget=QtGui2.QPixmap().fromImage( QtGui2.QImage( self.pref_imgDefault ) ) )
+                self.nim.pix( _type ).fromImage( QtGui2.QImage( self.pref_imgDefault ) )
             except :
                 self.nim.set_pic( elem=_type, widget=QtGui.QPixmap().fromImage( QtGui.QImage( self.pref_imgDefault ) ) )
-           
-            self.nim.pix( _type ).fromImage( QtGui.QImage( self.pref_imgDefault ) )
+                self.nim.pix( _type ).fromImage( QtGui.QImage( self.pref_imgDefault ) )
+
             self.nim.set_pic( elem=_type, widget=self.nim.pix( _type ).scaled( self.img_size, self.img_size, QtCore.Qt.KeepAspectRatio ) )
             self.nim.label( _type ).setPixmap( self.nim.pix( _type ) )
             return None
@@ -1974,16 +1975,22 @@ class GUI(QtGui.QMainWindow) :
         nim_domain = '{uri.scheme}://{uri.netloc}/'.format(uri=parsed_uri)
         print( 'NIM Domain: %s' % nim_domain)
 
-        try :
-            img_loc=nim_domain+img[0]['img_link']
-            img_dir=os.path.dirname( img_loc )+'/'
-            print('img_loc: %s' % img_loc)
-            print('img_dir: %s' % img_dir)
-        except :
-            #Failed to build img path
-            print('Failed to build icon path')
-            img_loc=''
-            print('Using default img: %s' % img_loc)
+        try:        
+            if img[0]['img_link']:
+                try :
+                    img_loc=nim_domain+img[0]['img_link']
+                    img_dir=os.path.dirname( img_loc )+'/'
+                    print('img_loc: %s' % img_loc)
+                    print('img_dir: %s' % img_dir)
+                except :
+                    #Failed to build img path
+                    print('Failed to build icon path')
+                    img_loc='/img/nim_logo.png'
+                    print('Using default img: %s' % img_loc)
+            else :
+                img_loc = None
+        except:
+            img_loc = None
 
         #  Set Shot/Asset image :
         if _type and img_loc :
@@ -1995,6 +2002,7 @@ class GUI(QtGui.QMainWindow) :
                 _data=urllib.urlopen( img_loc,context=myssl ).read()
             except :
                 _data=urllib.urlopen( img_loc ).read()
+            
             self.nim.pix( _type ).loadFromData( _data )
             self.nim.set_pic( elem=_type, widget=self.nim.pix( _type ).scaled( self.img_size, self.img_size, QtCore.Qt.KeepAspectRatio ) )
             self.nim.label( _type ).setPixmap( self.nim.pix( _type ) )
@@ -2005,12 +2013,12 @@ class GUI(QtGui.QMainWindow) :
         if _type and not _set :
             print("default image")
             try :
-                self.nim.set_pic( elem=_type, widget=QtGui2.QPixmap().fromImage( \
-                    QtGui2.QImage( self.pref_imgDefault ) ) )
+                self.nim.set_pic( elem=_type, widget=QtGui2.QPixmap().fromImage( QtGui2.QImage( self.pref_imgDefault ) ) )
+                self.nim.pix( _type ).fromImage( QtGui2.QImage( self.pref_imgDefault ) )
             except :
-                self.nim.set_pic( elem=_type, widget=QtGui.QPixmap().fromImage( \
-                    QtGui.QImage( self.pref_imgDefault ) ) )
-            self.nim.pix( _type ).fromImage( QtGui.QImage( self.pref_imgDefault ) )
+                self.nim.set_pic( elem=_type, widget=QtGui.QPixmap().fromImage( QtGui.QImage( self.pref_imgDefault ) ) )
+                self.nim.pix( _type ).fromImage( QtGui.QImage( self.pref_imgDefault ) )
+
             self.nim.set_pic( elem=_type, widget=self.nim.pix( _type ).scaled( self.img_size, self.img_size, QtCore.Qt.KeepAspectRatio ) )
             self.nim.label( _type ).setPixmap( self.nim.pix( _type ) )
             P.debug( '%s image URL set to default : "%s"' % (_type.upper(), self.pref_imgDefault) )
@@ -2020,11 +2028,9 @@ class GUI(QtGui.QMainWindow) :
             _type = 'shot'
             try :
                 self.nim.set_pic( elem=_type, widget=QtGui2.QPixmap().fromImage( QtGui2.QImage( self.pref_imgDefault ) ) )
-            except :
-                self.nim.set_pic( elem=_type, widget=QtGui.QPixmap().fromImage( QtGui.QImage( self.pref_imgDefault ) ) )
-            try :
                 self.nim.pix( _type ).fromImage( QtGui2.QImage( self.pref_imgDefault ) )
             except :
+                self.nim.set_pic( elem=_type, widget=QtGui.QPixmap().fromImage( QtGui.QImage( self.pref_imgDefault ) ) )
                 self.nim.pix( _type ).fromImage( QtGui.QImage( self.pref_imgDefault ) )
 
             self.nim.set_pic( elem=_type, widget=self.nim.pix( _type ).scaled( \
