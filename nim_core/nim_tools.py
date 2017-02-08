@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: nim_tools.py
-# Version:  v2.5.0.160930
+# Version:  v2.5.1.170208
 #
 # Copyright (c) 2016 NIM Labs LLC
 # All rights reserved.
@@ -16,12 +16,20 @@ qt_import=False
 try : 
     from PySide2 import QtWidgets as QtGui
     from PySide2 import QtCore
+    qt_import=True
 except ImportError :
     try :
         from PySide import QtCore, QtGui
         qt_import=True
-    except ImportError : 
-        print "NIM: Failed to load UI Modules - Tools"
+    except ImportError :
+        try : 
+            from PyQt4 import QtCore, QtGui
+            qt_import=True
+        except ImportError : 
+            # Suppressed for D8
+            # print "NIM: Failed to load UI Modules - Tools"
+            pass
+
 
 import os
 import nim_print

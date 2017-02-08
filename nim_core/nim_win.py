@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: nim_win.py
-# Version:  v2.5.0.160930
+# Version:  v2.5.1.170208
 #
 # Copyright (c) 2016 NIM Labs LLC
 # All rights reserved.
@@ -27,7 +27,9 @@ except ImportError :
     except ImportError :
         try : from PyQt4 import QtCore, QtGui
         except ImportError : 
-            print "NIM: Failed to load UI Modules - Win"
+            # Suppressed for D8
+            # print "NIM: Failed to load UI Modules - Win"
+            pass
 
 
 
