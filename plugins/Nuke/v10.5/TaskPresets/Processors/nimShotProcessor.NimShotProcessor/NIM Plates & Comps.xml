@@ -1,0 +1,106 @@
+<root presetname="NIM Plates &amp; Comps" tasktype="nimShotProcessor.NimShotProcessor">
+    <startFrameIndex valuetype="int">1001</startFrameIndex>
+    <exportRoot valuetype="str">{nim_server_path}</exportRoot>
+    <versionIndex valuetype="int">1</versionIndex>
+    <cutUseHandles valuetype="bool">False</cutUseHandles>
+    <versionPadding valuetype="int">2</versionPadding>
+    <exportTemplate valuetype="list">
+        <SequenceItem valuetype="tuple">
+            <SequenceItem valuetype="str">{nim_shot_plates}/{filehead}/{filehead}.####.jpg</SequenceItem>
+            <SequenceItem valuetype="hiero.exporters.FnTranscodeExporter.TranscodePreset">
+                <root presetname="hiero.exporters.FnTranscodeExporter.TranscodeExporter" tasktype="hiero.exporters.FnTranscodeExporter.TranscodeExporter">
+                    <colourspace valuetype="str">default</colourspace>
+                    <file_type valuetype="unicode">jpeg</file_type>
+                    <jpeg valuetype="dict">
+                        <_jpeg_quality valuetype="float">1.0</_jpeg_quality>
+                    </jpeg>
+                    <channels valuetype="str">rgb</channels>
+                    <burninDataEnabled valuetype="bool">False</burninDataEnabled>
+                    <useSingleSocket valuetype="bool">False</useSingleSocket>
+                    <additionalNodesEnabled valuetype="bool">False</additionalNodesEnabled>
+                    <additionalNodesData valuetype="list" />
+                    <dpx valuetype="dict" />
+                    <readAllLinesForExport valuetype="bool">False</readAllLinesForExport>
+                    <burninData valuetype="dict">
+                        <burnIn_bottomRight valuetype="NoneType">None</burnIn_bottomRight>
+                        <burnIn_topLeft valuetype="NoneType">None</burnIn_topLeft>
+                        <burnIn_topMiddle valuetype="NoneType">None</burnIn_topMiddle>
+                        <burnIn_padding valuetype="NoneType">None</burnIn_padding>
+                        <burnIn_topRight valuetype="NoneType">None</burnIn_topRight>
+                        <burnIn_textSize valuetype="NoneType">None</burnIn_textSize>
+                        <burnIn_bottomLeft valuetype="NoneType">None</burnIn_bottomLeft>
+                        <burnIn_bottomMiddle valuetype="NoneType">None</burnIn_bottomMiddle>
+                        <burnIn_font valuetype="NoneType">None</burnIn_font>
+                    </burninData>
+                    <writeNodeName valuetype="str">Write_{ext}</writeNodeName>
+                    <reformat valuetype="dict">
+                        <to_type valuetype="str">None</to_type>
+                    </reformat>
+                    <keepNukeScript valuetype="bool">False</keepNukeScript>
+                    <method valuetype="str">Blend</method>
+                </root>
+            </SequenceItem>
+        </SequenceItem>
+        <SequenceItem valuetype="tuple">
+            <SequenceItem valuetype="str">{nim_shot_root}/COMP/{shot}_COMP/{shot}_COMP_{version}.nk</SequenceItem>
+            <SequenceItem valuetype="hiero.exporters.FnNukeShotExporter.NukeShotPreset">
+                <root presetname="hiero.exporters.FnNukeShotExporter.NukeShotExporter" tasktype="hiero.exporters.FnNukeShotExporter.NukeShotExporter">
+                    <postProcessScript valuetype="bool">True</postProcessScript>
+                    <annotationsPreCompPaths valuetype="list" />
+                    <readPaths valuetype="list">
+                        <SequenceItem valuetype="unicode">{nim_shot_plates}/{filehead}/{filehead}.####.jpg</SequenceItem>
+                    </readPaths>
+                    <connectTracks valuetype="bool">False</connectTracks>
+                    <collateSequence valuetype="bool">False</collateSequence>
+                    <additionalNodesData valuetype="list" />
+                    <collateShotNames valuetype="bool">False</collateShotNames>
+                    <includeEffects valuetype="bool">True</includeEffects>
+                    <writePaths valuetype="list">
+                        <SequenceItem valuetype="unicode">{nim_shot_comp}/{shot}_COMP_{version}/{shot}_COMP_{version}.####.exr</SequenceItem>
+                    </writePaths>
+                    <method valuetype="str">Blend</method>
+                    <includeAnnotations valuetype="bool">False</includeAnnotations>
+                    <enable valuetype="bool">True</enable>
+                    <showAnnotations valuetype="bool">True</showAnnotations>
+                    <collateCustomStart valuetype="bool">True</collateCustomStart>
+                    <additionalNodesEnabled valuetype="bool">False</additionalNodesEnabled>
+                    <collateTracks valuetype="bool">False</collateTracks>
+                </root>
+            </SequenceItem>
+        </SequenceItem>
+        <SequenceItem valuetype="tuple">
+            <SequenceItem valuetype="str">{nim_shot_comp}/{shot}_COMP_{version}/{shot}_COMP_{version}.####.exr</SequenceItem>
+            <SequenceItem valuetype="hiero.exporters.FnExternalRender.NukeRenderPreset">
+                <root presetname="hiero.exporters.FnExternalRender.NukeRenderTask" tasktype="hiero.exporters.FnExternalRender.NukeRenderTask">
+                    <burninDataEnabled valuetype="bool">False</burninDataEnabled>
+                    <colourspace valuetype="str">default</colourspace>
+                    <file_type valuetype="unicode">exr</file_type>
+                    <dpx valuetype="dict" />
+                    <channels valuetype="unicode">all</channels>
+                    <burninData valuetype="dict">
+                        <burnIn_bottomRight valuetype="NoneType">None</burnIn_bottomRight>
+                        <burnIn_topLeft valuetype="NoneType">None</burnIn_topLeft>
+                        <burnIn_topMiddle valuetype="NoneType">None</burnIn_topMiddle>
+                        <burnIn_padding valuetype="NoneType">None</burnIn_padding>
+                        <burnIn_topRight valuetype="NoneType">None</burnIn_topRight>
+                        <burnIn_bottomMiddle valuetype="NoneType">None</burnIn_bottomMiddle>
+                        <burnIn_bottomLeft valuetype="NoneType">None</burnIn_bottomLeft>
+                        <burnIn_textSize valuetype="NoneType">None</burnIn_textSize>
+                        <burnIn_font valuetype="NoneType">None</burnIn_font>
+                    </burninData>
+                    <exr valuetype="dict" />
+                    <writeNodeName valuetype="str">Write_{ext}</writeNodeName>
+                    <reformat valuetype="dict">
+                        <to_type valuetype="str">None</to_type>
+                    </reformat>
+                </root>
+            </SequenceItem>
+        </SequenceItem>
+    </exportTemplate>
+    <excludeTags valuetype="list" />
+    <includeTags valuetype="list" />
+    <includeRetimes valuetype="bool">False</includeRetimes>
+    <startFrameSource valuetype="str">Source</startFrameSource>
+    <cutLength valuetype="bool">True</cutLength>
+    <cutHandles valuetype="int">12</cutHandles>
+</root>

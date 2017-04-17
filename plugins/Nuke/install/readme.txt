@@ -45,12 +45,14 @@ NukeStudio Installation:
 	STEP 3 - Export Presets:
 		NIM ships with a default export template for the NIM: Process as Shots export processor.
 
-		To install copy the folder [NIM_CONNECTOR_ROOT]/plugins/Nuke/TaskPresets/Processors/nimShotProcessor.NimShotProcessor to the TaskPresets/Processors folder in your local .nuke folder location.
+		To install copy the folder [NIM_CONNECTOR_ROOT]/plugins/Nuke/vX.X/TaskPresets to your local .nuke folder location.
 
-		Windows: [DRIVE]:/Users/[USERNAME]/.nuke/TaskPresets/Processors
-		OSX: ~/.nuke/TaskPresets/Processors
-		Linux: ~/.nuke/TaskPresets/Processors
+		Windows: [DRIVE]:/Users/[USERNAME]/.nuke/TaskPresets
+		OSX: ~/.nuke/TaskPresets
+		Linux: ~/.nuke/TaskPresets
 
+			** NOTE: As of NukeStudio 10.5 there is a new preset format.  
+					 Please copy the TaskPresets folder from the correspoding Nuke version.
 
 
 Nuke Installation:
