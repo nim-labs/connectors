@@ -2,9 +2,9 @@
 #******************************************************************************
 #
 # Filename: nim_api.py
-# Version:  v2.5.22.170202
+# Version:  v2.6.01.170417
 #
-# Copyright (c) 2016 NIM Labs LLC
+# Copyright (c) 2017 NIM Labs LLC
 # All rights reserved.
 #
 # Use of this software is subject to the terms of the NIM Labs license
@@ -299,13 +299,12 @@ def upload( params=None, nimURL=None, apiKey=None ) :
 
     _actionURL = nimURL.encode('ascii')
 
-    P.info("Verifying API URL: %s" % _actionURL)
+    P.info("API URL: %s" % _actionURL)
 
    # Create opener with extended form post support
     try:
         opener = urllib2.build_opener(FormPostHandler)
-        opener.addheaders = [('X-NIM-API-USER', nim_apiUser)]
-        opener.addheaders = [('X-NIM-API-KEY', nim_apiKey)]
+        opener.addheaders = [('X-NIM-API-USER', nim_apiUser),('X-NIM-API-KEY', nim_apiKey)]
     except:
         P.error( "Failed building url opener")
         P.error( traceback.format_exc() )
@@ -1575,7 +1574,7 @@ def update_shot( shotID=None, duration=None) :
     'Update current shot information'
     return get( {'q': 'updateShot', 'shotID': str(shotID), 'duration': str(duration) } )
 
-def upload_shotIcon( shotID=None, img=None ) :
+def upload_shotIcon( shotID=None, img=None, nimURL=None, apiKey=None ) :
     'Upload shot icon'
     params = {}
     action = "uploadShotIcon"
@@ -1585,10 +1584,10 @@ def upload_shotIcon( shotID=None, img=None ) :
     params["shotID"] = shot_str.encode('ascii')
     params["file"] = open(img,'rb')
 
-    result = upload(params=params)
+    result = upload(params=params, nimURL=nimURL, apiKey=apiKey)
     return result
 
-def upload_assetIcon( assetID=None, img=None ) :
+def upload_assetIcon( assetID=None, img=None, nimURL=None, apiKey=None ) :
     'Upload asset icon'
     params = {}
     action = "uploadAssetIcon"
@@ -1598,7 +1597,7 @@ def upload_assetIcon( assetID=None, img=None ) :
     params["assetID"] = asset_str.encode('ascii')
     params["file"] = open(img,'rb')
 
-    result = upload(params=params)
+    result = upload(params=params, nimURL=nimURL, apiKey=apiKey)
     return result
 
 def add_render( jobID=0, itemType='shot', taskID=0, fileID=0, \
@@ -1658,7 +1657,7 @@ def upload_dailies( taskID=None, renderID=None, renderKey='', path=None, nimURL=
     result = upload(params=params, nimURL=nimURL, apiKey=apiKey)
     return result
 
-def upload_dailiesNote( dailiesID=None, name='', img=None, note='', frame=0, time=-1, userID=None, nimURL=None ) :
+def upload_dailiesNote( dailiesID=None, name='', img=None, note='', frame=0, time=-1, userID=None, nimURL=None, apiKey=None ) :
     'Upload dailiesNote'
     params = {}
     action = "uploadDailiesNote"
@@ -1677,7 +1676,7 @@ def upload_dailiesNote( dailiesID=None, name='', img=None, note='', frame=0, tim
     params["time"] = time
     params["userID"] = userID
 
-    result = upload(params=params)
+    result = upload(params=params, nimURL=nimURL, apiKey=apiKey)
     return result
 
 #  End
