@@ -282,6 +282,8 @@ def nimExportShots(nim_showID=None, info=None) :
 		nim_shotName = info['shotName']
 		nim_sourceIn = info['sourceIn']
 		nim_sourceOut = info['sourceOut']
+		nim_handleIn = info['handleIn']
+		nim_handleOut = info['handleOut']
 		nim_duration = nim_sourceOut - nim_sourceIn
 		nim_assetType = info['assetType']
 		nim_destinationPath = info['destinationPath']
@@ -325,6 +327,11 @@ def nimExportShots(nim_showID=None, info=None) :
 					print 'NIM - Failed to upload icon'
 			else :
 				print 'NIM - Skipping icon upload for non-video assetType'
+
+			
+			# Add Media Item as Element
+			element_result = nimAPI.add_element( parent='shot', parentID=nim_shotID, path=nim_fullPath, name=nim_resolvedPath, \
+										startFrame=nim_sourceIn, endFrame=nim_sourceOut, handles=nim_handleIn, isPublished=False )
 
 
 		print "NIM - %s has been updated in NIM." % nim_shotName
