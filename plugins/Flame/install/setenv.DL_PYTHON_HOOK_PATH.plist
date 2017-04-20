@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+  <plist version="1.0">
+  <dict>
+    <key>Label</key>            
+    <string>setenv.DL_PYTHON_HOOK_PATH</string>
+    <key>ProgramArguments</key>
+      <array>
+        <string>/bin/launchctl</string>
+        <string>setenv</string>
+        <string>DL_PYTHON_HOOK_PATH</string>
+        <string>[NIM_CONNECTOR_ROOT]/plugins/Flame/python</string>
+      </array>
+    <key>RunAtLoad</key>
+    <true/>
+  </dict>
+</plist>
