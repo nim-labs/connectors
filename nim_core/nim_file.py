@@ -75,13 +75,17 @@ def get_app() :
     try:
         import cinesync
         return 'Cinesync'
-    except:
-        pass
+    except: pass
+    try :
+        nim_app = os.environ.get('NIM_APP', '-1')
+        if nim_app == 'Flame':
+            return 'Flame'
+    except: pass
     return None
 
 def get_apps() :
     'Provides a list of supported applications'
-    return ['Maya', 'Nuke', 'C4D', 'Hiero', '3dsMax', 'Houdini']
+    return ['Maya', 'Nuke', 'C4D', 'Hiero', '3dsMax', 'Houdini', 'Flame']
 
 def get_ext( filePath='' ) :
     'Retrieves the extension of a given file'
@@ -116,6 +120,8 @@ def get_ext( filePath='' ) :
             ext='.max'
         elif app=='Houdini' :
             ext='.hip'
+        elif app=='Flame' :
+            ext='.batch'
         if ext :
             return ext
         else :

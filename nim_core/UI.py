@@ -129,6 +129,15 @@ def mk( mode='open', _import=False, _export=False, ref=False, pub=False ) :
                 P.debug( '    %s' % traceback.print_exc() )
                 return False
 
+        # Flame :
+        elif app=='Flame' :
+            try :
+                WIN=GUI( mode=mode )
+            except Exception, e :
+                P.error( 'Sorry, unable to retrieve variables from the NIM preference file.' )
+                P.debug( '    %s' % traceback.print_exc() )
+                return False
+
     #  Set the window to one of five modes :
     if WIN.complete :
         P.info( '\nStarting up the NIM File Browser, in %s mode.' % mode )
@@ -285,6 +294,9 @@ class GUI(QtGui.QMainWindow) :
             elif self.app=='Houdini' :
                 import nim_houdini as Houdini
                 Houdini.get_vars( nim=self.nimPrefs )
+            elif self.app=='Flame' :
+                import nim_flame as Flame
+                Flame.get_vars( nim=self.nimPrefs )
         else :
             self.nimPrefs=Nim.NIM().ingest_prefs()
         #  Get and set User Information :
@@ -832,6 +844,8 @@ class GUI(QtGui.QMainWindow) :
             self.nim.set_name( elem='fileExt', name='.max' )
         elif self.app=='Houdini' :
             self.nim.set_name( elem='fileExt', name='.hip' )
+        elif self.app=='Flame' :
+            self.nim.set_name( elem='fileExt', name='.batch' )
         
         #  Enable :
         for elem in ['job', 'server', 'asset', 'show', 'shot', 'task', 'base'] :

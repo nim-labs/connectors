@@ -11,10 +11,15 @@
 # otherwise accompanies this software in either electronic or hard copy form.
 # *****************************************************************************
 
+
 from PySide.QtGui import *
 from PySide.QtCore import *
 
 import os,sys,re
+
+nim_app = 'Flame'
+os.environ['NIM_APP'] = str(nim_app)
+
 # Relative path to append for NIM Scripts
 nimFlameScriptPath = os.path.dirname(os.path.realpath(__file__))
 nimFlameScriptPath = nimFlameScriptPath.replace('\\','/')

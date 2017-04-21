@@ -12,7 +12,7 @@
 # otherwise accompanies this software in either electronic or hard copy form.
 # *****************************************************************************
 
-import os,sys,re,string
+import os,sys,re,string,traceback
 import os.path
 import base64
 import platform
@@ -47,6 +47,19 @@ from PySide.QtCore import *
 print "NIM - Loading nimFlameExport"
 
 
+#  Make prefs:
+import nim_core.nim_prefs as menuPrefs
+menuPrefs.mk_default( notify_success=True )
+
+
+try :
+	# from libwiretapPythonClientAPI import *
+	nimExport_app = os.environ.get('NIM_APP', '-1')
+	print "NIM - Current Application: %s" % nimExport_app
+except :
+	print "NIM - failed to load Wiretap API"
+
+
 class NimExportDialog(QDialog):
 	def __init__(self, parent=None):
 		super(NimExportDialog, self).__init__(parent)
@@ -57,13 +70,35 @@ class NimExportDialog(QDialog):
 			#TODO: update prefs with Flame awareness
 			self.app=nimFile.get_app()
 			self.prefs=nimPrefs.read()
-			self.user=self.prefs['NIM_User']
-			self.pref_job=self.prefs[self.app+'_Job']
-			self.pref_show=self.prefs[self.app+'_Show']
-			self.pref_server=self.prefs[self.app+'_ServerPath']
+			print "NIM - Prefs: "
+			print self.prefs
+
+			if 'NIM_User' in self.prefs :
+				self.user=self.prefs['NIM_User']
+			else :
+				self.user = ''
+
+			if self.app+'_Job' in self.prefs:
+				self.pref_job=self.prefs[self.app+'_Job']
+			else :
+				self.pref_job = ''
+
+			if self.app+'_Show' in self.prefs:
+				self.pref_show=self.prefs[self.app+'_Show']
+			else :
+				self.pref_show= ''
+
+			if self.app+'_ServerPath' in self.prefs:
+				self.pref_server=self.prefs[self.app+'_ServerPath']
+			else :
+				self.pref_server= ''
+
+			print "NIM - Prefs successfully read"
+
 		except:
 			print "NIM - Failed to read NIM prefs"
-			self.app='flame'
+			print 'NIM - ERROR: %s' % traceback.print_exc()
+			self.app='Flame'
 			self.prefs=''
 			self.user='andrew'
 			self.pref_job=0
@@ -227,8 +262,8 @@ class NimExportDialog(QDialog):
 					for key, value in sorted(self.nim_showDict.items(), reverse=False):
 						self.nim_showChooser.addItem(key)
 						'''
-						if self.g_nim_showID:
-							if self.g_nim_showID == value:
+						if self.nim_showID:
+							if self.nim_showID == value:
 								print "Found matching showID, show=", key
 								self.pref_show == key
 								showIndex = showIter
@@ -268,6 +303,9 @@ class NimExportDialog(QDialog):
 				print "NIM: No Data Returned"
 			
 	def acceptTest(self):
+		#Saving Preferences
+		nimPrefs.update( 'Job', 'Flame', self.nim_jobID )
+		nimPrefs.update( 'Show', 'Flame', self.nim_showID )
 		self.accept()
 
 

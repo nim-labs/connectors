@@ -455,8 +455,12 @@ def get_app() :
     try:
         import cinesync
         return 'Cinesync'
-    except:
-        pass
+    except : pass
+    try :
+        nim_app = os.environ.get('NIM_APP', '-1')
+        if nim_app == 'Flame':
+            return 'Flame'
+    except: pass
     return None
 
 def get_user() :
@@ -1198,6 +1202,9 @@ def versionUp( nim=None, padding=2, selected=False, win_launch=False, pub=False,
         elif nim.app()=='Houdini' :
             import nim_houdini as Houdini
             Houdini.get_vars( nim=nim )
+        elif nim.app()=='Flame' :
+            import nim_flame as Flame
+            Flame.get_vars( nim=nim )
     
     #  Error check :
     try :
