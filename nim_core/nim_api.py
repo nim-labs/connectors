@@ -70,10 +70,10 @@ def testAPI(nimURL=None, nim_apiUser='', nim_apiKey='') :
         request.add_header("X-NIM-API-KEY", nim_apiKey)
         request.add_header("Content-type", "application/x-www-form-urlencoded; charset=UTF-8")
         try :
-            myssl = ssl.create_default_context()
-            myssl.check_hostname=False
-            myssl.verify_mode=ssl.CERT_NONE
-            _file = urllib2.urlopen(request,context=myssl)
+            ssl_ctx = ssl.create_default_context()
+            ssl_ctx.check_hostname=False
+            ssl_ctx.verify_mode=ssl.CERT_NONE
+            _file = urllib2.urlopen(request,context=ssl_ctx)
         except :
             _file = urllib2.urlopen(request)
         fr=_file.read()
@@ -200,10 +200,10 @@ def connect( method='get', params=None, nimURL=None, apiKey=None ) :
             request.add_header("X-NIM-API-KEY", nim_apiKey)
             request.add_header("Content-type", "application/x-www-form-urlencoded; charset=UTF-8")
             try :
-                myssl = ssl.create_default_context()
-                myssl.check_hostname=False
-                myssl.verify_mode=ssl.CERT_NONE
-                _file = urllib2.urlopen(request,context=myssl)
+                ssl_ctx = ssl.create_default_context()
+                ssl_ctx.check_hostname=False
+                ssl_ctx.verify_mode=ssl.CERT_NONE
+                _file = urllib2.urlopen(request,context=ssl_ctx)
             except :
                 _file = urllib2.urlopen(request)
             fr=_file.read()
@@ -300,16 +300,7 @@ def upload( params=None, nimURL=None, apiKey=None ) :
     _actionURL = nimURL.encode('ascii')
 
     P.info("API URL: %s" % _actionURL)
-
-   # Create opener with extended form post support
-    try:
-        opener = urllib2.build_opener(FormPostHandler)
-        opener.addheaders = [('X-NIM-API-USER', nim_apiUser),('X-NIM-API-KEY', nim_apiKey)]
-    except:
-        P.error( "Failed building url opener")
-        P.error( traceback.format_exc() )
-        return False
-
+    
     # Test for SSL Redirection
     isRedirected = False
     try:
@@ -317,14 +308,43 @@ def upload( params=None, nimURL=None, apiKey=None ) :
         cmd=urllib.urlencode(testCmd)
         testURL="".join(( nimURL, cmd ))
         req = urllib2.Request(testURL)
-        res = urllib2.urlopen(req)
+
+        try :
+            ssl_ctx = ssl.create_default_context()
+            ssl_ctx.check_hostname=False
+            ssl_ctx.verify_mode=ssl.CERT_NONE
+            res = urllib2.urlopen(req, context=ssl_ctx)
+        except :
+            res = urllib2.urlopen(req)
+            #pass
+        
         finalurl = res.geturl()
+        #P.info("Request URL: %s" % finalurl)
         if nimURL.startswith('http:') and finalurl.startswith('https'):
             isRedirected = True
             _actionURL = _actionURL.replace("http:","https:")
             P.info("Redirect: %s" % _actionURL)
     except:
         P.error("Failed to test for redirect.")
+
+    # Create opener with extended form post support
+    try:
+        try :
+            P.info( "Opening Connection on HTTPS" )
+            ssl_ctx = ssl.create_default_context()
+            ssl_ctx.check_hostname=False
+            ssl_ctx.verify_mode=ssl.CERT_NONE
+            opener = urllib2.build_opener(urllib2.HTTPSHandler(context=ssl_ctx), FormPostHandler)
+        except :
+            P.info( "Opening Connection on HTTP" )
+            opener = urllib2.build_opener(FormPostHandler)
+
+        opener.addheaders = [('X-NIM-API-USER', nim_apiUser),('X-NIM-API-KEY', nim_apiKey)]
+    except:
+        P.error( "Failed building url opener")
+        P.error( traceback.format_exc() )
+        return False
+
 
     try:
         result = opener.open(_actionURL, params).read()

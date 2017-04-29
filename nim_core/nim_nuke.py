@@ -21,7 +21,18 @@ import nim_print as P
 #  Nuke Imports :
 import nuke, nukescripts
 #  Import Pythong GUI Packages :
-from PySide import QtCore, QtGui
+#from PySide import QtCore, QtGui
+#  Import Python GUI packages :
+try : 
+    from PySide2 import QtWidgets as QtGui
+    from PySide2 import QtGui as QtGui2
+    from PySide2 import QtCore
+except ImportError :
+    try : from PySide import QtCore, QtGui
+    except ImportError :
+        try : from PyQt4 import QtCore, QtGui
+        except ImportError : 
+            print "NIM: Failed to UI Modules - UI"
 
 
 def get_mainWin() :
