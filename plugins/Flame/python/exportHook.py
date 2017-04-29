@@ -417,9 +417,6 @@ def preExportAsset( info, userData ):
    print "resolvedPath: %s" % info['resolvedPath']
    print "shotName: %s" % info['shotName']
 
-   if userData['nim_export_sequence'] == True :
-      success = nimFlameExport.nimExportShots(nim_showID=userData['nim_showID'], info=info)
-
    print "preExportAsset - end 2 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
    pass
 
@@ -532,12 +529,20 @@ def preExportAsset( info, userData ):
 #   This can be used by the hook to pass black box data around.
 #
 def postExportAsset( info, userData ):
-   '''
+
    print "postExportAsset - start"
    print info
    print userData
-   print "postExportAsset - end"
-   '''
+
+   print "destinationPath: %s" % info['destinationPath']
+   print "resolvedPath: %s" % info['resolvedPath']
+   print "shotName: %s" % info['shotName']
+
+   if userData['nim_export_sequence'] == True :
+      success = nimFlameExport.nimExportShots(nim_showID=userData['nim_showID'], info=info)
+   
+   print "postExportAsset - end" 
+   
    pass
 
 
