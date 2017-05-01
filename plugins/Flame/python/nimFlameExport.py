@@ -18,6 +18,11 @@ import base64
 import platform
 import ntpath
 
+try:
+	import xml.etree.cElementTree as ET
+except ImportError:
+	import xml.etree.ElementTree as ET
+
 # Relative path to append for NIM Scripts
 nimFlameScriptPath = os.path.dirname(os.path.realpath(__file__))
 nimFlameScriptPath = nimFlameScriptPath.replace('\\','/')
@@ -365,7 +370,6 @@ class NimExportDialog(QDialog):
 		self.accept()
 
 
-
 def nimCreateShot(nim_showID=None, info=None) :
 	'''Create Shot in NIM on preAssetExport'''
 
@@ -383,6 +387,8 @@ def nimCreateShot(nim_showID=None, info=None) :
 		nim_destinationPath = info['destinationPath']
 		nim_resolvedPath = info['resolvedPath']
 		nim_fullPath = os.path.join(nim_destinationPath, nim_resolvedPath)
+
+		#TODO: If shotName is '' then set to assetName
 
 		print "NIM - Exporting Shot Info"
 		shotInfo = nimAPI.add_shot( nim_showID, nim_shotName, nim_duration )
@@ -414,20 +420,20 @@ def nimCreateShot(nim_showID=None, info=None) :
 				iconPath = string.join([pathRoot, iconFrame,'.',mediaExt],'')
 				
 				# Append iconPath to result
-				result['nim_iconPath'] = nimResolvePath(nim_shotID=nim_shotID, path=iconPath)
+				result['nim_iconPath'] = nimResolvePath(nim_shotID=nim_shotID, keyword_string=iconPath)
 				print "NIM - iconPath: %s" % result['nim_iconPath']
 
 			else :
 				print 'NIM - Skipping icon upload for non-video assetType'
 		
 		result['nim_shotID'] = nim_shotID
-		result['resolvedPath'] = nimResolvePath(nim_shotID=nim_shotID, path=nim_resolvedPath)
+		result['resolvedPath'] = nimResolvePath(nim_shotID=nim_shotID, keyword_string=nim_resolvedPath)
 
 	return result
 
-
+'''
 def nimExportShot(nim_showID=None, info=None) :
-	'''Update/Export Shots to NIM on postAssetExport'''
+	# Update/Export Shots to NIM on postAssetExport
 
 	success = False
 
@@ -444,6 +450,8 @@ def nimExportShot(nim_showID=None, info=None) :
 		nim_destinationPath = info['destinationPath']
 		nim_resolvedPath = info['resolvedPath']
 		nim_fullPath = os.path.join(nim_destinationPath, nim_resolvedPath)
+
+		#TODO: If shotName is '' then set to assetName
 
 		print "NIM - Exporting Shot Info"
 		shotInfo = nimAPI.add_shot( nim_showID, nim_shotName, nim_duration )
@@ -498,7 +506,7 @@ def nimExportShot(nim_showID=None, info=None) :
 		print "NIM - No shows found"
 
 	return success
-
+'''
 
 def updateShotIcon(nim_shotID=None, image_path='') :
 	success = False
@@ -519,7 +527,7 @@ def updateShotIcon(nim_shotID=None, image_path='') :
 	return success
 
 
-def nimResolvePath(nim_jobID=None, nim_showID=None, nim_shotID=None, path='') :
+def nimResolvePath(nim_jobID=None, nim_showID=None, nim_shotID=None, keyword_string='', tokenL='<', tokenR='>') :
 
 	nimPaths = {}
 	
@@ -566,32 +574,75 @@ def nimResolvePath(nim_jobID=None, nim_showID=None, nim_shotID=None, path='') :
 				nimPaths['nim_job_root'] = nim_jobPaths['root']
 
 
-	#path = path.format(**nimPaths)
+	#keyword_string = keyword_string.format(**nimPaths)
 	if 'nim_job_root' in nimPaths :
-		path = path.replace('<nim_job_root>', nimPaths['nim_job_root'])
+		keyword_string = keyword_string.replace(tokenL+'nim_job_root'+tokenR, nimPaths['nim_job_root'])
 
 	if 'nim_job_number' in nimPaths :
-		path = path.replace('<nim_job_number>', nimPaths['nim_job_number'])
+		keyword_string = keyword_string.replace(tokenL+'nim_job_number'+tokenR, nimPaths['nim_job_number'])
 
 	if 'nim_job_name' in nimPaths :
-		path = path.replace('<nim_job_name>', nimPaths['nim_job_name'])
+		keyword_string = keyword_string.replace(tokenL+'nim_job_name'+tokenR, nimPaths['nim_job_name'])
 
 	if 'nim_show_root' in nimPaths :
-		path = path.replace('<nim_show_root>', nimPaths['nim_show_root'])
+		keyword_string = keyword_string.replace(tokenL+'nim_show_root'+tokenR, nimPaths['nim_show_root'])
 
 	if 'nim_show_name' in nimPaths :
-		path = path.replace('<nim_show_name>', nimPaths['nim_show_name'])
+		keyword_string = keyword_string.replace(tokenL+'nim_show_name'+tokenR, nimPaths['nim_show_name'])
 
 	if 'nim_shot_root' in nimPaths :
-		path = path.replace('<nim_shot_root>', nimPaths['nim_shot_root'])
+		keyword_string = keyword_string.replace(tokenL+'nim_shot_root'+tokenR, nimPaths['nim_shot_root'])
 
 	if 'nim_shot_plates' in nimPaths :
-		path = path.replace('<nim_shot_plates>', nimPaths['nim_shot_plates'])
+		keyword_string = keyword_string.replace(tokenL+'nim_shot_plates'+tokenR, nimPaths['nim_shot_plates'])
 
 	if 'nim_shot_render' in nimPaths :
-		path = path.replace('<nim_shot_render>', nimPaths['nim_shot_render'])
+		keyword_string = keyword_string.replace(tokenL+'nim_shot_render'+tokenR, nimPaths['nim_shot_render'])
 
 	if 'nim_shot_comp' in nimPaths :
-		path = path.replace('<nim_shot_comp>', nimPaths['nim_shot_comp'])
+		keyword_string = keyword_string.replace(tokenL+'nim_shot_comp'+tokenR, nimPaths['nim_shot_comp'])
 
-	return path.encode('utf-8')
+	return keyword_string.encode('utf-8')
+
+
+def resolveBatchKeywords(nim_shotID=None, batch_path=None) :
+	'''Scrubs batch files for NIM keywords and resolves path'''
+	success = False
+	if batch_path :
+		#	/PRJ/NIM_PROJECTS/NIM_1/17022_FLAME/FLM/SHOTS/SH_011/FLAME/batch/SH_011_v00.batch
+		if batch_path.endswith('.batch') :
+			batch_path = batch_path[:-6]
+			print "Bath Path: %s" % batch_path
+
+		for file in os.listdir(batch_path) :
+			if file.endswith(".export_node") :
+				export_node_file = os.path.join(batch_path, file)
+				print "Export Node Found: %s" % export_node_file
+				try:
+					'''
+					export_node_xml = ET.parse(export_node_file)
+					print "Export Node Loaded"
+					export_node_root = export_node_xml.getroot()
+					for elem in export_node_root.iterfind('Setup/State/NamePattern'):
+						print "NamePattern: %s" % elem.text
+					for elem in export_node_root.iterfind('Setup/State/ClipPattern'):
+						print "NamePattern: %s" % elem.text
+					for elem in export_node_root.iterfind('Setup/State/SetupPattern'):
+						print "NamePattern: %s" % elem.text
+					'''
+					with open(export_node_file) as f :
+						export_node_contents=f.read()
+						print "Export Node Loaded"
+						export_node_contents = nimResolvePath(nim_shotID=nim_shotID, keyword_string=export_node_contents, tokenL='&lt;', tokenR='&gt;')
+					with open(export_node_file, "w") as f :
+						f.write(export_node_contents)
+					print 'Export Node Updated'
+					success = True
+				except Exception, e :
+					print 'Export Node Keyword Resolution Failed'
+					print '    %s' % traceback.print_exc()
+
+	return success
+
+
+

@@ -160,8 +160,30 @@ def customUIAction( info, userData ):
       utf8 = QtCore.QTextCodec.codecForName("utf-8")
       QtCore.QTextCodec.setCodecForCStrings(utf8)
 
+
+      import sys, traceback
+      '''
+      try:
+         import xml.etree.cElementTree as ET
+      except ImportError:
+         import xml.etree.ElementTree as ET
+      try:
+         print "XML loaded"
+         nimFlamePresetPath = '/Users/andrew/Documents/NIM Labs/Repository/nim_connectors/plugins/Flame/presets/sequence_publish/NimExportSequence.xml'
+         preset_xml = ET.parse(nimFlamePresetPath)
+         preset_root = preset_xml.getroot()
+         for elem in preset_root.iterfind('createOpenClip/batchSetup/namePattern'):
+            print elem.text
+         print "XML done"
+      except Exception, e :
+         print 'XML Failed'
+         print '    %s' % traceback.print_exc()
+      '''
+
+      version = "Version: %s.%s" % (sys.version_info[0], sys.version_info[0])
+
       title = "Export to Edits"
-      msg = "Export to Edits"
+      msg = "Export to Edits: "+version
       dialog=QtGui.QMessageBox.information( None, title, msg, QtGui.QMessageBox.Ok)
       if dialog==QtGui.QMessageBox.Ok :
          userInput='OK'

@@ -404,19 +404,25 @@ def postExportSequence( info, userData ):
       for shotName in shotData :
          print "shotName: %s" % shotName
          for assetType in shotData[shotName] :
+            # Update Icons
             if assetType == 'video' :
+               print "Updating Shot Icon"
                itemData = shotData[shotName]['video']
                nim_shotID = itemData['nim_shotID']
                nim_iconPath = itemData['nim_iconPath']
                print "shotID: %s" % nim_shotID
                print "iconPath: %s" % nim_iconPath
-               # Update Icons
                result = nimFlameExport.updateShotIcon(nim_shotID=nim_shotID, image_path=nim_iconPath)
 
-         #TODO: update the writefileXX.export_node for each shot in batch group
-         #      read file and resolve :
-         #                                nim_shot_comp
-         #                                nim_shot_root
+            # Resolve keywords in Batch export_node files
+            if assetType == 'batch' :
+               print "Resolving Keywords in Batch Export Node"
+               itemData = shotData[shotName]['batch']
+               nim_shotID = itemData['nim_shotID']
+               resolvedPath = itemData['resolvedPath']
+               destinationPath = info['destinationPath']
+               batchPath = os.path.join(destinationPath,resolvedPath)
+               result = nimFlameExport.resolveBatchKeywords(nim_shotID=nim_shotID, batch_path=batchPath)
 
    print "postExportSequence - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
    pass
