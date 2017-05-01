@@ -3,12 +3,46 @@
 #
 # Filename: exportHook.py
 #
-# Copyright (c) 2014 Autodesk Inc.
-# All rights reserved.
-#
-# Use of this software is subject to the terms of the Autodesk license
-# agreement provided at the time of installation or download, or which
-# otherwise accompanies this software in either electronic or hard copy form.
+'''
+Create wiretap ID association with NIM Show
+   Log all openClips from export
+
+Options on right click to :
+   Scan for versions
+   Build OpenClips from Elements
+
+Clip can be associated with a single shot or show(sequence)
+
+__________________________________________________________________________
+
+Custom Export....
+
+   preCustomExport :
+      get job/server/show and set in user data
+      choose preset from NIM preset files
+
+
+Generic export....
+
+   preAssetExport :
+      if custom export is not defined
+         Check for nim keywords in template
+         if keywords exist assume working with NIM
+            if nim variables are not set 
+               "NIM Keywords Detected"
+               ask if export sequence to NIM
+                  get job/show and set in user data
+         
+      create shot
+      get root paths
+      replace keywords with paths
+
+   postAssetExport :
+      update shotIcons
+      log elements
+      log files
+      log openClip against shot
+'''
 # *****************************************************************************
 
 
@@ -21,10 +55,14 @@ nim_app = 'Flame'
 os.environ['NIM_APP'] = str(nim_app)
 
 # Relative path to append for NIM Scripts
-nimFlameScriptPath = os.path.dirname(os.path.realpath(__file__))
-nimFlameScriptPath = nimFlameScriptPath.replace('\\','/')
-nimScriptPath = re.sub(r"\/plugins/Flame/python$", "", nimFlameScriptPath)
+nimFlamePythonPath = os.path.dirname(os.path.realpath(__file__))
+nimFlamePythonPath = nimFlamePythonPath.replace('\\','/')
+nimScriptPath = re.sub(r"\/plugins/Flame/python$", "", nimFlamePythonPath)
+nimFlamePresetPath = os.path.join(re.sub(r"\/python$", "", nimFlamePythonPath),'presets')
+
 print "NIM Script Path: %s" % nimScriptPath
+print "NIM Python Path: %s" % nimFlamePythonPath
+print "NIM Preset Path: %s" % nimFlamePresetPath
 
 # If relocating these scripts uncomment the line below and enter the fixed path
 # to the NIM Connector Root directory
@@ -99,12 +137,64 @@ import nimFlameExport
 #   This can be used by the hook to pass black box data around.
 #
 def preCustomExport( info, userData ):
-   '''
-   print "preCustomExport - start"
+   print "preCustomExport - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
    print info
    print userData
-   print "preCustomExport - end"
-   '''
+
+   #Test what 'exportType' was select in the UI, by the user
+   if userData['nim_export_type'] == 'NimExportSequence' :
+      #Set the proper 'presetPath' in the info dictionary
+      #This defines which preset is used for the custom encode job
+      #info['presetPath'] = '/path/to/export/presets/uncompressed_qt.xml'
+
+      print "NIM - Exporting to NIM"
+      userData['nim_export_sequence'] = True
+
+      exportDlg = nimFlameExport.NimExportDialog()
+      exportDlg.show()
+      if exportDlg.exec_() :
+         print "NIM - serverOSPath: %s" % exportDlg.nim_serverOSPath
+         nim_serverOSPath = exportDlg.nim_serverOSPath
+         userData['nim_serverOSPath'] = nim_serverOSPath
+
+         print "NIM - jobID: %s" % exportDlg.nim_jobID
+         nim_jobID = exportDlg.nim_jobID
+         userData['nim_jobID'] = nim_jobID
+
+         print "NIM - showID: %s" % exportDlg.nim_showID
+         nim_showID = exportDlg.nim_showID
+         userData['nim_showID'] = nim_showID
+         
+         # Create empty dictionary for shot data
+         userData['shotData'] = {}
+         
+         # TODO: Add dropdown to dialog to select preset option
+         #  Optional - read xml and resolve all NIM keywords and write to temp XML
+         #           - set to temp XML
+         #           This will work for custom but still won't resolve keys used in standard export
+         
+         #  DO INSTEAD OF OPTIONAL :
+         #          To resolve all keywords in standard export modify the .export_node file in the batch
+         #              retrieve & resolve batchSetup location from XML - batchSetup / namePattern
+
+         info['presetPath'] = nimFlamePresetPath + '/sequence_publish/NimExportSequence.xml'
+
+         # Set destination path to NIM server path
+         info['destinationPath'] = nim_serverOSPath
+         print "Destination Path: %s" % info['destinationPath']
+         
+         # Process in Background
+         info['isBackground'] = False
+
+      else:
+         print "NIM - Canceled Export to NIM"
+         userData['nim_export_sequence'] = False
+         info['abort'] = True
+
+      #Set the 'destinationPath' in the info dictionary
+      #info['destinationPath'] = '/PRJ/NIM_PROJECTS/FlameFiles/' + CURRENT_PROJECT + '/'
+      
+   print "preCustomExport - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
    pass
 
 
@@ -130,12 +220,10 @@ def preCustomExport( info, userData ):
 #   This can be used by the hook to pass black box data around.
 #
 def postCustomExport( info, userData ):
-   '''
-   print "postCustomExport - start"
+   print "postCustomExport - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
    print info
    print userData
-   print "postCustomExport - end"
-   '''
+   print "postCustomExport - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
    pass
 
 
@@ -168,12 +256,10 @@ def postCustomExport( info, userData ):
 #   This can be used by the hook to pass black box data around.
 #
 def preExport( info, userData ):
-   '''
-   print "preExport - start"
+   print "preExport - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
    print info
    print userData
-   print "preExport - end"
-   '''
+   print "preExport - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
    pass
 
 
@@ -198,10 +284,10 @@ def preExport( info, userData ):
 #   This can be used by the hook to pass black box data around.
 #
 def postExport( info, userData ):
-   print "postExport - start"
+   print "postExport - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
    print info
    print userData
-   print "postExport - end"
+   print "postExport - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
    pass
 
 
@@ -243,30 +329,39 @@ def postExport( info, userData ):
 #   This can be used by the hook to pass black box data around.
 #
 def preExportSequence( info, userData ):
-   print "preExportSequence - start *****************************************************************"
+   print "preExportSequence - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
    print info
    print userData
 
-   msgBox = QMessageBox()
-   msgBox.setTextFormat(Qt.RichText)
-   result = msgBox.information(None, "Export Sequence to NIM?", "Export Sequence to NIM?", QMessageBox.Ok | QMessageBox.Cancel)
-   if result == QMessageBox.Ok:
-      print "NIM - Exporting to NIM"
-      userData['nim_export_sequence'] = True
+   # Check if Custom NIM export or Standard Export
+   # If standard export then ask for NIM association
+   nimShowDialog = False
 
-      exportDlg = nimFlameExport.NimExportDialog()
-      exportDlg.show()
-      if exportDlg.exec_() :
-         print "NIM - showID: %s" % exportDlg.nim_showID
-         userData['nim_showID'] = exportDlg.nim_showID
-   else:
-      print "NIM - Skipping Export to NIM"
-      userData['nim_export_sequence'] = False
+   if 'nim_export_type' in userData :
+      if userData['nim_export_type'] != 'NimExportSequence' :
+         nimShowDialog = True
+   else :
+      nimShowDialog = True
 
-   
+   if nimShowDialog :
+      msgBox = QMessageBox()
+      msgBox.setTextFormat(Qt.RichText)
+      result = msgBox.information(None, "Export Sequence to NIM?", "Export Sequence to NIM?", QMessageBox.Ok | QMessageBox.Cancel)
+      if result == QMessageBox.Ok:
+         print "NIM - Exporting to NIM"
+         userData['nim_export_sequence'] = True
 
+         exportDlg = nimFlameExport.NimExportDialog()
+         exportDlg.show()
+         if exportDlg.exec_() :
+            print "NIM - showID: %s" % exportDlg.nim_showID
+            userData['nim_showID'] = exportDlg.nim_showID
+            userData['shotData'] = {}
+      else:
+         print "NIM - Skipping Export to NIM"
+         userData['nim_export_sequence'] = False
 
-   print "preExportSequence - end *****************************************************************"
+   print "preExportSequence - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
    pass
 
 
@@ -299,13 +394,31 @@ def preExportSequence( info, userData ):
 #   This can be used by the hook to pass black box data around.
 #
 def postExportSequence( info, userData ):
-   print "postExportSequence - start *****************************************************************"
+   print "postExportSequence - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
    print info
    print userData
 
-   userData['nim_export_sequence'] = False
+   if userData['nim_export_sequence'] == True :
+      shotData = userData['shotData']
 
-   print "postExportSequence - end *****************************************************************"
+      for shotName in shotData :
+         print "shotName: %s" % shotName
+         for assetType in shotData[shotName] :
+            if assetType == 'video' :
+               itemData = shotData[shotName]['video']
+               nim_shotID = itemData['nim_shotID']
+               nim_iconPath = itemData['nim_iconPath']
+               print "shotID: %s" % nim_shotID
+               print "iconPath: %s" % nim_iconPath
+               # Update Icons
+               result = nimFlameExport.updateShotIcon(nim_shotID=nim_shotID, image_path=nim_iconPath)
+
+         #TODO: update the writefileXX.export_node for each shot in batch group
+         #      read file and resolve :
+         #                                nim_shot_comp
+         #                                nim_shot_root
+
+   print "postExportSequence - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
    pass
 
 
@@ -409,15 +522,28 @@ def postExportSequence( info, userData ):
 #   This can be used by the hook to pass black box data around.
 #
 def preExportAsset( info, userData ):
-   print "preExportAsset - start 2 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+   print "preExportAsset - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
    print info
    print userData
+
+   if 'nim_export_sequence' in userData :
+      if userData['nim_export_sequence'] == True :
+         result = nimFlameExport.nimCreateShot(nim_showID=userData['nim_showID'], info=info)
+
+   #print result
+
+   info['resolvedPath'] = result['resolvedPath']
+
+   if info['shotName'] not in userData['shotData'] :
+      userData['shotData'][info['shotName']] = {}
+
+   userData['shotData'][info['shotName']][info['assetType']] = result 
 
    print "destinationPath: %s" % info['destinationPath']
    print "resolvedPath: %s" % info['resolvedPath']
    print "shotName: %s" % info['shotName']
 
-   print "preExportAsset - end 2 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+   print "preExportAsset - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
    pass
 
 
@@ -530,7 +656,7 @@ def preExportAsset( info, userData ):
 #
 def postExportAsset( info, userData ):
 
-   print "postExportAsset - start"
+   print "postExportAsset - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
    print info
    print userData
 
@@ -538,10 +664,7 @@ def postExportAsset( info, userData ):
    print "resolvedPath: %s" % info['resolvedPath']
    print "shotName: %s" % info['shotName']
 
-   if userData['nim_export_sequence'] == True :
-      success = nimFlameExport.nimExportShots(nim_showID=userData['nim_showID'], info=info)
-   
-   print "postExportAsset - end" 
+   print "postExportAsset - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<" 
    
    pass
 
@@ -567,11 +690,9 @@ def useBackburnerPostExportAsset():
 #    of the profiles to show in contextual menus.
 #
 def getCustomExportProfiles( profiles ):
-   '''
-   print "getCustomExportProfiles - start"
-   print profiles
-   print "getCustomExportProfiles - end"
-   '''
+   print "getCustomExportProfiles - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+   profiles['NIM Export Sequence']= {'nim_export_type':'NimExportSequence'} #Adds an entry to the 'userData' dictionary
+   print "getCustomExportProfiles - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
    pass
 
 

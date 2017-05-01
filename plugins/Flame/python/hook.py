@@ -18,6 +18,8 @@ from PySide import QtGui, QtCore
 # sequenceName : Name of the rendered sequence -- String.
 # elapsedTimeInSeconds : number of seconds used to render -- Float
 def renderEnded(moduleName, sequenceName, elapsedTimeInSeconds):
+   print "renderEnded - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+   print "renderEnded - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
    pass
 
 
@@ -100,12 +102,28 @@ def previewWindowConfigChanged(description,width,height,bitDepth,
 def getCustomUIActions( ):
    #return ()
    action1 = {}
-   action1[ "name" ] = "action1"
-   action1[ "caption" ] = "Export Daily"
+   action1[ "name" ] = "nimExportEdit"
+   action1[ "caption" ] = "Export to Edits"
+
+   action2 = {}
+   action2[ "name" ] = "nimExportDailies"
+   action2[ "caption" ] = "Export to Dailies"
+
+   action3 = {}
+   action3[ "name" ] = "nimScanForVersions"
+   action3[ "caption" ] = "Scan for Versions"
+
+   action4 = {}
+   action4[ "name" ] = "nimBuildOpenClipFromElements"
+   action4[ "caption" ] = "Build OpenClip from Elements"
+
+   action5 = {}
+   action5[ "name" ] = "nimChangeUser"
+   action5[ "caption" ] = "Change User"
 
    group1 = {}
    group1[ "name" ] = "NIM"
-   group1[ "actions" ] = ( action1, )
+   group1[ "actions" ] = ( action1, action2, action3, action4, action5, )
 
    # action2 = {}
    # action2[ "name" ] = "action2"
@@ -135,16 +153,67 @@ def getCustomUIActions( ):
 #   Dictionary that is passed to getCustomUIActions.
 #
 def customUIAction( info, userData ):
-   if info[ "name" ] == "action1" :
-      print "this changed"
-      print "action1 triggered"
+   if info[ "name" ] == "nimExportEdit" :
+      print "nimExportDaily triggered"
       print info["selection"]
 
       utf8 = QtCore.QTextCodec.codecForName("utf-8")
       QtCore.QTextCodec.setCodecForCStrings(utf8)
 
-      title = "This is a test"
-      msg = "Testing 1 2 3"
+      title = "Export to Edits"
+      msg = "Export to Edits"
+      dialog=QtGui.QMessageBox.information( None, title, msg, QtGui.QMessageBox.Ok)
+      if dialog==QtGui.QMessageBox.Ok :
+         userInput='OK'
+
+   if info[ "name" ] == "nimExportDailies" :
+      print "nimExportDaily triggered"
+      print info["selection"]
+
+      utf8 = QtCore.QTextCodec.codecForName("utf-8")
+      QtCore.QTextCodec.setCodecForCStrings(utf8)
+
+      title = "Export to Dailies"
+      msg = "Export to Dailies"
+      dialog=QtGui.QMessageBox.information( None, title, msg, QtGui.QMessageBox.Ok)
+      if dialog==QtGui.QMessageBox.Ok :
+         userInput='OK'
+
+   if info[ "name" ] == "nimScanForVersions" :
+      print "nimScanForVersions triggered"
+      print info["selection"]
+
+      utf8 = QtCore.QTextCodec.codecForName("utf-8")
+      QtCore.QTextCodec.setCodecForCStrings(utf8)
+
+      title = "Scan for Versions"
+      msg = "Scan for Versions"
+      dialog=QtGui.QMessageBox.information( None, title, msg, QtGui.QMessageBox.Ok)
+      if dialog==QtGui.QMessageBox.Ok :
+         userInput='OK'
+
+   if info[ "name" ] == "nimBuildOpenClipFromElements" :
+      print "nimBuildOpenClipFromElements triggered"
+      print info["selection"]
+
+      utf8 = QtCore.QTextCodec.codecForName("utf-8")
+      QtCore.QTextCodec.setCodecForCStrings(utf8)
+
+      title = "Build OpenClip from Elements"
+      msg = "Build OpenClip from Elements"
+      dialog=QtGui.QMessageBox.information( None, title, msg, QtGui.QMessageBox.Ok)
+      if dialog==QtGui.QMessageBox.Ok :
+         userInput='OK'
+
+   if info[ "name" ] == "nimChangeUser" :
+      print "nimChangeUser triggered"
+      print info["selection"]
+
+      utf8 = QtCore.QTextCodec.codecForName("utf-8")
+      QtCore.QTextCodec.setCodecForCStrings(utf8)
+
+      title = "Change User"
+      msg = "Change User"
       dialog=QtGui.QMessageBox.information( None, title, msg, QtGui.QMessageBox.Ok)
       if dialog==QtGui.QMessageBox.Ok :
          userInput='OK'

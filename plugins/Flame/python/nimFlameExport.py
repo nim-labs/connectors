@@ -194,6 +194,24 @@ class NimExportDialog(QDialog):
 
 		self.nim_jobChooser.currentIndexChanged.connect(self.nim_jobChanged)
 
+
+		# SERVERS: List box for server selection
+		horizontalLayout2 = QHBoxLayout()
+		horizontalLayout2.setSpacing(-1)
+		horizontalLayout2.setSizeConstraint(QLayout.SetDefaultConstraint)
+		horizontalLayout2.setObjectName("HorizontalLayout2")
+		self.nimServerLabel = QLabel()
+		self.nimServerLabel.setFixedWidth(40)
+		self.nimServerLabel.setText("Server:")
+		horizontalLayout2.addWidget(self.nimServerLabel)
+		self.nim_serverChooser = QComboBox()
+		self.nim_serverChooser.setToolTip("Choose the server you wish to export shots to.")
+		horizontalLayout2.addWidget(self.nim_serverChooser)
+		horizontalLayout2.setStretch(1, 40)
+		groupLayout.setLayout(1, QFormLayout.SpanningRole, horizontalLayout2)
+		self.nim_serverChooser.currentIndexChanged.connect(self.nim_serverChanged)
+		
+
 		# SHOWS: List box for show selection
 		horizontalLayout3 = QHBoxLayout()
 		horizontalLayout3.setSpacing(-1)
@@ -207,7 +225,7 @@ class NimExportDialog(QDialog):
 		self.nim_showChooser.setToolTip("Choose the show you wish to export shots to.")
 		horizontalLayout3.addWidget(self.nim_showChooser)
 		horizontalLayout3.setStretch(1, 40)
-		groupLayout.setLayout(1, QFormLayout.SpanningRole, horizontalLayout3)
+		groupLayout.setLayout(2, QFormLayout.SpanningRole, horizontalLayout3)
 		self.nim_showChooser.currentIndexChanged.connect(self.nim_showChanged)
 	
 
@@ -226,7 +244,7 @@ class NimExportDialog(QDialog):
 		horizontalLayout4.addItem(spacerItem4)
 		horizontalLayout4.addWidget(self._buttonbox)
 		horizontalLayout4.setStretch(1, 40)
-		groupLayout.setLayout(2, QFormLayout.SpanningRole, horizontalLayout4)
+		groupLayout.setLayout(3, QFormLayout.SpanningRole, horizontalLayout4)
 
 		self.setLayout(groupLayout)
 		layout.addWidget(groupBox)
@@ -241,8 +259,46 @@ class NimExportDialog(QDialog):
 		self.nim_jobID = self.nim_jobs[job]
 		self.nim_jobPaths = nimAPI.get_paths('job', self.nim_jobID)
 
+		self.nim_updateServer()
 		self.nim_updateShow()
 		
+
+	def nim_updateServer(self):
+		self.nim_servers = {}
+		self.nim_servers = nimAPI.get_jobServers(self.nim_jobID)
+		self.nim_serverID = ''
+		self.nim_serverOSPath = ''
+		self.nim_serverDict = {}
+		try:
+			self.nim_serverChooser.clear()
+			if self.nim_serverChooser:
+				if len(self.nim_servers)>0:  
+					for server in self.nim_servers:
+						self.nim_serverDict[server['server']] = server['ID']
+					for key, value in sorted(self.nim_serverDict.items(), reverse=False):
+						self.nim_serverChooser.addItem(key)
+		except:
+			pass
+
+
+	def nim_serverChanged(self):
+		'''Action when job is selected'''
+		#print "SERVER CHANGED"
+		serverName = self.nim_serverChooser.currentText()
+		if serverName:
+			print "NIM: server=%s" % serverName
+			serverID = self.nim_serverDict[serverName]
+			self.nim_serverID = serverID
+
+			serverInfo = nimAPI.get_serverOSPath(serverID, self.nim_OS)
+			if serverInfo:
+				if len(serverInfo)>0:
+					self.nim_serverOSPath = serverInfo[0]['serverOSPath']
+					print "NIM: serverOSPath=%s" % self.nim_serverOSPath
+				else:
+					print "NIM: No Server Found"
+			else:
+				print "NIM: No Data Returned"
 
 
 	def nim_updateShow(self):
@@ -309,8 +365,69 @@ class NimExportDialog(QDialog):
 		self.accept()
 
 
-def nimExportShots(nim_showID=None, info=None) :
-	'''Export Shots to NIM'''
+
+def nimCreateShot(nim_showID=None, info=None) :
+	'''Create Shot in NIM on preAssetExport'''
+
+	result = {}
+
+	if nim_showID != None:
+		nim_shotID = False
+		nim_shotName = info['shotName']
+		nim_sourceIn = info['sourceIn']
+		nim_sourceOut = info['sourceOut']
+		nim_handleIn = info['handleIn']
+		nim_handleOut = info['handleOut']
+		nim_duration = nim_sourceOut - nim_sourceIn
+		nim_assetType = info['assetType']
+		nim_destinationPath = info['destinationPath']
+		nim_resolvedPath = info['resolvedPath']
+		nim_fullPath = os.path.join(nim_destinationPath, nim_resolvedPath)
+
+		print "NIM - Exporting Shot Info"
+		shotInfo = nimAPI.add_shot( nim_showID, nim_shotName, nim_duration )
+
+		if shotInfo['success'] == 'true':
+			result['success'] = True
+			nim_shotID = shotInfo['ID']
+			print "NIM - nim_shotID: %s" % nim_shotID
+			if 'error' in shotInfo:
+				print "NIM - WARNING: %s" % shotInfo['error']
+		else:
+			result['success'] = False
+			nim_shotID = False
+			if shotInfo['error']:
+				#error exists
+				print "NIM - ERROR: %s" % shotInfo['error']
+
+		if nim_shotID == False:
+			pass
+		else:
+			if nim_assetType == 'video' :
+				icon_success = False
+
+				mediaExt = nim_fullPath.rpartition('.')[2]
+				pathPartition = nim_fullPath.rpartition('[')
+				pathRoot = pathPartition[0]
+				iconFrame = pathPartition[2].rpartition('-')[0]
+
+				iconPath = string.join([pathRoot, iconFrame,'.',mediaExt],'')
+				
+				# Append iconPath to result
+				result['nim_iconPath'] = nimResolvePath(nim_shotID=nim_shotID, path=iconPath)
+				print "NIM - iconPath: %s" % result['nim_iconPath']
+
+			else :
+				print 'NIM - Skipping icon upload for non-video assetType'
+		
+		result['nim_shotID'] = nim_shotID
+		result['resolvedPath'] = nimResolvePath(nim_shotID=nim_shotID, path=nim_resolvedPath)
+
+	return result
+
+
+def nimExportShot(nim_showID=None, info=None) :
+	'''Update/Export Shots to NIM on postAssetExport'''
 
 	success = False
 
@@ -328,7 +445,7 @@ def nimExportShots(nim_showID=None, info=None) :
 		nim_resolvedPath = info['resolvedPath']
 		nim_fullPath = os.path.join(nim_destinationPath, nim_resolvedPath)
 
-		print "NIM - Creating New Shot"
+		print "NIM - Exporting Shot Info"
 		shotInfo = nimAPI.add_shot( nim_showID, nim_shotName, nim_duration )
 		#print shotInfo
 
@@ -357,12 +474,15 @@ def nimExportShots(nim_showID=None, info=None) :
 				iconPath = string.join([pathRoot, iconFrame,'.',mediaExt],'')
 				print "NIM - iconPath: %s" % iconPath
 
-				print "NIM - Updating Thumbnail"
-				icon_success = updateShotIcon(nim_shotID, iconPath)
-				if icon_success :
-					print 'NIM - Shot Icon uploaded'
+				if os.path.isfile(iconPath) :
+					print "NIM - Updating Thumbnail"
+					icon_success = updateShotIcon(nim_shotID, iconPath)
+					if icon_success :
+						print 'NIM - Shot Icon uploaded'
+					else :
+						print 'NIM - Failed to upload icon'
 				else :
-					print 'NIM - Failed to upload icon'
+					print "NIM - Icon file does not exist."
 			else :
 				print 'NIM - Skipping icon upload for non-video assetType'
 
@@ -399,4 +519,79 @@ def updateShotIcon(nim_shotID=None, image_path='') :
 	return success
 
 
+def nimResolvePath(nim_jobID=None, nim_showID=None, nim_shotID=None, path='') :
 
+	nimPaths = {}
+	
+	# Get shotInfo
+	if nim_shotID :	
+		nim_shotInfo = nimAPI.get_shotInfo(nim_shotID)
+		if nim_shotInfo:
+			if len(nim_shotInfo)>0:
+				nim_showID = nim_shotInfo[0]['showID']
+
+		nim_shotPaths = nimAPI.get_paths('shot', nim_shotID)
+		if nim_shotPaths:
+			if len(nim_shotPaths)>0:
+				nimPaths['nim_shot_root'] = nim_shotPaths['root']
+				nimPaths['nim_shot_plates'] = nim_shotPaths['plates']
+				nimPaths['nim_shot_render'] = nim_shotPaths['renders']
+				nimPaths['nim_shot_comp'] = nim_shotPaths['comps']
+
+	# Get showInfo
+	if nim_showID :	
+		nim_showInfo = nimAPI.get_showInfo(nim_showID)
+		if nim_showInfo:
+			if len(nim_showInfo)>0:
+				nim_jobID = nim_showInfo[0]['jobID']
+				nimPaths['nim_show_name'] = nim_showInfo[0]['showname']
+
+		nim_showPaths = nimAPI.get_paths('show', nim_showID)
+		if nim_showPaths:
+			if len(nim_showPaths)>0:
+				nimPaths['nim_show_root'] = nim_showPaths['root']
+
+		
+	# Get jobInfo
+	if nim_jobID :	
+		nim_jobInfo = nimAPI.get_jobInfo(nim_jobID)
+		if nim_jobInfo:
+			if len(nim_jobInfo)>0:
+				nimPaths['nim_job_name'] = nim_jobInfo[0]['jobname']
+				nimPaths['nim_job_number'] = nim_jobInfo[0]['number']
+
+		nim_jobPaths = nimAPI.get_paths('job', nim_jobID)
+		if nim_jobPaths:
+			if len(nim_jobPaths)>0:
+				nimPaths['nim_job_root'] = nim_jobPaths['root']
+
+
+	#path = path.format(**nimPaths)
+	if 'nim_job_root' in nimPaths :
+		path = path.replace('<nim_job_root>', nimPaths['nim_job_root'])
+
+	if 'nim_job_number' in nimPaths :
+		path = path.replace('<nim_job_number>', nimPaths['nim_job_number'])
+
+	if 'nim_job_name' in nimPaths :
+		path = path.replace('<nim_job_name>', nimPaths['nim_job_name'])
+
+	if 'nim_show_root' in nimPaths :
+		path = path.replace('<nim_show_root>', nimPaths['nim_show_root'])
+
+	if 'nim_show_name' in nimPaths :
+		path = path.replace('<nim_show_name>', nimPaths['nim_show_name'])
+
+	if 'nim_shot_root' in nimPaths :
+		path = path.replace('<nim_shot_root>', nimPaths['nim_shot_root'])
+
+	if 'nim_shot_plates' in nimPaths :
+		path = path.replace('<nim_shot_plates>', nimPaths['nim_shot_plates'])
+
+	if 'nim_shot_render' in nimPaths :
+		path = path.replace('<nim_shot_render>', nimPaths['nim_shot_render'])
+
+	if 'nim_shot_comp' in nimPaths :
+		path = path.replace('<nim_shot_comp>', nimPaths['nim_shot_comp'])
+
+	return path.encode('utf-8')
