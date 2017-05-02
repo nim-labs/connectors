@@ -431,6 +431,36 @@ def nimCreateShot(nim_showID=None, info=None) :
 
 	return result
 
+
+def nimExportElement(nim_shotID=None, info=None) :
+	# Update Elements in NIM on postAssetExport
+	print "Exporting NIM Element"
+	success = False
+
+	if nim_shotID != None and info != None :
+		nim_shotName = info['shotName']
+		nim_sourceIn = info['sourceIn']
+		nim_sourceOut = info['sourceOut']
+		nim_handleIn = info['handleIn']
+		nim_handleOut = info['handleOut']
+		nim_duration = nim_sourceOut - nim_sourceIn
+		nim_assetType = info['assetType']
+		nim_destinationPath = info['destinationPath']
+		nim_resolvedPath = info['resolvedPath']
+		nim_fullPath = os.path.join(nim_destinationPath, nim_resolvedPath)
+
+		# Add Media Item as Element
+		element_result = nimAPI.add_element( parent='shot', parentID=nim_shotID, path=nim_fullPath, name=nim_resolvedPath, \
+									startFrame=nim_sourceIn, endFrame=nim_sourceOut, handles=nim_handleIn, isPublished=False )
+
+		print "NIM - %s has been added to %s in NIM." % (nim_assetType, nim_shotName)
+		success = True
+	else:
+		print "NIM - No shows found"
+
+	return success
+
+
 '''
 def nimExportShot(nim_showID=None, info=None) :
 	# Update/Export Shots to NIM on postAssetExport

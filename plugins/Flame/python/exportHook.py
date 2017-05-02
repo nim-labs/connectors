@@ -74,7 +74,7 @@ sys.path.append(nimScriptPath)
 
 import nimFlameExport
 
-
+debug = True
 
 # Hooks in this files are called in the following order:
 #
@@ -138,8 +138,9 @@ import nimFlameExport
 #
 def preCustomExport( info, userData ):
    print "preCustomExport - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
-   print info
-   print userData
+   if debug :
+      print info
+      print userData
 
    #Test what 'exportType' was select in the UI, by the user
    if userData['nim_export_type'] == 'NimExportSequence' :
@@ -221,8 +222,9 @@ def preCustomExport( info, userData ):
 #
 def postCustomExport( info, userData ):
    print "postCustomExport - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
-   print info
-   print userData
+   if debug :
+      print info
+      print userData
    print "postCustomExport - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
    pass
 
@@ -257,8 +259,9 @@ def postCustomExport( info, userData ):
 #
 def preExport( info, userData ):
    print "preExport - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
-   print info
-   print userData
+   if debug :
+      print info
+      print userData
    print "preExport - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
    pass
 
@@ -285,8 +288,9 @@ def preExport( info, userData ):
 #
 def postExport( info, userData ):
    print "postExport - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
-   print info
-   print userData
+   if debug :
+      print info
+      print userData
    print "postExport - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
    pass
 
@@ -330,8 +334,9 @@ def postExport( info, userData ):
 #
 def preExportSequence( info, userData ):
    print "preExportSequence - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
-   print info
-   print userData
+   if debug :
+      print info
+      print userData
 
    # Check if Custom NIM export or Standard Export
    # If standard export then ask for NIM association
@@ -395,8 +400,9 @@ def preExportSequence( info, userData ):
 #
 def postExportSequence( info, userData ):
    print "postExportSequence - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
-   print info
-   print userData
+   if debug :
+      print info
+      print userData
 
    if userData['nim_export_sequence'] == True :
       shotData = userData['shotData']
@@ -404,6 +410,7 @@ def postExportSequence( info, userData ):
       for shotName in shotData :
          print "shotName: %s" % shotName
          for assetType in shotData[shotName] :
+            
             # Update Icons
             if assetType == 'video' :
                print "Updating Shot Icon"
@@ -529,14 +536,13 @@ def postExportSequence( info, userData ):
 #
 def preExportAsset( info, userData ):
    print "preExportAsset - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
-   print info
-   print userData
+   if debug :
+      print info
+      print userData
 
    if 'nim_export_sequence' in userData :
       if userData['nim_export_sequence'] == True :
          result = nimFlameExport.nimCreateShot(nim_showID=userData['nim_showID'], info=info)
-
-   #print result
 
    info['resolvedPath'] = result['resolvedPath']
 
@@ -544,10 +550,12 @@ def preExportAsset( info, userData ):
       userData['shotData'][info['shotName']] = {}
 
    userData['shotData'][info['shotName']][info['assetType']] = result 
+   userData['currentShotID'] = result['nim_shotID']
 
-   print "destinationPath: %s" % info['destinationPath']
-   print "resolvedPath: %s" % info['resolvedPath']
-   print "shotName: %s" % info['shotName']
+   if debug :
+      print "destinationPath: %s" % info['destinationPath']
+      print "resolvedPath: %s" % info['resolvedPath']
+      print "shotName: %s" % info['shotName']
 
    print "preExportAsset - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
    pass
@@ -663,12 +671,19 @@ def preExportAsset( info, userData ):
 def postExportAsset( info, userData ):
 
    print "postExportAsset - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
-   print info
-   print userData
+   if debug :
+      print info
+      print userData
 
-   print "destinationPath: %s" % info['destinationPath']
-   print "resolvedPath: %s" % info['resolvedPath']
-   print "shotName: %s" % info['shotName']
+   if 'nim_export_sequence' in userData :
+      if userData['nim_export_sequence'] == True :
+         result = nimFlameExport.nimExportElement(nim_shotID=userData['currentShotID'], info=info)
+   
+   if debug :
+      print "destinationPath: %s" % info['destinationPath']
+      print "resolvedPath: %s" % info['resolvedPath']
+      print "shotName: %s" % info['shotName']
+      print "shotID: %s" % userData['currentShotID']
 
    print "postExportAsset - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<" 
    
