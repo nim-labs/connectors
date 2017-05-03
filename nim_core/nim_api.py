@@ -1070,6 +1070,9 @@ def add_file( nim=None, filePath='', comment='', pub=False ) :
             projPath=prefs[app+'_ServerPath']
             #P.error( 'AS - projPath: %s' % prefs[app+'_ServerPath'] )
 
+        if prefs and app+'_ServerID' in prefs.keys() :
+            projPath=prefs[app+'_ServerID']
+
 
     ver=F.get_ver( filePath )
     ext=F.get_ext( filePath )
