@@ -471,83 +471,6 @@ def nimExportElement(nim_shotID=None, info=None) :
 	return success
 
 
-'''
-def nimExportShot(nim_showID=None, info=None) :
-	# Update/Export Shots to NIM on postAssetExport
-
-	success = False
-
-	if nim_showID != None:
-
-		nim_shotID = False
-		nim_shotName = info['shotName']
-		nim_sourceIn = info['sourceIn']
-		nim_sourceOut = info['sourceOut']
-		nim_handleIn = info['handleIn']
-		nim_handleOut = info['handleOut']
-		nim_duration = nim_sourceOut - nim_sourceIn
-		nim_assetType = info['assetType']
-		nim_destinationPath = info['destinationPath']
-		nim_resolvedPath = info['resolvedPath']
-		nim_fullPath = os.path.join(nim_destinationPath, nim_resolvedPath)
-
-		#TODO: If shotName is '' then set to assetName
-
-		print "NIM - Exporting Shot Info"
-		shotInfo = nimAPI.add_shot( nim_showID, nim_shotName, nim_duration )
-		#print shotInfo
-
-		if shotInfo['success'] == 'true':
-			nim_shotID = shotInfo['ID']
-			print "NIM - nim_shotID: %s" % nim_shotID
-			if 'error' in shotInfo:
-				print "NIM - WARNING: %s" % shotInfo['error']
-		else:
-			if shotInfo['error']:
-				#error exists
-				print "NIM - ERROR: %s" % shotInfo['error']
-			nim_shotID = False
-
-		if nim_shotID == False:
-			pass
-		else:
-			if nim_assetType == 'video' :
-				icon_success = False
-
-				mediaExt = nim_fullPath.rpartition('.')[2]
-				pathPartition = nim_fullPath.rpartition('[')
-				pathRoot = pathPartition[0]
-				iconFrame = pathPartition[2].rpartition('-')[0]
-
-				iconPath = string.join([pathRoot, iconFrame,'.',mediaExt],'')
-				print "NIM - iconPath: %s" % iconPath
-
-				if os.path.isfile(iconPath) :
-					print "NIM - Updating Thumbnail"
-					icon_success = updateShotIcon(nim_shotID, iconPath)
-					if icon_success :
-						print 'NIM - Shot Icon uploaded'
-					else :
-						print 'NIM - Failed to upload icon'
-				else :
-					print "NIM - Icon file does not exist."
-			else :
-				print 'NIM - Skipping icon upload for non-video assetType'
-
-			
-			# Add Media Item as Element
-			element_result = nimAPI.add_element( parent='shot', parentID=nim_shotID, path=nim_fullPath, name=nim_resolvedPath, \
-										startFrame=nim_sourceIn, endFrame=nim_sourceOut, handles=nim_handleIn, isPublished=False )
-
-
-		print "NIM - %s has been updated in NIM." % nim_shotName
-		success = True
-	else:
-		print "NIM - No shows found"
-
-	return success
-'''
-
 def updateShotIcon(nim_shotID=None, image_path='') :
 	success = False
 
@@ -659,17 +582,6 @@ def resolveBatchKeywords(nim_shotID=None, batch_path=None) :
 				export_node_file = os.path.join(batch_path, file)
 				print "Export Node Found: %s" % export_node_file
 				try:
-					'''
-					export_node_xml = ET.parse(export_node_file)
-					print "Export Node Loaded"
-					export_node_root = export_node_xml.getroot()
-					for elem in export_node_root.iterfind('Setup/State/NamePattern'):
-						print "NamePattern: %s" % elem.text
-					for elem in export_node_root.iterfind('Setup/State/ClipPattern'):
-						print "NamePattern: %s" % elem.text
-					for elem in export_node_root.iterfind('Setup/State/SetupPattern'):
-						print "NamePattern: %s" % elem.text
-					'''
 					with open(export_node_file) as f :
 						export_node_contents=f.read()
 						print "Export Node Loaded"
