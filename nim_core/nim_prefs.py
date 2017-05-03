@@ -235,6 +235,7 @@ def _appPrefs( app='Maya' ) :
         app+'_Job': '',
         #app+'_DefaultServerPath': '',
         app+'_ServerPath': '',
+        app+'_ServerID': '',
         app+'_Tab': 'SHOT',
         app+'_Asset': '',
         app+'_Show': '',
@@ -251,7 +252,7 @@ def _appPrefsList( app='Maya' ) :
     'Returns a list of keys from the Application Preferences Dictionary, for orderly printing'
     appList=[app+'_WinPosX', app+'_WinPosY', app+'_WinWidth', app+'_WinHeight', \
         app+'_StyleSheetDir', app+'_UseStyleSheet', app+'_Job', \
-        app+'_ServerPath', app+'_Tab', app+'_Asset', app+'_Show', app+'_Shot', app+'_Filter', \
+        app+'_ServerPath', app+'_ServerID', app+'_Tab', app+'_Asset', app+'_Show', app+'_Shot', app+'_Filter', \
         app+'_Task', app+'_Basename', app+'_Version']
     return appList
 

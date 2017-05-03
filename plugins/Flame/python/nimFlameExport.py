@@ -98,6 +98,11 @@ class NimExportDialog(QDialog):
 			else :
 				self.pref_server= ''
 
+			if self.app+'_ServerID' in self.prefs:
+				self.pref_serverID=self.prefs[self.app+'_ServerID']
+			else :
+				self.pref_serverID= ''
+
 			print "NIM - Prefs successfully read"
 
 		except:

@@ -589,7 +589,8 @@ class nim_fileUI( gui.GeDialog ) :
                 if _os in ['windows', 'win32'] :
                     self.nim.Input('server').addItem( js['winPath']+' - ("'+js['server']+'")' )
                     #if js['winPath'] !=self.pref_defaultServerPath :
-                    if js['winPath'] !=self.pref_serverPath :
+                    #if js['winPath'] !=self.pref_serverPath :
+                    if js['ID'] !=self.pref_serverID :
                         self.nim.set_server( name=self.nim.Input('server').currentText(), ID=str(js['ID']), path=str(js['path']) )
                         index+=1
                     else :
@@ -598,7 +599,8 @@ class nim_fileUI( gui.GeDialog ) :
                 elif _os in ['darwin', 'mac'] :
                     self.nim.Input('server').addItem( js['osxPath']+' - ("'+js['server']+'")' )
                     #if js['osxPath'] !=self.pref_defaultServerPath :
-                    if js['osxPath'] !=self.pref_serverPath :
+                    #if js['osxPath'] !=self.pref_serverPath :
+                    if js['ID'] !=self.pref_serverID :
                         self.nim.set_server( name=self.nim.Input('server').currentText(), ID=str(js['ID']), path=str(js['path']) )
                         index +=1
                     else :
@@ -606,8 +608,9 @@ class nim_fileUI( gui.GeDialog ) :
                         self.nim.set_server( name=self.nim.Input('server').currentText(), ID=str(js['ID']), path=str(js['osxPath']) )
                 elif _os in ['linux', 'linux2'] :
                     self.nim.Input('server').addItem( js['path']+' - ("'+js['server']+'")' )
-                    if js['path'] !=self.pref_serverPath :
                     #if js['path'] !=self.pref_defaultServerPath :
+                    #if js['path'] !=self.pref_serverPath :
+                    if js['ID'] !=self.pref_serverID :
                         self.nim.set_server( name=self.nim.Input('server').currentText(), ID=str(js['ID']), path=str(js['path']) )
                         index +=1
                     else :

@@ -324,14 +324,18 @@ def verUp( nim=None, padding=2, selected=False, win_launch=False, pub=False, sym
         else : nim.set_name( elem='filter', name='Work' )
     
 
-    ''' TEST SETTING THE SERVER ID HERE'''
-    #P.info("TEST SERVER ID: %s" % str(nim.server(get='ID')))
+    #P.info("SERVER ID: %s" % str(nim.server(get='ID')))
     # Get Server OS Path from server ID
     serverOsPathInfo = Api.get_serverOSPath( nim.server(get='ID'), platform.system() )
     P.info("Server OS Path: %s" % serverOsPathInfo)
     serverOSPath = serverOsPathInfo[0]['serverOSPath']
+
+    print "SERVER ID IS HERE:::::   %s" % nim.server(get='ID')
+    print "SERVER NAME IS HERE:::::   %s" % nim.server(get='name')
+    print "SERVER PATH IS HERE:::::   %s" % nim.server(get='path')
+    #nim.set_server( name=serverName ) # TODO: need to resolve serverName here 
     nim.set_server( path=serverOSPath )
-    ''' END TEST '''
+
 
     #  Attempt to get current file information :
     if nim.filePath() :
@@ -545,7 +549,12 @@ def verUp( nim=None, padding=2, selected=False, win_launch=False, pub=False, sym
             nuke.scriptSaveAs( new_filePath )
         elif selected :
             P.info( 'Saving selected items as %s \n' % new_filePath )
-            nuke.nodeCopy( new_filePath )
+            try :
+                nuke.nodeCopy( new_filePath )
+            except RuntimeError:
+                P.info( 'Failed to selected items... Possibly no items selected.' )
+                return False
+
     
     #  Cinema 4D :
     elif nim.app()=='C4D' :
