@@ -378,6 +378,9 @@ class NimExportDialog(QDialog):
 def nimCreateShot(nim_showID=None, info=None) :
 	'''Create Shot in NIM on preAssetExport'''
 
+	# TODO: Needs to be Variable Project Structure Aware
+	#		Check if project is online
+
 	result = {}
 
 	if nim_showID != None:
@@ -439,6 +442,9 @@ def nimCreateShot(nim_showID=None, info=None) :
 
 def nimExportElement(nim_shotID=None, info=None) :
 	# Update Elements in NIM on postAssetExport
+
+	# TODO: Get NIM Element type from dialog for each assetType option
+
 	print "Exporting NIM Element"
 	success = False
 
@@ -454,8 +460,12 @@ def nimExportElement(nim_shotID=None, info=None) :
 		nim_resolvedPath = info['resolvedPath']
 		nim_fullPath = os.path.join(nim_destinationPath, nim_resolvedPath)
 
+		nim_element_path = nim_fullPath.rpartition('/')
+		nim_path = nim_element_path[0]
+		nim_name = nim_element_path[2]
+		
 		# Add Media Item as Element
-		element_result = nimAPI.add_element( parent='shot', parentID=nim_shotID, path=nim_fullPath, name=nim_resolvedPath, \
+		element_result = nimAPI.add_element( parent='shot', parentID=nim_shotID, path=nim_path, name=nim_name, \
 									startFrame=nim_sourceIn, endFrame=nim_sourceOut, handles=nim_handleIn, isPublished=False )
 
 		print "NIM - %s has been added to %s in NIM." % (nim_assetType, nim_shotName)
