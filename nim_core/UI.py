@@ -1536,6 +1536,7 @@ class GUI(QtGui.QMainWindow) :
             print( '   Job Servers = %s' % serverDict )
             # TODO: Update pref_serverPath to use pref_serverID to differentiate servers
             print( '   self.pref_serverPath = %s' % self.pref_serverPath )
+            print( '   self.pref_serverID = %s' % self.pref_serverID )
             print( '   current server ID= %s' %  self.nim.server(get="ID") )
             print( '   current server name= %s' %  self.nim.server(get="name") )
             print( '   current server path= %s' %  self.nim.server(get="path") )
@@ -2187,10 +2188,10 @@ class GUI(QtGui.QMainWindow) :
         # Only update server prefs on actual save.. .not just close
         if self.saveServerPref == True:
             P.info('Saving server setting to prefs...')
-            P.info('    serverPath: %s' % self.nim.server( get='path') )                        #TODO:  THIS DATA IS WRONG
-            P.info('    serverID: %s' % self.nim.server( get='ID') )                            #TODO:  THIS DATA IS WRONG
-            Prefs.update( attr='ServerPath', app=self.app, value=self.nim.server( get='path') ) #TODO:  THIS DATA IS WRONG
-            Prefs.update( attr='ServerID', app=self.app, value=self.nim.server( get='ID') )     #TODO:  THIS DATA IS WRONG
+            P.info('    serverPath: %s' % self.nim.server( get='path') )
+            P.info('    serverID: %s' % self.nim.server( get='ID') )
+            Prefs.update( attr='ServerPath', app=self.app, value=self.nim.server( get='path') )
+            Prefs.update( attr='ServerID', app=self.app, value=self.nim.server( get='ID') )
             self.saveServerPref = False
 
         #  Don't write preferences for Publish or Version Up windows :
@@ -2756,7 +2757,7 @@ class GUI(QtGui.QMainWindow) :
         print 'file_pub - Server ID set to: %s' % self.nim.server( get='ID')
         print 'file_pub - Server name set to: %s' % self.nim.server( get='name')
         print 'file_pub - Server path set to: %s' % self.nim.server( get='path')
-        
+
         #  Get File Extension :
         if self.app=='Maya' : ext=self.nim.Input('fileExt').currentText()
         elif self.app=='Nuke' : 

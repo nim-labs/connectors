@@ -1,8 +1,8 @@
 #! /usr/bin/python
 #******************************************************************************
 #
-# Filename: C4D/nim_v2-0-0.py
-# Version:  v2.0.0.160510
+# Filename: C4D/nim_v2-6-0.py
+# Version:  v2.6.0.170503
 #
 # Copyright (c) 2016 NIM Labs LLC
 # All rights reserved.
@@ -29,8 +29,6 @@ userHome=os.path.expanduser( '~' )
 if userHome.endswith( 'Documents' ) :
     userHome=userHome[:-9]
 user_home = os.path.normpath( os.path.join( userHome, prefs_dirName ) )
-
-# TODO - read path from prefs file:
 prefsFile=os.path.normpath( os.path.join( user_home, prefs_fileName ) )
 print 'NIM ~> NIM preferences:     %s' % prefsFile
 
@@ -106,7 +104,7 @@ if loadNIM:
     print 'NIM ~> Loading NIM Variables'
 
     #  Variables :
-    version='v2.0.0'
+    version='v2.6.0'
     winTitle='NIM_'+version+' - '
     nim_plugin_ID=1032427
     nim_openUI_ID=1032462
