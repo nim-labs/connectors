@@ -3,19 +3,18 @@
 #
 # Filename: batchHook.py
 #
-# Copyright (c) 2014 Autodesk Inc.
-# All rights reserved.
-#
-# Use of this software is subject to the terms of the Autodesk license
-# agreement provided at the time of installation or download, or which
-# otherwise accompanies this software in either electronic or hard copy form.
 # *****************************************************************************
 
+debug = True
 # Hook called when a batch setup is loaded
 #
 # setupPath: File path of the setup being loaded.
 #
 def batchSetupLoaded( setupPath ):
+   print "batchSetupLoaded - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+   if debug :
+      print setupPath
+   print "batchSetupLoaded - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
    pass
 
 
@@ -24,6 +23,10 @@ def batchSetupLoaded( setupPath ):
 # setupPath: File path of the setup being saved.
 #
 def batchSetupSaved( setupPath ):
+   print "batchSetupSaved - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+   if debug :
+      print setupPath
+   print "batchSetupSaved - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
    pass
 
 
@@ -103,6 +106,11 @@ def batchSetupSaved( setupPath ):
 #   This can be used by the hook to pass black box data around.
 #
 def batchExportBegin( info, userData ):
+   print "batchExportBegin - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+   if debug :
+      print info
+      print userData
+   print "batchExportBegin - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
    pass
 
 
@@ -186,6 +194,11 @@ def batchExportBegin( info, userData ):
 #   This can be used by the hook to pass black box data around.
 #
 def batchExportEnd( info, userData ):
+   print "batchExportEnd - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+   if debug :
+      print info
+      print userData
+   print "batchExportEnd - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
    pass
 
 # Hook called when starting the application and when switching project
@@ -203,6 +216,10 @@ def batchExportEnd( info, userData ):
 # <batch name> and <iteration>
 
 def batchDefaultIterationName( project ):
+   print "batchDefaultIterationName - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+   if debug :
+      print project
+   print "batchDefaultIterationName - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
    return ""
 
 # Hook called when starting the application and when switching project
@@ -218,6 +235,10 @@ def batchDefaultIterationName( project ):
 #
 
 def batchDefaultRenderNodeName( project ):
+   print "batchDefaultRenderNodeName - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+   if debug :
+      print project
+   print "batchDefaultRenderNodeName - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
    return ""
 
 # Hook called when starting the application and when switching project
@@ -232,6 +253,10 @@ def batchDefaultRenderNodeName( project ):
 #     return "<batch name>_writefile_global"
 
 def batchDefaultWriteFileNodeName( project ):
+   print "batchDefaultWriteFileNodeName - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+   if debug :
+      print project
+   print "batchDefaultWriteFileNodeName - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
    return ""
 
 # Hook called when starting the application and when switching project
@@ -247,7 +272,11 @@ def batchDefaultWriteFileNodeName( project ):
 #
 
 def batchDefaultGroupPath( project ):
-    return ""
+   print "batchDefaultGroupPath - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+   if debug :
+      print project
+   print "batchDefaultGroupPath - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
+   return ""
 
 # Hook called when starting the application and when switching project
 # This default batch iteration path will be used to save setups.
@@ -262,6 +291,10 @@ def batchDefaultGroupPath( project ):
 #
 
 def batchDefaultIterationPath( project ):
+   print "batchDefaultIterationPath - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+   if debug :
+      print project
+   print "batchDefaultIterationPath - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
    return ""
 
 # Hook called when starting the application and when switching project
@@ -277,5 +310,9 @@ def batchDefaultIterationPath( project ):
 #
 
 def actionDefaultGeometryPath( project ):
+   print "actionDefaultGeometryPath - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+   if debug :
+      print project
+   print "actionDefaultGeometryPath - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
    return ""
 
