@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: nim_api.py
-# Version:  v2.6.01.170417
+# Version:  v2.6.01.170504
 #
 # Copyright (c) 2017 NIM Labs LLC
 # All rights reserved.
@@ -38,7 +38,7 @@ import urllib, urllib2
 try :
     import ssl
 except :
-    print "NIM: Failed to load SSL - API"
+    print "NIM API: Failed to load SSL"
     pass
 
 import mimetools, mimetypes
@@ -56,7 +56,7 @@ import nim_tools
 import nim_win as Win
 
 #  Variables :
-version='v2.5.22'
+version='v2.6.01'
 winTitle='NIM_'+version
 
 
@@ -1119,11 +1119,13 @@ def add_file( nim=None, filePath='', comment='', pub=False ) :
         shotInfo=get( {'q': 'getShotInfo', 'ID':nim.ID( 'shot' )} )
         basenameInfo=get( {'q': 'getBasenameVersion', 'class': 'SHOT', \
             'itemID': nim.ID( 'shot' ), 'basename': nim.name('base')} )
+        '''
         #  Error check dictionaries :
         if not shotInfo or not basenameInfo or not len(shotInfo) or not len(basenameInfo) :
             P.warning( '\nProblem retrieving Shot/Basename information from the database.' )
             P.warning( 'Shot Info = %s' % shotInfo )
             P.warning( 'Basename Info = %s' % basenameInfo )
+        '''
         if shotInfo[0]['jobFolder']=='NULL' or shotInfo[0]['showFolder']=='NULL' :
             P.error( 'Specified Job/Show is not online, sorry.' )
             return False

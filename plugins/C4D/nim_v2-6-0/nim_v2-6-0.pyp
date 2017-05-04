@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: C4D/nim_v2-6-0.py
-# Version:  v2.6.0.170503
+# Version:  v2.6.01.170504
 #
 # Copyright (c) 2016 NIM Labs LLC
 # All rights reserved.

@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: nim_c4d.py
-# Version:  v2.6.01.170417
+# Version:  v2.6.01.170504
 #
 # Copyright (c) 2017 NIM Labs LLC
 # All rights reserved.
@@ -204,8 +204,6 @@ class nim_fileUI( gui.GeDialog ) :
             self.pref_serverID=self.prefs[self.app+'_ServerID']
         except :
             print "Failed to read preferences..."
-        
-        print "ServerID Loaded From Prefs: %s" % self.pref_serverID
         
         #  Get Variables/Preferences :
         self.nimPrefs=Nim.NIM().ingest_prefs()
@@ -494,63 +492,45 @@ class nim_fileUI( gui.GeDialog ) :
             self.nim.set_server( Dict=jobServers )
             P.info("NIM jobServers: %s" % jobServers)
             serverOptNum=self.serverChildIndex
-            print "Command - Update Servers - serverOptNum: %s" % serverOptNum
-            print "Command - Update Servers - pref_serverID: %s" % self.pref_serverID
-            if jobServers and len(jobServers) :
-                for js in jobServers :
-                    if  _os in ['windows', 'win32'] :
-                        serverName=js['winPath']+' - ("'+js['server']+'")'
 
-                        if self.mode.lower() in ['save', 'saveas'] :
+            if self.mode.lower() in ['save', 'saveas'] :
+                if jobServers and len(jobServers) :
+                    for js in jobServers :
+                        if  _os in ['windows', 'win32'] :
+                            serverName=js['winPath']+' - ("'+js['server']+'")'
                             self.AddChild( self.nim.inputIDs['server'], serverOptNum, serverName )
-
-                            if self.pref_serverID == js['ID'] :
-                                self.SetLong( self.nim.inputIDs['server'], serverOptNum)
-                                self.nim.set_server( name=serverName, ID=str(js['ID']), path=str(js['winPath']) )
-
-                        # If first element in dropdown
-                        if serverOptNum==800 :
-                            if self.mode.lower() in ['save', 'saveas'] :
-                                self.nim.set_server( name=serverName, ID=str(js['ID']), path=str(js['winPath']) )
+                            if serverOptNum==800 :
                                 self.SetLong( self.nim.inputIDs['server'], 800 )
-
-                        serverOptNum+=1
-
-                    elif _os in ['darwin', 'mac'] :
-                        serverName=js['osxPath']+' - ("'+js['server']+'")'
-
-                        if self.mode.lower() in ['save', 'saveas'] :
-                            self.AddChild( self.nim.inputIDs['server'], serverOptNum, serverName )
-
+                                self.nim.set_server( name=serverName, ID=str(js['ID']), path=str(js['winPath']) )
                             if self.pref_serverID == js['ID'] :
                                 self.SetLong( self.nim.inputIDs['server'], serverOptNum)
                                 self.nim.set_server( name=serverName, ID=str(js['ID']), path=str(js['winPath']) )
 
-                        # If first element in dropdown
-                        if serverOptNum==800 :
-                            if self.mode.lower() in ['save', 'saveas'] :
+                            serverOptNum+=1
+
+                        elif _os in ['darwin', 'mac'] :
+                            serverName=js['osxPath']+' - ("'+js['server']+'")'
+                            self.AddChild( self.nim.inputIDs['server'], serverOptNum, serverName )
+                            if serverOptNum==800 :
+                                self.SetLong( self.nim.inputIDs['server'], 800 )
                                 self.nim.set_server( name=serverName, ID=str(js['ID']), path=str(js['osxPath']) )
-                                self.SetLong( self.nim.inputIDs['server'], 800 )
-
-                        serverOptNum+=1
-
-                    elif _os in ['linux', 'linux2'] :
-                        serverName=js['path']+' - ("'+js['server']+'")'
-
-                        if self.mode.lower() in ['save', 'saveas'] :
-                            self.AddChild( self.nim.inputIDs['server'], serverOptNum, serverName )
-
                             if self.pref_serverID == js['ID'] :
                                 self.SetLong( self.nim.inputIDs['server'], serverOptNum)
-                                self.nim.set_server( name=serverName, ID=str(js['ID']), path=str(js['winPath']) )
+                                self.nim.set_server( name=serverName, ID=str(js['ID']), path=str(js['osxPath']) )
 
-                        # If first element in dropdown
-                        if serverOptNum==800 :
-                            if self.mode.lower() in ['save', 'saveas'] :
-                                self.nim.set_server( name=serverName, ID=str(js['ID']), path=str(js['path']) )
+                            serverOptNum+=1
+
+                        elif _os in ['linux', 'linux2'] :
+                            serverName=js['path']+' - ("'+js['server']+'")'
+                            self.AddChild( self.nim.inputIDs['server'], serverOptNum, serverName )
+                            if serverOptNum==800 :
                                 self.SetLong( self.nim.inputIDs['server'], 800 )
+                                self.nim.set_server( name=serverName, ID=str(js['ID']), path=str(js['path']) )
+                            if self.pref_serverID == js['ID'] :
+                                self.SetLong( self.nim.inputIDs['server'], serverOptNum)
+                                self.nim.set_server( name=serverName, ID=str(js['ID']), path=str(js['path']) )
 
-                        serverOptNum+=1
+                            serverOptNum+=1
 
         # END UPDATE SERVER
 
@@ -746,67 +726,46 @@ class nim_fileUI( gui.GeDialog ) :
 
                     P.info("NIM jobServers: %s" % jobServers)
                     serverOptNum=self.serverChildIndex # default 800
-
-                    #print( '   self.pref_serverPath = %s' % self.pref_serverPath )
-                    #print( '   self.pref_serverID = %s' % self.pref_serverID )
-                    print "populate_elem - serverOptNum: %s" % serverOptNum
-                    print "populate_elem - pref_serverID: %s" % self.pref_serverID
-                    print "Server Before Populate: %s" % self.nim.server(get='name')  # TODO : REMOVE
-
-                    if jobServers and len(jobServers) :
-                        for js in jobServers :
-                            if  _os in ['windows', 'win32'] :
-                                serverName=js['winPath']+' - ("'+js['server']+'")'
-
-                                if self.mode.lower() in ['save', 'saveas'] :
+                    
+                    if self.mode.lower() in ['save', 'saveas'] :
+                        if jobServers and len(jobServers) :
+                            for js in jobServers :
+                                if  _os in ['windows', 'win32'] :
+                                    serverName=js['winPath']+' - ("'+js['server']+'")'
                                     self.AddChild( self.nim.inputIDs['server'], serverOptNum, serverName )
-
+                                    if serverOptNum==800 :
+                                        self.SetLong( self.nim.inputIDs['server'], 800 )
+                                        self.nim.set_server( name=serverName, ID=str(js['ID']), path=str(js['winPath']) )
                                     if self.pref_serverID == js['ID'] :
                                         self.SetLong( self.nim.inputIDs['server'], serverOptNum)
                                         self.nim.set_server( name=serverName, ID=str(js['ID']), path=str(js['winPath']) )
-
-                                if serverOptNum==800 :
-                                    if self.mode.lower() in ['save', 'saveas'] :
-                                        self.nim.set_server( name=serverName, ID=str(js['ID']), path=str(js['winPath']) )
-                                        self.SetLong( self.nim.inputIDs['server'], 800 )
                                     
-                                serverOptNum+=1
+                                    serverOptNum+=1
 
-                            elif _os in ['darwin', 'mac'] :
-                                serverName=js['osxPath']+' - ("'+js['server']+'")'
-
-                                if self.mode.lower() in ['save', 'saveas'] :
+                                elif _os in ['darwin', 'mac'] :
+                                    serverName=js['osxPath']+' - ("'+js['server']+'")'
                                     self.AddChild( self.nim.inputIDs['server'], serverOptNum, serverName )
-
-                                    if self.pref_serverID == js['ID'] :
-                                        self.SetLong( self.nim.inputIDs['server'], serverOptNum)
-                                        self.nim.set_server( name=serverName, ID=str(js['ID']), path=str(js['winPath']) )
-
-                                if serverOptNum==800 :
-                                    if self.mode.lower() in ['save', 'saveas'] :
+                                    if serverOptNum==800 :
+                                        self.SetLong( self.nim.inputIDs['server'], 800 )
                                         self.nim.set_server( name=serverName, ID=str(js['ID']), path=str(js['osxPath']) )
-                                        self.SetLong( self.nim.inputIDs['server'], 800 )
-
-                                serverOptNum+=1
-
-                            elif _os in ['linux', 'linux2'] :
-                                serverName=js['path']+' - ("'+js['server']+'")'
-
-                                if self.mode.lower() in ['save', 'saveas'] :
-                                    self.AddChild( self.nim.inputIDs['server'], serverOptNum, serverName )
-
                                     if self.pref_serverID == js['ID'] :
                                         self.SetLong( self.nim.inputIDs['server'], serverOptNum)
-                                        self.nim.set_server( name=serverName, ID=str(js['ID']), path=str(js['winPath']) )
+                                        self.nim.set_server( name=serverName, ID=str(js['ID']), path=str(js['osxPath']) )
 
-                                if serverOptNum==800 :
-                                    if self.mode.lower() in ['save', 'saveas'] :
-                                        self.nim.set_server( name=serverName, ID=str(js['ID']), path=str(js['path']) )
+                                    serverOptNum+=1
+
+                                elif _os in ['linux', 'linux2'] :
+                                    serverName=js['path']+' - ("'+js['server']+'")'
+                                    self.AddChild( self.nim.inputIDs['server'], serverOptNum, serverName )
+                                    if serverOptNum==800 :
                                         self.SetLong( self.nim.inputIDs['server'], 800 )
+                                        self.nim.set_server( name=serverName, ID=str(js['ID']), path=str(js['path']) )
+                                    if self.pref_serverID == js['ID'] :
+                                        self.SetLong( self.nim.inputIDs['server'], serverOptNum)
+                                        self.nim.set_server( name=serverName, ID=str(js['ID']), path=str(js['path']) )
 
-                                serverOptNum+=1
+                                    serverOptNum+=1
                 
-                    print "Server After Populate: %s" % self.nim.server(get='name')  # TODO : REMOVE
                 #  Increment count :
                 itemNum+=1
             

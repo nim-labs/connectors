@@ -23,7 +23,7 @@ import nim as Nim
 
 
 #  Variables :
-version='v2.5.0'
+version='v2.6.0'
 winTitle='NIM_'+version
 _os=platform.system().lower()
 #  Compiled REGEX Searches :
@@ -329,11 +329,6 @@ def verUp( nim=None, padding=2, selected=False, win_launch=False, pub=False, sym
     serverOsPathInfo = Api.get_serverOSPath( nim.server(get='ID'), platform.system() )
     P.info("Server OS Path: %s" % serverOsPathInfo)
     serverOSPath = serverOsPathInfo[0]['serverOSPath']
-
-    print "SERVER ID IS HERE:::::   %s" % nim.server(get='ID')
-    print "SERVER NAME IS HERE:::::   %s" % nim.server(get='name')
-    print "SERVER PATH IS HERE:::::   %s" % nim.server(get='path')
-    #nim.set_server( name=serverName ) # TODO: need to resolve serverName here 
     nim.set_server( path=serverOSPath )
 
 
