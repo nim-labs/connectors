@@ -13,21 +13,27 @@
 # *****************************************************************************
 
 import os,sys,re,string,traceback
-import os.path
 import base64
 import platform
 import ntpath
-
+'''
 try:
 	import xml.etree.cElementTree as ET
 except ImportError:
 	import xml.etree.ElementTree as ET
+'''
 
 # Relative path to append for NIM Scripts
-nimFlameScriptPath = os.path.dirname(os.path.realpath(__file__))
-nimFlameScriptPath = nimFlameScriptPath.replace('\\','/')
-nimScriptPath = re.sub(r"\/plugins/Flame/python$", "", nimFlameScriptPath)
-print "NIM - Script Path: %s" % nimScriptPath
+nimFlamePythonPath = os.path.dirname(os.path.realpath(__file__))
+nimFlamePythonPath = nimFlamePythonPath.replace('\\','/')
+nimScriptPath = re.sub(r"\/plugins/Flame/python$", "", nimFlamePythonPath)
+nimFlamePresetPath = os.path.join(re.sub(r"\/python$", "", nimFlamePythonPath),'presets')
+
+print "NIM Script Path: %s" % nimScriptPath
+print "NIM Python Path: %s" % nimFlamePythonPath
+print "NIM Preset Path: %s" % nimFlamePresetPath
+
+
 
 # If relocating these scripts uncomment the line below and enter the fixed path
 # to the NIM Connector Root directory
@@ -72,8 +78,8 @@ class NimExportDialog(QDialog):
 		self.result = ""
 
 		try:
-			#TODO: update prefs with Flame awareness
-			self.app=nimFile.get_app()
+			#self.app=nimFile.get_app()
+			self.app = 'Flame'
 			self.prefs=nimPrefs.read()
 			print "NIM - Prefs: "
 			print self.prefs
@@ -142,6 +148,28 @@ class NimExportDialog(QDialog):
 		self.nim_serverID = None
 		self.nim_serverOSPath = ''
 
+		
+		#Get NIM Element Types
+		self.nim_elementTypes = []
+		self.nim_elementTypesDict = {}
+		self.nim_elementTypes = nimAPI.get_elementTypes()
+		if len(self.nim_elementTypes)>0:
+			for element in self.nim_elementTypes:
+				self.nim_elementTypesDict[element['name']] = element['ID']
+
+
+		#Get NIM Task Types
+		self.nim_taskTypes = []
+		self.nim_taskTypesDict = {}
+		self.nim_taskFolderDict = {}
+		self.nim_taskTypes = nimAPI.get_tasks(app='NUKE', userType='all')
+		
+		if len(self.nim_taskTypes)>0:
+			for task in self.nim_taskTypes:
+				self.nim_taskTypesDict[task['name']] = task['ID']
+				self.nim_taskFolderDict[task['ID']] = task['folder']
+
+
 		#Get NIM Jobs
 		self.nim_jobID = None
 		self.nim_jobs = nimAPI.get_jobs(self.nim_userID)
@@ -153,7 +181,8 @@ class NimExportDialog(QDialog):
 		self.nim_showDict = {}
 		self.nim_showID = None
 		
-		self.setWindowTitle("NIM Update Selected Shots")
+		self.setWindowTitle("NIM: Export Sequence")
+		self.setStyleSheet("QLabel {font: 14pt}")
 		self.setSizeGripEnabled(True)
 
 		self._exportTemplate = None
@@ -161,33 +190,76 @@ class NimExportDialog(QDialog):
 		tag_jobID = None
 		tag_showID = None
 
+		
+
 		layout = QVBoxLayout()
 		formLayout = QFormLayout()
 		groupBox = QGroupBox()
 		groupLayout = QFormLayout()
 		groupBox.setLayout(groupLayout)
 
+		pixmap = QPixmap(1, 24)
+		pixmap.fill(Qt.transparent)
+		self.clearPix = QIcon(pixmap)
+		
+
+		# Flame 2 NIM image
+		# 400x88
+		# PRESETS: List box for preset selection
+		horizontalLayout_header = QHBoxLayout()
+		horizontalLayout_header.setSpacing(-1)
+		horizontalLayout_header.setSizeConstraint(QLayout.SetDefaultConstraint)
+		horizontalLayout_header.setObjectName("horizontalLayout_header")
+		connectorImage = QPixmap(nimFlamePythonPath+"/flm2nim.png")
+		self.nimConnectorHeader = QLabel()
+		self.nimConnectorHeader.setPixmap(connectorImage)
+		horizontalLayout_header.addWidget(self.nimConnectorHeader)
+
+
+		# PRESETS: List box for preset selection
+		horizontalLayout_preset = QHBoxLayout()
+		horizontalLayout_preset.setSpacing(-1)
+		horizontalLayout_preset.setSizeConstraint(QLayout.SetDefaultConstraint)
+		horizontalLayout_preset.setObjectName("horizontalLayout_preset")
+		self.nimPresetLabel = QLabel()
+		self.nimPresetLabel.setFixedWidth(120)
+		self.nimPresetLabel.setText("Export Preset:")
+		horizontalLayout_preset.addWidget(self.nimPresetLabel)
+		self.nim_presetChooser = QComboBox()
+		self.nim_presetChooser.setToolTip("Choose the NIM preset to use for this export.")
+		self.nim_presetChooser.setMinimumHeight(28)
+		self.nim_presetChooser.setIconSize(QSize(1, 24))
+		horizontalLayout_preset.addWidget(self.nim_presetChooser)
+		horizontalLayout_preset.setStretch(1, 40)
+
+		presetList = self.nim_getPresets()
+		if len(presetList) > 0:
+			for preset in presetList :
+				 self.nim_presetChooser.addItem(self.clearPix, preset)
+
 		# JOBS: List box for job selection
-		horizontalLayout = QHBoxLayout()
-		horizontalLayout.setSpacing(-1)
-		horizontalLayout.setSizeConstraint(QLayout.SetDefaultConstraint)
-		horizontalLayout.setObjectName("HorizontalLayout")
+		horizontalLayout_job = QHBoxLayout()
+		horizontalLayout_job.setSpacing(-1)
+		horizontalLayout_job.setSizeConstraint(QLayout.SetDefaultConstraint)
+		horizontalLayout_job.setObjectName("horizontalLayout_job")
 		self.nimJobLabel = QLabel()
-		self.nimJobLabel.setFixedWidth(40)
+		self.nimJobLabel.setFixedWidth(120)
 		self.nimJobLabel.setText("Job:")
-		horizontalLayout.addWidget(self.nimJobLabel)
+		horizontalLayout_job.addWidget(self.nimJobLabel)
 		self.nim_jobChooser = QComboBox()
 		self.nim_jobChooser.setToolTip("Choose the job you wish to export shots to.")
-		horizontalLayout.addWidget(self.nim_jobChooser)
-		horizontalLayout.setStretch(1, 40)
-		groupLayout.setLayout(0, QFormLayout.SpanningRole, horizontalLayout)
+		self.nim_jobChooser.setMinimumHeight(28)
+		self.nim_jobChooser.setIconSize(QSize(1, 24))
+		horizontalLayout_job.addWidget(self.nim_jobChooser)
+		horizontalLayout_job.setStretch(1, 40)
+		
 
 		# JOBS: Add dictionary in ordered list
 		jobIndex = 0
 		jobIter = 0
 		if len(self.nim_jobs)>0:
 			for key, value in sorted(self.nim_jobs.items(), reverse=True):
-				self.nim_jobChooser.addItem(key)
+				self.nim_jobChooser.addItem(self.clearPix, key)
 				if self.nim_jobID:
 					if self.nim_jobID == value:
 						print "Found matching jobID, job=", key
@@ -206,60 +278,241 @@ class NimExportDialog(QDialog):
 
 
 		# SERVERS: List box for server selection
-		horizontalLayout2 = QHBoxLayout()
-		horizontalLayout2.setSpacing(-1)
-		horizontalLayout2.setSizeConstraint(QLayout.SetDefaultConstraint)
-		horizontalLayout2.setObjectName("HorizontalLayout2")
+		horizontalLayout_server = QHBoxLayout()
+		horizontalLayout_server.setSpacing(-1)
+		horizontalLayout_server.setSizeConstraint(QLayout.SetDefaultConstraint)
+		horizontalLayout_server.setObjectName("horizontalLayout_server")
 		self.nimServerLabel = QLabel()
-		self.nimServerLabel.setFixedWidth(40)
+		self.nimServerLabel.setFixedWidth(120)
 		self.nimServerLabel.setText("Server:")
-		horizontalLayout2.addWidget(self.nimServerLabel)
+		horizontalLayout_server.addWidget(self.nimServerLabel)
 		self.nim_serverChooser = QComboBox()
 		self.nim_serverChooser.setToolTip("Choose the server you wish to export shots to.")
-		horizontalLayout2.addWidget(self.nim_serverChooser)
-		horizontalLayout2.setStretch(1, 40)
-		groupLayout.setLayout(1, QFormLayout.SpanningRole, horizontalLayout2)
+		self.nim_serverChooser.setMinimumHeight(28)
+		self.nim_serverChooser.setIconSize(QSize(1, 24))
+		horizontalLayout_server.addWidget(self.nim_serverChooser)
+		horizontalLayout_server.setStretch(1, 40)
 		self.nim_serverChooser.currentIndexChanged.connect(self.nim_serverChanged)
 		
 
 		# SHOWS: List box for show selection
-		horizontalLayout3 = QHBoxLayout()
-		horizontalLayout3.setSpacing(-1)
-		horizontalLayout3.setSizeConstraint(QLayout.SetDefaultConstraint)
-		horizontalLayout3.setObjectName("HorizontalLayout3")
+		horizontalLayout_show = QHBoxLayout()
+		horizontalLayout_show.setSpacing(-1)
+		horizontalLayout_show.setSizeConstraint(QLayout.SetDefaultConstraint)
+		horizontalLayout_show.setObjectName("horizontalLayout_show")
 		self.nimShowLabel = QLabel()
-		self.nimShowLabel.setFixedWidth(40)
+		self.nimShowLabel.setFixedWidth(120)
 		self.nimShowLabel.setText("Show:")
-		horizontalLayout3.addWidget(self.nimShowLabel)
+		horizontalLayout_show.addWidget(self.nimShowLabel)
 		self.nim_showChooser = QComboBox()
 		self.nim_showChooser.setToolTip("Choose the show you wish to export shots to.")
-		horizontalLayout3.addWidget(self.nim_showChooser)
-		horizontalLayout3.setStretch(1, 40)
-		groupLayout.setLayout(2, QFormLayout.SpanningRole, horizontalLayout3)
+		self.nim_showChooser.setMinimumHeight(28)
+		self.nim_showChooser.setIconSize(QSize(1, 24))
+		horizontalLayout_show.addWidget(self.nim_showChooser)
+		horizontalLayout_show.setStretch(1, 40)
 		self.nim_showChooser.currentIndexChanged.connect(self.nim_showChanged)
 	
 
+
+		# -- ELEMENT TYPES -- #
+
+		horizontalLayout_elementSpacer = QHBoxLayout()
+		horizontalLayout_elementSpacer.setSpacing(-1)
+		horizontalLayout_elementSpacer.setSizeConstraint(QLayout.SetDefaultConstraint)
+		horizontalLayout_elementSpacer.setObjectName("horizontalLayout_elementSpacer")
+		elementSpacer = QLabel()
+		elementSpacer.setText("")
+		horizontalLayout_elementSpacer.addWidget(elementSpacer)
+		horizontalLayout_elementSpacer.setStretch(1, 40)
+
+
+		# Elements Label
+		horizontalLayout_elementDesc = QHBoxLayout()
+		horizontalLayout_elementDesc.setSpacing(-1)
+		horizontalLayout_elementDesc.setSizeConstraint(QLayout.SetDefaultConstraint)
+		horizontalLayout_elementDesc.setObjectName("horizontalLayout_elementDesc")
+		self.nimElementSectionLabel = QLabel()
+		self.nimElementSectionLabel.setText("Select NIM element type to assign to export media:")
+		horizontalLayout_elementDesc.addWidget(self.nimElementSectionLabel)
+		horizontalLayout_elementDesc.setStretch(1, 40)
+
+
+		# video - exported media
+		horizontalLayout_video = QHBoxLayout()
+		horizontalLayout_video.setSpacing(-1)
+		horizontalLayout_video.setSizeConstraint(QLayout.SetDefaultConstraint)
+		horizontalLayout_video.setObjectName("horizontalLayout_video")
+		self.nimVideoLabel = QLabel()
+		self.nimVideoLabel.setFixedWidth(120)
+		self.nimVideoLabel.setText("Video:")
+		horizontalLayout_video.addWidget(self.nimVideoLabel)
+		self.nim_videoChooser = QComboBox()
+		self.nim_videoChooser.setToolTip("Choose the NIM element type for video media.")
+		self.nim_videoChooser.setMinimumHeight(28)
+		self.nim_videoChooser.setIconSize(QSize(1, 24))
+		horizontalLayout_video.addWidget(self.nim_videoChooser)
+		horizontalLayout_video.setStretch(1, 40)
+
+		for key, value in sorted(self.nim_elementTypesDict.items(), reverse=False):
+			self.nim_videoChooser.addItem(self.clearPix, key)
+
+		# audio - exported media
+		horizontalLayout_audio = QHBoxLayout()
+		horizontalLayout_audio.setSpacing(-1)
+		horizontalLayout_audio.setSizeConstraint(QLayout.SetDefaultConstraint)
+		horizontalLayout_audio.setObjectName("horizontalLayout_audio")
+		self.nimAudioLabel = QLabel()
+		self.nimAudioLabel.setFixedWidth(120)
+		self.nimAudioLabel.setText("Audio:")
+		horizontalLayout_audio.addWidget(self.nimAudioLabel)
+		self.nim_audioChooser = QComboBox()
+		self.nim_audioChooser.setToolTip("Choose the NIM element type for audio media.")
+		self.nim_audioChooser.setMinimumHeight(28)
+		self.nim_audioChooser.setIconSize(QSize(1, 24))
+		horizontalLayout_audio.addWidget(self.nim_audioChooser)
+		horizontalLayout_audio.setStretch(1, 40)
+
+		for key, value in sorted(self.nim_elementTypesDict.items(), reverse=False):
+			self.nim_audioChooser.addItem(self.clearPix, key)
+		
+
+		# openClip - Source Clip
+		horizontalLayout_openClip = QHBoxLayout()
+		horizontalLayout_openClip.setSpacing(-1)
+		horizontalLayout_openClip.setSizeConstraint(QLayout.SetDefaultConstraint)
+		horizontalLayout_openClip.setObjectName("horizontalLayout_openClip")
+		self.nimOpenClipLabel = QLabel()
+		self.nimOpenClipLabel.setFixedWidth(120)
+		self.nimOpenClipLabel.setText("Source OpenClip:")
+		horizontalLayout_openClip.addWidget(self.nimOpenClipLabel)
+		self.nim_openClipChooser = QComboBox()
+		self.nim_openClipChooser.setToolTip("Choose the NIM element type for openClip media.")
+		self.nim_openClipChooser.setMinimumHeight(28)
+		self.nim_openClipChooser.setIconSize(QSize(1, 24))
+		horizontalLayout_openClip.addWidget(self.nim_openClipChooser)
+		horizontalLayout_openClip.setStretch(1, 40)
+		
+		for key, value in sorted(self.nim_elementTypesDict.items(), reverse=False):
+			self.nim_openClipChooser.addItem(self.clearPix, key)
+		
+
+		# video - exported media
+		horizontalLayout_batchOpenClip = QHBoxLayout()
+		horizontalLayout_batchOpenClip.setSpacing(-1)
+		horizontalLayout_batchOpenClip.setSizeConstraint(QLayout.SetDefaultConstraint)
+		horizontalLayout_batchOpenClip.setObjectName("horizontalLayout_batchOpenClip")
+		self.nimBatchOpenClipLabel = QLabel()
+		self.nimBatchOpenClipLabel.setFixedWidth(120)
+		self.nimBatchOpenClipLabel.setText("Batch OpenClip:")
+		horizontalLayout_batchOpenClip.addWidget(self.nimBatchOpenClipLabel)
+		self.nim_batchOpenClipChooser = QComboBox()
+		self.nim_batchOpenClipChooser.setToolTip("Choose the NIM element type for batchOpenClip media.")
+		self.nim_batchOpenClipChooser.setMinimumHeight(28)
+		self.nim_batchOpenClipChooser.setIconSize(QSize(1, 24))
+		horizontalLayout_batchOpenClip.addWidget(self.nim_batchOpenClipChooser)
+		horizontalLayout_batchOpenClip.setStretch(1, 40)
+		
+		for key, value in sorted(self.nim_elementTypesDict.items(), reverse=False):
+			self.nim_batchOpenClipChooser.addItem(self.clearPix, key)
+		
+
+
+		# -- TASK TYPES -- #
+
+		horizontalLayout_taskSpacer = QHBoxLayout()
+		horizontalLayout_taskSpacer.setSpacing(-1)
+		horizontalLayout_taskSpacer.setSizeConstraint(QLayout.SetDefaultConstraint)
+		horizontalLayout_taskSpacer.setObjectName("horizontalLayout_taskSpacer")
+		taskSpacer = QLabel()
+		taskSpacer.setText("")
+		horizontalLayout_taskSpacer.addWidget(taskSpacer)
+		horizontalLayout_taskSpacer.setStretch(1, 40)
+
+
+		# Task Label
+		horizontalLayout_taskDesc = QHBoxLayout()
+		horizontalLayout_taskDesc.setSpacing(-1)
+		horizontalLayout_taskDesc.setSizeConstraint(QLayout.SetDefaultConstraint)
+		horizontalLayout_taskDesc.setObjectName("horizontalLayout_taskDesc")
+		self.nimElementSectionLabel = QLabel()
+		self.nimElementSectionLabel.setText("Select NIM task type to assign to batch files:")
+		horizontalLayout_taskDesc.addWidget(self.nimElementSectionLabel)
+		horizontalLayout_taskDesc.setStretch(1, 40)
+
+
+		# batch - versioned comps
+		horizontalLayout_batch = QHBoxLayout()
+		horizontalLayout_batch.setSpacing(-1)
+		horizontalLayout_batch.setSizeConstraint(QLayout.SetDefaultConstraint)
+		horizontalLayout_batch.setObjectName("horizontalLayout_batch")
+		self.nimBatchLabel = QLabel()
+		self.nimBatchLabel.setFixedWidth(120)
+		self.nimBatchLabel.setText("Batch:")
+		horizontalLayout_batch.addWidget(self.nimBatchLabel)
+		self.nim_batchChooser = QComboBox()
+		self.nim_batchChooser.setToolTip("Choose the NIM task type to assign to batch files.")
+		self.nim_batchChooser.setMinimumHeight(28)
+		self.nim_batchChooser.setIconSize(QSize(1, 24))
+		horizontalLayout_batch.addWidget(self.nim_batchChooser)
+		horizontalLayout_batch.setStretch(1, 40)
+
+		for key, value in sorted(self.nim_taskTypesDict.items(), reverse=False):
+			self.nim_batchChooser.addItem(self.clearPix, key)
+
+
+
 		# Add the standard ok/cancel buttons, default to ok.
 		self._buttonbox = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
-		self._buttonbox.button(QDialogButtonBox.StandardButton.Ok).setText("Update")
+		self._buttonbox.button(QDialogButtonBox.StandardButton.Ok).setText("Export")
 		self._buttonbox.button(QDialogButtonBox.StandardButton.Ok).setDefault(True)
 		self._buttonbox.button(QDialogButtonBox.StandardButton.Ok).setToolTip("Executes exports on selection for each selected preset")
 		self._buttonbox.accepted.connect(self.acceptTest)
 		self._buttonbox.rejected.connect(self.reject)
-		horizontalLayout4 = QHBoxLayout()
-		horizontalLayout4.setSpacing(-1)
-		horizontalLayout4.setSizeConstraint(QLayout.SetDefaultConstraint)
-		horizontalLayout4.setObjectName("HorizontalLayout4")
+		horizontalLayout_OkCancel = QHBoxLayout()
+		horizontalLayout_OkCancel.setSpacing(-1)
+		horizontalLayout_OkCancel.setSizeConstraint(QLayout.SetDefaultConstraint)
+		horizontalLayout_OkCancel.setObjectName("horizontalLayout_OkCancel")
 		spacerItem4 = QSpacerItem(175, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
-		horizontalLayout4.addItem(spacerItem4)
-		horizontalLayout4.addWidget(self._buttonbox)
-		horizontalLayout4.setStretch(1, 40)
-		groupLayout.setLayout(3, QFormLayout.SpanningRole, horizontalLayout4)
+		horizontalLayout_OkCancel.addItem(spacerItem4)
+		horizontalLayout_OkCancel.addWidget(self._buttonbox)
+		horizontalLayout_OkCancel.setStretch(1, 40)
+
+
+		groupLayout.setLayout(0, QFormLayout.SpanningRole, horizontalLayout_header)
+
+		groupLayout.setLayout(1, QFormLayout.SpanningRole, horizontalLayout_preset)
+		groupLayout.setLayout(2, QFormLayout.SpanningRole, horizontalLayout_job)
+		groupLayout.setLayout(3, QFormLayout.SpanningRole, horizontalLayout_server)
+		groupLayout.setLayout(4, QFormLayout.SpanningRole, horizontalLayout_show)
+
+		groupLayout.setLayout(5, QFormLayout.SpanningRole, horizontalLayout_elementSpacer)
+		groupLayout.setLayout(6, QFormLayout.SpanningRole, horizontalLayout_elementDesc)
+		groupLayout.setLayout(7, QFormLayout.SpanningRole, horizontalLayout_video)
+		groupLayout.setLayout(8, QFormLayout.SpanningRole, horizontalLayout_audio)
+		groupLayout.setLayout(9, QFormLayout.SpanningRole, horizontalLayout_openClip)
+		groupLayout.setLayout(10, QFormLayout.SpanningRole, horizontalLayout_batchOpenClip)
+
+		groupLayout.setLayout(11, QFormLayout.SpanningRole, horizontalLayout_taskSpacer)
+		groupLayout.setLayout(12, QFormLayout.SpanningRole, horizontalLayout_taskDesc)
+		groupLayout.setLayout(13, QFormLayout.SpanningRole, horizontalLayout_batch)
+
+		groupLayout.setLayout(14, QFormLayout.SpanningRole, horizontalLayout_OkCancel)
 
 		self.setLayout(groupLayout)
 		layout.addWidget(groupBox)
 
 		self.nim_jobChanged() #trigger job changed to load choosers
+
+
+	def nim_getPresets(self):
+		presetList = []
+		for preset in os.listdir(nimFlamePresetPath+'/sequence_publish'):
+			print "PRESET: %s" % preset
+			if preset.endswith(".xml"):
+				presetName = preset.rpartition('.')[0]
+				presetList.append(presetName)
+				
+		return presetList
 
 
 	def nim_jobChanged(self):
@@ -286,7 +539,7 @@ class NimExportDialog(QDialog):
 					for server in self.nim_servers:
 						self.nim_serverDict[server['server']] = server['ID']
 					for key, value in sorted(self.nim_serverDict.items(), reverse=False):
-						self.nim_serverChooser.addItem(key)
+						self.nim_serverChooser.addItem(self.clearPix, key)
 		except:
 			pass
 
@@ -326,7 +579,7 @@ class NimExportDialog(QDialog):
 					for show in self.nim_shows:
 						self.nim_showDict[show['showname']] = show['ID']
 					for key, value in sorted(self.nim_showDict.items(), reverse=False):
-						self.nim_showChooser.addItem(key)
+						self.nim_showChooser.addItem(self.clearPix, key)
 						'''
 						if self.nim_showID:
 							if self.nim_showID == value:

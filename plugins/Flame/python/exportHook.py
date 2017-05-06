@@ -169,15 +169,6 @@ def preCustomExport( info, userData ):
          # Create empty dictionary for shot data
          userData['shotData'] = {}
          
-         # TODO: Add dropdown to dialog to select preset option
-         #  Optional - read xml and resolve all NIM keywords and write to temp XML
-         #           - set to temp XML
-         #           This will work for custom but still won't resolve keys used in standard export
-         
-         #  DO INSTEAD OF OPTIONAL :
-         #          To resolve all keywords in standard export modify the .export_node file in the batch
-         #              retrieve & resolve batchSetup location from XML - batchSetup / namePattern
-
          info['presetPath'] = nimFlamePresetPath + '/sequence_publish/NimExportSequence.xml'
 
          # Set destination path to NIM server path

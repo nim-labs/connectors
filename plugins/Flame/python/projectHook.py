@@ -3,17 +3,20 @@
 #
 # Filename: projectHook.py
 #
-# Copyright (c) 2014 Autodesk Inc.
-# All rights reserved.
-#
-# Use of this software is subject to the terms of the Autodesk license
-# agreement provided at the time of installation or download, or which
-# otherwise accompanies this software in either electronic or hard copy form.
 # *****************************************************************************
+
+debug=True
+
+import os
 
 # Hook called when the user loads a project in the application.
 # projectName : Name of the loaded project -- String.
 def projectChanged(projectName):
+   print "projectChanged - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+   os.environ['NIM_FLAME_PROJECT'] = str(projectName)
+   if debug :
+      print projectName
+   print "projectChanged - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
    pass
 
 
