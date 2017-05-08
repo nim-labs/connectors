@@ -5,7 +5,36 @@
 #
 # *****************************************************************************
 
+from PySide.QtGui import *
+from PySide.QtCore import *
+
+import os,sys,re
+
+nim_app = 'Flame'
+os.environ['NIM_APP'] = str(nim_app)
+
+# Relative path to append for NIM Scripts
+nimFlamePythonPath = os.path.dirname(os.path.realpath(__file__))
+nimFlamePythonPath = nimFlamePythonPath.replace('\\','/')
+nimScriptPath = re.sub(r"\/plugins/Flame/python$", "", nimFlamePythonPath)
+nimFlamePresetPath = os.path.join(re.sub(r"\/python$", "", nimFlamePythonPath),'presets')
+
+print "NIM Script Path: %s" % nimScriptPath
+print "NIM Python Path: %s" % nimFlamePythonPath
+print "NIM Preset Path: %s" % nimFlamePresetPath
+
+# If relocating these scripts uncomment the line below and enter the fixed path
+# to the NIM Connector Root directory
+#
+# nimScriptPath = [NIM_CONNECTOR_ROOT]
+#
+
+sys.path.append(nimScriptPath)
+
+import nimFlameExport
+
 debug = True
+
 # Hook called when a batch setup is loaded
 #
 # setupPath: File path of the setup being loaded.
@@ -110,6 +139,27 @@ def batchExportBegin( info, userData ):
    if debug :
       print info
       print userData
+
+   # Check if Custom NIM export or Standard Export
+   # If standard export then ask for NIM association
+   nimShowDialog = True
+
+   # TODO: Check either local file/variable for Flame Project association with NIM
+   #       OR look in NIM for matching files to find link
+   '''
+   if 'nim_export_type' in userData :
+      nimShowDialog = True
+   else :
+      nimShowDialog = True
+   '''
+
+   if nimShowDialog :
+      msgBox = QMessageBox()
+      msgBox.setTextFormat(Qt.RichText)
+      result = msgBox.information(None, "Export results to NIM?", "Export results to NIM?", QMessageBox.Ok | QMessageBox.Cancel)
+      if result == QMessageBox.Ok:
+         nimFlameExport.nimAddBatchExport(info=info)
+
    print "batchExportBegin - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
    pass
 
