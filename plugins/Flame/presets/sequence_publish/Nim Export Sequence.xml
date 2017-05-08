@@ -60,7 +60,7 @@
 			<name>v&lt;version&gt;</name>
 		</version>
 		<batchSetup>
-			<namePattern>&lt;nim_shot_root&gt;/FLAME/batch/&lt;shot name&gt;_&lt;version name&gt;</namePattern>
+			<namePattern>&lt;nim_shot_root&gt;/FLAME/batch/&lt;shot name&gt;_COMP_&lt;version name&gt;</namePattern>
 			<exportNamePattern>&lt;nim_shot_comp&gt;/FLAME/&lt;shot name&gt;_COMP</exportNamePattern>
 			<outputPathPattern>&lt;nim_shot_comp&gt;/&lt;shot name&gt;_COMP_&lt;version name&gt;/&lt;shot name&gt;_COMP_&lt;version name&gt;.</outputPathPattern>
 			<batchGroup>False</batchGroup>

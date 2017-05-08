@@ -16,6 +16,7 @@ import os,sys,re,string,traceback
 import base64
 import platform
 import ntpath
+import json
 '''
 try:
 	import xml.etree.cElementTree as ET
@@ -134,7 +135,7 @@ class NimExportDialog(QDialog):
 		except:
 			# failing on user
 			print "NIM - Failed to get userID"
-			self.nim_userID = 1
+			self.nim_userID = 0
 
 		print "NIM - user=%s" % self.user
 		print "NIM - userID=%s" % self.nim_userID
@@ -157,17 +158,29 @@ class NimExportDialog(QDialog):
 			for element in self.nim_elementTypes:
 				self.nim_elementTypesDict[element['name']] = element['ID']
 
+		self.videoElement = ''
+		self.videoElementID = 0
+		self.audioElement = ''
+		self.audioElementID = 0
+		self.openClipElement = ''
+		self.openClipElementID = 0
+		self.batchOpenClipElement = ''
+		self.batchOpenClipElementID = 0
+
 
 		#Get NIM Task Types
 		self.nim_taskTypes = []
 		self.nim_taskTypesDict = {}
 		self.nim_taskFolderDict = {}
 		self.nim_taskTypes = nimAPI.get_tasks(app='NUKE', userType='all')
-		
 		if len(self.nim_taskTypes)>0:
 			for task in self.nim_taskTypes:
 				self.nim_taskTypesDict[task['name']] = task['ID']
 				self.nim_taskFolderDict[task['ID']] = task['folder']
+
+		self.batchTaskType = ''
+		self.batchTaskTypeID = 0
+		self.batchTaskTypeFolder = ''
 
 
 		#Get NIM Jobs
@@ -236,6 +249,8 @@ class NimExportDialog(QDialog):
 		if len(presetList) > 0:
 			for preset in presetList :
 				 self.nim_presetChooser.addItem(self.clearPix, preset)
+
+		self.nim_presetChooser.currentIndexChanged.connect(self.nim_presetChanged)
 
 		# JOBS: List box for job selection
 		horizontalLayout_job = QHBoxLayout()
@@ -337,6 +352,7 @@ class NimExportDialog(QDialog):
 		horizontalLayout_elementDesc.setStretch(1, 40)
 
 
+
 		# video - exported media
 		horizontalLayout_video = QHBoxLayout()
 		horizontalLayout_video.setSpacing(-1)
@@ -355,6 +371,9 @@ class NimExportDialog(QDialog):
 
 		for key, value in sorted(self.nim_elementTypesDict.items(), reverse=False):
 			self.nim_videoChooser.addItem(self.clearPix, key)
+
+		self.nim_videoChooser.currentIndexChanged.connect(self.nim_videoElementChanged)
+
 
 		# audio - exported media
 		horizontalLayout_audio = QHBoxLayout()
@@ -375,6 +394,7 @@ class NimExportDialog(QDialog):
 		for key, value in sorted(self.nim_elementTypesDict.items(), reverse=False):
 			self.nim_audioChooser.addItem(self.clearPix, key)
 		
+		self.nim_audioChooser.currentIndexChanged.connect(self.nim_audioElementChanged)
 
 		# openClip - Source Clip
 		horizontalLayout_openClip = QHBoxLayout()
@@ -395,6 +415,7 @@ class NimExportDialog(QDialog):
 		for key, value in sorted(self.nim_elementTypesDict.items(), reverse=False):
 			self.nim_openClipChooser.addItem(self.clearPix, key)
 		
+		self.nim_openClipChooser.currentIndexChanged.connect(self.nim_openClipElementChanged)
 
 		# video - exported media
 		horizontalLayout_batchOpenClip = QHBoxLayout()
@@ -415,6 +436,7 @@ class NimExportDialog(QDialog):
 		for key, value in sorted(self.nim_elementTypesDict.items(), reverse=False):
 			self.nim_batchOpenClipChooser.addItem(self.clearPix, key)
 		
+		self.nim_batchOpenClipChooser.currentIndexChanged.connect(self.nim_batchOpenClipElementChanged)
 
 
 		# -- TASK TYPES -- #
@@ -459,6 +481,7 @@ class NimExportDialog(QDialog):
 		for key, value in sorted(self.nim_taskTypesDict.items(), reverse=False):
 			self.nim_batchChooser.addItem(self.clearPix, key)
 
+		self.nim_batchChooser.currentIndexChanged.connect(self.nim_batchTaskChanged)
 
 
 		# Add the standard ok/cancel buttons, default to ok.
@@ -513,6 +536,11 @@ class NimExportDialog(QDialog):
 				presetList.append(presetName)
 				
 		return presetList
+
+
+	def nim_presetChanged(self):
+		'''Action when task type is selected'''
+		self.nim_preset = self.nim_presetChooser.currentText()
 
 
 	def nim_jobChanged(self):
@@ -620,11 +648,60 @@ class NimExportDialog(QDialog):
 					print "NIM: No Show Paths Found"
 			else:
 				print "NIM: No Data Returned"
-			
+	
+
+	def nim_videoElementChanged(self):
+		'''Action when video type is selected'''
+		self.videoElement = self.nim_videoChooser.currentText()
+		self.videoElementID = self.nim_elementTypesDict[self.videoElement]
+
+
+	def nim_audioElementChanged(self):
+		'''Action when video type is selected'''
+		self.audioElement = self.nim_audioChooser.currentText()
+		self.audioElementID = self.nim_elementTypesDict[self.audioElement]
+
+
+	def nim_openClipElementChanged(self):
+		'''Action when video type is selected'''
+		self.openClipElement = self.nim_openClipChooser.currentText()
+		self.openClipElementID = self.nim_elementTypesDict[self.openClipElement]
+
+
+	def nim_batchOpenClipElementChanged(self):
+		'''Action when video type is selected'''
+		self.batchOpenClipElement = self.nim_batchOpenClipChooser.currentText()
+		self.batchOpenClipElementID = self.nim_elementTypesDict[self.batchOpenClipElement]
+
+
+	def nim_batchTaskChanged(self):
+		'''Action when task type is selected'''
+		self.batchTaskType = self.nim_batchChooser.currentText()
+		self.batchTaskTypeID = self.nim_taskTypesDict[self.batchTaskType]
+		self.batchTaskTypeFolder = self.nim_taskFolderDict[self.batchTaskTypeID]
+
+
 	def acceptTest(self):
-		#Saving Preferences
+		# Get Current Values For Static Objects
+		self.nim_preset = self.nim_presetChooser.currentText()
+		self.videoElement = self.nim_videoChooser.currentText()
+		self.videoElementID = self.nim_elementTypesDict[self.videoElement]
+		self.audioElement = self.nim_audioChooser.currentText()
+		self.audioElementID = self.nim_elementTypesDict[self.audioElement]
+		self.openClipElement = self.nim_openClipChooser.currentText()
+		self.openClipElementID = self.nim_elementTypesDict[self.openClipElement]
+		self.batchOpenClipElement = self.nim_batchOpenClipChooser.currentText()
+		self.batchOpenClipElementID = self.nim_elementTypesDict[self.batchOpenClipElement]
+		self.batchTaskType = self.nim_batchChooser.currentText()
+		self.batchTaskTypeID = self.nim_taskTypesDict[self.batchTaskType]
+		self.batchTaskTypeFolder = self.nim_taskFolderDict[self.batchTaskTypeID]
+
+		# Saving Preferences
 		nimPrefs.update( 'Job', 'Flame', self.nim_jobID )
 		nimPrefs.update( 'Show', 'Flame', self.nim_showID )
+
+		# TODO: Save custom Flame-NIM preferences for element associations
+
 		self.accept()
 
 
@@ -693,10 +770,8 @@ def nimCreateShot(nim_showID=None, info=None) :
 	return result
 
 
-def nimExportElement(nim_shotID=None, info=None) :
-	# Update Elements in NIM on postAssetExport
-
-	# TODO: Get NIM Element type from dialog for each assetType option
+def nimExportElement(nim_shotID=None, info=None, typeID='', nim_userID=None) :
+	# Export Elements in NIM on postAssetExport
 
 	print "Exporting NIM Element"
 	success = False
@@ -709,23 +784,253 @@ def nimExportElement(nim_shotID=None, info=None) :
 		nim_handleOut = info['handleOut']
 		nim_duration = nim_sourceOut - nim_sourceIn
 		nim_assetType = info['assetType']
+		nim_sequenceName = info['sequenceName']
 		nim_destinationPath = info['destinationPath']
 		nim_resolvedPath = info['resolvedPath']
-		nim_fullPath = os.path.join(nim_destinationPath, nim_resolvedPath)
+		if 'nim_fullPath' in info :
+			nim_fullPath = info['nim_fullPath']
+		else :
+			nim_fullPath = os.path.join(nim_destinationPath, nim_resolvedPath)
 
+		nim_tapeName = ''
+		if 'tapeName' in info :
+			nim_tapeName = info['tapeName']
+		
 		nim_element_path = nim_fullPath.rpartition('/')
 		nim_path = nim_element_path[0]
 		nim_name = nim_element_path[2]
 		
-		# Add Media Item as Element
-		element_result = nimAPI.add_element( parent='shot', parentID=nim_shotID, path=nim_path, name=nim_name, \
-									startFrame=nim_sourceIn, endFrame=nim_sourceOut, handles=nim_handleIn, isPublished=False )
+		# Build metadata
+		metadata = {}
+		if nim_tapeName :
+			metadata['tapeName'] = nim_tapeName
+		if nim_sequenceName :
+			metadata['sequenceName'] = nim_sequenceName
+		metadata = json.dumps(metadata)
 
-		print "NIM - %s has been added to %s in NIM." % (nim_assetType, nim_shotName)
+		# Add Media Item as Element
+		element_result = nimAPI.add_element( parent='shot', parentID=nim_shotID, userID=nim_userID, typeID=typeID, path=nim_path, name=nim_name, \
+										startFrame=nim_sourceIn, endFrame=nim_sourceOut, handles=nim_handleIn, isPublished=False, metadata=metadata )
+
+		print "NIM - %s has been added in NIM." % (nim_assetType)
 		success = True
 	else:
-		print "NIM - No shows found"
+		print "NIM - shotID missing found"
 
+	return success
+
+
+def nimExportFile(nim_shotID=None, info=None, taskTypeID='', taskFolder='', serverID=None, nim_userID=None, tapeName='') :
+	# Export File in NIM on postAssetExport
+
+	print "Exporting NIM File"
+	success = False
+
+	if nim_shotID != None and info != None :
+		nim_shotName = info['shotName']
+		nim_sourceIn = info['sourceIn']
+		nim_sourceOut = info['sourceOut']
+		nim_handleIn = info['handleIn']
+		nim_handleOut = info['handleOut']
+		nim_duration = nim_sourceOut - nim_sourceIn
+		nim_assetType = info['assetType']
+		nim_sequenceName = info['sequenceName']
+		nim_destinationPath = info['destinationPath']
+		nim_resolvedPath = info['resolvedPath']
+		nim_versionName = info['versionName']
+
+		if 'nim_fullPath' in info :
+			nim_fullPath = info['nim_fullPath']
+		else :
+			nim_fullPath = os.path.join(nim_destinationPath, nim_resolvedPath)
+
+		nim_element_path = nim_fullPath.rpartition('/')
+		element_filePath = nim_element_path[0]
+		element_fileName = nim_element_path[2]
+
+		#Derive basename from file ( TODO: give option to use shot_task_tag_ver.batch method )
+		#Using filename entered in Export window
+		#ext = '.batch'
+		nim_doSave = True
+		basename = element_fileName
+		version = 0
+
+		basenameFull, ext = os.path.splitext(element_fileName)
+		basenameMatch = re.search(r'v[0-9]+$', basenameFull, re.I)
+		if basenameMatch:
+			matchIndex = basenameMatch.start(0)
+			basename = basenameFull[:matchIndex]    #returns basename without v#: shot_comp_ (test for trailing _ and remove to be NIM compliant)
+			lastCharMatch = re.search(r'_+$', basename)
+			if lastCharMatch:
+				basename = basename[:lastCharMatch.start(0)]
+
+			version = basenameFull[matchIndex:][1:].lstrip('0') #returns version without v and leading 0s: '1'
+		else:
+			print "Version information was either not found in batch export name or has incorrect placement to be NIM compatible.\n \
+					Please include the version in the comp name at the end of the name by using the <version name> keyword \
+					or manually adding 'v#' to the batch file name.\n \
+					Example: <shot name>_comp_<version name>.batch\n \
+					The batch file will be created but not logged into NIM."
+			nim_doSave = False
+		
+		filename = element_fileName
+		filepath = element_filePath
+		
+		print "basename: %s" % basename
+		print "filename: %s" % filename
+		print "version: %s" % version
+
+		# Verify entry is not duplicate of existing version
+		nim_doUpdate = False
+
+		# Get versions for basename
+		nim_versions = {}
+		nim_versionID = 0
+		nim_versions = nimAPI.get_vers(shotID=nim_shotID, basename=basename)
+		print "Versions Returned: %s" % nim_versions
+
+		# If file matching class / basename / filename / version
+		try:
+			if len(nim_versions)>0:
+				print "Versions found" 
+				for versionItem in nim_versions:
+					if versionItem['filename'] == filename:
+						print "Existing Version Found"
+						nim_versionID = versionItem['fileID']
+						print "versionID: %s" % nim_versionID
+						nim_doUpdate = True
+
+					# Match previous taskTypeID, taskFolder, and serverID if not set
+					if taskTypeID == '' :
+						taskTypeID = versionItem['task_type_ID']
+						print "taskTypeID: %s" % taskTypeID
+					if taskFolder == '' :
+						taskFolder = versionItem['task_type_folder']
+						print "taskFolder: %s" % taskFolder
+					if not serverID :
+						serverID = versionItem['serverID']
+						print "serverID: %s" % serverID
+			else:
+				print "No existing versions found"
+		except:
+			print "Failed to load existing versions from NIM"
+			pass
+		  
+		comment = 'Batch File exported from Flame'
+		  
+		if not serverID :
+			print "NIM Sever information is missing.\n \
+					Please select a NIM Project Server from the Server dropdown list.\n \
+					The batch file will be created but not logged into NIM."
+			nim_doSave = False
+
+		pub = False
+		forceLink = 0 	# lazy symlink as files wont exist yet
+		work = True 	# set comp as working file
+		metadata = {}
+
+		# Build Metadata		
+		# Resolve setupNamePattern to match against batchExport setupNamePattern
+		if 'namePattern' in info :
+			namePattern = nimResolvePath(nim_shotID=nim_shotID, keyword_string=info['namePattern'])
+			setupNamePattern = resolveBatchSetupNamePattern(namePattern=namePattern, sequenceName=nim_sequenceName, tapeName=tapeName)
+			metadata['setupNamePattern'] = setupNamePattern
+
+		if nim_sequenceName :
+			metadata['sequenceName'] = nim_sequenceName
+		if nim_versionName :
+			metadata['versionName'] = nim_versionName
+		metadata = json.dumps(metadata)
+
+		if nim_doSave is True:
+			if nim_doUpdate is True:
+				print "Updating file data in NIM"
+				file_apiResult = nimAPI.update_file( ID=nim_versionID, task_type_ID=taskTypeID, task_folder=taskFolder, userID=nim_userID, \
+														basename=basename, filename=filename, path=filepath, ext=ext, version=version, \
+														comment=comment, serverID=serverID, pub=pub, forceLink=forceLink, work=work, metadata=metadata )
+				print file_apiResult
+			else:
+				print "Saving file data to NIM"
+				file_apiResult = nimAPI.save_file( parent='shot', parentID=nim_shotID, task_type_ID=taskTypeID, task_folder=taskFolder, userID=nim_userID, \
+													basename=basename, filename=filename, path=filepath, ext=ext, version=version, \
+													comment=comment, serverID=serverID, pub=pub, forceLink=forceLink, work=work, metadata=metadata )
+				print file_apiResult
+
+	return success
+
+
+def nimAddBatchExport(info=None) :
+	'''Determine NIM shot from associated openClip, then log elements and files'''
+
+	# exportPath - path prefix
+	# openClipResolvedPath - path to the output openClip
+	# setupResolvedPath - path to the new batch file
+	# resolvedPath - path to the image sequence / output
+	
+	success = False
+
+	nimPrefs = getNimPrefs()
+	nim_userID = nimPrefs['NIM_userID']
+
+	exportPath = info['exportPath']
+	openClipResolvedPath = info['openClipResolvedPath']
+	setupResolvedPath = info['setupResolvedPath']
+	resolvedPath = info['resolvedPath']
+	firstFrame = info['firstFrame']
+	lastFrame = info['lastFrame']
+
+	clipPartition = openClipResolvedPath.rpartition('/')
+	clipPath = clipPartition[0]
+	clipName = clipPartition[2]
+
+	print "ClipPath: %s" % clipPath
+	print "ClipName: %s" % clipName
+
+	# Resolve shot by assocaited openClipResolvedPath
+	elements = nimAPI.find_elements(name=clipName, path=clipPath)
+	print "Matching Clip Element Found: "
+	print elements 
+
+	if len(elements) > 1 :
+		print "Found more than one result..."
+	else :
+		# Get Element metadata to read sequenceName
+
+		nim_shotID = elements[0]['shotID']
+		print "NIM shotID: %s" % nim_shotID
+		elementTypeID = elements[0]['elementTypeID']
+		print "NIM elementTypeID: %s" % elementTypeID
+
+		elementData = {}
+		elementData['shotName'] = ''
+		elementData['sourceIn'] = firstFrame
+		elementData['sourceOut'] = lastFrame
+		elementData['handleIn'] = 0
+		elementData['handleOut'] = 0
+		elementData['assetType'] = 'video'
+		elementData['sequenceName'] = ''
+		elementData['destinationPath'] = exportPath
+		elementData['resolvedPath'] = resolvedPath
+		elementData['nim_fullPath'] = resolvedPath
+		elementData['versionName'] = info['versionName']
+
+		nimExportElement(nim_shotID=nim_shotID, info=elementData, typeID=elementTypeID, nim_userID=nim_userID)
+
+
+		fileData = {}
+		fileData['shotName'] =''
+		fileData['sourceIn'] = firstFrame
+		fileData['sourceOut'] = lastFrame
+		fileData['handleIn'] = 0
+		fileData['handleOut'] = 0
+		fileData['assetType'] = 'batch'
+		fileData['sequenceName'] = ''
+		fileData['destinationPath'] = exportPath
+		fileData['resolvedPath'] = setupResolvedPath
+		fileData['versionName'] = info['versionName']
+
+		nimExportFile(nim_shotID=nim_shotID, info=fileData, taskTypeID='', taskFolder='', nim_userID=nim_userID)
+	
 	return success
 
 
@@ -854,5 +1159,60 @@ def resolveBatchKeywords(nim_shotID=None, batch_path=None) :
 
 	return success
 
+
+def resolveBatchSetupNamePattern(namePattern=None, sequenceName='', tapeName='') :
+	# Update namePattern to match value saved on batchExportBegin
+	#	Used When saving metatag to match back new batch versions
+	#		Resolve <nim_shot_root> 
+	#		Replace <name> (sequence name) and <tape> (tape name) as they are already resolved in batchExportBegin
+	#	 	Convert <shot name> to <name> to match setupNamePattern
+	namePattern = namePattern.replace('<name>', sequenceName)
+	namePattern = namePattern.replace('<tape>', tapeName)
+	return namePattern
+
+
+def getNimPrefs() :
+	try:
+		#self.app=nimFile.get_app()
+		app = 'Flame'
+		prefs=nimPrefs.read()
+		print "NIM - Prefs: "
+		print prefs
+
+		if 'NIM_User' in prefs :
+			user=prefs['NIM_User']
+		else :
+			user = ''
+
+		print "NIM - Prefs successfully read"
+
+	except:
+		print "NIM - Failed to read NIM prefs"
+		print 'NIM - ERROR: %s' % traceback.print_exc()
+		app='Flame'
+		prefs=''
+		user=''
+
+	nim_OS = platform.system()
+	prefs['OS'] = nim_OS
+	
+	try:
+		nim_userID = nimAPI.get_userID(user)
+		if not nim_userID :
+			nimUI.GUI().update_user()
+			userInfo=nim.NIM().userInfo()
+			user = userInfo['name']
+			nim_userID = userInfo['ID']
+	except:
+		# failing on user
+		print "NIM - Failed to get userID"
+		nim_userID = 0
+
+	prefs['NIM_userID'] = nim_userID
+
+	print "NIM - user=%s" % user
+	print "NIM - userID=%s" % nim_userID
+
+	return prefs
 
 

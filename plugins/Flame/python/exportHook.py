@@ -154,26 +154,50 @@ def preCustomExport( info, userData ):
       exportDlg = nimFlameExport.NimExportDialog()
       exportDlg.show()
       if exportDlg.exec_() :
+         print "NIM - nim_userID: %s" % exportDlg.nim_userID
+         userData['nim_userID'] = exportDlg.nim_userID
+
+         print "NIM - serverID: %s" % exportDlg.nim_serverID
+         userData['nim_serverID'] = exportDlg.nim_serverID
+
          print "NIM - serverOSPath: %s" % exportDlg.nim_serverOSPath
          nim_serverOSPath = exportDlg.nim_serverOSPath
          userData['nim_serverOSPath'] = nim_serverOSPath
 
+         # Set destination path to NIM server path
+         info['destinationPath'] = nim_serverOSPath
+         print "Destination Path: %s" % info['destinationPath']
+
+
          print "NIM - jobID: %s" % exportDlg.nim_jobID
-         nim_jobID = exportDlg.nim_jobID
-         userData['nim_jobID'] = nim_jobID
+         userData['nim_jobID'] = exportDlg.nim_jobID
 
          print "NIM - showID: %s" % exportDlg.nim_showID
-         nim_showID = exportDlg.nim_showID
-         userData['nim_showID'] = nim_showID
+         userData['nim_showID'] = exportDlg.nim_showID
+
+         print "NIM - videoElementID: %s" % exportDlg.videoElementID
+         userData['videoElementID'] = exportDlg.videoElementID
+
+         print "NIM - audioElementID: %s" % exportDlg.audioElementID
+         userData['audioElementID'] = exportDlg.audioElementID
+
+         print "NIM - openClipElementID: %s" % exportDlg.openClipElementID
+         userData['openClipElementID'] = exportDlg.openClipElementID
+
+         print "NIM - batchOpenClipElementID: %s" % exportDlg.batchOpenClipElementID
+         userData['batchOpenClipElementID'] = exportDlg.batchOpenClipElementID
+
+         print "NIM - batchTaskTypeID: %s" % exportDlg.batchTaskTypeID
+         userData['batchTaskTypeID'] = exportDlg.batchTaskTypeID
+         userData['batchTaskTypeFolder'] = exportDlg.batchTaskTypeFolder
+         
          
          # Create empty dictionary for shot data
          userData['shotData'] = {}
          
-         info['presetPath'] = nimFlamePresetPath + '/sequence_publish/NimExportSequence.xml'
-
-         # Set destination path to NIM server path
-         info['destinationPath'] = nim_serverOSPath
-         print "Destination Path: %s" % info['destinationPath']
+         # Set NIM Preset
+         nim_preset = exportDlg.nim_preset
+         info['presetPath'] = nimFlamePresetPath + '/sequence_publish/'+nim_preset+'.xml'         
          
          # Process in Background
          info['isBackground'] = False
@@ -350,9 +374,38 @@ def preExportSequence( info, userData ):
          exportDlg = nimFlameExport.NimExportDialog()
          exportDlg.show()
          if exportDlg.exec_() :
+            userData['shotData'] = {}
+            
+            print "NIM - nim_userID: %s" % exportDlg.nim_userID
+            userData['nim_userID'] = exportDlg.nim_userID
+
+            # TODO:  SERVER NEEDS TO MATCH SELECTED PATH 
+            #        OR NEED TO ATTEMPT TO DERIVE FROM info['destinationPath']
+            print "NIM - serverID: %s" % exportDlg.nim_serverID
+            userData['nim_serverID'] = exportDlg.nim_serverID
+
             print "NIM - showID: %s" % exportDlg.nim_showID
             userData['nim_showID'] = exportDlg.nim_showID
-            userData['shotData'] = {}
+
+            print "NIM - showID: %s" % exportDlg.nim_showID
+            userData['nim_showID'] = exportDlg.nim_showID
+            
+            print "NIM - videoElementID: %s" % exportDlg.videoElementID
+            userData['videoElementID'] = exportDlg.videoElementID
+
+            print "NIM - audioElementID: %s" % exportDlg.audioElementID
+            userData['audioElementID'] = exportDlg.audioElementID
+
+            print "NIM - openClipElementID: %s" % exportDlg.openClipElementID
+            userData['openClipElementID'] = exportDlg.openClipElementID
+
+            print "NIM - batchOpenClipElementID: %s" % exportDlg.batchOpenClipElementID
+            userData['batchOpenClipElementID'] = exportDlg.batchOpenClipElementID
+
+            print "NIM - batchTaskTypeID: %s" % exportDlg.batchTaskTypeID
+            userData['batchTaskTypeID'] = exportDlg.batchTaskTypeID
+            userData['batchTaskTypeFolder'] = exportDlg.batchTaskTypeFolder
+
       else:
          print "NIM - Skipping Export to NIM"
          userData['nim_export_sequence'] = False
@@ -668,7 +721,42 @@ def postExportAsset( info, userData ):
 
    if 'nim_export_sequence' in userData :
       if userData['nim_export_sequence'] == True :
-         result = nimFlameExport.nimExportElement(nim_shotID=userData['currentShotID'], info=info)
+
+         nim_userID = userData['nim_userID']
+         
+         nim_tapeName = ''
+         # Check if tapeName is in info
+         # if exists set userData 
+         #  - should happen first on batchOpenClip before batch
+         if 'tapeName' in info :
+            userData['tapeName'] = info['tapeName']
+
+         # If tapeName has been sent in userData set var for exportFile
+         if 'tapeName' in userData :
+            nim_tapeName = userData['tapeName']
+
+         assetTypeID = 0
+         exportFile = False
+         if info['assetType'] == 'video' :
+            assetTypeID = userData['videoElementID']
+         if info['assetType'] == 'audio' :
+            assetTypeID = userData['audioElementID']
+         if info['assetType'] == 'openClip' :
+            assetTypeID = userData['openClipElementID']
+         if info['assetType'] == 'batchOpenClip' :
+            assetTypeID = userData['batchOpenClipElementID']
+         if info['assetType'] == 'batch' :
+            assetTypeID = userData['batchTaskTypeID']
+            exportFile = True
+
+         if exportFile :
+            # export batch to NIM files
+            result = nimFlameExport.nimExportFile(nim_shotID=userData['currentShotID'], info=info, taskTypeID=assetTypeID, \
+                                    taskFolder=userData['batchTaskTypeFolder'], serverID=userData['nim_serverID'], nim_userID=nim_userID, tapeName=nim_tapeName)
+         else :
+            # export asset to NIM element
+            result = nimFlameExport.nimExportElement(nim_shotID=userData['currentShotID'], info=info, typeID=assetTypeID, nim_userID=nim_userID)
+
    
    if debug :
       print "destinationPath: %s" % info['destinationPath']

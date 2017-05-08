@@ -794,6 +794,16 @@ def get_elementType( ID=None):
     elementType=get( {'q': 'getElementType', 'ID': ID} )
     return elementType
 
+def find_files( name='', path='', metadata=None):
+    'Retrieves a dictionary of files matching the file path'
+    files=get( {'q': 'findFiles', 'name': name, 'path': path, 'metadata': metadata} )
+    return files
+
+def find_elements( name='', path='', metadata=None):
+    'Retrieves a dictionary of elements matching the file path'
+    elements=get( {'q': 'findElements', 'name': name, 'path': path, 'metadata': metadata} )
+    return elements
+
 def get_elements( parent='shot', parentID=None, elementTypeID=None, getLastElement=False, isPublished=False):
     ''' Retrieves a dictionary of elements for a particular type given parentID.
         If no elementTypeID is given will return elements for all types.
@@ -803,11 +813,11 @@ def get_elements( parent='shot', parentID=None, elementTypeID=None, getLastEleme
     publishedElements=get( {'q': 'getElements', 'parent': parent, 'parentID': parentID, 'elementTypeID': elementTypeID, 'getLastElement': getLastElement, 'isPublished': isPublished} )
     return publishedElements
 
-def add_element( parent='shot', parentID=None, typeID='', path='', name='', startFrame=None, endFrame=None, handles=None, isPublished=False, nimURL=None, apiKey=None ):
+def add_element( parent='shot', parentID=None, userID=None, typeID='', path='', name='', startFrame=None, endFrame=None, handles=None, isPublished=False, nimURL=None, apiKey=None, metadata=None ):
     'Adds an element to an asset, shot, task, or render'
     # nimURL and apiKey are optional for Render API Key overrride
-    params = {'q': 'addElement', 'parent': parent, 'typeID': typeID, 'parentID': parentID, 'path': path, \
-                'name': name, 'startFrame': startFrame, 'endFrame': endFrame, 'handles': handles, 'isPublished': isPublished}
+    params = {'q': 'addElement', 'parent': parent, 'userID':userID, 'typeID': typeID, 'parentID': parentID, 'path': path, \
+                'name': name, 'startFrame': startFrame, 'endFrame': endFrame, 'handles': handles, 'isPublished': isPublished, 'metadata': metadata}
     result = connect( method='get', params=params, nimURL=nimURL, apiKey=apiKey )
     return result
 
@@ -1449,7 +1459,7 @@ def versionUp( nim=None, padding=2, selected=False, win_launch=False, pub=False,
             msg='FAILED to Version Up the file.' )
         return False
 
-def save_file( parent='SHOW', parentID=0, task_type_ID=0, task_folder='', userID=0, basename='', filename='', path='', ext='', version='', comment='', serverID=0, pub=False, forceLink=1, work=True ):
+def save_file( parent='SHOW', parentID=0, task_type_ID=0, task_folder='', userID=0, basename='', filename='', path='', ext='', version='', comment='', serverID=0, pub=False, forceLink=1, work=True, metadata=None ):
     '''General Purpose Save File Function that Adds a File to the NIM Database with brute force data'''
     parent = parent.upper()
 
@@ -1458,7 +1468,7 @@ def save_file( parent='SHOW', parentID=0, task_type_ID=0, task_folder='', userID
             'task_type_ID': str(task_type_ID), 'task_type_folder': task_folder,
             'userID': str(userID), 'basename': basename, 'filename': filename,
             'filepath': path, 'ext': ext, 'version': str(version), 'note': comment,
-            'serverID': str(serverID)} )
+            'serverID': str(serverID), 'metadata': metadata } )
     elif pub :
         if parent == "SHOW":
             clear_pubFlags( showID=parentID, basename=basename )
@@ -1478,7 +1488,7 @@ def save_file( parent='SHOW', parentID=0, task_type_ID=0, task_folder='', userID
             'task_type_ID': str(task_type_ID), 'task_type_folder': task_folder,
             'userID': str(userID), 'basename': basename, 'filename': filename,
             'filepath': path, 'ext': ext, 'version': str(version), 'note': comment,
-            'serverID': str(serverID), 'isPub': 1, 'isWork': is_work} )
+            'serverID': str(serverID), 'isPub': 1, 'isWork': is_work, 'metadata': metadata } )
         
 
     if  not result :
@@ -1502,7 +1512,7 @@ def save_file( parent='SHOW', parentID=0, task_type_ID=0, task_folder='', userID
                         Please check to make sure the file exists on disk.')
     return result
 
-def update_file( ID=0, task_type_ID=0, task_folder='', userID=0, basename='', filename='', path='', ext='', version='', comment='', serverID=0, pub=False, forceLink=1, work=True ):
+def update_file( ID=0, task_type_ID=0, task_folder='', userID=0, basename='', filename='', path='', ext='', version='', comment='', serverID=0, pub=False, forceLink=1, work=True, metadata=None ):
     '''General Purpose Update File Function that Updates and existing File in the NIM Database'''
     is_work = 0
     if work:
@@ -1513,7 +1523,7 @@ def update_file( ID=0, task_type_ID=0, task_folder='', userID=0, basename='', fi
                     'task_type_ID': str(task_type_ID), 'task_type_folder': task_folder,
                     'userID': str(userID), 'basename': basename, 'filename': filename,
                     'filepath': path, 'ext': ext, 'version': str(version), 'note': comment,
-                    'serverID': str(serverID)} )
+                    'serverID': str(serverID), 'metadata': metadata } )
     elif pub :
         P.info('')
         clear_pubFlags( fileID=ID, basename=basename )
@@ -1526,7 +1536,7 @@ def update_file( ID=0, task_type_ID=0, task_folder='', userID=0, basename='', fi
                     'task_type_ID': str(task_type_ID), 'task_type_folder': task_folder,
                     'userID': str(userID), 'basename': basename, 'filename': filename,
                     'filepath': path, 'ext': ext, 'version': str(version), 'note': comment,
-                    'serverID': str(serverID), 'isPub': 1, 'isWork': is_work} )
+                    'serverID': str(serverID), 'isPub': 1, 'isWork': is_work, 'metadata': metadata } )
 
     if  not result :
         P.error( 'There was a problem writing to the NIM database.' )

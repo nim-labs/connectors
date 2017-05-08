@@ -353,6 +353,8 @@ class NimShotProcessor(hiero.core.ProcessorBase):
     # Iterate through track items and find NIM associations
     # Check for any shots that can not be brought online due to a variable based project structure
 
+    # TODO : ADD CHECK FOR JOB JUST BEING OFFLINE AND NOT USING VBPS
+
     print 'NIM: Checking for variable based project structure items'
     is_vbps = 0
     is_vbps = nimAPI.can_bringOnline(item='shot',showID=nimHieroConnector.g_nim_showID)
@@ -663,7 +665,7 @@ class NimShotProcessor(hiero.core.ProcessorBase):
               print "filename: %s" % filename
               print "version: %s" % version
 
-              #TODO: verify entry is not duplicate of existing version
+              # Verify entry is not duplicate of existing version
               nim_doUpdate = False
 
               # Get versions for basename
