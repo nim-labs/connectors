@@ -204,7 +204,7 @@ def _prefsFail() :
 
 
 def _nimPrefs() :
-    'Returns a list of NIM preferences'
+    'Returns a dictionary of NIM preferences'
     nimDict={
         'NIM_URL': nim_URL,
         'NIM_User': nim_user,
@@ -223,7 +223,7 @@ def _nimPrefsList() :
 
 
 def _appPrefs( app='Maya' ) :
-    'Returns a list of NIM Preferences Dictionary, common for all applications.'
+    'Returns a dictionary of NIM Preferences Dictionary, common for all applications.'
     appDict={
         app+'_WinPosX': '250',
         app+'_WinPosY': '250',
