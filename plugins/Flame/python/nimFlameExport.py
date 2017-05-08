@@ -72,6 +72,86 @@ except :
 	print "NIM - failed to load Wiretap API"
 
 
+class NimBatchExportDialog(QDialog):
+	def __init__(self, parent=None):
+		super(NimBatchExportDialog, self).__init__(parent)
+
+		self.result = ""
+		self.nim_comment = ""
+
+		layout = QVBoxLayout()
+		formLayout = QFormLayout()
+		groupBox = QGroupBox()
+		groupLayout = QFormLayout()
+		groupBox.setLayout(groupLayout)
+
+		pixmap = QPixmap(1, 24)
+		pixmap.fill(Qt.transparent)
+		self.clearPix = QIcon(pixmap)
+		
+		# Header Image
+		horizontalLayout_header = QHBoxLayout()
+		horizontalLayout_header.setSpacing(-1)
+		horizontalLayout_header.setSizeConstraint(QLayout.SetDefaultConstraint)
+		horizontalLayout_header.setObjectName("horizontalLayout_header")
+		connectorImage = QPixmap(nimFlamePythonPath+"/flm2nim.png")
+		self.nimConnectorHeader = QLabel()
+		self.nimConnectorHeader.setPixmap(connectorImage)
+		horizontalLayout_header.addWidget(self.nimConnectorHeader)
+
+		# Comment Label
+		horizontalLayout_commentDesc = QHBoxLayout()
+		horizontalLayout_commentDesc.setSpacing(-1)
+		horizontalLayout_commentDesc.setSizeConstraint(QLayout.SetDefaultConstraint)
+		horizontalLayout_commentDesc.setObjectName("horizontalLayout_commentDesc")
+		self.nimCommentLabel = QLabel()
+		self.nimCommentLabel.setText("Enter the comment to use for logged batch files.")
+		horizontalLayout_commentDesc.addWidget(self.nimCommentLabel)
+		horizontalLayout_commentDesc.setStretch(1, 40)
+
+		# Create textbox
+		horizontalLayout_comment = QHBoxLayout()
+		horizontalLayout_comment.setSpacing(-1)
+		horizontalLayout_comment.setSizeConstraint(QLayout.SetDefaultConstraint)
+		horizontalLayout_comment.setObjectName("horizontalLayout_comment")
+		self.commentBox = QLineEdit()
+		self.commentBox.move(20, 20)
+		self.commentBox.resize(280,40)
+		horizontalLayout_comment.addWidget(self.commentBox)
+		horizontalLayout_comment.setStretch(1, 40)
+
+		# Add the standard ok/cancel buttons, default to ok.
+		self._buttonbox = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
+		self._buttonbox.button(QDialogButtonBox.StandardButton.Ok).setText(" Log to NIM ")
+		self._buttonbox.button(QDialogButtonBox.StandardButton.Ok).setDefault(True)
+		self._buttonbox.button(QDialogButtonBox.StandardButton.Ok).setToolTip("Log render and batch files to NIM")
+		self._buttonbox.accepted.connect(self.acceptTest)
+		self._buttonbox.rejected.connect(self.reject)
+		horizontalLayout_OkCancel = QHBoxLayout()
+		horizontalLayout_OkCancel.setSpacing(-1)
+		horizontalLayout_OkCancel.setSizeConstraint(QLayout.SetDefaultConstraint)
+		horizontalLayout_OkCancel.setObjectName("horizontalLayout_OkCancel")
+		spacerItem4 = QSpacerItem(175, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+		horizontalLayout_OkCancel.addItem(spacerItem4)
+		horizontalLayout_OkCancel.addWidget(self._buttonbox)
+		horizontalLayout_OkCancel.setStretch(1, 40)
+
+
+		groupLayout.setLayout(0, QFormLayout.SpanningRole, horizontalLayout_header)
+		groupLayout.setLayout(1, QFormLayout.SpanningRole, horizontalLayout_commentDesc)
+		groupLayout.setLayout(2, QFormLayout.SpanningRole, horizontalLayout_comment)
+		groupLayout.setLayout(3, QFormLayout.SpanningRole, horizontalLayout_OkCancel)
+
+		self.setLayout(groupLayout)
+		layout.addWidget(groupBox)
+
+
+	def acceptTest(self):
+		# Get Current Values For Static Objects
+		self.nim_comment = self.commentBox.text()
+		self.accept()
+
+
 class NimExportDialog(QDialog):
 	def __init__(self, parent=None):
 		super(NimExportDialog, self).__init__(parent)
@@ -820,7 +900,7 @@ def nimExportElement(nim_shotID=None, info=None, typeID='', nim_userID=None) :
 	return success
 
 
-def nimExportFile(nim_shotID=None, info=None, taskTypeID='', taskFolder='', serverID=None, nim_userID=None, tapeName='') :
+def nimExportFile(nim_shotID=None, info=None, taskTypeID='', taskFolder='', serverID=None, nim_userID=None, tapeName='', comment='') :
 	# Export File in NIM on postAssetExport
 
 	print "Exporting NIM File"
@@ -915,9 +995,7 @@ def nimExportFile(nim_shotID=None, info=None, taskTypeID='', taskFolder='', serv
 		except:
 			print "Failed to load existing versions from NIM"
 			pass
-		  
-		comment = 'Batch File exported from Flame'
-		  
+		  		  
 		if not serverID :
 			print "NIM Sever information is missing.\n \
 					Please select a NIM Project Server from the Server dropdown list.\n \
@@ -959,7 +1037,7 @@ def nimExportFile(nim_shotID=None, info=None, taskTypeID='', taskFolder='', serv
 	return success
 
 
-def nimAddBatchExport(info=None) :
+def nimAddBatchExport(info=None, comment='') :
 	'''Determine NIM shot from associated openClip, then log elements and files'''
 
 	# exportPath - path prefix
@@ -1029,7 +1107,7 @@ def nimAddBatchExport(info=None) :
 		fileData['resolvedPath'] = setupResolvedPath
 		fileData['versionName'] = info['versionName']
 
-		nimExportFile(nim_shotID=nim_shotID, info=fileData, taskTypeID='', taskFolder='', nim_userID=nim_userID)
+		nimExportFile(nim_shotID=nim_shotID, info=fileData, taskTypeID='', taskFolder='', nim_userID=nim_userID, comment=comment)
 	
 	return success
 

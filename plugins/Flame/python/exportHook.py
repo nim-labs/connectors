@@ -749,10 +749,13 @@ def postExportAsset( info, userData ):
             assetTypeID = userData['batchTaskTypeID']
             exportFile = True
 
+         comment = 'Batch File exported from Flame'
+
          if exportFile :
             # export batch to NIM files
             result = nimFlameExport.nimExportFile(nim_shotID=userData['currentShotID'], info=info, taskTypeID=assetTypeID, \
-                                    taskFolder=userData['batchTaskTypeFolder'], serverID=userData['nim_serverID'], nim_userID=nim_userID, tapeName=nim_tapeName)
+                                    taskFolder=userData['batchTaskTypeFolder'], serverID=userData['nim_serverID'], \
+                                    nim_userID=nim_userID, tapeName=nim_tapeName, comment=comment)
          else :
             # export asset to NIM element
             result = nimFlameExport.nimExportElement(nim_shotID=userData['currentShotID'], info=info, typeID=assetTypeID, nim_userID=nim_userID)

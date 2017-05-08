@@ -153,12 +153,20 @@ def batchExportBegin( info, userData ):
       nimShowDialog = True
    '''
 
+   batchExportDlg = nimFlameExport.NimBatchExportDialog()
+   batchExportDlg.show()
+   if batchExportDlg.exec_() :
+      nim_comment = batchExportDlg.nim_comment
+      nimFlameExport.nimAddBatchExport(info=info, comment=nim_comment)
+
+   '''
    if nimShowDialog :
       msgBox = QMessageBox()
       msgBox.setTextFormat(Qt.RichText)
       result = msgBox.information(None, "Export results to NIM?", "Export results to NIM?", QMessageBox.Ok | QMessageBox.Cancel)
       if result == QMessageBox.Ok:
          nimFlameExport.nimAddBatchExport(info=info)
+   '''
 
    print "batchExportBegin - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
    pass
