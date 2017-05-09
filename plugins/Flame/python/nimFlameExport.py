@@ -1430,6 +1430,7 @@ def nimScanForVersions(nim_showID=None, nim_shotID=None) :
 	# find_elements in show with metadata flameAssetType : batchOpenClip
 	# get element type
 	# find all elements of type in shot
+
 	# add elements to batchOpenClip
 	metadata = {}
 	metadata['flameAssetType'] = 'batchOpenClip'
@@ -1456,29 +1457,37 @@ def nimScanForVersions(nim_showID=None, nim_shotID=None) :
 				elementName = element['name'].encode('utf-8')
 				print os.path.join(elementPath,elementName)
 				
-				getMediaScript = "/usr/discreet/mio/current/dl_get_media_info"
-				
-				if not os.path.isfile(getMediaScript) :
-					print "The get media info script is not installed: file %s missing" % getMediaScript
-				else :
-					tmpfile = "tmp.clip"
-					apath = os.path.abspath(elementPath)
-					print " Adding folder %s" % apath
-					#output a temp file 
-					tmpfile = apath+"/"+tmpfile
-					if os.path.isfile(tmpfile):
-						os.remove(tmpfile)
-					print "Temp File: %s" % tmpfile
-					res = os.popen4("%s -r %s" % ( getMediaScript, apath ) )[1].readlines()
-					
-					with open(tmpfile,"w+") as f:
-						for line in res:
-							f.write( line )
+				updateOpenClip( clipFile, elementPath, elementName )
 
-					updateOpenClip( clipFile, tmpfile, elementName ) 
+
+	# add elements to openClip
+	metadata = {}
+	metadata['flameAssetType'] = 'openClip'
+	metadata = json.dumps(metadata)
+	openClipElements = nimAPI.find_elements(showID=nim_showID, metadata=metadata)
+	print openClipElements
+
+	for openClipElement in openClipElements :
+		clipID = openClipElement['ID']
+		shotID = openClipElement['shotID']
+		clipPath = openClipElement['path'].encode('utf-8')
+		clipName = openClipElement['name'].encode('utf-8')
+		clipFile = os.path.join(clipPath,clipName)
+
+		elementTypeID = openClipElement['elementTypeID']
+		elements = nimAPI.find_elements(shotID=shotID, elementTypeID=elementTypeID)
+		print "matching elements found"
+		print elements
+
+		for element in elements :
+			if element['ID'] != clipID :
+				print "Element found for shotID %s" % shotID
+				elementPath = element['path'].encode('utf-8')
+				elementName = element['name'].encode('utf-8')
+				print os.path.join(elementPath,elementName)
 				
-					if os.path.isfile(tmpfile):
-						os.remove(tmpfile)
+				updateOpenClip( clipFile, elementPath, elementName ) 
+				
 	return
 	
 
@@ -1645,184 +1654,99 @@ def getNimPrefs() :
 	return prefs
 
 
-def addFeed(feed,vuid,targetMIO,trackUID):
-
-	tracks = targetMIO.getElementsByTagName('track')
-	newID  = vuid
-
-	#Iterate through the tracks, looking for perfect matches for the incoming feed
-	for i in range(len(tracks)):
-		if tracks[i].attributes["uid"].value == trackUID:
-			if ( len(vuid) == 0 ):
-				#Get the version of the last feed
-				allfeeds = tracks[i].getElementsByTagName('feed')
-				for j in range(len(allfeeds)):
-					feedID = allfeeds[j].attributes["uid"].value
-					if feedID == "v0":
-						newID = "002"
-					else:
-						match = re.search( "([\d]+)", feedID)
-						if match:				   				
-							number = int(match.group(1))
-							number = number + 1					
-							newID = "%03d" % number 
-						else:
-							print "Invalid feed uid in masterfile: %s" % feedID
-							return False
-
-			feed.attributes['vuid'].value = newID
-			feed.attributes['uid'].value = newID		
-
-			#When the feed's track matches the one in the clip, add the feed to this track
-			tracks[i].getElementsByTagName('feeds')[0].appendChild(feed)
-
-	return newID
-
-
-def addFeed_ET(feed,vuid,targetMIO,trackUID):
-
-	newID  = vuid
-
-
-	#Iterate through the tracks, looking for perfect matches for the incoming feed
-	for track in targetMIO.iter('track'):
-		print "Track Iteration"
-		# Update version number based on current uid
-		if track.get('uid') == trackUID :
-			print "Found matching UID"
-			if ( len(vuid) == 0 ) :
-				#Get the version of the last feed
-				for feed in track.iter('feed') :
-					feedID = feed.get("uid")
-					print "Current FeedID: %s" % feedID
-
-					if feedID == "v0" :
-						newID = "002"
-					else :
-						match = re.search( "([\d]+)", feedID)
-						if match:				   				
-							number = int(match.group(1))
-							number = number + 1					
-							newID = "%03d" % number 
-						else:
-							print "Invalid feed uid in masterfile: %s" % feedID
-							return False
-
-		print "newID: %s" % newID
-		feed.set('vuid', newID)
-		feed.set('uid', newID)
-
-		track.find('feeds').append(feed)
-
-	return newID
-
-
-def splice( masterFile, newFile ):
-
+def updateOpenClip( masterFile, elementPath, elementName ) :
 	print "MasterFile: 	%s" % masterFile
-	print "newFile: 	%s" % newFile
+	print "ElementPath: %s" % elementPath
+	print "ElementName: %s" % elementName
 
-	#Read the Gateway Clip XML files for the existing and new versions
-	sourceGWXML	= minidom.parse(masterFile)
-	newGWXML	= minidom.parse(newFile)
+	# Trim padding and extension from elementName
+	# assumes name.#.ext format
+	elementBasename = elementName.rpartition('.')[0].rpartition('.')[0]
+	print "elementBasename: %s" % elementBasename
 
-	#Get all of the tracks from the new
-	allTracks	= newGWXML.getElementsByTagName('track') 
-	
-	newVersionID = ''
-
-	for i in range(len(allTracks)):
-		theTrackID	= allTracks[i].attributes["uid"].value
-		theTrack	= allTracks[i]
-		theFeed	= theTrack.getElementsByTagName('feed')[0]
-		newVersionID = addFeed(theFeed,newVersionID,sourceGWXML,theTrackID)
-
-	print "newVersionID: %s" % newVersionID
-	if newVersionID :	
-		#Add a version description at the end of the file, for this new version
-		doc		= minidom.Document()
-		newVersion	= sourceGWXML.getElementsByTagName('versions')[0].appendChild(doc.createElement('version'))
-		newVersion.setAttribute('type', 'version')
-		newVersion.setAttribute('uid', newVersionID)
-
-		resultXML	= sourceGWXML.toxml()
-
-		# Create a backup of the original file
-		bakfile = "%s.bak" % masterFile
-		if not os.path.isfile(bakfile):
-			shutil.copy2(masterFile,bakfile)
-		else:
-			created = False
-			for i in range ( 1, 99 ):
-				bakfile = "%s.bak.%02d" % ( masterFile, i )
-				if not os.path.isfile(bakfile):
-					shutil.copy2(masterFile,bakfile)
-					created = True
-					break
-			if not created:
-				bakfile = "%s.bak.last" % masterFile
-				shutil.copy2(masterFile,bakfile)
+	getMediaScript = "/usr/discreet/mio/current/dl_get_media_info"
 				
-		outFile = masterFile
-
-		print " Adding feed version %s" % newVersionID
-		f = open(outFile, "w")	
-		f.write( resultXML )
-		f.close()
-	else :
-		print "No VersionID Found"
-
-
-def updateOpenClip( masterFile, newFile, clipName ) :
-	print "MasterFile: 	%s" % masterFile
-	print "newFile: 	%s" % newFile
-
-	vuid = ''
-	sourceXML 	= ET.parse(masterFile)
-	newXML 		= ET.parse(newFile)
-	
-	for newTrack in newXML.iter('track') :
-		theTrackID = newTrack.get('uid')
-		newFeed = newTrack.find('feeds/feed')
-		print theTrackID
-		print ET.tostring(newFeed)
+	if not os.path.isfile(getMediaScript) :
+		print "The get media info script is not installed: file %s missing" % getMediaScript
+	else :		
+		tmpfile = "tmp.clip"
+		apath = os.path.abspath(elementPath)
+		print " Adding folder %s" % apath
+		#output a temp file 
+		tmpfile = apath+"/"+tmpfile
+		if os.path.isfile(tmpfile):
+			os.remove(tmpfile)
+		print "Temp File: %s" % tmpfile
+		res = os.popen4("%s -r %s" % ( getMediaScript, apath ) )[1].readlines()
 		
-		for srcTrack in sourceXML.iter('track') :
-			print "Track Iteration"
-			newFeed.set('vuid', clipName)
-			#newFeed.set('vuid', vuid)
-			#newFeed.set('uid', vuid)
-			srcTrack.find('feeds').append(newFeed)
+		with open(tmpfile,"w+") as f:
+			for line in res:
+				f.write( line )
+
+		vuid = ''
+		sourceXML 	= ET.parse(masterFile)
+		newXML 		= ET.parse(tmpfile)
+		
+		elementExists = False
+		
+		# Get new feed from file
+		for newTrack in newXML.iter('track') :
+			uid = newTrack.get('uid')
+			newFeed = newTrack.find('feeds/feed')
+			newPathObject = newTrack.find("feeds/feed/spans/span/path")
+			newPath = newPathObject.text
+			print uid
+			print ET.tostring(newFeed)
+			print "newPath: %s" % newPath
+			
+			# Check for path in sourceFile 
+			# If Path exists ... skip append
+			
+			for srcPath in sourceXML.iter('path') :
+				print "srcPath: %s" % srcPath.text
+				if newPath == srcPath.text :
+					print "Element exists in clip... skipping append"
+					elementExists = True
+
+			if not elementExists :
+				# Append new feed to source track
+				for srcTrack in sourceXML.iter('track') :
+					newFeed.set('vuid', elementBasename)
+					srcTrack.find('feeds').append(newFeed)
+
+		if not elementExists :
+			# Append vUID to versions
+			newVersion = sourceXML.find('versions')
+			newVersionElement = ET.Element("version", {"type": "version", "uid": elementBasename})
+			newVersion.insert(0, newVersionElement)
+			xmlRoot = sourceXML.getroot()
+			resultXML	= ET.tostring(xmlRoot)
 
 
-	# Append vUID to versions
-	newVersion = sourceXML.find('versions')
-	newVersionElement = ET.Element("version", {"type": "version", "uid": clipName})
-	newVersion.insert(0, newVersionElement)
-	xmlRoot = sourceXML.getroot()
-	resultXML	= ET.tostring(xmlRoot)
-
-
-	# Create a backup of the original file
-	bakfile = "%s.bak" % masterFile
-	if not os.path.isfile(bakfile):
-		shutil.copy2(masterFile,bakfile)
-	else:
-		created = False
-		for i in range ( 1, 99 ):
-			bakfile = "%s.bak.%02d" % ( masterFile, i )
+			# Create a backup of the original file
+			bakfile = "%s.bak" % masterFile
 			if not os.path.isfile(bakfile):
 				shutil.copy2(masterFile,bakfile)
-				created = True
-				break
-		if not created:
-			bakfile = "%s.bak.last" % masterFile
-			shutil.copy2(masterFile,bakfile)
-			
-	outFile = masterFile
+			else:
+				created = False
+				for i in range ( 1, 99 ):
+					bakfile = "%s.bak.%02d" % ( masterFile, i )
+					if not os.path.isfile(bakfile):
+						shutil.copy2(masterFile,bakfile)
+						created = True
+						break
+				if not created:
+					bakfile = "%s.bak.last" % masterFile
+					shutil.copy2(masterFile,bakfile)
+					
+			outFile = masterFile
 
-	print " Adding feed version %s" % vuid
-	f = open(outFile, "w")	
-	f.write( resultXML )
-	f.close()
+			print " Adding feed version %s" % vuid
+			f = open(outFile, "w")	
+			f.write( resultXML )
+			f.close()
+
+		if os.path.isfile(tmpfile):
+			os.remove(tmpfile)
+
 
