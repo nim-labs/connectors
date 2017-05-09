@@ -1449,46 +1449,36 @@ def nimScanForVersions(nim_showID=None, nim_shotID=None) :
 		print "matching elements found"
 		print elements
 
-		elementFolders = []
 		for element in elements :
 			if element['ID'] != clipID :
 				print "Element found for shotID %s" % shotID
 				elementPath = element['path'].encode('utf-8')
 				elementName = element['name'].encode('utf-8')
 				print os.path.join(elementPath,elementName)
-				elementFolders.append(elementPath)
-
-		getMediaScript = "/usr/discreet/mio/current/dl_get_media_info"
-		
-		if not os.path.isfile(getMediaScript) :
-			print "The get media info script is not installed: file %s missing" % getMediaScript
-			return
-		else :
-			#tmpfile = os.path.abspath("tmpfile")
-			tmpfile = "tmp.clip"
-			
-			for folder in elementFolders:
-				apath = os.path.abspath(folder)
-				print " Adding folder %s" % apath
-				#output a temp file 
-				tmpfile = apath+"/"+tmpfile
-				if os.path.isfile(tmpfile):
-					os.remove(tmpfile)
-				print "Temp File: %s" % tmpfile
-				res = os.popen4("%s -r %s" % ( getMediaScript, apath ) )[1].readlines()
 				
-				with open(tmpfile,"w+") as f:
-					#f = open(tmpfile, "w")
-					for line in res:
-						f.write( line )
-					#f.close()
-				splice(clipFile,tmpfile)
+				getMediaScript = "/usr/discreet/mio/current/dl_get_media_info"
+				
+				if not os.path.isfile(getMediaScript) :
+					print "The get media info script is not installed: file %s missing" % getMediaScript
+				else :
+					tmpfile = "tmp.clip"
+					apath = os.path.abspath(elementPath)
+					print " Adding folder %s" % apath
+					#output a temp file 
+					tmpfile = apath+"/"+tmpfile
+					if os.path.isfile(tmpfile):
+						os.remove(tmpfile)
+					print "Temp File: %s" % tmpfile
+					res = os.popen4("%s -r %s" % ( getMediaScript, apath ) )[1].readlines()
+					
+					with open(tmpfile,"w+") as f:
+						for line in res:
+							f.write( line )
 
-			'''
-			if os.path.isfile(tmpfile):
-				os.remove(tmpfile)
-			'''
-
+					updateOpenClip( clipFile, tmpfile, elementName ) 
+				
+					if os.path.isfile(tmpfile):
+						os.remove(tmpfile)
 	return
 	
 
@@ -1689,6 +1679,44 @@ def addFeed(feed,vuid,targetMIO,trackUID):
 	return newID
 
 
+def addFeed_ET(feed,vuid,targetMIO,trackUID):
+
+	newID  = vuid
+
+
+	#Iterate through the tracks, looking for perfect matches for the incoming feed
+	for track in targetMIO.iter('track'):
+		print "Track Iteration"
+		# Update version number based on current uid
+		if track.get('uid') == trackUID :
+			print "Found matching UID"
+			if ( len(vuid) == 0 ) :
+				#Get the version of the last feed
+				for feed in track.iter('feed') :
+					feedID = feed.get("uid")
+					print "Current FeedID: %s" % feedID
+
+					if feedID == "v0" :
+						newID = "002"
+					else :
+						match = re.search( "([\d]+)", feedID)
+						if match:				   				
+							number = int(match.group(1))
+							number = number + 1					
+							newID = "%03d" % number 
+						else:
+							print "Invalid feed uid in masterfile: %s" % feedID
+							return False
+
+		print "newID: %s" % newID
+		feed.set('vuid', newID)
+		feed.set('uid', newID)
+
+		track.find('feeds').append(feed)
+
+	return newID
+
+
 def splice( masterFile, newFile ):
 
 	print "MasterFile: 	%s" % masterFile
@@ -1700,22 +1728,7 @@ def splice( masterFile, newFile ):
 
 	#Get all of the tracks from the new
 	allTracks	= newGWXML.getElementsByTagName('track') 
-
-
-	#--> Start ET Implementation
-	sourceXML 	= ET.parse(masterFile)
-	newXML 		= ET.parse(newFile)
 	
-	for track in newXML.iter('track'):
-		theTrackID = track.get('uid')
-		theFeed = track.find('feeds/feed')
-		print theTrackID
-		print theFeed
-		#newVersionID = addFeed(theFeed,newVersionID,sourceGWXML,theTrackID)
-
-	#--> END ET Implementation
-
-
 	newVersionID = ''
 
 	for i in range(len(allTracks)):
@@ -1724,8 +1737,8 @@ def splice( masterFile, newFile ):
 		theFeed	= theTrack.getElementsByTagName('feed')[0]
 		newVersionID = addFeed(theFeed,newVersionID,sourceGWXML,theTrackID)
 
-	if newVersionID :
-		print "newVersionID: %s" % newVersionID
+	print "newVersionID: %s" % newVersionID
+	if newVersionID :	
 		#Add a version description at the end of the file, for this new version
 		doc		= minidom.Document()
 		newVersion	= sourceGWXML.getElementsByTagName('versions')[0].appendChild(doc.createElement('version'))
@@ -1733,7 +1746,6 @@ def splice( masterFile, newFile ):
 		newVersion.setAttribute('uid', newVersionID)
 
 		resultXML	= sourceGWXML.toxml()
-
 
 		# Create a backup of the original file
 		bakfile = "%s.bak" % masterFile
@@ -1759,3 +1771,58 @@ def splice( masterFile, newFile ):
 		f.close()
 	else :
 		print "No VersionID Found"
+
+
+def updateOpenClip( masterFile, newFile, clipName ) :
+	print "MasterFile: 	%s" % masterFile
+	print "newFile: 	%s" % newFile
+
+	vuid = ''
+	sourceXML 	= ET.parse(masterFile)
+	newXML 		= ET.parse(newFile)
+	
+	for newTrack in newXML.iter('track') :
+		theTrackID = newTrack.get('uid')
+		newFeed = newTrack.find('feeds/feed')
+		print theTrackID
+		print ET.tostring(newFeed)
+		
+		for srcTrack in sourceXML.iter('track') :
+			print "Track Iteration"
+			newFeed.set('vuid', clipName)
+			#newFeed.set('vuid', vuid)
+			#newFeed.set('uid', vuid)
+			srcTrack.find('feeds').append(newFeed)
+
+
+	# Append vUID to versions
+	newVersion = sourceXML.find('versions')
+	newVersionElement = ET.Element("version", {"type": "version", "uid": clipName})
+	newVersion.insert(0, newVersionElement)
+	xmlRoot = sourceXML.getroot()
+	resultXML	= ET.tostring(xmlRoot)
+
+
+	# Create a backup of the original file
+	bakfile = "%s.bak" % masterFile
+	if not os.path.isfile(bakfile):
+		shutil.copy2(masterFile,bakfile)
+	else:
+		created = False
+		for i in range ( 1, 99 ):
+			bakfile = "%s.bak.%02d" % ( masterFile, i )
+			if not os.path.isfile(bakfile):
+				shutil.copy2(masterFile,bakfile)
+				created = True
+				break
+		if not created:
+			bakfile = "%s.bak.last" % masterFile
+			shutil.copy2(masterFile,bakfile)
+			
+	outFile = masterFile
+
+	print " Adding feed version %s" % vuid
+	f = open(outFile, "w")	
+	f.write( resultXML )
+	f.close()
+
