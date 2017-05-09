@@ -13,6 +13,33 @@
 
 from PySide import QtGui, QtCore
 
+import os,sys,re
+
+nim_app = 'Flame'
+os.environ['NIM_APP'] = str(nim_app)
+
+# Relative path to append for NIM Scripts
+nimFlamePythonPath = os.path.dirname(os.path.realpath(__file__))
+nimFlamePythonPath = nimFlamePythonPath.replace('\\','/')
+nimScriptPath = re.sub(r"\/plugins/Flame/python$", "", nimFlamePythonPath)
+nimFlamePresetPath = os.path.join(re.sub(r"\/python$", "", nimFlamePythonPath),'presets')
+
+print "NIM Script Path: %s" % nimScriptPath
+print "NIM Python Path: %s" % nimFlamePythonPath
+print "NIM Preset Path: %s" % nimFlamePresetPath
+
+# If relocating these scripts uncomment the line below and enter the fixed path
+# to the NIM Connector Root directory
+#
+# nimScriptPath = [NIM_CONNECTOR_ROOT]
+#
+
+sys.path.append(nimScriptPath)
+
+import nimFlameExport
+
+
+
 # Hook called when a sequence finishes rendering (even if unsuccessful).
 # moduleName : Name of the rendering module -- String.
 # sequenceName : Name of the rendered sequence -- String.
@@ -188,6 +215,7 @@ def customUIAction( info, userData ):
       if dialog==QtGui.QMessageBox.Ok :
          userInput='OK'
 
+
    if info[ "name" ] == "nimExportDailies" :
       print "nimExportDaily triggered"
       print info["selection"]
@@ -201,18 +229,17 @@ def customUIAction( info, userData ):
       if dialog==QtGui.QMessageBox.Ok :
          userInput='OK'
 
+
    if info[ "name" ] == "nimScanForVersions" :
-      print "nimScanForVersions triggered"
       print info["selection"]
 
-      utf8 = QtCore.QTextCodec.codecForName("utf-8")
-      QtCore.QTextCodec.setCodecForCStrings(utf8)
+      nimScanDlg = nimFlameExport.NimScanForVersionsDialog()
+      nimScanDlg.show()
+      if nimScanDlg.exec_() :
+         nim_showID = nimScanDlg.nim_showID
+         print "Scanning showID %s for versions" % nim_showID
+         nimFlameExport.nimScanForVersions(nim_showID=nim_showID)
 
-      title = "Scan for Versions"
-      msg = "Scan for Versions"
-      dialog=QtGui.QMessageBox.information( None, title, msg, QtGui.QMessageBox.Ok)
-      if dialog==QtGui.QMessageBox.Ok :
-         userInput='OK'
 
    if info[ "name" ] == "nimBuildOpenClipFromElements" :
       print "nimBuildOpenClipFromElements triggered"
@@ -226,6 +253,7 @@ def customUIAction( info, userData ):
       dialog=QtGui.QMessageBox.information( None, title, msg, QtGui.QMessageBox.Ok)
       if dialog==QtGui.QMessageBox.Ok :
          userInput='OK'
+
 
    if info[ "name" ] == "nimChangeUser" :
       print "nimChangeUser triggered"

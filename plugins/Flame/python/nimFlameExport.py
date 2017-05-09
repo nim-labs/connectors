@@ -17,22 +17,27 @@ import base64
 import platform
 import ntpath
 import json
-'''
+import xml.dom.minidom as minidom
+import shutil
+
+
 try:
 	import xml.etree.cElementTree as ET
 except ImportError:
 	import xml.etree.ElementTree as ET
-'''
+
 
 # Relative path to append for NIM Scripts
 nimFlamePythonPath = os.path.dirname(os.path.realpath(__file__))
 nimFlamePythonPath = nimFlamePythonPath.replace('\\','/')
 nimScriptPath = re.sub(r"\/plugins/Flame/python$", "", nimFlamePythonPath)
 nimFlamePresetPath = os.path.join(re.sub(r"\/python$", "", nimFlamePythonPath),'presets')
+nimFlameImgPath = os.path.join(re.sub(r"\/python$", "", nimFlamePythonPath),'img')
 
 print "NIM Script Path: %s" % nimScriptPath
 print "NIM Python Path: %s" % nimFlamePythonPath
 print "NIM Preset Path: %s" % nimFlamePresetPath
+print "NIM Image Path: %s" % nimFlameImgPath
 
 
 
@@ -72,6 +77,294 @@ except :
 	print "NIM - failed to load Wiretap API"
 
 
+class NimScanForVersionsDialog(QDialog):
+	def __init__(self, parent=None):
+		super(NimScanForVersionsDialog, self).__init__(parent)
+
+		self.result = ""
+
+		try:
+			#self.app=nimFile.get_app()
+			self.app = 'Flame'
+			self.prefs=nimPrefs.read()
+			print "NIM - Prefs: "
+			print self.prefs
+
+			if 'NIM_User' in self.prefs :
+				self.user=self.prefs['NIM_User']
+			else :
+				self.user = ''
+
+			if self.app+'_Job' in self.prefs:
+				self.pref_job=self.prefs[self.app+'_Job']
+			else :
+				self.pref_job = ''
+
+			if self.app+'_Show' in self.prefs:
+				self.pref_show=self.prefs[self.app+'_Show']
+			else :
+				self.pref_show= ''
+
+			if self.app+'_ServerPath' in self.prefs:
+				self.pref_server=self.prefs[self.app+'_ServerPath']
+			else :
+				self.pref_server= ''
+
+			if self.app+'_ServerID' in self.prefs:
+				self.pref_serverID=self.prefs[self.app+'_ServerID']
+			else :
+				self.pref_serverID= ''
+
+			print "NIM - Prefs successfully read"
+
+		except:
+			print "NIM - Failed to read NIM prefs"
+			print 'NIM - ERROR: %s' % traceback.print_exc()
+			self.app='Flame'
+			self.prefs=''
+			self.user=''
+			self.pref_job=0
+			self.pref_show=0
+			self.pref_server=''
+			pass
+
+		self.nim_OS = platform.system()
+		
+		try:
+			self.nim_userID = nimAPI.get_userID(self.user)
+			if not self.nim_userID :
+				nimUI.GUI().update_user()
+				userInfo=nim.NIM().userInfo()
+				self.user = userInfo['name']
+				self.nim_userID = userInfo['ID']
+		except:
+			# failing on user
+			print "NIM - Failed to get userID"
+			self.nim_userID = 0
+
+		print "NIM - user=%s" % self.user
+		print "NIM - userID=%s" % self.nim_userID
+		print "NIM - default job=%s" % self.pref_job
+
+		self.nim_jobPaths = {}
+		self.nim_showPaths = {}
+		self.nim_shotPaths = {}
+		self.nim_showFolder = ''
+		self.nim_servers = {}
+		self.nim_serverID = None
+		self.nim_serverOSPath = ''
+
+		#Get NIM Jobs
+		self.nim_jobID = None
+		self.nim_jobs = nimAPI.get_jobs(self.nim_userID)
+		if not self.nim_jobs :
+			print "No Jobs Found"
+			self.nim_jobs["None"]="0"
+		
+		self.nim_shows = []
+		self.nim_showDict = {}
+		self.nim_showID = None
+		
+		self.setWindowTitle("NIM: Scan For Versions")
+		self.setStyleSheet("QLabel {font: 14pt}")
+		self.setSizeGripEnabled(True)
+
+		tag_jobID = None
+		tag_showID = None
+
+		layout = QVBoxLayout()
+		formLayout = QFormLayout()
+		groupBox = QGroupBox()
+		groupLayout = QFormLayout()
+		groupBox.setLayout(groupLayout)
+
+		pixmap = QPixmap(1, 24)
+		pixmap.fill(Qt.transparent)
+		self.clearPix = QIcon(pixmap)
+		
+
+		# Header
+		horizontalLayout_header = QHBoxLayout()
+		horizontalLayout_header.setSpacing(-1)
+		horizontalLayout_header.setSizeConstraint(QLayout.SetDefaultConstraint)
+		horizontalLayout_header.setObjectName("horizontalLayout_header")
+		connectorImage = QPixmap(nimFlameImgPath+"/nim2flm.png")
+		self.nimConnectorHeader = QLabel()
+		self.nimConnectorHeader.setPixmap(connectorImage)
+		horizontalLayout_header.addWidget(self.nimConnectorHeader)
+
+		# Comment Label
+		horizontalLayout_commentDesc = QHBoxLayout()
+		horizontalLayout_commentDesc.setSpacing(-1)
+		horizontalLayout_commentDesc.setSizeConstraint(QLayout.SetDefaultConstraint)
+		horizontalLayout_commentDesc.setObjectName("horizontalLayout_commentDesc")
+		self.nimCommentLabel = QLabel()
+		self.nimCommentLabel.setText("Select the show to scan for versions:")
+		horizontalLayout_commentDesc.addWidget(self.nimCommentLabel)
+		horizontalLayout_commentDesc.setStretch(1, 40)
+
+		# JOBS: List box for job selection
+		horizontalLayout_job = QHBoxLayout()
+		horizontalLayout_job.setSpacing(-1)
+		horizontalLayout_job.setSizeConstraint(QLayout.SetDefaultConstraint)
+		horizontalLayout_job.setObjectName("horizontalLayout_job")
+		self.nimJobLabel = QLabel()
+		self.nimJobLabel.setFixedWidth(120)
+		self.nimJobLabel.setText("Job:")
+		horizontalLayout_job.addWidget(self.nimJobLabel)
+		self.nim_jobChooser = QComboBox()
+		self.nim_jobChooser.setToolTip("Choose the job you wish to export shots to.")
+		self.nim_jobChooser.setMinimumHeight(28)
+		self.nim_jobChooser.setIconSize(QSize(1, 24))
+		horizontalLayout_job.addWidget(self.nim_jobChooser)
+		horizontalLayout_job.setStretch(1, 40)
+		
+
+		# JOBS: Add dictionary in ordered list
+		jobIndex = 0
+		jobIter = 0
+		if len(self.nim_jobs)>0:
+			for key, value in sorted(self.nim_jobs.items(), reverse=True):
+				self.nim_jobChooser.addItem(self.clearPix, key)
+				if self.nim_jobID:
+					if self.nim_jobID == value:
+						print "Found matching jobID, job=", key
+						self.pref_job = key
+						jobIndex = jobIter
+				else:
+					if self.pref_job == key:
+						print "Found matching Job Name, job=", key
+						jobIndex = jobIter
+				jobIter += 1
+
+			if self.pref_job != '':
+				self.nim_jobChooser.setCurrentIndex(jobIndex)
+
+		self.nim_jobChooser.currentIndexChanged.connect(self.nim_jobChanged)
+		
+
+		# SHOWS: List box for show selection
+		horizontalLayout_show = QHBoxLayout()
+		horizontalLayout_show.setSpacing(-1)
+		horizontalLayout_show.setSizeConstraint(QLayout.SetDefaultConstraint)
+		horizontalLayout_show.setObjectName("horizontalLayout_show")
+		self.nimShowLabel = QLabel()
+		self.nimShowLabel.setFixedWidth(120)
+		self.nimShowLabel.setText("Show:")
+		horizontalLayout_show.addWidget(self.nimShowLabel)
+		self.nim_showChooser = QComboBox()
+		self.nim_showChooser.setToolTip("Choose the show you wish to export shots to.")
+		self.nim_showChooser.setMinimumHeight(28)
+		self.nim_showChooser.setIconSize(QSize(1, 24))
+		horizontalLayout_show.addWidget(self.nim_showChooser)
+		horizontalLayout_show.setStretch(1, 40)
+		self.nim_showChooser.currentIndexChanged.connect(self.nim_showChanged)
+	
+
+		# Add the standard ok/cancel buttons, default to ok.
+		self._buttonbox = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
+		self._buttonbox.button(QDialogButtonBox.StandardButton.Ok).setText(" Scan for Versions ")
+		self._buttonbox.button(QDialogButtonBox.StandardButton.Ok).setDefault(True)
+		self._buttonbox.button(QDialogButtonBox.StandardButton.Ok).setToolTip("Scans the selected show for element types that match the batchOpenClip and adds them to the batchOpenClip.")
+		self._buttonbox.accepted.connect(self.acceptTest)
+		self._buttonbox.rejected.connect(self.reject)
+		horizontalLayout_OkCancel = QHBoxLayout()
+		horizontalLayout_OkCancel.setSpacing(-1)
+		horizontalLayout_OkCancel.setSizeConstraint(QLayout.SetDefaultConstraint)
+		horizontalLayout_OkCancel.setObjectName("horizontalLayout_OkCancel")
+		spacerItem4 = QSpacerItem(175, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+		horizontalLayout_OkCancel.addItem(spacerItem4)
+		horizontalLayout_OkCancel.addWidget(self._buttonbox)
+		horizontalLayout_OkCancel.setStretch(1, 40)
+
+		groupLayout.setLayout(0, QFormLayout.SpanningRole, horizontalLayout_header)
+		groupLayout.setLayout(1, QFormLayout.SpanningRole, horizontalLayout_commentDesc)
+		groupLayout.setLayout(2, QFormLayout.SpanningRole, horizontalLayout_job)
+		groupLayout.setLayout(3, QFormLayout.SpanningRole, horizontalLayout_show)
+		groupLayout.setLayout(4, QFormLayout.SpanningRole, horizontalLayout_OkCancel)
+
+		self.setLayout(groupLayout)
+		layout.addWidget(groupBox)
+
+		self.nim_jobChanged() #trigger job changed to load choosers
+
+
+	def nim_jobChanged(self):
+		'''Action when job is selected'''
+		#print "JOB CHANGED"
+		job = self.nim_jobChooser.currentText()
+		self.nim_jobID = self.nim_jobs[job]
+		self.nim_jobPaths = nimAPI.get_paths('job', self.nim_jobID)
+
+		self.nim_updateShow()
+		
+
+	def nim_updateShow(self):
+		self.nim_shows = {}
+		self.nim_shows = nimAPI.get_shows(self.nim_jobID)
+		#print self.nim_shows
+
+		showIndex = 0
+		showIter = 0
+		self.nim_showDict = {}
+		try:
+			self.nim_showChooser.clear()
+			if self.nim_showChooser:
+				if len(self.nim_shows)>0:  
+					for show in self.nim_shows:
+						self.nim_showDict[show['showname']] = show['ID']
+					for key, value in sorted(self.nim_showDict.items(), reverse=False):
+						self.nim_showChooser.addItem(self.clearPix, key)
+						'''
+						if self.nim_showID:
+							if self.nim_showID == value:
+								print "Found matching showID, show=", key
+								self.pref_show == key
+								showIndex = showIter
+						else:
+							if self.pref_show == key:
+								print "Found matching Show Name, show=", key
+								showIndex = showIter
+						'''
+						showIter += 1
+
+					if self.pref_show != '':
+						self.nim_showChooser.setCurrentIndex(showIndex)
+		except:
+			pass
+
+
+	def nim_showChanged(self):
+		'''Action when job is selected'''
+		#print "SHOW CHANGED"
+		showname = self.nim_showChooser.currentText()
+		if showname:
+			print "NIM: show=%s" % showname
+
+			showID = self.nim_showDict[showname]
+
+			##set showID
+			self.nim_showID = showID
+
+			self.nim_showPaths = nimAPI.get_paths('show', showID)
+			if self.nim_showPaths:
+				if len(self.nim_showPaths)>0:
+					#print "NIM: showPaths=", self.nim_showPaths
+					self.nim_showFolder = self.nim_showPaths['root']
+				else:
+					print "NIM: No Show Paths Found"
+			else:
+				print "NIM: No Data Returned"
+	
+
+	def acceptTest(self):
+		# Saving Preferences
+		nimPrefs.update( 'Job', 'Flame', self.nim_jobID )
+		nimPrefs.update( 'Show', 'Flame', self.nim_showID )
+
+		self.accept()
+
+
 class NimBatchExportDialog(QDialog):
 	def __init__(self, parent=None):
 		super(NimBatchExportDialog, self).__init__(parent)
@@ -94,7 +387,7 @@ class NimBatchExportDialog(QDialog):
 		horizontalLayout_header.setSpacing(-1)
 		horizontalLayout_header.setSizeConstraint(QLayout.SetDefaultConstraint)
 		horizontalLayout_header.setObjectName("horizontalLayout_header")
-		connectorImage = QPixmap(nimFlamePythonPath+"/flm2nim.png")
+		connectorImage = QPixmap(nimFlameImgPath+"/flm2nim.png")
 		self.nimConnectorHeader = QLabel()
 		self.nimConnectorHeader.setPixmap(connectorImage)
 		horizontalLayout_header.addWidget(self.nimConnectorHeader)
@@ -303,7 +596,7 @@ class NimExportDialog(QDialog):
 		horizontalLayout_header.setSpacing(-1)
 		horizontalLayout_header.setSizeConstraint(QLayout.SetDefaultConstraint)
 		horizontalLayout_header.setObjectName("horizontalLayout_header")
-		connectorImage = QPixmap(nimFlamePythonPath+"/flm2nim.png")
+		connectorImage = QPixmap(nimFlameImgPath+"/flm2nim.png")
 		self.nimConnectorHeader = QLabel()
 		self.nimConnectorHeader.setPixmap(connectorImage)
 		horizontalLayout_header.addWidget(self.nimConnectorHeader)
@@ -882,10 +1175,12 @@ def nimExportElement(nim_shotID=None, info=None, typeID='', nim_userID=None) :
 		
 		# Build metadata
 		metadata = {}
+		if nim_assetType :
+			metadata['flameAssetType'] = nim_assetType
 		if nim_tapeName :
-			metadata['tapeName'] = nim_tapeName
+			metadata['flameTapeName'] = nim_tapeName
 		if nim_sequenceName :
-			metadata['sequenceName'] = nim_sequenceName
+			metadata['flameSequenceName'] = nim_sequenceName
 		metadata = json.dumps(metadata)
 
 		# Add Media Item as Element
@@ -995,7 +1290,7 @@ def nimExportFile(nim_shotID=None, info=None, taskTypeID='', taskFolder='', serv
 		except:
 			print "Failed to load existing versions from NIM"
 			pass
-		  		  
+				  
 		if not serverID :
 			print "NIM Sever information is missing.\n \
 					Please select a NIM Project Server from the Server dropdown list.\n \
@@ -1015,9 +1310,9 @@ def nimExportFile(nim_shotID=None, info=None, taskTypeID='', taskFolder='', serv
 			metadata['setupNamePattern'] = setupNamePattern
 
 		if nim_sequenceName :
-			metadata['sequenceName'] = nim_sequenceName
+			metadata['flameSequenceName'] = nim_sequenceName
 		if nim_versionName :
-			metadata['versionName'] = nim_versionName
+			metadata['flameVersionName'] = nim_versionName
 		metadata = json.dumps(metadata)
 
 		if nim_doSave is True:
@@ -1130,6 +1425,72 @@ def updateShotIcon(nim_shotID=None, image_path='') :
 
 	return success
 
+
+def nimScanForVersions(nim_showID=None, nim_shotID=None) :
+	# find_elements in show with metadata flameAssetType : batchOpenClip
+	# get element type
+	# find all elements of type in shot
+	# add elements to batchOpenClip
+	metadata = {}
+	metadata['flameAssetType'] = 'batchOpenClip'
+	metadata = json.dumps(metadata)
+	openClipElements = nimAPI.find_elements(showID=nim_showID, metadata=metadata)
+	print openClipElements
+
+	for openClipElement in openClipElements :
+		clipID = openClipElement['ID']
+		shotID = openClipElement['shotID']
+		clipPath = openClipElement['path'].encode('utf-8')
+		clipName = openClipElement['name'].encode('utf-8')
+		clipFile = os.path.join(clipPath,clipName)
+
+		elementTypeID = openClipElement['elementTypeID']
+		elements = nimAPI.find_elements(shotID=shotID, elementTypeID=elementTypeID)
+		print "matching elements found"
+		print elements
+
+		elementFolders = []
+		for element in elements :
+			if element['ID'] != clipID :
+				print "Element found for shotID %s" % shotID
+				elementPath = element['path'].encode('utf-8')
+				elementName = element['name'].encode('utf-8')
+				print os.path.join(elementPath,elementName)
+				elementFolders.append(elementPath)
+
+		getMediaScript = "/usr/discreet/mio/current/dl_get_media_info"
+		
+		if not os.path.isfile(getMediaScript) :
+			print "The get media info script is not installed: file %s missing" % getMediaScript
+			return
+		else :
+			#tmpfile = os.path.abspath("tmpfile")
+			tmpfile = "tmp.clip"
+			
+			for folder in elementFolders:
+				apath = os.path.abspath(folder)
+				print " Adding folder %s" % apath
+				#output a temp file 
+				tmpfile = apath+"/"+tmpfile
+				if os.path.isfile(tmpfile):
+					os.remove(tmpfile)
+				print "Temp File: %s" % tmpfile
+				res = os.popen4("%s -r %s" % ( getMediaScript, apath ) )[1].readlines()
+				
+				with open(tmpfile,"w+") as f:
+					#f = open(tmpfile, "w")
+					for line in res:
+						f.write( line )
+					#f.close()
+				splice(clipFile,tmpfile)
+
+			'''
+			if os.path.isfile(tmpfile):
+				os.remove(tmpfile)
+			'''
+
+	return
+	
 
 def nimResolvePath(nim_jobID=None, nim_showID=None, nim_shotID=None, keyword_string='', tokenL='<', tokenR='>') :
 
@@ -1294,3 +1655,107 @@ def getNimPrefs() :
 	return prefs
 
 
+def addFeed(feed,vuid,targetMIO,trackUID):
+
+	tracks = targetMIO.getElementsByTagName('track')
+	newID  = vuid
+
+	#Iterate through the tracks, looking for perfect matches for the incoming feed
+	for i in range(len(tracks)):
+		if tracks[i].attributes["uid"].value == trackUID:
+			if ( len(vuid) == 0 ):
+				#Get the version of the last feed
+				allfeeds = tracks[i].getElementsByTagName('feed')
+				for j in range(len(allfeeds)):
+					feedID = allfeeds[j].attributes["uid"].value
+					if feedID == "v0":
+						newID = "002"
+					else:
+						match = re.search( "([\d]+)", feedID)
+						if match:				   				
+							number = int(match.group(1))
+							number = number + 1					
+							newID = "%03d" % number 
+						else:
+							print "Invalid feed uid in masterfile: %s" % feedID
+							return False
+
+			feed.attributes['vuid'].value = newID
+			feed.attributes['uid'].value = newID		
+
+			#When the feed's track matches the one in the clip, add the feed to this track
+			tracks[i].getElementsByTagName('feeds')[0].appendChild(feed)
+
+	return newID
+
+
+def splice( masterFile, newFile ):
+
+	print "MasterFile: 	%s" % masterFile
+	print "newFile: 	%s" % newFile
+
+	#Read the Gateway Clip XML files for the existing and new versions
+	sourceGWXML	= minidom.parse(masterFile)
+	newGWXML	= minidom.parse(newFile)
+
+	#Get all of the tracks from the new
+	allTracks	= newGWXML.getElementsByTagName('track') 
+
+
+	#--> Start ET Implementation
+	sourceXML 	= ET.parse(masterFile)
+	newXML 		= ET.parse(newFile)
+	
+	for track in newXML.iter('track'):
+		theTrackID = track.get('uid')
+		theFeed = track.find('feeds/feed')
+		print theTrackID
+		print theFeed
+		#newVersionID = addFeed(theFeed,newVersionID,sourceGWXML,theTrackID)
+
+	#--> END ET Implementation
+
+
+	newVersionID = ''
+
+	for i in range(len(allTracks)):
+		theTrackID	= allTracks[i].attributes["uid"].value
+		theTrack	= allTracks[i]
+		theFeed	= theTrack.getElementsByTagName('feed')[0]
+		newVersionID = addFeed(theFeed,newVersionID,sourceGWXML,theTrackID)
+
+	if newVersionID :
+		print "newVersionID: %s" % newVersionID
+		#Add a version description at the end of the file, for this new version
+		doc		= minidom.Document()
+		newVersion	= sourceGWXML.getElementsByTagName('versions')[0].appendChild(doc.createElement('version'))
+		newVersion.setAttribute('type', 'version')
+		newVersion.setAttribute('uid', newVersionID)
+
+		resultXML	= sourceGWXML.toxml()
+
+
+		# Create a backup of the original file
+		bakfile = "%s.bak" % masterFile
+		if not os.path.isfile(bakfile):
+			shutil.copy2(masterFile,bakfile)
+		else:
+			created = False
+			for i in range ( 1, 99 ):
+				bakfile = "%s.bak.%02d" % ( masterFile, i )
+				if not os.path.isfile(bakfile):
+					shutil.copy2(masterFile,bakfile)
+					created = True
+					break
+			if not created:
+				bakfile = "%s.bak.last" % masterFile
+				shutil.copy2(masterFile,bakfile)
+				
+		outFile = masterFile
+
+		print " Adding feed version %s" % newVersionID
+		f = open(outFile, "w")	
+		f.write( resultXML )
+		f.close()
+	else :
+		print "No VersionID Found"

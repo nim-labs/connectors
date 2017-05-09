@@ -794,14 +794,14 @@ def get_elementType( ID=None):
     elementType=get( {'q': 'getElementType', 'ID': ID} )
     return elementType
 
-def find_files( name='', path='', metadata=None):
+def find_files( name='', path='', metadata=''):
     'Retrieves a dictionary of files matching the file path'
     files=get( {'q': 'findFiles', 'name': name, 'path': path, 'metadata': metadata} )
     return files
 
-def find_elements( name='', path='', metadata=None):
+def find_elements( name='', path='', jobID='', showID='', shotID='', assetID='', elementTypeID='', metadata=''):
     'Retrieves a dictionary of elements matching the file path'
-    elements=get( {'q': 'findElements', 'name': name, 'path': path, 'metadata': metadata} )
+    elements=get( {'q': 'findElements', 'name': name, 'path': path, 'jobID': jobID, 'showID': showID, 'shotID': shotID, 'assetID': assetID, 'elementTypeID': elementTypeID, 'metadata': metadata} )
     return elements
 
 def get_elements( parent='shot', parentID=None, elementTypeID=None, getLastElement=False, isPublished=False):
@@ -813,7 +813,7 @@ def get_elements( parent='shot', parentID=None, elementTypeID=None, getLastEleme
     publishedElements=get( {'q': 'getElements', 'parent': parent, 'parentID': parentID, 'elementTypeID': elementTypeID, 'getLastElement': getLastElement, 'isPublished': isPublished} )
     return publishedElements
 
-def add_element( parent='shot', parentID=None, userID=None, typeID='', path='', name='', startFrame=None, endFrame=None, handles=None, isPublished=False, nimURL=None, apiKey=None, metadata=None ):
+def add_element( parent='shot', parentID=None, userID=None, typeID='', path='', name='', startFrame=None, endFrame=None, handles=None, isPublished=False, nimURL=None, apiKey=None, metadata='' ):
     'Adds an element to an asset, shot, task, or render'
     # nimURL and apiKey are optional for Render API Key overrride
     params = {'q': 'addElement', 'parent': parent, 'userID':userID, 'typeID': typeID, 'parentID': parentID, 'path': path, \
@@ -1459,7 +1459,7 @@ def versionUp( nim=None, padding=2, selected=False, win_launch=False, pub=False,
             msg='FAILED to Version Up the file.' )
         return False
 
-def save_file( parent='SHOW', parentID=0, task_type_ID=0, task_folder='', userID=0, basename='', filename='', path='', ext='', version='', comment='', serverID=0, pub=False, forceLink=1, work=True, metadata=None ):
+def save_file( parent='SHOW', parentID=0, task_type_ID=0, task_folder='', userID=0, basename='', filename='', path='', ext='', version='', comment='', serverID=0, pub=False, forceLink=1, work=True, metadata='' ):
     '''General Purpose Save File Function that Adds a File to the NIM Database with brute force data'''
     parent = parent.upper()
 
@@ -1512,7 +1512,7 @@ def save_file( parent='SHOW', parentID=0, task_type_ID=0, task_folder='', userID
                         Please check to make sure the file exists on disk.')
     return result
 
-def update_file( ID=0, task_type_ID=0, task_folder='', userID=0, basename='', filename='', path='', ext='', version='', comment='', serverID=0, pub=False, forceLink=1, work=True, metadata=None ):
+def update_file( ID=0, task_type_ID=0, task_folder='', userID=0, basename='', filename='', path='', ext='', version='', comment='', serverID=0, pub=False, forceLink=1, work=True, metadata='' ):
     '''General Purpose Update File Function that Updates and existing File in the NIM Database'''
     is_work = 0
     if work:
