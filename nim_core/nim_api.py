@@ -799,9 +799,9 @@ def find_files( name='', path='', metadata=''):
     files=get( {'q': 'findFiles', 'name': name, 'path': path, 'metadata': metadata} )
     return files
 
-def find_elements( name='', path='', jobID='', showID='', shotID='', assetID='', elementTypeID='', metadata=''):
+def find_elements( name='', path='', jobID='', showID='', shotID='', assetID='', elementTypeID='', ext='' ,metadata=''):
     'Retrieves a dictionary of elements matching the file path'
-    elements=get( {'q': 'findElements', 'name': name, 'path': path, 'jobID': jobID, 'showID': showID, 'shotID': shotID, 'assetID': assetID, 'elementTypeID': elementTypeID, 'metadata': metadata} )
+    elements=get( {'q': 'findElements', 'name': name, 'path': path, 'jobID': jobID, 'showID': showID, 'shotID': shotID, 'assetID': assetID, 'ext': ext, 'elementTypeID': elementTypeID, 'metadata': metadata} )
     return elements
 
 def get_elements( parent='shot', parentID=None, elementTypeID=None, getLastElement=False, isPublished=False):

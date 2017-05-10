@@ -189,23 +189,6 @@ def customUIAction( info, userData ):
 
 
       import sys, traceback
-      '''
-      try:
-         import xml.etree.cElementTree as ET
-      except ImportError:
-         import xml.etree.ElementTree as ET
-      try:
-         print "XML loaded"
-         nimFlamePresetPath = '/Users/andrew/Documents/NIM Labs/Repository/nim_connectors/plugins/Flame/presets/sequence_publish/NimExportSequence.xml'
-         preset_xml = ET.parse(nimFlamePresetPath)
-         preset_root = preset_xml.getroot()
-         for elem in preset_root.iterfind('createOpenClip/batchSetup/namePattern'):
-            print elem.text
-         print "XML done"
-      except Exception, e :
-         print 'XML Failed'
-         print '    %s' % traceback.print_exc()
-      '''
 
       version = "Version: %s.%s" % (sys.version_info[0], sys.version_info[0])
 
@@ -230,6 +213,8 @@ def customUIAction( info, userData ):
          userInput='OK'
 
 
+
+
    if info[ "name" ] == "nimScanForVersions" :
       print info["selection"]
 
@@ -238,21 +223,38 @@ def customUIAction( info, userData ):
       if nimScanDlg.exec_() :
          nim_showID = nimScanDlg.nim_showID
          print "Scanning showID %s for versions" % nim_showID
-         nimFlameExport.nimScanForVersions(nim_showID=nim_showID)
+         clipCount = nimFlameExport.nimScanForVersions(nim_showID=nim_showID)
+
+         utf8 = QtCore.QTextCodec.codecForName("utf-8")
+         QtCore.QTextCodec.setCodecForCStrings(utf8)
+         title = "New Versions Found"
+         msg = "New Versions Found: "+str(clipCount)
+         dialog=QtGui.QMessageBox.information( None, title, msg, QtGui.QMessageBox.Ok)
+         if dialog==QtGui.QMessageBox.Ok :
+            userInput='OK'
+
 
 
    if info[ "name" ] == "nimBuildOpenClipFromElements" :
       print "nimBuildOpenClipFromElements triggered"
       print info["selection"]
-
-      utf8 = QtCore.QTextCodec.codecForName("utf-8")
-      QtCore.QTextCodec.setCodecForCStrings(utf8)
-
       title = "Build OpenClip from Elements"
-      msg = "Build OpenClip from Elements"
-      dialog=QtGui.QMessageBox.information( None, title, msg, QtGui.QMessageBox.Ok)
-      if dialog==QtGui.QMessageBox.Ok :
-         userInput='OK'
+      
+      nimScanDlg = nimFlameExport.NimScanForVersionsDialog()
+      nimScanDlg.show()
+      if nimScanDlg.exec_() :
+         nim_showID = nimScanDlg.nim_showID
+         print "Scanning showID %s for elements" % nim_showID
+         clipCount = nimFlameExport.nimBuildOpenClipFromElements(nim_showID=nim_showID)
+
+         utf8 = QtCore.QTextCodec.codecForName("utf-8")
+         QtCore.QTextCodec.setCodecForCStrings(utf8)
+         title = "New Versions Found"
+         msg = "New Versions Found: "+str(clipCount)
+         dialog=QtGui.QMessageBox.information( None, title, msg, QtGui.QMessageBox.Ok)
+         if dialog==QtGui.QMessageBox.Ok :
+            userInput='OK'
+
 
 
    if info[ "name" ] == "nimChangeUser" :
