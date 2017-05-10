@@ -222,8 +222,8 @@ def customUIAction( info, userData ):
       nimScanDlg.show()
       if nimScanDlg.exec_() :
          nim_showID = nimScanDlg.nim_showID
-         print "Scanning showID %s for versions" % nim_showID
-         clipCount = nimFlameExport.nimScanForVersions(nim_showID=nim_showID)
+         clipCount = nimScanDlg.clipCount
+         #clipCount = nimFlameExport.nimScanForVersions(nim_showID=nim_showID)
 
          utf8 = QtCore.QTextCodec.codecForName("utf-8")
          QtCore.QTextCodec.setCodecForCStrings(utf8)
@@ -240,12 +240,12 @@ def customUIAction( info, userData ):
       print info["selection"]
       title = "Build OpenClip from Elements"
       
-      nimScanDlg = nimFlameExport.NimScanForVersionsDialog()
+      nimScanDlg = nimFlameExport.NimBuildOpenClipsDialog()
       nimScanDlg.show()
       if nimScanDlg.exec_() :
          nim_showID = nimScanDlg.nim_showID
-         print "Scanning showID %s for elements" % nim_showID
-         clipCount = nimFlameExport.nimBuildOpenClipFromElements(nim_showID=nim_showID)
+         nim_serverID = nimScanDlg.nim_serverID
+         clipCount = nimScanDlg.clipCount
 
          utf8 = QtCore.QTextCodec.codecForName("utf-8")
          QtCore.QTextCodec.setCodecForCStrings(utf8)

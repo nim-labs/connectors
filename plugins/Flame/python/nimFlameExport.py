@@ -203,6 +203,16 @@ class NimScanForVersionsDialog(QDialog):
 		horizontalLayout_commentDesc.addWidget(self.nimCommentLabel)
 		horizontalLayout_commentDesc.setStretch(1, 40)
 
+		# Progress Bar
+		horizontalLayout_progress = QHBoxLayout()
+		horizontalLayout_progress.setSpacing(-1)
+		horizontalLayout_progress.setSizeConstraint(QLayout.SetDefaultConstraint)
+		horizontalLayout_progress.setObjectName("horizontalLayout_progress")
+		self.progressBar = QProgressBar(self)
+		self.progressBar.setGeometry(200, 80, 250, 20)
+		horizontalLayout_progress.addWidget(self.progressBar)
+		horizontalLayout_progress.setStretch(1, 40)
+
 		# JOBS: List box for job selection
 		horizontalLayout_job = QHBoxLayout()
 		horizontalLayout_job.setSpacing(-1)
@@ -279,9 +289,10 @@ class NimScanForVersionsDialog(QDialog):
 
 		groupLayout.setLayout(0, QFormLayout.SpanningRole, horizontalLayout_header)
 		groupLayout.setLayout(1, QFormLayout.SpanningRole, horizontalLayout_commentDesc)
-		groupLayout.setLayout(2, QFormLayout.SpanningRole, horizontalLayout_job)
-		groupLayout.setLayout(3, QFormLayout.SpanningRole, horizontalLayout_show)
-		groupLayout.setLayout(4, QFormLayout.SpanningRole, horizontalLayout_OkCancel)
+		groupLayout.setLayout(2, QFormLayout.SpanningRole, horizontalLayout_progress)
+		groupLayout.setLayout(3, QFormLayout.SpanningRole, horizontalLayout_job)
+		groupLayout.setLayout(4, QFormLayout.SpanningRole, horizontalLayout_show)
+		groupLayout.setLayout(5, QFormLayout.SpanningRole, horizontalLayout_OkCancel)
 
 		self.setLayout(groupLayout)
 		layout.addWidget(groupBox)
@@ -361,6 +372,405 @@ class NimScanForVersionsDialog(QDialog):
 		# Saving Preferences
 		nimPrefs.update( 'Job', 'Flame', self.nim_jobID )
 		nimPrefs.update( 'Show', 'Flame', self.nim_showID )
+
+		# Start Loop
+		self.clipCount = 0
+		shots = nimAPI.get_shots(showID=self.nim_showID)
+		numShots = len(shots)
+		print "Shot count: %s" % numShots
+		self.progressBar.setRange(0, numShots)
+
+		self.nim_jobChooser.setDisabled(True)
+		self.nim_showChooser.setDisabled(True)
+		self._buttonbox.setDisabled(True)
+
+		shotCount = 0
+		for shot in shots :
+			shotCount += 1
+			self.nimCommentLabel.setText( "Scanning shot: "+shot['name'] )
+			self.progressBar.setValue(shotCount)
+			QApplication.processEvents()
+			
+			#self.clipCount += nimBuildOpenClipFromElements(nim_shotID=shot['ID'], nim_serverID=self.nim_serverID)
+			self.clipCount += nimScanForVersions(nim_shotID=shot['ID'])
+
+		self.accept()
+
+
+class NimBuildOpenClipsDialog(QDialog):
+	def __init__(self, parent=None):
+		super(NimBuildOpenClipsDialog, self).__init__(parent)
+
+		self.result = ""
+		
+		try:
+			#self.app=nimFile.get_app()
+			self.app = 'Flame'
+			self.prefs=nimPrefs.read()
+			print "NIM - Prefs: "
+			print self.prefs
+
+			if 'NIM_User' in self.prefs :
+				self.user=self.prefs['NIM_User']
+			else :
+				self.user = ''
+
+			if self.app+'_Job' in self.prefs:
+				self.pref_job=self.prefs[self.app+'_Job']
+			else :
+				self.pref_job = ''
+
+			if self.app+'_Show' in self.prefs:
+				self.pref_show=self.prefs[self.app+'_Show']
+			else :
+				self.pref_show= ''
+
+			if self.app+'_ServerPath' in self.prefs:
+				self.pref_server=self.prefs[self.app+'_ServerPath']
+			else :
+				self.pref_server= ''
+
+			if self.app+'_ServerID' in self.prefs:
+				self.pref_serverID=self.prefs[self.app+'_ServerID']
+			else :
+				self.pref_serverID= ''
+
+			print "NIM - Prefs successfully read"
+
+		except:
+			print "NIM - Failed to read NIM prefs"
+			print 'NIM - ERROR: %s' % traceback.print_exc()
+			self.app='Flame'
+			self.prefs=''
+			self.user=''
+			self.pref_job=0
+			self.pref_show=0
+			self.pref_server=''
+			pass
+
+		self.nim_OS = platform.system()
+		
+		try:
+			self.nim_userID = nimAPI.get_userID(self.user)
+			if not self.nim_userID :
+				nimUI.GUI().update_user()
+				userInfo=nim.NIM().userInfo()
+				self.user = userInfo['name']
+				self.nim_userID = userInfo['ID']
+		except:
+			# failing on user
+			print "NIM - Failed to get userID"
+			self.nim_userID = 0
+
+		print "NIM - user=%s" % self.user
+		print "NIM - userID=%s" % self.nim_userID
+		print "NIM - default job=%s" % self.pref_job
+
+		self.nim_jobPaths = {}
+		self.nim_showPaths = {}
+		self.nim_shotPaths = {}
+		self.nim_showFolder = ''
+		self.nim_servers = {}
+		self.nim_serverID = None
+		self.nim_serverOSPath = ''
+
+		#Get NIM Jobs
+		self.nim_jobID = None
+		self.nim_jobs = nimAPI.get_jobs(self.nim_userID)
+		if not self.nim_jobs :
+			print "No Jobs Found"
+			self.nim_jobs["None"]="0"
+		
+		self.nim_shows = []
+		self.nim_showDict = {}
+		self.nim_showID = None
+		
+		self.setWindowTitle("NIM: Build OpenClips from Elements")
+		self.setStyleSheet("QLabel {font: 14pt}")
+		self.setSizeGripEnabled(True)
+
+		tag_jobID = None
+		tag_showID = None
+
+		layout = QVBoxLayout()
+		formLayout = QFormLayout()
+		groupBox = QGroupBox()
+		groupLayout = QFormLayout()
+		groupBox.setLayout(groupLayout)
+
+		pixmap = QPixmap(1, 24)
+		pixmap.fill(Qt.transparent)
+		self.clearPix = QIcon(pixmap)
+		
+
+		# Header
+		horizontalLayout_header = QHBoxLayout()
+		horizontalLayout_header.setSpacing(-1)
+		horizontalLayout_header.setSizeConstraint(QLayout.SetDefaultConstraint)
+		horizontalLayout_header.setObjectName("horizontalLayout_header")
+		connectorImage = QPixmap(nimFlameImgPath+"/nim2flm.png")
+		self.nimConnectorHeader = QLabel()
+		self.nimConnectorHeader.setPixmap(connectorImage)
+		horizontalLayout_header.addWidget(self.nimConnectorHeader)
+
+		# Comment Label
+		horizontalLayout_commentDesc = QHBoxLayout()
+		horizontalLayout_commentDesc.setSpacing(-1)
+		horizontalLayout_commentDesc.setSizeConstraint(QLayout.SetDefaultConstraint)
+		horizontalLayout_commentDesc.setObjectName("horizontalLayout_commentDesc")
+		self.nimCommentLabel = QLabel()
+		self.nimCommentLabel.setText("Select the show to scan for versions:")
+		horizontalLayout_commentDesc.addWidget(self.nimCommentLabel)
+		horizontalLayout_commentDesc.setStretch(1, 40)
+
+
+		# Progress Bar
+		horizontalLayout_progress = QHBoxLayout()
+		horizontalLayout_progress.setSpacing(-1)
+		horizontalLayout_progress.setSizeConstraint(QLayout.SetDefaultConstraint)
+		horizontalLayout_progress.setObjectName("horizontalLayout_progress")
+		self.progressBar = QProgressBar(self)
+		self.progressBar.setGeometry(200, 80, 250, 20)
+		horizontalLayout_progress.addWidget(self.progressBar)
+		horizontalLayout_progress.setStretch(1, 40)
+
+
+		# JOBS: List box for job selection
+		horizontalLayout_job = QHBoxLayout()
+		horizontalLayout_job.setSpacing(-1)
+		horizontalLayout_job.setSizeConstraint(QLayout.SetDefaultConstraint)
+		horizontalLayout_job.setObjectName("horizontalLayout_job")
+		self.nimJobLabel = QLabel()
+		self.nimJobLabel.setFixedWidth(120)
+		self.nimJobLabel.setText("Job:")
+		horizontalLayout_job.addWidget(self.nimJobLabel)
+		self.nim_jobChooser = QComboBox()
+		self.nim_jobChooser.setToolTip("Choose the job you wish to export shots to.")
+		self.nim_jobChooser.setMinimumHeight(28)
+		self.nim_jobChooser.setIconSize(QSize(1, 24))
+		horizontalLayout_job.addWidget(self.nim_jobChooser)
+		horizontalLayout_job.setStretch(1, 40)
+		
+
+		# JOBS: Add dictionary in ordered list
+		jobIndex = 0
+		jobIter = 0
+		if len(self.nim_jobs)>0:
+			for key, value in sorted(self.nim_jobs.items(), reverse=True):
+				self.nim_jobChooser.addItem(self.clearPix, key)
+				if self.nim_jobID:
+					if self.nim_jobID == value:
+						print "Found matching jobID, job=", key
+						self.pref_job = key
+						jobIndex = jobIter
+				else:
+					if self.pref_job == key:
+						print "Found matching Job Name, job=", key
+						jobIndex = jobIter
+				jobIter += 1
+
+			if self.pref_job != '':
+				self.nim_jobChooser.setCurrentIndex(jobIndex)
+
+		self.nim_jobChooser.currentIndexChanged.connect(self.nim_jobChanged)
+		
+		# SERVERS: List box for server selection
+		horizontalLayout_server = QHBoxLayout()
+		horizontalLayout_server.setSpacing(-1)
+		horizontalLayout_server.setSizeConstraint(QLayout.SetDefaultConstraint)
+		horizontalLayout_server.setObjectName("horizontalLayout_server")
+		self.nimServerLabel = QLabel()
+		self.nimServerLabel.setFixedWidth(120)
+		self.nimServerLabel.setText("Server:")
+		horizontalLayout_server.addWidget(self.nimServerLabel)
+		self.nim_serverChooser = QComboBox()
+		self.nim_serverChooser.setToolTip("Choose the server you wish to export shots to.")
+		self.nim_serverChooser.setMinimumHeight(28)
+		self.nim_serverChooser.setIconSize(QSize(1, 24))
+		horizontalLayout_server.addWidget(self.nim_serverChooser)
+		horizontalLayout_server.setStretch(1, 40)
+		self.nim_serverChooser.currentIndexChanged.connect(self.nim_serverChanged)
+
+		# SHOWS: List box for show selection
+		horizontalLayout_show = QHBoxLayout()
+		horizontalLayout_show.setSpacing(-1)
+		horizontalLayout_show.setSizeConstraint(QLayout.SetDefaultConstraint)
+		horizontalLayout_show.setObjectName("horizontalLayout_show")
+		self.nimShowLabel = QLabel()
+		self.nimShowLabel.setFixedWidth(120)
+		self.nimShowLabel.setText("Show:")
+		horizontalLayout_show.addWidget(self.nimShowLabel)
+		self.nim_showChooser = QComboBox()
+		self.nim_showChooser.setToolTip("Choose the show you wish to export shots to.")
+		self.nim_showChooser.setMinimumHeight(28)
+		self.nim_showChooser.setIconSize(QSize(1, 24))
+		horizontalLayout_show.addWidget(self.nim_showChooser)
+		horizontalLayout_show.setStretch(1, 40)
+		self.nim_showChooser.currentIndexChanged.connect(self.nim_showChanged)
+	
+
+		# Add the standard ok/cancel buttons, default to ok.
+		self._buttonbox = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
+		self._buttonbox.button(QDialogButtonBox.StandardButton.Ok).setText(" Scan for Versions ")
+		self._buttonbox.button(QDialogButtonBox.StandardButton.Ok).setDefault(True)
+		self._buttonbox.button(QDialogButtonBox.StandardButton.Ok).setToolTip("Scans the selected show for element types that match the batchOpenClip and adds them to the batchOpenClip.")
+		self._buttonbox.accepted.connect(self.acceptTest)
+		self._buttonbox.rejected.connect(self.reject)
+		horizontalLayout_OkCancel = QHBoxLayout()
+		horizontalLayout_OkCancel.setSpacing(-1)
+		horizontalLayout_OkCancel.setSizeConstraint(QLayout.SetDefaultConstraint)
+		horizontalLayout_OkCancel.setObjectName("horizontalLayout_OkCancel")
+		spacerItem4 = QSpacerItem(175, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+		horizontalLayout_OkCancel.addItem(spacerItem4)
+		horizontalLayout_OkCancel.addWidget(self._buttonbox)
+		horizontalLayout_OkCancel.setStretch(1, 40)
+
+		groupLayout.setLayout(0, QFormLayout.SpanningRole, horizontalLayout_header)
+		groupLayout.setLayout(1, QFormLayout.SpanningRole, horizontalLayout_commentDesc)
+		groupLayout.setLayout(2, QFormLayout.SpanningRole, horizontalLayout_progress)
+		groupLayout.setLayout(3, QFormLayout.SpanningRole, horizontalLayout_job)
+		groupLayout.setLayout(4, QFormLayout.SpanningRole, horizontalLayout_server)
+		groupLayout.setLayout(5, QFormLayout.SpanningRole, horizontalLayout_show)
+		groupLayout.setLayout(6, QFormLayout.SpanningRole, horizontalLayout_OkCancel)
+
+		self.setLayout(groupLayout)
+		layout.addWidget(groupBox)
+
+		self.nim_jobChanged() #trigger job changed to load choosers
+
+
+	def nim_jobChanged(self):
+		'''Action when job is selected'''
+		#print "JOB CHANGED"
+		job = self.nim_jobChooser.currentText()
+		self.nim_jobID = self.nim_jobs[job]
+		self.nim_jobPaths = nimAPI.get_paths('job', self.nim_jobID)
+
+		self.nim_updateServer()
+		self.nim_updateShow()
+		
+
+	def nim_updateServer(self):
+		self.nim_servers = {}
+		self.nim_servers = nimAPI.get_jobServers(self.nim_jobID)
+		self.nim_serverID = ''
+		self.nim_serverOSPath = ''
+		self.nim_serverDict = {}
+		try:
+			self.nim_serverChooser.clear()
+			if self.nim_serverChooser:
+				if len(self.nim_servers)>0:  
+					for server in self.nim_servers:
+						self.nim_serverDict[server['server']] = server['ID']
+					for key, value in sorted(self.nim_serverDict.items(), reverse=False):
+						self.nim_serverChooser.addItem(self.clearPix, key)
+		except:
+			pass
+
+
+	def nim_serverChanged(self):
+		'''Action when job is selected'''
+		#print "SERVER CHANGED"
+		serverName = self.nim_serverChooser.currentText()
+		if serverName:
+			print "NIM: server=%s" % serverName
+			serverID = self.nim_serverDict[serverName]
+			self.nim_serverID = serverID
+
+			serverInfo = nimAPI.get_serverOSPath(serverID, self.nim_OS)
+			if serverInfo:
+				if len(serverInfo)>0:
+					self.nim_serverOSPath = serverInfo[0]['serverOSPath']
+					print "NIM: serverOSPath=%s" % self.nim_serverOSPath
+				else:
+					print "NIM: No Server Found"
+			else:
+				print "NIM: No Data Returned"
+
+
+	def nim_updateShow(self):
+		self.nim_shows = {}
+		self.nim_shows = nimAPI.get_shows(self.nim_jobID)
+		#print self.nim_shows
+
+		showIndex = 0
+		showIter = 0
+		self.nim_showDict = {}
+		try:
+			self.nim_showChooser.clear()
+			if self.nim_showChooser:
+				if len(self.nim_shows)>0:  
+					for show in self.nim_shows:
+						self.nim_showDict[show['showname']] = show['ID']
+					for key, value in sorted(self.nim_showDict.items(), reverse=False):
+						self.nim_showChooser.addItem(self.clearPix, key)
+						'''
+						if self.nim_showID:
+							if self.nim_showID == value:
+								print "Found matching showID, show=", key
+								self.pref_show == key
+								showIndex = showIter
+						else:
+							if self.pref_show == key:
+								print "Found matching Show Name, show=", key
+								showIndex = showIter
+						'''
+						showIter += 1
+
+					if self.pref_show != '':
+						self.nim_showChooser.setCurrentIndex(showIndex)
+		except:
+			pass
+
+
+	def nim_showChanged(self):
+		'''Action when job is selected'''
+		#print "SHOW CHANGED"
+		showname = self.nim_showChooser.currentText()
+		if showname:
+			print "NIM: show=%s" % showname
+
+			showID = self.nim_showDict[showname]
+
+			##set showID
+			self.nim_showID = showID
+
+			self.nim_showPaths = nimAPI.get_paths('show', showID)
+			if self.nim_showPaths:
+				if len(self.nim_showPaths)>0:
+					#print "NIM: showPaths=", self.nim_showPaths
+					self.nim_showFolder = self.nim_showPaths['root']
+				else:
+					print "NIM: No Show Paths Found"
+			else:
+				print "NIM: No Data Returned"
+	
+
+	def acceptTest(self):
+		# Saving Preferences
+		nimPrefs.update( 'Job', 'Flame', self.nim_jobID )
+		nimPrefs.update( 'Show', 'Flame', self.nim_showID )
+
+		# Start Loop
+		self.clipCount = 0
+		shots = nimAPI.get_shots(showID=self.nim_showID)
+		numShots = len(shots)
+		print "Shot count: %s" % numShots
+		self.progressBar.setRange(0, numShots)
+
+		self.nim_jobChooser.setDisabled(True)
+		self.nim_serverChooser.setDisabled(True)
+		self.nim_showChooser.setDisabled(True)
+		self._buttonbox.setDisabled(True)
+
+		shotCount = 0
+		for shot in shots :
+			shotCount += 1
+			self.nimCommentLabel.setText( "Scanning shot: "+shot['name'] )
+			self.progressBar.setValue(shotCount)
+			QApplication.processEvents()
+			
+			self.clipCount += nimBuildOpenClipFromElements(nim_shotID=shot['ID'], nim_serverID=self.nim_serverID)
 
 		self.accept()
 
@@ -1497,37 +1907,51 @@ def nimScanForVersions(nim_showID=None, nim_shotID=None) :
 					clipCount += 1
 	'''
 
-	# Get Elements By extensino
-	openClipElements = nimAPI.find_elements(showID=nim_showID, ext='.clip')
-	print openClipElements
+	if nim_showID :
+		shots = nimAPI.get_shots(showID=nim_showID)
+	if nim_shotID :
+		shotInfo = nimAPI.get_shotInfo(shotID=nim_shotID)
+		shots = []
+		if shotInfo :
+			shots.append( {'ID':nim_shotID, 'name':shotInfo[0]['shotName'] } )
 
-	for openClipElement in openClipElements :
-		clipID = openClipElement['ID']
-		shotID = openClipElement['shotID']
-		clipPath = openClipElement['path'].encode('utf-8')
-		clipName = openClipElement['name'].encode('utf-8')
-		clipFile = os.path.join(clipPath,clipName)
+	# Iterate through shots in show
+	for shot in shots :
+		if 'ID' in shot :
+			nim_shotID = shot['ID']
 
-		elementTypeID = openClipElement['elementTypeID']
-		elements = nimAPI.find_elements(shotID=shotID, elementTypeID=elementTypeID)
-		print "matching elements found"
-		print elements
+			# Get Elements By extensino
+			#openClipElements = nimAPI.find_elements(showID=nim_showID, ext='.clip')
+			openClipElements = nimAPI.find_elements(shotID=nim_shotID, ext='.clip')
+			print openClipElements
 
-		for element in elements :
-			if element['ID'] != clipID :
-				print "Element found for shotID %s" % shotID
-				elementPath = element['path'].encode('utf-8')
-				elementName = element['name'].encode('utf-8')
-				print os.path.join(elementPath,elementName)
-				
-				clipUpdated = updateOpenClip( clipFile, elementPath, elementName )
-				if clipUpdated :
-					clipCount += 1
+			for openClipElement in openClipElements :
+				clipID = openClipElement['ID']
+				shotID = openClipElement['shotID']
+				clipPath = openClipElement['path'].encode('utf-8')
+				clipName = openClipElement['name'].encode('utf-8')
+				clipFile = os.path.join(clipPath,clipName)
+
+				elementTypeID = openClipElement['elementTypeID']
+				elements = nimAPI.find_elements(shotID=shotID, elementTypeID=elementTypeID)
+				print "matching elements found"
+				print elements
+
+				for element in elements :
+					if element['ID'] != clipID :
+						print "Element found for shotID %s" % shotID
+						elementPath = element['path'].encode('utf-8')
+						elementName = element['name'].encode('utf-8')
+						print os.path.join(elementPath,elementName)
+						
+						clipUpdated = updateOpenClip( clipFile, elementPath, elementName )
+						if clipUpdated :
+							clipCount += 1
 
 	return clipCount
 	
 
-def nimBuildOpenClipFromElements(nim_showID=None, nim_shotID=None) :
+def nimBuildOpenClipFromElements(nim_showID=None, nim_shotID=None, nim_serverID=None) :
 	# Find all element types on shots in a show
 	# Update existing openClips of matching elementType
 	# Create newClip if no matching type
@@ -1535,8 +1959,14 @@ def nimBuildOpenClipFromElements(nim_showID=None, nim_shotID=None) :
 	# 		This could be just assuming that the clip doesn't exist
 
 	clipCount = 0
-
-	shots = nimAPI.get_shots(showID=nim_showID)
+	
+	if nim_showID :
+		shots = nimAPI.get_shots(showID=nim_showID)
+	if nim_shotID :
+		shotInfo = nimAPI.get_shotInfo(shotID=nim_shotID)
+		shots = []
+		if shotInfo :
+			shots.append( {'ID':nim_shotID, 'name':shotInfo[0]['shotName'] } )
 
 	#Get NIM Element Types
 	elementTypes = []
@@ -1559,52 +1989,6 @@ def nimBuildOpenClipFromElements(nim_showID=None, nim_shotID=None) :
 					elements = nimAPI.find_elements(shotID=nim_shotID, elementTypeID=elementTypeID)
 					openClipElements = nimAPI.find_elements( shotID=nim_shotID, ext='.clip', elementTypeID=elementTypeID )
 
-					'''
-					# Find matching clip elements in shot with .clip extension and elementType
-					if len(openClipElements)>0 :
-						# if elements exist that are not wrapped in openClip .. createNew clip and add element
-						for openClipElement in openClipElements :
-							clipID = openClipElement['ID']
-							shotID = openClipElement['shotID']
-							clipPath = openClipElement['path'].encode('utf-8')
-							clipName = openClipElement['name'].encode('utf-8')
-							clipFile = os.path.join(clipPath,clipName)
-
-							for element in elements :
-								if element['ID'] != clipID :
-									print "Element found for shotID %s" % shotID
-									elementPath = element['path'].encode('utf-8')
-									elementName = element['name'].encode('utf-8')
-									print os.path.join(elementPath,elementName)
-									
-									clipUpdated = updateOpenClip( clipFile, elementPath, elementName )
-									if clipUpdated :
-										clipCount += 1
-					else :
-						# Create new openClip from comp path and elementTypeName
-						nim_shotPaths = nimAPI.get_paths('shot', nim_shotID)
-						if 'comps' in nim_shotPaths:
-							nim_shot_comp = nim_shotPaths['comps']
-
-							clipPath = nim_shot_comp.encode('utf-8')
-							clipName = elementTypeName.encode('utf-8')
-							clipName = nim_shotName +"_nimElement_"+ elementTypeName +".clip"
-							clipFile = os.path.join(clipPath,clipName)
-
-							for element in elements :
-								if element['ID'] != clipID :
-									print "Element found for shotID %s" % shotID
-									elementPath = element['path'].encode('utf-8')
-									elementName = element['name'].encode('utf-8')
-									print os.path.join(elementPath,elementName)
-									
-									clipUpdated = updateOpenClip( clipFile, elementPath, elementName )
-									if clipUpdated :
-										clipCount += 1
-						else :
-							print "Could not resolve NIM project comp path. \
-									Skipping creation of new openClip for element."
-					'''
 					# Create new openClip from comp path and elementTypeName
 					nim_comp_path = "/PRJ/NIM_PROJECTS/NIM_1/<nim_shot_comp>"				# TODO : Add server dropdown to scan for elements 
 					nim_comp_path = nimResolvePath(nim_shotID=nim_shotID, keyword_string=nim_comp_path)
