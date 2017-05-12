@@ -1942,8 +1942,12 @@ def nimScanForVersions(nim_showID=None, nim_shotID=None) :
 						print "Element found for shotID %s" % shotID
 						elementPath = element['path'].encode('utf-8')
 						elementName = element['name'].encode('utf-8')
-						print os.path.join(elementPath,elementName)
 						
+						# Update elementPath using server os resolution
+						elementPath = resolveServerOsPath(elementPath)
+						print "OS ElementPath: %s" % elementPath
+
+						print os.path.join(elementPath,elementName)
 						clipUpdated = updateOpenClip( clipFile, elementPath, elementName )
 						if clipUpdated :
 							clipCount += 1
@@ -1960,6 +1964,10 @@ def nimBuildOpenClipFromElements(nim_showID=None, nim_shotID=None, nim_serverID=
 
 	clipCount = 0
 	
+	serverOsPathInfo = nimAPI.get_serverOSPath( nim_serverID, platform.system() )
+	serverOSPath = serverOsPathInfo[0]['serverOSPath']
+
+
 	if nim_showID :
 		shots = nimAPI.get_shots(showID=nim_showID)
 	if nim_shotID :
@@ -1990,7 +1998,7 @@ def nimBuildOpenClipFromElements(nim_showID=None, nim_shotID=None, nim_serverID=
 					openClipElements = nimAPI.find_elements( shotID=nim_shotID, ext='.clip', elementTypeID=elementTypeID )
 
 					# Create new openClip from comp path and elementTypeName
-					nim_comp_path = "/PRJ/NIM_PROJECTS/NIM_1/<nim_shot_comp>"				# TODO : Add server dropdown to scan for elements 
+					nim_comp_path = os.path.join(serverOSPath,"<nim_shot_comp>")
 					nim_comp_path = nimResolvePath(nim_shotID=nim_shotID, keyword_string=nim_comp_path)
 					print "nim_comp_path: %s" % nim_comp_path
 
@@ -2012,6 +2020,10 @@ def nimBuildOpenClipFromElements(nim_showID=None, nim_shotID=None, nim_serverID=
 							elementName = element['name'].encode('utf-8')
 							print os.path.join(elementPath,elementName)
 							
+							# Update elementPath using server os resolution
+							elementPath = resolveServerOsPath(elementPath)
+							print "OS ElementPath: %s" % elementPath
+
 							clipUpdated = updateOpenClip( clipFile, elementPath, elementName )
 							if clipUpdated :
 								# TODO: Add newly created openClip to shot elements
@@ -2140,6 +2152,54 @@ def resolveBatchSetupNamePattern(namePattern=None, sequenceName='', tapeName='')
 	namePattern = namePattern.replace('<name>', sequenceName)
 	namePattern = namePattern.replace('<tape>', tapeName)
 	return namePattern
+
+
+def resolveServerOsPath(path='') :
+	#Convert path from known NIM server to OS relavtive path
+
+	_os = platform.system()
+	servers = {}
+	servers = nimAPI.get_allServers()
+	serverID = ''
+
+	resolvedPath = path
+
+	# Find matching server from path
+	if len(servers) > 0:
+		print "Servers Found: %s" % str(len(servers))
+		for server in servers :
+			linuxPath 	= server['path'].replace('\\', '/')
+			winPath 	= server['winPath'].replace('/', '\\')
+			osxPath 	= server['osxPath'].replace('\\', '/')
+
+			if _os.lower() in ['darwin', 'mac'] :
+				targetPath = osxPath
+				# Compare against windows and linux & set to osx
+				if path.startswith(winPath) :
+					pathTail = path[path.startswith(winPath) and len(winPath):]
+					resolvedPath = os.path.join(targetPath,pathTail)
+					break
+
+				elif path.startswith(linuxPath) :
+					pathTail = path[path.startswith(winPath) and len(winPath):]
+					resolvedPath = os.path.join(targetPath,pathTail)
+					break
+
+
+			elif _os.lower() in ['linux', 'linux2'] :
+				targetPath = linuxPath
+				# Compare against windows and linux & set to linux
+				if path.startswith(winPath) :
+					pathTail = path[path.startswith(winPath) and len(winPath):]
+					resolvedPath = os.path.join(targetPath,pathTail)
+					break
+
+				elif path.startswith(linuxPath) :
+					pathTail = path[path.startswith(winPath) and len(winPath):]
+					resolvedPath = os.path.join(targetPath,pathTail)
+					break
+
+	return resolvedPath
 
 
 def getNimPrefs() :

@@ -536,6 +536,11 @@ def get_jobs( userID=None, folders=False ) :
         P.error("Failed to get jobs")
         return False
 
+def get_allServers( locationID='' ) :
+    'Retrieves all servers optionally filtered by locationID'
+    servers=get( {'q':'getJobServers', 'ID':locationID} )
+    return servers
+
 def get_servers( ID=None ) :
     'Retrieves servers associated with a specified job ID - does not match phpAPI'
     if ID :
