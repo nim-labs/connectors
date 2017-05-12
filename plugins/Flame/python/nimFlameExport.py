@@ -2793,6 +2793,7 @@ def updateOpenClip( masterFile, elementPath, elementName ) :
 			res = os.popen4("%s -r %s" % ( getMediaScript, apath ) )[1].readlines()
 		except :
 			print "Failed to read media: %s" % apath
+			print'%s' % traceback.print_exc()
 			return -1
 
 
@@ -2911,6 +2912,7 @@ def updateOpenClip( masterFile, elementPath, elementName ) :
 
 			except :
 				print "Failed to update openClip: %s" % tmpfile
+				print'%s' % traceback.print_exc()
 
 	return clipUpdated
 
