@@ -378,6 +378,8 @@ class NimScanForVersionsDialog(QDialog):
 
 		# Start Loop
 		self.clipCount = 0
+		self.clipFail = 0
+		
 		shots = nimAPI.get_shots(showID=self.nim_showID)
 		numShots = len(shots)
 		print "Shot count: %s" % numShots
@@ -394,8 +396,11 @@ class NimScanForVersionsDialog(QDialog):
 			self.progressBar.setValue(shotCount)
 			QApplication.processEvents()
 			
-			#self.clipCount += nimBuildOpenClipFromElements(nim_shotID=shot['ID'], nim_serverID=self.nim_serverID)
-			self.clipCount += nimScanForVersions(nim_shotID=shot['ID'])
+			clipSucess = {}
+			clipSucess = nimScanForVersions(nim_shotID=shot['ID'])
+
+			self.clipCount += clipSucess['clipCount']
+			self.clipFail += clipSucess['clipFail']
 
 		self.accept()
 
@@ -756,6 +761,8 @@ class NimBuildOpenClipsFromElementDialog(QDialog):
 
 		# Start Loop
 		self.clipCount = 0
+		self.clipFail = 0
+
 		shots = nimAPI.get_shots(showID=self.nim_showID)
 		numShots = len(shots)
 		print "Shot count: %s" % numShots
@@ -773,7 +780,11 @@ class NimBuildOpenClipsFromElementDialog(QDialog):
 			self.progressBar.setValue(shotCount)
 			QApplication.processEvents()
 			
-			self.clipCount += nimBuildOpenClipFromElements(nim_shotID=shot['ID'], nim_serverID=self.nim_serverID)
+			clipSucess = {}
+			clipSucess = nimBuildOpenClipFromElements(nim_shotID=shot['ID'], nim_serverID=self.nim_serverID)
+
+			self.clipCount += clipSucess['clipCount']
+			self.clipFail += clipSucess['clipFail']
 
 		self.accept()
 
@@ -1134,6 +1145,8 @@ class NimBuildOpenClipsFromProjectDialog(QDialog):
 
 		# Start Loop
 		self.clipCount = 0
+		self.clipFail = 0
+
 		shots = nimAPI.get_shots(showID=self.nim_showID)
 		numShots = len(shots)
 		print "Shot count: %s" % numShots
@@ -1163,7 +1176,11 @@ class NimBuildOpenClipsFromProjectDialog(QDialog):
 			if useComps :
 				folders.append('<nim_shot_comp>')
 
-			self.clipCount += nimBuildOpenClipFromFolders(nim_shotID=shot['ID'], nim_serverID=self.nim_serverID, folders=folders)
+			clipSucess = {}
+			clipSucess = nimBuildOpenClipFromFolders(nim_shotID=shot['ID'], nim_serverID=self.nim_serverID, folders=folders)
+
+			self.clipCount += clipSucess['clipCount']
+			self.clipFail += clipSucess['clipFail']
 
 		self.accept()
 
@@ -2348,7 +2365,10 @@ def nimScanForVersions(nim_showID=None, nim_shotID=None) :
 							else :
 								clipCount += 1
 
-	return clipCount
+	clipSucess = {}
+	clipSucess['clipCount'] = clipCount
+	clipSucess['clipFail'] = clipFail
+	return clipSucess
 	
 
 def nimBuildOpenClipFromElements(nim_showID=None, nim_shotID=None, nim_serverID=None) :
@@ -2433,7 +2453,10 @@ def nimBuildOpenClipFromElements(nim_showID=None, nim_shotID=None, nim_serverID=
 									else :
 										clipCount += 1
 	
-	return clipCount					
+	clipSucess = {}
+	clipSucess['clipCount'] = clipCount
+	clipSucess['clipFail'] = clipFail
+	return clipSucess					
 
 
 def nimBuildOpenClipFromFolders(nim_showID=None, nim_shotID=None, nim_serverID=None, folders=None) :
@@ -2534,9 +2557,10 @@ def nimBuildOpenClipFromFolders(nim_showID=None, nim_shotID=None, nim_serverID=N
 								else :
 									clipCount += 1
 
-
-	
-	return clipCount					
+	clipSucess = {}
+	clipSucess['clipCount'] = clipCount
+	clipSucess['clipFail'] = clipFail
+	return clipSucess					
 
 
 def nimResolvePath(nim_jobID=None, nim_showID=None, nim_shotID=None, keyword_string='', tokenL='<', tokenR='>') :
@@ -2797,14 +2821,19 @@ def updateOpenClip( masterFile, elementPath, elementName ) :
 			return -1
 
 
-		tmpStart = False
-		with open(tmpfile,"w") as f:
-			for line in res:
-				# Skip lines till first <clip> 
-				if tmpStart == False and line.startswith('<?xml ') :
-					tmpStart = True
-				if tmpStart == True :
-					f.write( line )
+		try :
+			tmpStart = False
+			with open(tmpfile,"w") as f:
+				for line in res:
+					# Skip lines till first <?xml
+					if tmpStart == False and line.startswith('<?xml ') :
+						tmpStart = True
+					if tmpStart == True :
+						f.write( line )
+		except :
+			print "Failed to read temp file: %s" % tmpfile
+			print'%s' % traceback.print_exc()
+			return -1
 
 		# Only splice XML when masterFile does not exist
 		if not createNewClip :
@@ -2900,6 +2929,7 @@ def updateOpenClip( masterFile, elementPath, elementName ) :
 					feed.set('vuid', elementBasename)
 				
 				for newVersion in newXML.iter('versions') :
+					newVersion.set('currentVersion', elementBasename)
 					version = newVersion.find('version')
 					version.set('uid', elementBasename)
 					version.set('type', 'version')
@@ -2907,7 +2937,7 @@ def updateOpenClip( masterFile, elementPath, elementName ) :
 				xmlRoot = newXML.getroot()
 				resultXML	= ET.tostring(xmlRoot)
 
-				with open(outFile,"w") as f:
+				with open(tmpfile,"w") as f:
 					f.write( resultXML )
 
 			except :

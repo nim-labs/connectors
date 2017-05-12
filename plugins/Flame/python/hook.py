@@ -243,12 +243,16 @@ def customUIAction( info, userData ):
       if nimScanDlg.exec_() :
          nim_showID = nimScanDlg.nim_showID
          clipCount = nimScanDlg.clipCount
-         #clipCount = nimFlameExport.nimScanForVersions(nim_showID=nim_showID)
-
+         clipFail = nimScanDlg.clipFail
+ 
          utf8 = QtCore.QTextCodec.codecForName("utf-8")
          QtCore.QTextCodec.setCodecForCStrings(utf8)
          title = "New Versions Found"
          msg = "New Versions Found: "+str(clipCount)
+         if clipFail > 0 :
+            msg += "\nFailed to Read Versions: "+str(clipFail)
+            msg += "\nPlease try again"
+
          dialog=QtGui.QMessageBox.information( None, title, msg, QtGui.QMessageBox.Ok)
          if dialog==QtGui.QMessageBox.Ok :
             userInput='OK'
@@ -265,11 +269,15 @@ def customUIAction( info, userData ):
          nim_showID = nimScanDlg.nim_showID
          nim_serverID = nimScanDlg.nim_serverID
          clipCount = nimScanDlg.clipCount
+         clipFail = nimScanDlg.clipFail
 
          utf8 = QtCore.QTextCodec.codecForName("utf-8")
          QtCore.QTextCodec.setCodecForCStrings(utf8)
          title = "New Versions Found"
          msg = "New Versions Found: "+str(clipCount)
+         if clipFail > 0 :
+            msg += "\nFailed to Read Versions: "+str(clipFail)
+            msg += "\nPlease try again"
          dialog=QtGui.QMessageBox.information( None, title, msg, QtGui.QMessageBox.Ok)
          if dialog==QtGui.QMessageBox.Ok :
             userInput='OK'
@@ -286,11 +294,15 @@ def customUIAction( info, userData ):
          nim_showID = nimScanDlg.nim_showID
          nim_serverID = nimScanDlg.nim_serverID
          clipCount = nimScanDlg.clipCount
+         clipFail = nimScanDlg.clipFail
 
          utf8 = QtCore.QTextCodec.codecForName("utf-8")
          QtCore.QTextCodec.setCodecForCStrings(utf8)
          title = "New Versions Found"
          msg = "New Versions Found: "+str(clipCount)
+         if clipFail > 0 :
+            msg += "\nFailed to Read Versions: "+str(clipFail)
+            msg += "\nPlease try again"
          dialog=QtGui.QMessageBox.information( None, title, msg, QtGui.QMessageBox.Ok)
          if dialog==QtGui.QMessageBox.Ok :
             userInput='OK'
