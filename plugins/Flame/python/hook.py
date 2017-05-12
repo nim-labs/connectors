@@ -17,6 +17,7 @@ import os,sys,re
 
 nim_app = 'Flame'
 os.environ['NIM_APP'] = str(nim_app)
+os.environ['NIM_EXPORT'] = ''
 
 # Relative path to append for NIM Scripts
 nimFlamePythonPath = os.path.dirname(os.path.realpath(__file__))
@@ -145,12 +146,16 @@ def getCustomUIActions( ):
    action4[ "caption" ] = "Build OpenClip from Elements"
 
    action5 = {}
-   action5[ "name" ] = "nimChangeUser"
-   action5[ "caption" ] = "Change User"
+   action5[ "name" ] = "nimBuildOpenClipFromProject"
+   action5[ "caption" ] = "Build OpenClip from Project"
+
+   action6 = {}
+   action6[ "name" ] = "nimChangeUser"
+   action6[ "caption" ] = "Change User"
 
    group1 = {}
    group1[ "name" ] = "NIM"
-   group1[ "actions" ] = ( action1, action2, action3, action4, action5, )
+   group1[ "actions" ] = ( action1, action2, action3, action4, action5, action6, )
 
    # action2 = {}
    # action2[ "name" ] = "action2"
@@ -180,6 +185,7 @@ def getCustomUIActions( ):
 #   Dictionary that is passed to getCustomUIActions.
 #
 def customUIAction( info, userData ):
+   
    if info[ "name" ] == "nimExportEdit" :
       print "nimExportDaily triggered"
       #print info["selection"]
@@ -201,7 +207,7 @@ def customUIAction( info, userData ):
 
    if info[ "name" ] == "nimExportDailies" :
       print "nimExportDaily triggered"
-      #print info["selection"]
+      #print info['selection']
 
       utf8 = QtCore.QTextCodec.codecForName("utf-8")
       QtCore.QTextCodec.setCodecForCStrings(utf8)
@@ -211,14 +217,21 @@ def customUIAction( info, userData ):
       dialog=QtGui.QMessageBox.information( None, title, msg, QtGui.QMessageBox.Ok)
       if dialog==QtGui.QMessageBox.Ok :
          userInput='OK'
+         
+         nim_export = "dailies"
+         os.environ['NIM_EXPORT'] = str(nim_export)
+         
+         selectedNodes = ()
+         selectedNodes = info['selection']
+         for node in selectedNodes :
+            print "Exporting Node: %s" % node
+            flame_export_cmd    = "/usr/discreet/io/bin/flame_export"
+            flame_export_id      = node
+            flame_export_preset  = "'/Users/andrew/Documents/NIM Labs/Repository/nim_connectors/plugins/Flame/presets/movie_file/NIM Edit - QuickTime (H.264 1080i 10Mbits).xml'"
+            flame_export_path    = "'/PRJ/NIM_PROJECTS/FlameFiles/Exports'"
 
-         flame_export_path    = "/usr/discreet/io/bin/flame_export"
-         flame_export_id      = "'"+str(info["selection"])+"'"
-         flame_export_preset  =  "'/Users/andrew/Documents/NIM\ Labs/Repository/nim_connectors/plugins/Flame/presets/movie_file/NIM Edit - QuickTime (H.264 1080i 10Mbits).xml'"
-         flame_export_path    = "'/PRJ/NIM_PROJECTS/FlameFiles/Exports'"
-
-         (dummy, stdout_and_stderr) = os.popen4("%s -n -e %s -p %s -d %s" % ( flame_export_path, flame_export_id, flame_export_preset, flame_export_path ) )
-         print stdout_and_stderr.read()
+            (dummy, stdout_and_stderr) = os.popen4("%s -e %s -n -f -p %s -d %s" % ( flame_export_cmd, flame_export_id, flame_export_preset, flame_export_path ) )
+            print stdout_and_stderr.read()
 
 
    if info[ "name" ] == "nimScanForVersions" :
@@ -241,13 +254,12 @@ def customUIAction( info, userData ):
             userInput='OK'
 
 
-
    if info[ "name" ] == "nimBuildOpenClipFromElements" :
       print "nimBuildOpenClipFromElements"
       #print info["selection"]
       title = "Build OpenClip from Elements"
       
-      nimScanDlg = nimFlameExport.NimBuildOpenClipsDialog()
+      nimScanDlg = nimFlameExport.NimBuildOpenClipsFromElementDialog()
       nimScanDlg.show()
       if nimScanDlg.exec_() :
          nim_showID = nimScanDlg.nim_showID
@@ -262,6 +274,27 @@ def customUIAction( info, userData ):
          if dialog==QtGui.QMessageBox.Ok :
             userInput='OK'
 
+
+   if info[ "name" ] == "nimBuildOpenClipFromProject" :
+      print "nimBuildOpenClipFromProject"
+      #print info["selection"]
+      title = "Build OpenClip from Project Structure"
+      
+      nimScanDlg = nimFlameExport.NimBuildOpenClipsFromProjectDialog()
+      nimScanDlg.show()
+      if nimScanDlg.exec_() :
+         nim_showID = nimScanDlg.nim_showID
+         nim_serverID = nimScanDlg.nim_serverID
+         clipCount = nimScanDlg.clipCount
+
+         utf8 = QtCore.QTextCodec.codecForName("utf-8")
+         QtCore.QTextCodec.setCodecForCStrings(utf8)
+         title = "New Versions Found"
+         msg = "New Versions Found: "+str(clipCount)
+         dialog=QtGui.QMessageBox.information( None, title, msg, QtGui.QMessageBox.Ok)
+         if dialog==QtGui.QMessageBox.Ok :
+            userInput='OK'
+      
 
 
    if info[ "name" ] == "nimChangeUser" :

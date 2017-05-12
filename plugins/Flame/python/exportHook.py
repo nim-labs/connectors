@@ -349,9 +349,12 @@ def postExport( info, userData ):
 #
 def preExportSequence( info, userData ):
    print "preExportSequence - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+   nim_export = os.environ.get('NIM_EXPORT', '-1')
+
    if debug :
       print info
       print userData
+      print nim_export
 
    # Check if Custom NIM export or Standard Export
    # If standard export then ask for NIM association
@@ -363,52 +366,61 @@ def preExportSequence( info, userData ):
    else :
       nimShowDialog = True
 
+   if nim_export == 'dailies' :
+      print "Exporting Dailies"
+      nimShowDialog = False
+      # reset var
+      os.environ['NIM_EXPORT'] = ''
+
    if nimShowDialog :
-      msgBox = QMessageBox()
-      msgBox.setTextFormat(Qt.RichText)
-      result = msgBox.information(None, "Export Sequence to NIM?", "Export Sequence to NIM?", QMessageBox.Ok | QMessageBox.Cancel)
-      if result == QMessageBox.Ok:
-         print "NIM - Exporting to NIM"
-         userData['nim_export_sequence'] = True
+      try :
+         msgBox = QMessageBox()
+         msgBox.setTextFormat(Qt.RichText)
+         result = msgBox.information(None, "Export Sequence to NIM?", "Export Sequence to NIM?", QMessageBox.Ok | QMessageBox.Cancel)
+         if result == QMessageBox.Ok:
+            print "NIM - Exporting to NIM"
+            userData['nim_export_sequence'] = True
 
-         exportDlg = nimFlameExport.NimExportDialog()
-         exportDlg.show()
-         if exportDlg.exec_() :
-            userData['shotData'] = {}
-            
-            print "NIM - nim_userID: %s" % exportDlg.nim_userID
-            userData['nim_userID'] = exportDlg.nim_userID
+            exportDlg = nimFlameExport.NimExportDialog()
+            exportDlg.show()
+            if exportDlg.exec_() :
+               userData['shotData'] = {}
+               
+               print "NIM - nim_userID: %s" % exportDlg.nim_userID
+               userData['nim_userID'] = exportDlg.nim_userID
 
-            # TODO:  SERVER NEEDS TO MATCH SELECTED PATH 
-            #        OR NEED TO ATTEMPT TO DERIVE FROM info['destinationPath']
-            print "NIM - serverID: %s" % exportDlg.nim_serverID
-            userData['nim_serverID'] = exportDlg.nim_serverID
+               # TODO:  SERVER NEEDS TO MATCH SELECTED PATH 
+               #        OR NEED TO ATTEMPT TO DERIVE FROM info['destinationPath']
+               print "NIM - serverID: %s" % exportDlg.nim_serverID
+               userData['nim_serverID'] = exportDlg.nim_serverID
 
-            print "NIM - showID: %s" % exportDlg.nim_showID
-            userData['nim_showID'] = exportDlg.nim_showID
+               print "NIM - showID: %s" % exportDlg.nim_showID
+               userData['nim_showID'] = exportDlg.nim_showID
 
-            print "NIM - showID: %s" % exportDlg.nim_showID
-            userData['nim_showID'] = exportDlg.nim_showID
-            
-            print "NIM - videoElementID: %s" % exportDlg.videoElementID
-            userData['videoElementID'] = exportDlg.videoElementID
+               print "NIM - showID: %s" % exportDlg.nim_showID
+               userData['nim_showID'] = exportDlg.nim_showID
+               
+               print "NIM - videoElementID: %s" % exportDlg.videoElementID
+               userData['videoElementID'] = exportDlg.videoElementID
 
-            print "NIM - audioElementID: %s" % exportDlg.audioElementID
-            userData['audioElementID'] = exportDlg.audioElementID
+               print "NIM - audioElementID: %s" % exportDlg.audioElementID
+               userData['audioElementID'] = exportDlg.audioElementID
 
-            print "NIM - openClipElementID: %s" % exportDlg.openClipElementID
-            userData['openClipElementID'] = exportDlg.openClipElementID
+               print "NIM - openClipElementID: %s" % exportDlg.openClipElementID
+               userData['openClipElementID'] = exportDlg.openClipElementID
 
-            print "NIM - batchOpenClipElementID: %s" % exportDlg.batchOpenClipElementID
-            userData['batchOpenClipElementID'] = exportDlg.batchOpenClipElementID
+               print "NIM - batchOpenClipElementID: %s" % exportDlg.batchOpenClipElementID
+               userData['batchOpenClipElementID'] = exportDlg.batchOpenClipElementID
 
-            print "NIM - batchTaskTypeID: %s" % exportDlg.batchTaskTypeID
-            userData['batchTaskTypeID'] = exportDlg.batchTaskTypeID
-            userData['batchTaskTypeFolder'] = exportDlg.batchTaskTypeFolder
+               print "NIM - batchTaskTypeID: %s" % exportDlg.batchTaskTypeID
+               userData['batchTaskTypeID'] = exportDlg.batchTaskTypeID
+               userData['batchTaskTypeFolder'] = exportDlg.batchTaskTypeFolder
 
-      else:
-         print "NIM - Skipping Export to NIM"
-         userData['nim_export_sequence'] = False
+         else:
+            print "NIM - Skipping Export to NIM"
+            userData['nim_export_sequence'] = False
+      except :
+         pass
 
    print "preExportSequence - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
    pass
