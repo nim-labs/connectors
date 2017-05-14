@@ -143,15 +143,17 @@ def preCustomExport( info, userData ):
       print userData
 
    #Test what 'exportType' was select in the UI, by the user
+
+   #NimExportSequence
    if userData['nim_export_type'] == 'NimExportSequence' :
       #Set the proper 'presetPath' in the info dictionary
       #This defines which preset is used for the custom encode job
       #info['presetPath'] = '/path/to/export/presets/uncompressed_qt.xml'
 
-      print "NIM - Exporting to NIM"
+      print "NIM - Exporting Sequence"
       userData['nim_export_sequence'] = True
 
-      exportDlg = nimFlameExport.NimExportDialog()
+      exportDlg = nimFlameExport.NimExportSequenceDialog()
       exportDlg.show()
       if exportDlg.exec_() :
          print "NIM - nim_userID: %s" % exportDlg.nim_userID
@@ -191,13 +193,12 @@ def preCustomExport( info, userData ):
          userData['batchTaskTypeID'] = exportDlg.batchTaskTypeID
          userData['batchTaskTypeFolder'] = exportDlg.batchTaskTypeFolder
          
-         
          # Create empty dictionary for shot data
          userData['shotData'] = {}
          
          # Set NIM Preset
          nim_preset = exportDlg.nim_preset
-         info['presetPath'] = nimFlamePresetPath + '/sequence_publish/'+nim_preset+'.xml'         
+         info['presetPath'] = nimFlamePresetPath + '/sequence/'+nim_preset+'.xml'         
          
          # Process in Background
          info['isBackground'] = False
@@ -207,9 +208,111 @@ def preCustomExport( info, userData ):
          userData['nim_export_sequence'] = False
          info['abort'] = True
 
-      #Set the 'destinationPath' in the info dictionary
-      #info['destinationPath'] = '/PRJ/NIM_PROJECTS/FlameFiles/' + CURRENT_PROJECT + '/'
-      
+
+   #NimExportEdit
+   if userData['nim_export_type'] == 'NimExportEdit' :
+      #Set the proper 'presetPath' in the info dictionary
+      #This defines which preset is used for the custom encode job
+      #info['presetPath'] = '/path/to/export/presets/uncompressed_qt.xml'
+
+      print "NIM - Exporting Edit"
+      userData['nim_export_edit'] = True
+
+      exportDlg = nimFlameExport.NimExportEditDialog()
+      exportDlg.show()
+      if exportDlg.exec_() :
+         print "NIM - nim_userID: %s" % exportDlg.nim_userID
+         userData['nim_userID'] = exportDlg.nim_userID
+
+         print "NIM - serverID: %s" % exportDlg.nim_serverID
+         userData['nim_serverID'] = exportDlg.nim_serverID
+
+         print "NIM - serverOSPath: %s" % exportDlg.nim_serverOSPath
+         nim_serverOSPath = exportDlg.nim_serverOSPath
+         userData['nim_serverOSPath'] = nim_serverOSPath
+
+         # Set destination path to NIM server path
+         info['destinationPath'] = nim_serverOSPath
+         print "Destination Path: %s" % info['destinationPath']
+
+
+         print "NIM - jobID: %s" % exportDlg.nim_jobID
+         userData['nim_jobID'] = exportDlg.nim_jobID
+
+         print "NIM - showID: %s" % exportDlg.nim_showID
+         userData['nim_showID'] = exportDlg.nim_showID
+         
+         # Create empty dictionary for shot data
+         userData['shotData'] = {}
+         
+         # Set NIM Preset
+         nim_preset = exportDlg.nim_preset
+         info['presetPath'] = nimFlamePresetPath + '/edit/'+nim_preset+'.xml'         
+         
+         # Process in Background
+         info['isBackground'] = False
+
+      else:
+         print "NIM - Canceled Export to NIM"
+         userData['nim_export_edit'] = False
+         info['abort'] = True
+   
+
+   #NimExportEdit
+   if userData['nim_export_type'] == 'NimExportDaily' :
+      #Set the proper 'presetPath' in the info dictionary
+      #This defines which preset is used for the custom encode job
+      #info['presetPath'] = '/path/to/export/presets/uncompressed_qt.xml'
+
+      print "NIM - Exporting Daily"
+      userData['nim_export_daily'] = True
+
+      exportDlg = nimFlameExport.NimExportDailyDialog()
+      exportDlg.show()
+      if exportDlg.exec_() :
+         print "NIM - nim_userID: %s" % exportDlg.nim_userID
+         userData['nim_userID'] = exportDlg.nim_userID
+
+         print "NIM - serverID: %s" % exportDlg.nim_serverID
+         userData['nim_serverID'] = exportDlg.nim_serverID
+
+         print "NIM - serverOSPath: %s" % exportDlg.nim_serverOSPath
+         nim_serverOSPath = exportDlg.nim_serverOSPath
+         userData['nim_serverOSPath'] = nim_serverOSPath
+
+         # Set destination path to NIM server path
+         info['destinationPath'] = nim_serverOSPath
+         print "Destination Path: %s" % info['destinationPath']
+
+
+         print "NIM - jobID: %s" % exportDlg.nim_jobID
+         userData['nim_jobID'] = exportDlg.nim_jobID
+
+         print "NIM - showID: %s" % exportDlg.nim_showID
+         userData['nim_showID'] = exportDlg.nim_showID
+
+         print "NIM - shotID: %s" % exportDlg.nim_shotID
+         userData['nim_shotID'] = exportDlg.nim_shotID
+
+         print "NIM - taskID: %s" % exportDlg.nim_taskID
+         userData['nim_taskID'] = exportDlg.nim_taskID
+         
+         # Create empty dictionary for shot data
+         userData['shotData'] = {}
+         
+         # Set NIM Preset
+         nim_preset = exportDlg.nim_preset
+         info['presetPath'] = nimFlamePresetPath + '/daily/'+nim_preset+'.xml'         
+         
+         # Process in Background
+         info['isBackground'] = False
+
+      else:
+         print "NIM - Canceled Export to NIM"
+         userData['nim_export_edit'] = False
+         info['abort'] = True
+
+
    print "preCustomExport - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
    pass
 
@@ -349,28 +452,22 @@ def postExport( info, userData ):
 #
 def preExportSequence( info, userData ):
    print "preExportSequence - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
-   nim_export = os.environ.get('NIM_EXPORT', '-1')
 
    if debug :
       print info
       print userData
-      print nim_export
 
    # Check if Custom NIM export or Standard Export
    # If standard export then ask for NIM association
    nimShowDialog = False
 
    if 'nim_export_type' in userData :
-      if userData['nim_export_type'] != 'NimExportSequence' :
+      if userData['nim_export_type'] != 'NimExportSequence' \
+         and userData['nim_export_type'] != 'NimExportDaily' \
+         and userData['nim_export_type'] != 'NimExportEdit' :
          nimShowDialog = True
    else :
       nimShowDialog = True
-
-   if nim_export == 'dailies' :
-      print "Exporting Dailies"
-      nimShowDialog = False
-      # reset var
-      os.environ['NIM_EXPORT'] = ''
 
    if nimShowDialog :
       try :
@@ -381,7 +478,7 @@ def preExportSequence( info, userData ):
             print "NIM - Exporting to NIM"
             userData['nim_export_sequence'] = True
 
-            exportDlg = nimFlameExport.NimExportDialog()
+            exportDlg = nimFlameExport.NimExportSequenceDialog()
             exportDlg.show()
             if exportDlg.exec_() :
                userData['shotData'] = {}
@@ -460,32 +557,60 @@ def postExportSequence( info, userData ):
       print info
       print userData
 
-   if userData['nim_export_sequence'] == True :
-      shotData = userData['shotData']
+   if 'nim_export_sequence' in userData :
+      if userData['nim_export_sequence'] == True :
+         shotData = userData['shotData']
 
-      for shotName in shotData :
-         print "shotName: %s" % shotName
-         for assetType in shotData[shotName] :
-            
-            # Update Icons
-            if assetType == 'video' :
-               print "Updating Shot Icon"
-               itemData = shotData[shotName]['video']
-               nim_shotID = itemData['nim_shotID']
-               nim_iconPath = itemData['nim_iconPath']
-               print "shotID: %s" % nim_shotID
-               print "iconPath: %s" % nim_iconPath
-               result = nimFlameExport.updateShotIcon(nim_shotID=nim_shotID, image_path=nim_iconPath)
+         for shotName in shotData :
+            print "shotName: %s" % shotName
+            for assetType in shotData[shotName] :
+               
+               # Update Icons
+               if assetType == 'video' :
+                  print "Updating Shot Icon"
+                  itemData = shotData[shotName]['video']
+                  nim_shotID = itemData['nim_shotID']
+                  nim_iconPath = itemData['nim_iconPath']
+                  print "shotID: %s" % nim_shotID
+                  print "iconPath: %s" % nim_iconPath
+                  result = nimFlameExport.updateShotIcon(nim_shotID=nim_shotID, image_path=nim_iconPath)
 
-            # Resolve keywords in Batch export_node files
-            if assetType == 'batch' :
-               print "Resolving Keywords in Batch Export Node"
-               itemData = shotData[shotName]['batch']
-               nim_shotID = itemData['nim_shotID']
-               resolvedPath = itemData['resolvedPath']
-               destinationPath = info['destinationPath']
-               batchPath = os.path.join(destinationPath,resolvedPath)
-               result = nimFlameExport.resolveBatchKeywords(nim_shotID=nim_shotID, batch_path=batchPath)
+               # Resolve keywords in Batch export_node files
+               if assetType == 'batch' :
+                  print "Resolving Keywords in Batch Export Node"
+                  itemData = shotData[shotName]['batch']
+                  nim_shotID = itemData['nim_shotID']
+                  resolvedPath = itemData['resolvedPath']
+                  destinationPath = info['destinationPath']
+                  batchPath = os.path.join(destinationPath,resolvedPath)
+                  result = nimFlameExport.resolveBatchKeywords(nim_shotID=nim_shotID, batch_path=batchPath)
+
+
+   if 'nim_export_edit' in userData :
+      if userData['nim_export_edit'] == True :
+         print "postExportSequence - Edit"
+         # Upload Edit
+         nim_showID = None
+         if 'nim_showID' in userData :
+            nim_showID = userData['nim_showID']
+      
+         if 'editData' in userData :
+            mov_path = userData['editData']['path']
+            result = nimFlameExport.uploadEdit(nim_showID=nim_showID, mov_path=mov_path)
+         
+
+   if 'nim_export_daily' in userData :
+      if userData['nim_export_daily'] == True :
+         print "postExportSequence - Daily"
+         # Upload Daily
+
+         nim_taskID = None
+         if 'nim_taskID' in userData :
+            nim_taskID = userData['nim_taskID']
+      
+         if 'dailyData' in userData :
+            mov_path = userData['dailyData']['path']
+            result = nimFlameExport.uploadDaily(nim_taskID=nim_taskID, mov_path=mov_path)
 
    print "postExportSequence - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
    pass
@@ -600,18 +725,30 @@ def preExportAsset( info, userData ):
       if userData['nim_export_sequence'] == True :
          result = nimFlameExport.nimCreateShot(nim_showID=userData['nim_showID'], info=info)
 
-   info['resolvedPath'] = result['resolvedPath']
+         info['resolvedPath'] = result['resolvedPath']
 
-   if info['shotName'] not in userData['shotData'] :
-      userData['shotData'][info['shotName']] = {}
+         # Build Shot Array
+         if info['shotName'] not in userData['shotData'] :
+            userData['shotData'][info['shotName']] = {}
 
-   userData['shotData'][info['shotName']][info['assetType']] = result 
-   userData['currentShotID'] = result['nim_shotID']
+         userData['shotData'][info['shotName']][info['assetType']] = result 
+         userData['currentShotID'] = result['nim_shotID']
+
+
+   if 'nim_export_edit' in userData :
+      if userData['nim_export_edit'] == True :
+         info['resolvedPath'] = nimFlameExport.nimResolvePath(nim_showID=userData['nim_showID'], keyword_string=info['resolvedPath'])
+
+
+   if 'nim_export_daily' in userData :
+      if userData['nim_export_daily'] == True :
+         info['resolvedPath'] = nimFlameExport.nimResolvePath(nim_shotID=userData['nim_shotID'], keyword_string=info['resolvedPath'])
+
 
    if debug :
       print "destinationPath: %s" % info['destinationPath']
       print "resolvedPath: %s" % info['resolvedPath']
-      print "shotName: %s" % info['shotName']
+      #print "shotName: %s" % info['shotName']
 
    print "preExportAsset - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
    pass
@@ -773,11 +910,27 @@ def postExportAsset( info, userData ):
             result = nimFlameExport.nimExportElement(nim_shotID=userData['currentShotID'], info=info, typeID=assetTypeID, nim_userID=nim_userID)
 
    
+   if 'nim_export_edit' in userData :
+      if userData['nim_export_edit'] == True :
+         print "postExportEdit"
+         editPath = os.path.join(info['destinationPath'], info['resolvedPath'])
+         userData['editData'] = {}
+         userData['editData']['path'] = editPath
+
+
+   if 'nim_export_daily' in userData :
+      if userData['nim_export_daily'] == True :
+         print "postExportDaily"
+         dailyPath = os.path.join(info['destinationPath'], info['resolvedPath'])
+         userData['dailyData'] = {}
+         userData['dailyData']['path'] = dailyPath
+
+
    if debug :
       print "destinationPath: %s" % info['destinationPath']
       print "resolvedPath: %s" % info['resolvedPath']
-      print "shotName: %s" % info['shotName']
-      print "shotID: %s" % userData['currentShotID']
+      #print "shotName: %s" % info['shotName']
+      #print "shotID: %s" % userData['currentShotID']
 
    print "postExportAsset - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<" 
    
@@ -806,7 +959,13 @@ def useBackburnerPostExportAsset():
 #
 def getCustomExportProfiles( profiles ):
    print "getCustomExportProfiles - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
-   profiles['NIM Export Sequence']= {'nim_export_type':'NimExportSequence'} #Adds an entry to the 'userData' dictionary
+   #profiles['NIM Publish Sequence'] = {'nim_export_type':'NimExportSequence'} #Adds an entry to the 'userData' dictionary
+   #profiles['NIM Export Clip to Edits']      = {'nim_export_type':'NimExportEdit'}     #Adds an entry to the 'userData' dictionary
+   #profiles['NIM Export Clip to Dailies']     = {'nim_export_type':'NimExportDaily'}    #Adds an entry to the 'userData' dictionary
+   profiles['NIM Publish Sequence']        = {'nim_export_type':'NimExportSequence'} #Adds an entry to the 'userData' dictionary
+   profiles['NIM Export Clip to Daily']        = {'nim_export_type':'NimExportDaily'}    #Adds an entry to the 'userData' dictionary
+   profiles['NIM Export Clip to Edit']        = {'nim_export_type':'NimExportEdit'}     #Adds an entry to the 'userData' dictionary
+   
    print "getCustomExportProfiles - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
    pass
 

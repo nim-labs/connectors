@@ -1686,6 +1686,22 @@ def get_taskDailies( taskID=None) :
     dailies=get( {'q': 'getTaskDailies', 'taskID': taskID} )
     return dailies
 
+def upload_edit( showID=None, path=None, nimURL=None, apiKey=None ) :
+    'Upload Edit - 2 required fields: showID and path to movie'
+    # nimURL and apiKey are optional for Render API Key overrride
+    params = {}
+
+    params["q"] = "uploadEdit"
+    params["showID"] = showID
+    if path is not None:
+        path = os.path.normpath( path )
+        params["file"] = open(path,'rb')
+    else :
+        params["file"] = ''
+
+    result = upload(params=params, nimURL=nimURL, apiKey=apiKey)
+    return result
+
 def upload_dailies( taskID=None, renderID=None, renderKey='', path=None, nimURL=None, apiKey=None ) :
     'Upload Dailies - 2 required fields: (taskID, renderID, or renderKey) and path to movie'
     # nimURL and apiKey are optional for Render API Key overrride

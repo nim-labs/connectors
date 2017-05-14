@@ -128,45 +128,32 @@ def previewWindowConfigChanged(description,width,height,bitDepth,
 #
 #
 def getCustomUIActions( ):
-   #return ()
+
    action1 = {}
-   action1[ "name" ] = "nimExportEdit"
-   action1[ "caption" ] = "Export to Edits"
+   action1[ "name" ] = "nimScanForVersions"
+   action1[ "caption" ] = "Scan for Versions"
 
    action2 = {}
-   action2[ "name" ] = "nimExportDailies"
-   action2[ "caption" ] = "Export to Dailies"
+   action2[ "name" ] = "nimBuildOpenClipFromElements"
+   action2[ "caption" ] = "Build OpenClip from Elements"
 
    action3 = {}
-   action3[ "name" ] = "nimScanForVersions"
-   action3[ "caption" ] = "Scan for Versions"
+   action3[ "name" ] = "nimBuildOpenClipFromProject"
+   action3[ "caption" ] = "Build OpenClip from Project"
 
    action4 = {}
-   action4[ "name" ] = "nimBuildOpenClipFromElements"
-   action4[ "caption" ] = "Build OpenClip from Elements"
-
-   action5 = {}
-   action5[ "name" ] = "nimBuildOpenClipFromProject"
-   action5[ "caption" ] = "Build OpenClip from Project"
-
-   action6 = {}
-   action6[ "name" ] = "nimChangeUser"
-   action6[ "caption" ] = "Change User"
+   action4[ "name" ] = "nimChangeUser"
+   action4[ "caption" ] = "Change User"
 
    group1 = {}
-   group1[ "name" ] = "NIM"
-   group1[ "actions" ] = ( action1, action2, action3, action4, action5, action6, )
+   group1[ "name" ] = "NIM Update OpenClips"
+   group1[ "actions" ] = ( action1, action2, action3, )
 
-   # action2 = {}
-   # action2[ "name" ] = "action2"
-   # action2[ "caption" ] = "Action Number 2"
+   group2 = {}
+   group2[ "name" ] = "NIM Settings"
+   group2[ "actions" ] = ( action4, )
 
-   # group2 = {}
-   # group2[ "name" ] = "Custom Group 2"
-   # group2[ "actions" ] = ( action2, )
-
-   #return ( group1, group2 )
-   return ( group1, )
+   return ( group1, group2, )
 
 # Hook called when a custom action is triggered in the menu
 #
@@ -186,53 +173,6 @@ def getCustomUIActions( ):
 #
 def customUIAction( info, userData ):
    
-   if info[ "name" ] == "nimExportEdit" :
-      print "nimExportDaily triggered"
-      #print info["selection"]
-
-      utf8 = QtCore.QTextCodec.codecForName("utf-8")
-      QtCore.QTextCodec.setCodecForCStrings(utf8)
-
-
-      import sys, traceback
-
-      version = "Version: %s.%s" % (sys.version_info[0], sys.version_info[0])
-
-      title = "Export to Edits"
-      msg = "Export to Edits: "+version
-      dialog=QtGui.QMessageBox.information( None, title, msg, QtGui.QMessageBox.Ok)
-      if dialog==QtGui.QMessageBox.Ok :
-         userInput='OK'
-
-
-   if info[ "name" ] == "nimExportDailies" :
-      print "nimExportDaily triggered"
-      #print info['selection']
-
-      utf8 = QtCore.QTextCodec.codecForName("utf-8")
-      QtCore.QTextCodec.setCodecForCStrings(utf8)
-
-      title = "Export to Dailies"
-      msg = "Export to Dailies"
-      dialog=QtGui.QMessageBox.information( None, title, msg, QtGui.QMessageBox.Ok)
-      if dialog==QtGui.QMessageBox.Ok :
-         userInput='OK'
-         
-         nim_export = "dailies"
-         os.environ['NIM_EXPORT'] = str(nim_export)
-         
-         selectedNodes = ()
-         selectedNodes = info['selection']
-         for node in selectedNodes :
-            print "Exporting Node: %s" % node
-            flame_export_cmd    = "/usr/discreet/io/bin/flame_export"
-            flame_export_id      = node
-            flame_export_preset  = "'/Users/andrew/Documents/NIM Labs/Repository/nim_connectors/plugins/Flame/presets/movie_file/NIM Edit - QuickTime (H.264 1080i 10Mbits).xml'"
-            flame_export_path    = "'/PRJ/NIM_PROJECTS/FlameFiles/Exports'"
-
-            (dummy, stdout_and_stderr) = os.popen4("%s -e %s -n -f -p %s -d %s" % ( flame_export_cmd, flame_export_id, flame_export_preset, flame_export_path ) )
-            print stdout_and_stderr.read()
-
 
    if info[ "name" ] == "nimScanForVersions" :
       print "nimScanForVersions"
@@ -307,7 +247,6 @@ def customUIAction( info, userData ):
          if dialog==QtGui.QMessageBox.Ok :
             userInput='OK'
       
-
 
    if info[ "name" ] == "nimChangeUser" :
       print "nimChangeUser triggered"
