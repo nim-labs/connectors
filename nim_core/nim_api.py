@@ -63,9 +63,10 @@ isGUI = True
 try :
     if sys.stdin.isatty():
         isGUI = False
-    except :
-        pass
-        
+except :
+    pass
+
+
 def testAPI(nimURL=None, nim_apiUser='', nim_apiKey='') :
     sqlCmd={'q': 'testAPI'}
     cmd=urllib.urlencode(sqlCmd)
