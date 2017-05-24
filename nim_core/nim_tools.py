@@ -11,27 +11,22 @@
 # agreement provided at the time of installation or download, or which
 # otherwise accompanies this software in either electronic or hard copy form.
 # *****************************************************************************
+import os
 
-qt_import=False
+qt_import=True
 try : 
     from PySide2 import QtWidgets as QtGui
     from PySide2 import QtCore
-    qt_import=True
-except ImportError :
+except :
     try :
         from PySide import QtCore, QtGui
-        qt_import=True
-    except ImportError :
+    except :
         try : 
             from PyQt4 import QtCore, QtGui
-            qt_import=True
-        except ImportError : 
-            # Suppressed for D8
+        except :
             # print "NIM: Failed to load UI Modules - Tools"
-            pass
+            qt_import=False
 
-
-import os
 import nim_print
 import nim_win
 

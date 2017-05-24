@@ -59,6 +59,9 @@ import nim_win as Win
 version='v2.6.20'
 winTitle='NIM_'+version
 
+isGUI = True
+if sys.stdin.isatty():
+    isGUI = False
 
 def testAPI(nimURL=None, nim_apiUser='', nim_apiKey='') :
     sqlCmd={'q': 'testAPI'}
@@ -102,8 +105,32 @@ def get_connect_info() :
     if _prefs and 'NIM_URL' in _prefs.keys() :
         nim_apiURL=_prefs['NIM_URL']
     else :
-        P.info( '"NIM_URL" not found in preferences!' )
-        return False
+        print('"NIM_URL" not found in preferences!')
+        err_msg ='Would you like to recreate your preferences?'
+        if isGUI :
+            reply=Win.popup( title='NIM Error', msg=err_msg, type='okCancel' )
+        else :
+            reply=raw_input( 'Would you like to recreate your preferences? (Y/N): ')
+            if reply == 'Y' or reply == 'y' :
+                reply = 'OK'
+                
+        #  Re-create preferences, if prompted :
+        if reply=='OK' :
+            prefsFile=Prefs.get_path()
+            if os.path.exists( prefsFile ) :
+                os.remove( prefsFile )
+            result = Prefs.mk_default()
+
+            # Test Prefs 2nd Time... if fail after recreate then prompt for manual intervention
+            _prefs=Prefs.read()
+            if _prefs and 'NIM_URL' in _prefs.keys() :
+                nim_apiURL=_prefs['NIM_URL']
+            else :
+                print('Failed Recreating NIM preferences.\nPlease delete the .nim folder from your home directory and try again.')
+                return False
+        else :
+            sys.exit( '"NIM_URL" not found in preferences! \nPlease create NIM Preferences before using the NIM API' )
+            return False
 
     if _prefs and 'NIM_User' in _prefs.keys() :
         nim_apiUser=_prefs['NIM_User']
@@ -216,7 +243,8 @@ def connect( method='get', params=None, nimURL=None, apiKey=None ) :
             if type(result)==type(list()) and len(result)==1 :
                 try :
                     error_msg = result[0]['error']
-                    P.error( "API Error %s" % error_msg )
+                    if error_msg != '':
+                        P.error( "API Error %s" % error_msg )
                     if(error_msg == 'API Key Not Found.') :
                         #Win.popup( title='NIM API Error', msg='NIM API Key Not Found.\n\nNIM Security is set to require the use of API Keys. \
                         #                                        Please contact your NIM Administrator to obtain a NIM API KEY.' )
@@ -228,8 +256,12 @@ def connect( method='get', params=None, nimURL=None, apiKey=None ) :
                         api_result = Win.setApiKey()
 
                     if(error_msg == 'API Key Expired.') :
-                        Win.popup( title='NIM API Error', msg='NIM API Key Expired.\n\nNIM Security is set to require the use of API Keys. \
-                                                                Please contact your NIM Administrator to update your NIM API KEY expiration.' )
+                        if isGUI :
+                            Win.popup( title='NIM API Error', msg='NIM API Key Expired.\n\nNIM Security is set to require the use of API Keys. \
+                                                                    Please contact your NIM Administrator to update your NIM API KEY expiration.' )
+                        else :
+                            print 'NIM API Key Expired.\nNIM Security is set to require the use of API Keys.\n \
+                                    Please contact your NIM Administrator to update your NIM API KEY expiration.'
                         #return False <-- returning false loads reset prefs msgbox
                 except :
                     pass
@@ -242,12 +274,18 @@ def connect( method='get', params=None, nimURL=None, apiKey=None ) :
             url_error = e.reason
             P.error('URL ERROR: %s' % url_error)
             err_msg = 'NIM Connection Error:\n\n %s' %  url_error;
-            P.debug( '    %s' % traceback.print_exc() )
+            #P.debug( '    %s' % traceback.print_exc() )
 
             err_msg +='\n\n'+\
-                '    Would you like to recreate your preferences?'
-            P.error( err_msg )
-            reply=Win.popup( title='NIM Error', msg=err_msg, type='okCancel' )
+                'Would you like to recreate your preferences?'
+            #P.error( err_msg )
+            if isGUI :
+                reply=Win.popup( title='NIM Error', msg=err_msg, type='okCancel' )
+            else :
+                reply=raw_input( 'Would you like to recreate your preferences? (Y/N): ')
+                if reply == 'Y' or reply == 'y' :
+                    reply = 'OK'
+
             #  Re-create preferences, if prompted :
             if reply=='OK' :
                 prefsFile=Prefs.get_path()
@@ -366,8 +404,12 @@ def upload( params=None, nimURL=None, apiKey=None ) :
                     api_result = Win.setApiKey()
 
                 if(error_msg == 'API Key Expired.') :
-                    Win.popup( title='NIM API Error', msg='NIM API Key Expired.\n\nNIM Security is set to require the use of API Keys. \
+                    if isGUI :
+                        Win.popup( title='NIM API Error', msg='NIM API Key Expired.\n\nNIM Security is set to require the use of API Keys. \
                                                             Please contact your NIM Administrator to update your NIM API KEY expiration.' )
+                    else :
+                        print 'NIM API Key Expired.\nNIM Security is set to require the use of API Keys.\n \
+                                Please contact your NIM Administrator to update your NIM API KEY expiration.'
                     #return False <-- returning false loads reset prefs msgbox
             except :
                 pass
@@ -1680,7 +1722,7 @@ def upload_renderIcon( renderID=None, renderKey='', img=None, nimURL=None, apiKe
     result = upload(params=params, nimURL=nimURL, apiKey=apiKey)
     return result
 
-def get_taskDailies( taskID=None) :
+def get_taskDailies( taskID=None ) :
     'Retrieves the dictionary of dailies for the specified taskID from the API'
     #tasks=get( {'q': 'getTaskTypes', 'type': 'artist'} )
     dailies=get( {'q': 'getTaskDailies', 'taskID': taskID} )
