@@ -22,9 +22,12 @@ import nim_print as P
 qt_import=True
 
 isGUI = True
-if sys.stdin.isatty():
-    isGUI = False
-
+try :
+    if sys.stdin.isatty():
+        isGUI = False
+except:
+    pass
+    
 #  Import Python GUI packages :
 try : 
     from PySide2 import QtWidgets as QtGui

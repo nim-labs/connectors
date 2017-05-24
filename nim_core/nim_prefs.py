@@ -24,9 +24,11 @@ import nim_print as P
 import nim_win as Win
 
 isGUI = True
-if sys.stdin.isatty():
-    isGUI = False
-
+try :
+    if sys.stdin.isatty():
+        isGUI = False
+except :
+    pass
 
 #  Variables :
 prefs_dirName='.nim'
