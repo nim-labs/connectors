@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: nim_win.py
-# Version:  v2.6.21.170523
+# Version:  v2.6.21.170524
 #
 # Copyright (c) 2017 NIM Labs LLC
 # All rights reserved.
