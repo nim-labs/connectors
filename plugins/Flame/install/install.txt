@@ -1,18 +1,19 @@
 Flame Install:
 
-Set the DL_PYTHON_HOOK_PATH environment variable to the [NIM_CONNECTOR_ROOT]/plugins/Flame/python location
+Linux:
 
-DL_PYTHON_HOOK_PATH
+	Set the DL_PYTHON_HOOK_PATH environment variable to the [NIM_CONNECTOR_ROOT]/plugins/Flame/python location
 
-Allows you to set the path to the Python hooks files. It behaves similar to other PATH variables.
+	Edit the ~/.bash file to include the following:
 
-export DL_PYTHON_HOOK_PATH=/share1/dev/python_hooks/test:/share1/dev/python_hooks/production
+	export DL_PYTHON_HOOK_PATH=[NIM_CONNECTOR_ROOT]/plugins/Flame/python
 
-In the above example, Flame loads the hooks from test first, and then for any undefined hooks, continue to scan production.
+	Replace [NIM_CONNECTOR_ROOT] with the full path to the NIM Connector root folder.
 
 
 
-OSX:
+OSX 10.12.x:
+
 	Edit the setenv.DL_PYTHON_HOOK_PATH.plist file and replace [NIM_CONNECTOR_ROOT] with the full path to the NIM Connector root folder.
 
 	Copy the file to: ~/Library/LaunchAgents/setenv.DL_PYTHON_HOOK_PATH.plist
@@ -20,4 +21,14 @@ OSX:
 	Reboot
 
 
+OSX 10.11.x
 
+	Edit the launchd.conf file and replace [NIM_CONNECTOR_ROOT] with the full path to the NIM Connector root folder. 
+	
+	Copy the the file to: /etc/launchd.conf
+
+	If the /etc/launchd.conf file exists, append the following line to the file updating the [NIM_CONNECTOR_ROOT] with the full path to the NIM Connector root folder.)
+
+	setenv DL_PYTHON_HOOK_PATH [NIM_CONNECTOR_ROOT]/plugins/Flame/python
+
+	
