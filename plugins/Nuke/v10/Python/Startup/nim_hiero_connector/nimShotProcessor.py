@@ -600,8 +600,10 @@ class NimShotProcessor(hiero.core.ProcessorBase):
               print "     startFrame=", element_startFrame 
               print "     endFrame=", element_endFrame
               print "     cutHandles=", cutHandles
-            
-              element_result = nimAPI.add_element( 'shot', nim_shotID, nimHieroConnector.g_nim_elementTypeID, element_filePath, element_fileName, element_startFrame, element_endFrame, cutHandles, nimHieroConnector.g_nim_publishElement )
+              
+              element_result = nimAPI.add_element( parent='shot', parentID=nim_shotID, typeID=nimHieroConnector.g_nim_elementTypeID, \
+                                                    path=element_filePath, name=element_fileName, startFrame=element_startFrame, endFrame=element_endFrame, \
+                                                    handles=cutHandles, isPublished=nimHieroConnector.g_nim_publishElement )
 
           elif presetName == 'hiero.exporters.FnNukeShotExporter.NukeShotExporter':
             if nimHieroConnector.g_nim_publishComp == True:
