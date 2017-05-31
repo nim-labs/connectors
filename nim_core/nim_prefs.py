@@ -23,15 +23,25 @@ import nim_file as F
 import nim_print as P
 import nim_win as Win
 
+'''
 isGUI = True
 try :
     #Validate Against Terminal
     if sys.stdin.isatty():
-        #Validate Against DCC Environment
-        if F.get_app() == None :
-            isGUI = False
+        isGUI = False
 except :
     pass
+'''
+
+isGUI = False
+try :
+    #Validate Against DCC Environment
+    if F.get_app() is not None :
+        isGUI = True
+except :
+    pass
+
+#print "isGUI: %s" % isGUI
 
 #  Variables :
 prefs_dirName='.nim'
