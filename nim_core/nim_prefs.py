@@ -25,8 +25,11 @@ import nim_win as Win
 
 isGUI = True
 try :
+    #Validate Against Terminal
     if sys.stdin.isatty():
-        isGUI = False
+        #Validate Against DCC Environment
+        if F.get_app() == None :
+            isGUI = False
 except :
     pass
 
