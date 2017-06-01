@@ -41,11 +41,6 @@ def popup( title='', msg='', type='ok', defaultInput='', pyside=False, _list=[],
     #  Create PySide window :
     if pyside :
         try :
-            try : 
-                from PySide2 import QtWidgets as QtGui
-                from PySide2 import QtCore
-            except :
-                from PySide import QtCore, QtGui
             if type=='comboBox' :
                 userInput, ok=QtGui.QInputDialog.getItem( winPrnt, title, msg, _list, 0, False )
                 if not ok :
@@ -56,7 +51,6 @@ def popup( title='', msg='', type='ok', defaultInput='', pyside=False, _list=[],
     # Cinesync Window :        
     elif app == 'Cinesync':
         try:
-            from PySide import QtCore, QtGui
             if type == 'input' or type == 'okCancel':
                 userInput, ok = QtGui.QInputDialog.getText(winPrnt, title, msg, QtGui.QLineEdit.Normal, defaultInput)
                 if not ok:
@@ -100,7 +94,6 @@ def popup( title='', msg='', type='ok', defaultInput='', pyside=False, _list=[],
     elif app=='Hiero' :
         import hiero.ui
         from hiero.core import log
-        from PySide import QtCore, QtGui
         if type=='ok' :
             dialog=QtGui.QMessageBox.information( hiero.ui.mainWindow(), title, msg, \
                 QtGui.QMessageBox.Ok)
@@ -136,7 +129,6 @@ def popup( title='', msg='', type='ok', defaultInput='', pyside=False, _list=[],
     #  3dsMax :
     elif app=='3dsMax' :
         import MaxPlus
-        from PySide import QtCore, QtGui
         #maxWin=MaxPlus.Win32_GetMAXHWnd()
 
         if type=='ok' :
@@ -162,7 +154,6 @@ def popup( title='', msg='', type='ok', defaultInput='', pyside=False, _list=[],
     #  Houdini :
     elif app=='Houdini' :
         import hou
-        from PySide import QtCore, QtGui
 
         if type=='ok' :
             dialog=QtGui.QMessageBox.information( None, title, msg, \
