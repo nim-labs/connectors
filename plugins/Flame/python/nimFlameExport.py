@@ -2066,6 +2066,24 @@ class NimExportEditDialog(QDialog):
 
 		self.nim_presetChooser.currentIndexChanged.connect(self.nim_presetChanged)
 
+
+		# USE BACKGROUND
+		#horizontalLayout_BG = QHBoxLayout()
+		#horizontalLayout_BG.setSpacing(-1)
+		#horizontalLayout_BG.setSizeConstraint(QLayout.SetDefaultConstraint)
+		#horizontalLayout_BG.setObjectName("horizontalLayout_BG")
+		#self.nimBgLabel = QLabel()
+		#self.nimBgLabel.setFixedWidth(120)
+		#self.nimBgLabel.setText("Background Export:")
+		#horizontalLayout_BG.addWidget(self.nimBgLabel)
+		#self.nim_BgCheck = QCheckBox()
+		#self.nim_BgCheck.setToolTip("Exports clip as background process.")
+		#self.nim_BgCheck.setMinimumHeight(28)
+		#self.nim_BgCheck.setIconSize(QSize(1, 24))
+		#horizontalLayout_BG.addWidget(self.nim_BgCheck)
+		#horizontalLayout_BG.setStretch(1, 40)
+
+
 		# JOBS: List box for job selection
 		horizontalLayout_job = QHBoxLayout()
 		horizontalLayout_job.setSpacing(-1)
@@ -2162,6 +2180,8 @@ class NimExportEditDialog(QDialog):
 		groupLayout.setLayout(0, QFormLayout.SpanningRole, horizontalLayout_header)
 
 		groupLayout.setLayout(1, QFormLayout.SpanningRole, horizontalLayout_preset)
+		#groupLayout.setLayout(2, QFormLayout.SpanningRole, horizontalLayout_BG)
+
 		groupLayout.setLayout(2, QFormLayout.SpanningRole, horizontalLayout_job)
 		groupLayout.setLayout(3, QFormLayout.SpanningRole, horizontalLayout_server)
 		groupLayout.setLayout(4, QFormLayout.SpanningRole, horizontalLayout_show)
@@ -2300,11 +2320,15 @@ class NimExportEditDialog(QDialog):
 		# Get Current Values For Static Objects
 		self.nim_preset = self.nim_presetChooser.currentText()
 		
+		#if self.nim_BgCheck.isChecked() :
+		#	self.nim_bg_export = True
+		#else :
+		#	self.nim_bg_export = False
+
 		# Saving Preferences
 		nimPrefs.update( 'Job', 'Flame', self.nim_jobID )
 		nimPrefs.update( 'ServerID', 'Flame', self.nim_serverID )
 		nimPrefs.update( 'Show', 'Flame', self.nim_showID )
-
 
 		self.accept()
 

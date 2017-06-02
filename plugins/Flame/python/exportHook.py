@@ -3,46 +3,6 @@
 #
 # Filename: exportHook.py
 #
-'''
-Create wiretap ID association with NIM Show
-   Log all openClips from export
-
-Options on right click to :
-   Scan for versions
-   Build OpenClips from Elements
-
-Clip can be associated with a single shot or show(sequence)
-
-__________________________________________________________________________
-
-Custom Export....
-
-   preCustomExport :
-      get job/server/show and set in user data
-      choose preset from NIM preset files
-
-
-Generic export....
-
-   preAssetExport :
-      if custom export is not defined
-         Check for nim keywords in template
-         if keywords exist assume working with NIM
-            if nim variables are not set 
-               "NIM Keywords Detected"
-               ask if export sequence to NIM
-                  get job/show and set in user data
-         
-      create shot
-      get root paths
-      replace keywords with paths
-
-   postAssetExport :
-      update shotIcons
-      log elements
-      log files
-      log openClip against shot
-'''
 # *****************************************************************************
 
 
@@ -251,7 +211,9 @@ def preCustomExport( info, userData ):
          
          # Process in Background
          info['isBackground'] = False
-
+         #nim_bg_export = exportDlg.nim_bg_export
+         #info['isBackground'] = nim_bg_export
+         
       else:
          print "NIM - Canceled Export to NIM"
          userData['nim_export_edit'] = False
@@ -461,6 +423,11 @@ def preExportSequence( info, userData ):
    # If standard export then ask for NIM association
    nimShowDialog = False
 
+   '''
+   #TODO: On multiple exports Flame is displaying popup for each export...
+   #      Set flag for first time dlg is answered for all exports.
+   #      Display NIM export dialog without option to choose preset.
+
    if 'nim_export_type' in userData :
       if userData['nim_export_type'] != 'NimExportSequence' \
          and userData['nim_export_type'] != 'NimExportDaily' \
@@ -468,6 +435,7 @@ def preExportSequence( info, userData ):
          nimShowDialog = True
    else :
       nimShowDialog = True
+   
 
    if nimShowDialog :
       try :
@@ -518,6 +486,7 @@ def preExportSequence( info, userData ):
             userData['nim_export_sequence'] = False
       except :
          pass
+   '''
 
    print "preExportSequence - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
    pass
