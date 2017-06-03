@@ -181,7 +181,15 @@ def get_path() :
 
 def _inputURL() :
     'Gets the NIM API URL from the user, via a popup'
-    global nim_URL, version, isGUI
+    global nim_URL, version
+
+    isGUI = False
+    try :
+        #Validate Against DCC Environment
+        if F.get_app() is not None :
+            isGUI = True
+    except :
+        pass
 
     #  Prompt user to input URL :
     msg='Please input the NIM API URL :'
@@ -340,6 +348,15 @@ def mk_default( recreatePrefs=False, notify_success=True ) :
     global nim_api
     global nim_user, nim_userID
     global nim_URL
+
+    isGUI = False
+    try :
+        #Validate Against DCC Environment
+        if F.get_app() is not None :
+            isGUI = True
+    except :
+        pass
+    
     nimHome=mk_home()
     prefsFile=get_path()
     apps=F.get_apps()

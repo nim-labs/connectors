@@ -116,6 +116,14 @@ def testAPI(nimURL=None, nim_apiUser='', nim_apiKey='') :
 def get_connect_info() :
     'Returns the connection information from preferences'
 
+    isGUI = False
+    try :
+        #Validate Against DCC Environment
+        if F.get_app() is not None :
+            isGUI = True
+    except :
+        pass
+
     _prefs=Prefs.read()
 
     if _prefs and 'NIM_URL' in _prefs.keys() :
@@ -207,6 +215,14 @@ def connect( method='get', params=None, nimURL=None, apiKey=None ) :
     'Querys MySQL server and returns decoded json array'
     result=None
     
+    isGUI = False
+    try :
+        #Validate Against DCC Environment
+        if F.get_app() is not None :
+            isGUI = True
+    except :
+        pass
+
     connect_info = None
     if not nimURL :
         connect_info = get_connect_info()
@@ -337,6 +353,14 @@ def connect( method='get', params=None, nimURL=None, apiKey=None ) :
 #
 def upload( params=None, nimURL=None, apiKey=None ) :
 
+    isGUI = False
+    try :
+        #Validate Against DCC Environment
+        if F.get_app() is not None :
+            isGUI = True
+    except :
+        pass
+    
     connect_info = None
     if not nimURL :
         connect_info = get_connect_info()
