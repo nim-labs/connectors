@@ -31,7 +31,8 @@ try :
 except :
     pass
 '''
-
+'''
+# Moved to inline functions
 isGUI = False
 try :
     #Validate Against DCC Environment
@@ -39,7 +40,7 @@ try :
         isGUI = True
 except :
     pass
-
+'''
 #print "isGUI: %s" % isGUI
 
 
@@ -232,7 +233,13 @@ def userInfo( url='', apiUser='', newUser=False ) :
     
     user, userID, userList='', '', []
     
-    print("apiUser: %s" % apiUser)
+    isGUI = False
+    try :
+        #Validate Against DCC Environment
+        if F.get_app() is not None :
+            isGUI = True
+    except :
+        pass
 
     if isGUI :
         user=popup( title='Enter NIM Login', msg='Please enter your NIM username:', type='input', defaultInput=apiUser )
@@ -290,6 +297,14 @@ def setApiKey( url='' ) :
     api_user = connect_info['nim_apiUser']
 
     app=F.get_app()
+
+    isGUI = False
+    try :
+        #Validate Against DCC Environment
+        if F.get_app() is not None :
+            isGUI = True
+    except :
+        pass
 
     if isGUI :
         if app == 'C4D' :
