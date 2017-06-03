@@ -617,11 +617,15 @@ def verUp( nim=None, padding=2, selected=False, win_launch=False, pub=False, sym
             #Save File
             P.info( 'Saving file as %s \n' % new_filePath )
             hou.hipFile.save(file_name=str(new_filePath))
+            #Set $HIP var to location of current file
+            hou.hscript("set -g HIP = '" + str(projDir) + "'")
         else :
             #Save Selected Items
             #TODO: set to saveSelect items... currently saving entire scene
             P.info( 'Saving selected items as %s \n' % new_filePath )
             hou.hipFile.save(file_name=str(new_filePath))
+            #Set $HIP var to location of current file
+            hou.hscript("set -g HIP = '" + str(projDir) + "'")
 
     #  Make a copy of the file, if publishing :
     if pub and not symLink :
