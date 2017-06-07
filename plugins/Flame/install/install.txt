@@ -4,9 +4,9 @@ Linux:
 
 	Set the DL_PYTHON_HOOK_PATH environment variable to the [NIM_CONNECTOR_ROOT]/plugins/Flame/python location
 
-	Edit the ~/.bash file to include the following:
+	Edit the ~/.cshrc file to include the following:
 
-	export DL_PYTHON_HOOK_PATH=[NIM_CONNECTOR_ROOT]/plugins/Flame/python
+	setenv DL_PYTHON_HOOK_PATH [NIM_CONNECTOR_ROOT]/plugins/Flame/python
 
 	Replace [NIM_CONNECTOR_ROOT] with the full path to the NIM Connector root folder.
 

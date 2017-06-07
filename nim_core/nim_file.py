@@ -619,7 +619,6 @@ def verUp( nim=None, padding=2, selected=False, win_launch=False, pub=False, sym
             hou.hipFile.save(file_name=str(new_filePath))
             #Set $HIP var to location of current file
             hou.hscript("set -g HIP = '" + str(projDir) + "'")
-
             #Set $HIPNAME var to current file
             hipName = os.path.splitext(new_fileName)[0]
             hou.hscript("set -g HIPNAME = '" + str(hipName) + "'")
@@ -630,6 +629,7 @@ def verUp( nim=None, padding=2, selected=False, win_launch=False, pub=False, sym
             hou.hipFile.save(file_name=str(new_filePath))
             #Set $HIP var to location of current file
             hou.hscript("set -g HIP = '" + str(projDir) + "'")
+            #Set $HIPNAME var to current file
             hipName = os.path.splitext(new_fileName)[0]
             hou.hscript("set -g HIPNAME = '" + str(hipName) + "'")
 
