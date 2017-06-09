@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 #******************************************************************************
 #
-# Filename: nim_maya.py
-# Version:  v2.6.0.170226
+# Filename: nim_flame.py
+# Version:  v2.6.50.170609
 #
 # Copyright (c) 2016 NIM Labs LLC
 # All rights reserved.
