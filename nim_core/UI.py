@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: UI.py
-# Version:  v2.6.01.170417
+# Version:  v2.6.50.170609
 #
 # Copyright (c) 2017 NIM Labs LLC
 # All rights reserved.
@@ -18,7 +18,7 @@ import glob, os, platform, re, sys, traceback, urllib, urllib2, time
 try:
     import ssl
 except :
-    print "NIM: Failed to load SSL - UI"
+    print "NIM UI: Failed to load SSL"
     pass
 
 #  NIM Imports :
@@ -38,12 +38,12 @@ except ImportError :
     except ImportError :
         try : from PyQt4 import QtCore, QtGui
         except ImportError : 
-            print "NIM: Failed to UI Modules - UI"
+            print "NIM UI: Failed to UI Modules"
 
 #  Variables :
 WIN=''
 startTime=''
-version='v2.5.0'
+version='v2.6.0'
 winTitle='NIM_'+version
 _os=platform.system().lower()
 _osCap=platform.system()
@@ -123,6 +123,15 @@ def mk( mode='open', _import=False, _export=False, ref=False, pub=False ) :
         elif app=='Houdini' :
             try :
                 import hou
+                WIN=GUI( mode=mode )
+            except Exception, e :
+                P.error( 'Sorry, unable to retrieve variables from the NIM preference file.' )
+                P.debug( '    %s' % traceback.print_exc() )
+                return False
+
+        # Flame :
+        elif app=='Flame' :
+            try :
                 WIN=GUI( mode=mode )
             except Exception, e :
                 P.error( 'Sorry, unable to retrieve variables from the NIM preference file.' )
@@ -256,6 +265,7 @@ class GUI(QtGui.QMainWindow) :
             self.pref_job=self.prefs[self.app+'_Job']
             #self.pref_defaultServerPath=self.prefs[self.app+'_DefaultServerPath']
             self.pref_serverPath=self.prefs[self.app+'_ServerPath']
+            self.pref_serverID=self.prefs[self.app+'_ServerID']
             self.pref_asset=self.prefs[self.app+'_Asset']
             self.pref_tab=self.prefs[self.app+'_Tab']
             self.pref_show=self.prefs[self.app+'_Show']
@@ -285,6 +295,9 @@ class GUI(QtGui.QMainWindow) :
             elif self.app=='Houdini' :
                 import nim_houdini as Houdini
                 Houdini.get_vars( nim=self.nimPrefs )
+            elif self.app=='Flame' :
+                import nim_flame as Flame
+                Flame.get_vars( nim=self.nimPrefs )
         else :
             self.nimPrefs=Nim.NIM().ingest_prefs()
         #  Get and set User Information :
@@ -832,6 +845,8 @@ class GUI(QtGui.QMainWindow) :
             self.nim.set_name( elem='fileExt', name='.max' )
         elif self.app=='Houdini' :
             self.nim.set_name( elem='fileExt', name='.hip' )
+        elif self.app=='Flame' :
+            self.nim.set_name( elem='fileExt', name='.batch' )
         
         #  Enable :
         for elem in ['job', 'server', 'asset', 'show', 'shot', 'task', 'base'] :
@@ -1530,41 +1545,24 @@ class GUI(QtGui.QMainWindow) :
             for js in self.nim.Dict('server') :
                 if _os in ['windows', 'win32'] :
                     self.nim.Input('server').addItem( js['winPath']+' - ("'+js['server']+'")' )
-                    #if js['winPath'] !=self.pref_defaultServerPath :
-                    if js['winPath'] !=self.pref_serverPath :
-                        self.nim.set_server( name=self.nim.Input('server').currentText(), ID=str(js['ID']), \
-                            #path=str(js['path']) )
-                            path=str(js['winPath']) )
-                        index+=1
-                    else :
+                    if js['ID'] ==self.pref_serverID :
                         self.nim.Input('server').setCurrentIndex( index )
-                        self.nim.set_server( name=self.nim.Input('server').currentText(), ID=str(js['ID']), \
-                            path=str(js['winPath']) )
+                    else :
+                        index +=1
 
                 elif _os in ['darwin', 'mac'] :
                     self.nim.Input('server').addItem( js['osxPath']+' - ("'+js['server']+'")' )
-                    #if js['osxPath'] !=self.pref_defaultServerPath :
-                    if js['osxPath'] !=self.pref_serverPath :
-                        self.nim.set_server( name=self.nim.Input('server').currentText(), ID=str(js['ID']), \
-                            #path=str(js['path']) )
-                            path=str(js['osxPath']) )
-                        index +=1
-                    else :
+                    if js['ID'] ==self.pref_serverID :
                         self.nim.Input('server').setCurrentIndex( index )
-                        self.nim.set_server( name=self.nim.Input('server').currentText(), ID=str(js['ID']), \
-                            path=str(js['osxPath']) )
+                    else :
+                        index +=1
 
                 elif _os in ['linux', 'linux2'] :
                     self.nim.Input('server').addItem( js['path']+' - ("'+js['server']+'")' )
-                    #if js['path'] !=self.pref_defaultServerPath :
-                    if js['path'] !=self.pref_serverPath :
-                        self.nim.set_server( name=self.nim.Input('server').currentText(), ID=str(js['ID']), \
-                            path=str(js['path']) )
-                        index +=1
-                    else :
+                    if js['ID'] ==self.pref_serverID :
                         self.nim.Input('server').setCurrentIndex( index )
-                        self.nim.set_server( name=self.nim.Input('server').currentText(), ID=str(js['ID']), \
-                            path=str(js['path']) )
+                    else :
+                        index +=1
         else :
             self.nim.Input('server').clear()
             self.nim.Input('server').addItem('None')
@@ -1880,47 +1878,29 @@ class GUI(QtGui.QMainWindow) :
     
     def update_server(self) :
         'Updates the server path when the combo box is changed'
-        '''TEST'''
-        print 'THIS IS THE SERVER: %s' % self.nim.Input('server').currentText()
         self.nim.set_server( name=self.nim.Input('server').currentText() )
         for js in self.nim.Dict('server') :
-
-            if _os in ['windows', 'win32'] :    #js['winPath']+' - ("'+js['server']+'")'
-                ''' #REMOVED TO FIX FOR ADDITIONAL INFO IN SERVER DROPDOWN
-                if self.nim.Input('server').currentText()==self.nim.server( get='name' ) :
-                    self.nim.set_server( name=self.nim.Input('server').currentText(), ID=str(js['ID']), \
-                        path=str(js['winPath']) )
-                '''
+            if _os in ['windows', 'win32'] :
                 serverTitle = js['winPath']+' - ("'+js['server']+'")'
                 if self.nim.Input('server').currentText()==serverTitle :
                     self.nim.set_server( name=js['server'], ID=str(js['ID']), path=str(js['winPath']) )
                     self.pref_serverPath = str(js['winPath'])
+                    self.pref_serverID = str(js['ID'])
 
             elif _os in ['darwin', 'mac'] :
-                ''' #REMOVED TO FIX FOR ADDITIONAL INFO IN SERVER DROPDOWN
-                if self.nim.Input('server').currentText()==self.nim.server( get='name' ) :
-                    self.nim.set_server( name=self.nim.Input('server').currentText(), ID=str(js['ID']), \
-                        path=str(js['osxPath']) )
-                '''
                 serverTitle = js['osxPath']+' - ("'+js['server']+'")'
                 if self.nim.Input('server').currentText()==serverTitle :
                     self.nim.set_server( name=js['server'], ID=str(js['ID']), path=str(js['osxPath']) )
                     self.pref_serverPath = str(js['osxPath'])
+                    self.pref_serverID = str(js['ID'])
 
             elif _os in ['linux', 'linux2'] :
-                ''' #REMOVED TO FIX FOR ADDITIONAL INFO IN SERVER DROPDOWN
-                if self.nim.Input('server').currentText()==self.nim.server( get='name' ) :
-                    self.nim.set_server( name=self.nim.Input('server').currentText(), ID=str(js['ID']), \
-                        path=str(js['path']) )
-                '''
                 serverTitle = js['path']+' - ("'+js['server']+'")'
                 if self.nim.Input('server').currentText()==serverTitle :
                     self.nim.set_server( name=js['server'], ID=str(js['ID']), path=str(js['path']) )
                     self.pref_serverPath = str(js['path'])
+                    self.pref_serverID = str(js['ID'])
 
-
-        print 'Server ID set to %s' % self.nim.server( get='ID')
-        
         P.debug( 'Server set to - %s' % self.nim.name('server') )
         
         return
@@ -2182,12 +2162,13 @@ class GUI(QtGui.QMainWindow) :
         Prefs.update( attr='winHeight', app=self.app, value=str(self.height()) )
 
         # Export Server Prefs
-        # TODO: modify to recognize different servers with the same path
-        #       if the path is the same, no difference in operations ... just the name in the UI
-        #
-        # TODO: Only update server prefs on actual save.. .not just random close
+        # Only update server prefs on actual save.. .not just close
         if self.saveServerPref == True:
+            P.debug('Saving server setting to prefs...')
+            P.debug('    serverPath: %s' % self.nim.server( get='path') )
+            P.debug('    serverID: %s' % self.nim.server( get='ID') )
             Prefs.update( attr='ServerPath', app=self.app, value=self.nim.server( get='path') )
+            Prefs.update( attr='ServerID', app=self.app, value=self.nim.server( get='ID') )
             self.saveServerPref = False
 
         #  Don't write preferences for Publish or Version Up windows :
@@ -2312,18 +2293,6 @@ class GUI(QtGui.QMainWindow) :
         
         P.debug('file_open - filePath: %s' % filePath)
          
-        # DEPRICATED ---->
-        '''
-        #  Derive Server Path from File Name :
-        if not self.nim.server() :
-            for sp in ['winPath', 'osxPath', 'path'] :
-                prefix=os.path.normpath( self.nim.Dict('server')[0][sp] )
-                if prefix==os.path.normpath( filePath[:len(prefix)] ) :
-                    self.nim.set_server( path=prefix )
-                    break
-        '''
-        # <---- END DEPRICATED
-
         # Get Server OS Path from server ID
         P.info("FileID: %s" % self.nim.ID('ver'))
 
@@ -2573,10 +2542,7 @@ class GUI(QtGui.QMainWindow) :
         open_file_serverID = None
         if open_file_versionInfo:
             open_file_serverID = open_file_versionInfo[0]['serverID']
-            #serverOsPathInfo = Api.get_serverOSPath( open_file_serverID, platform.system() )
-            #serverOSPath = serverOsPathInfo[0]['serverOSPath']
 
-        # TODO: check file path conversion for multiple server scenario
         try:
             filePath=F.os_filePath( path=path, nim=self.nim, serverID=open_file_serverID )
         except:
@@ -2683,6 +2649,8 @@ class GUI(QtGui.QMainWindow) :
         
        
         #  Variables :
+        self.update_server()
+
         tag=self.nim.Input('tag').text()
         task=self.nim.Input('task').currentText()
         basename=Api.to_basename( nim=self.nim )
@@ -2715,7 +2683,7 @@ class GUI(QtGui.QMainWindow) :
         self.saveServerPref = True
 
         #  Refresh the Window :
-        self.win_save()
+        #self.win_save()
         
         #  Close the window :
         self.close()
@@ -2750,6 +2718,10 @@ class GUI(QtGui.QMainWindow) :
     
     def file_pub(self) :
         'Publishes the current file, when the Publish button is pressed'
+
+        #  Variables :
+        self.update_server()
+
         #  Get File Extension :
         if self.app=='Maya' : ext=self.nim.Input('fileExt').currentText()
         elif self.app=='Nuke' : 

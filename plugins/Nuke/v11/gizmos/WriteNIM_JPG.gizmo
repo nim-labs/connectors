@@ -1,0 +1,82 @@
+#! C:/Program Files/Nuke10.0v1/nuke-10.0.1.dll -nx
+#write_info WriteJPG file:"[ value nimPath ]/[value nimFolder]/[value nimFilename]" format:"2048 1556 1" chans:":" framerange:"1 100" fps:"0" colorspace:"default (sRGB)" datatype:"8 bit" transfer:"unknown" views:"main" colorManagement:"Nuke"
+version 10.0 v1
+Gizmo {
+ addUserKnob {20 User l WriteNIM_JPG}
+ addUserKnob {26 nim_outputFileText l Filename T "expected integer but got \"\""}
+ addUserKnob {41 nimCompTag l "Render Tag" T WriteJPG.nimCompTag}
+ addUserKnob {41 nimFilename l INVISIBLE +INVISIBLE T WriteJPG.nimFilename}
+ addUserKnob {22 refreshFilename l "Refresh Filename" t "This is a check to visualize the output filename.  The output filename will always be correct.  This button just refreshed the display label incase the file was versioned up or the tag changed while the preference pane was open." T "nuke.thisNode()\['nim_outputFileText'].setValue(nuke.thisNode()\['nimFilename'].value())" +STARTLINE}
+ addUserKnob {52 pythonFilenameScript T "nuke.thisNode()\['nim_outputFileText'].setValue(nuke.thisNode()\['nimFilename'].value())" +STARTLINE}
+ addUserKnob {26 ""}
+ addUserKnob {41 channels T WriteJPG.channels}
+ addUserKnob {41 frame_mode l frame T WriteJPG.frame_mode}
+ addUserKnob {41 frame l "" -STARTLINE T WriteJPG.frame}
+ addUserKnob {41 colorspace T WriteJPG.colorspace}
+ addUserKnob {41 premultiplied -STARTLINE T WriteJPG.premultiplied}
+ addUserKnob {41 raw l "raw data" -STARTLINE T WriteJPG.raw}
+ addUserKnob {41 views T WriteJPG.views}
+ addUserKnob {26 "" l "jpeg Options"}
+ addUserKnob {41 _jpeg_quality l quality T WriteJPG._jpeg_quality}
+ addUserKnob {41 _jpeg_sub_sampling l sub-sampling T WriteJPG._jpeg_sub_sampling}
+ addUserKnob {26 ""}
+ addUserKnob {41 render_order l "render order" T WriteJPG.render_order}
+ addUserKnob {41 Render -STARTLINE T WriteJPG.Render}
+ addUserKnob {41 first l "frame range" T WriteJPG.first}
+ addUserKnob {41 last l "" -STARTLINE T WriteJPG.last}
+ addUserKnob {41 use_limit l "limit to range" T WriteJPG.use_limit}
+ addUserKnob {26 "" l " "}
+ addUserKnob {41 reading l "read file" T WriteJPG.reading}
+ addUserKnob {41 checkHashOnRead l "check file matches input" -STARTLINE T WriteJPG.checkHashOnRead}
+ addUserKnob {41 on_error l "missing frames" T WriteJPG.on_error}
+ addUserKnob {41 reload l Reload -STARTLINE T WriteJPG.reload}
+ addUserKnob {41 read_all_lines l "read all lines" -STARTLINE T WriteJPG.read_all_lines}
+ addUserKnob {20 "" l OCIO}
+ addUserKnob {26 "" l Context}
+ addUserKnob {41 key1 T WriteJPG.key1}
+ addUserKnob {41 value1 -STARTLINE T WriteJPG.value1}
+ addUserKnob {41 key2 T WriteJPG.key2}
+ addUserKnob {41 value2 -STARTLINE T WriteJPG.value2}
+ addUserKnob {41 key3 T WriteJPG.key3}
+ addUserKnob {41 value3 -STARTLINE T WriteJPG.value3}
+ addUserKnob {41 key4 T WriteJPG.key4}
+ addUserKnob {41 value4 -STARTLINE T WriteJPG.value4}
+ addUserKnob {41 in_colorspace l INVISIBLE +INVISIBLE T WriteJPG.in_colorspace}
+ addUserKnob {41 out_colorspace l INVISIBLE +INVISIBLE T WriteJPG.out_colorspace}
+ addUserKnob {41 reverse_transform l INVISIBLE +INVISIBLE T WriteJPG.reverse_transform}
+ addUserKnob {20 "" l Python}
+ addUserKnob {41 beforeRender l "before render" T WriteJPG.beforeRender}
+ addUserKnob {41 beforeFrameRender l "before each frame" T WriteJPG.beforeFrameRender}
+ addUserKnob {41 afterFrameRender l "after each frame" T WriteJPG.afterFrameRender}
+ addUserKnob {41 afterRender l "after render" T WriteJPG.afterRender}
+ addUserKnob {41 renderProgress l "render progress" T WriteJPG.renderProgress}
+}
+ Input {
+  inputs 0
+  name Input1
+  xpos 509
+  ypos -123
+ }
+ Write {
+  file "\[ value nimPath ]/\[value nimFolder]/\[value nimFilename]"
+  file_type jpeg
+  checkHashOnRead false
+  beforeRender "import nim_tools; nim_tools.CheckOutputPath()"
+  name WriteJPG
+  xpos 509
+  ypos -83
+  addUserKnob {20 User}
+  addUserKnob {1 nimCompTag l "Render Tag"}
+  addUserKnob {1 nimPath l "NIM Path"}
+  nimPath "\[ value root.nim_compPath ]"
+  addUserKnob {1 nimFolder l "NIM Folder"}
+  nimFolder "\[value root.nim_basename]_v\[format %02d \[value root.nim_version]]\[ if \{ !\[string equal \[string trim \[value nimCompTag] \" \"] \"\"] \} \{return _\[string trim \[value nimCompTag] \" \"]\} ]"
+  addUserKnob {1 nimFilename l "NIM Filename"}
+  nimFilename "\[value root.nim_basename]_v\[format %02d \[value root.nim_version]]\[ if \{ !\[string equal \[string trim \[value nimCompTag] \" \"] \"\"] \} \{return _\[string trim \[value nimCompTag] \" \"]\} ].%04d.\[value file_type]"
+ }
+ Output {
+  name Output1
+  xpos 509
+  ypos 17
+ }
+end_group

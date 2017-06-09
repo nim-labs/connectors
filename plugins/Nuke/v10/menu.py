@@ -19,8 +19,8 @@ import nim_tools
 nuke.addOnScriptSave(nim_tools.updateNimWriteNodes)
 
 #  Make prefs:
-import nim_core.nim_prefs as menuPrefs
-menuPrefs.mk_default( notify_success=True )
+#import nim_core.nim_prefs as menuPrefs
+#menuPrefs.mk_default( notify_success=True )
 
 try:
 	isNuke = False

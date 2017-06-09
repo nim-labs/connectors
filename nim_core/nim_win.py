@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: nim_win.py
-# Version:  v2.6.01.170417
+# Version:  v2.6.50.170609
 #
 # Copyright (c) 2017 NIM Labs LLC
 # All rights reserved.
@@ -12,25 +12,51 @@
 # otherwise accompanies this software in either electronic or hard copy form.
 # *****************************************************************************
 
-import os
+import os, sys
 #  NIM Imports :
 import nim_api as Api
 import nim_file as F
 import nim_prefs as Prefs
 import nim_print as P
+
+qt_import=True
+
+
+'''
+isGUI = True
+try :
+    #Validate Against Terminal
+    if sys.stdin.isatty():
+        isGUI = False
+except :
+    pass
+'''
+'''
+# Moved to inline functions
+isGUI = False
+try :
+    #Validate Against DCC Environment
+    if F.get_app() is not None :
+        isGUI = True
+except :
+    pass
+'''
+#print "isGUI: %s" % isGUI
+
+
 #  Import Python GUI packages :
 try : 
     from PySide2 import QtWidgets as QtGui
+    from PySide2 import QtGui as QtGui2
     from PySide2 import QtCore
-except ImportError :
-    try : from PySide import QtCore, QtGui
-    except ImportError :
+except :
+    try : 
+        from PySide import QtCore, QtGui
+    except :
         try : from PyQt4 import QtCore, QtGui
-        except ImportError : 
-            # Suppressed for D8
-            # print "NIM: Failed to load UI Modules - Win"
-            pass
-
+        except : 
+            # print "NIM UI: Failed to UI Modules"
+            qt_import=False
 
 
 def popup( title='', msg='', type='ok', defaultInput='', pyside=False, _list=[], selNum=0, winPrnt=None ) :
@@ -46,7 +72,7 @@ def popup( title='', msg='', type='ok', defaultInput='', pyside=False, _list=[],
                 if not ok :
                     userInput=None
         except :
-            P.error( 'Sorry, problem loading PySide/PyQt4' )
+            P.error( 'Sorry, problem loading the dialog.' )
     
     # Cinesync Window :        
     elif app == 'Cinesync':
@@ -154,7 +180,28 @@ def popup( title='', msg='', type='ok', defaultInput='', pyside=False, _list=[],
     #  Houdini :
     elif app=='Houdini' :
         import hou
+        if type=='ok' :
+            dialog=QtGui.QMessageBox.information( None, title, msg, \
+                QtGui.QMessageBox.Ok)
+            if dialog==QtGui.QMessageBox.Ok :
+                userInput='OK'
+        elif type=='okCancel' :
+            dialog=QtGui.QMessageBox.question( None, title, msg, \
+                QtGui.QMessageBox.Cancel, QtGui.QMessageBox.Ok )
+            if dialog==QtGui.QMessageBox.Ok :
+                userInput='OK'
+            elif dialog==QtGui.QMessageBox.Cancel :
+                userInput='Cancel'
+        elif type=='input' :
+            dialog=QtGui.QInputDialog.getText( QtGui.QInputDialog(), title, msg, \
+                QtGui.QLineEdit.Normal )
+            if dialog[1] :
+                userInput=dialog[0]
+            else :
+                userInput=None
 
+    #  Flame :
+    elif app=='Flame' :
         if type=='ok' :
             dialog=QtGui.QMessageBox.information( None, title, msg, \
                 QtGui.QMessageBox.Ok)
@@ -184,9 +231,18 @@ def userInfo( url='', apiUser='', newUser=False ) :
     
     user, userID, userList='', '', []
     
-    print("apiUser: %s" % apiUser)
+    isGUI = False
+    try :
+        #Validate Against DCC Environment
+        if F.get_app() is not None :
+            isGUI = True
+    except :
+        pass
 
-    user=popup( title='Enter NIM Login', msg='Please enter your NIM username:', type='input', defaultInput=apiUser )
+    if isGUI :
+        user=popup( title='Enter NIM Login', msg='Please enter your NIM username:', type='input', defaultInput=apiUser )
+    else :
+        user=raw_input('Please enter your NIM username: ')
 
     if user is None :
         return False
@@ -207,13 +263,22 @@ def userInfo( url='', apiUser='', newUser=False ) :
                 if newUser == False:
                     #  Update Preferences :
                     Prefs.update( attr='NIM_User', value=user )
-                    popup( title='NIM User Set', msg='The NIM user has been set to %s.' % user)
+                    if isGUI :
+                        popup( title='NIM User Set', msg='The NIM user has been set to %s.' % user)
+                    else :
+                        print('The NIM user has been set to %s.' % user)
                 return (user, userID)
             except :
                 return False
         else :
             P.error( 'Failed to find NIM user.' )
-            response = popup( title='User Not Found', msg='The username entered is not a valid NIM user.\n\n Would you like to enter a new username?', type='okCancel')
+            if isGUI :
+                response = popup( title='User Not Found', msg='The username entered is not a valid NIM user.\n\n Would you like to enter a new username?', type='okCancel')
+            else :
+                response=raw_input('The username entered is not a valid NIM user. Would you like to enter a new username? (Y/N)')
+                if response == 'Y' or response == 'y' :
+                    response = 'OK'
+
             if(response=='OK'):
                 userInfo( url=url, newUser=newUser )
             else :
@@ -231,13 +296,27 @@ def setApiKey( url='' ) :
 
     app=F.get_app()
 
-    if app == 'C4D' :
-        api_key=popup( title='Enter NIM API Key', msg='Enter the NIM API Key for your user:', type='input', defaultInput='' )
+    isGUI = False
+    try :
+        #Validate Against DCC Environment
+        if F.get_app() is not None :
+            isGUI = True
+    except :
+        pass
+
+    if isGUI :
+        if app == 'C4D' :
+            api_key=popup( title='Enter NIM API Key', msg='Enter the NIM API Key for your user:', type='input', defaultInput='' )
+        else :
+            api_key=popup( title='Enter NIM API Key', msg='Failed to validate user.\n\n \
+                            NIM Security is set to require the use of API Keys.\n \
+                            Please obtain a valid NIM API KEY from your NIM Administrator.\n\n \
+                            Enter the NIM API Key for your user:', type='input', defaultInput='' )
     else :
-        api_key=popup( title='Enter NIM API Key', msg='Failed to validate user.\n\n \
-                        NIM Security is set to require the use of API Keys.\n \
-                        Please obtain a valid NIM API KEY from your NIM Administrator.\n\n \
-                        Enter the NIM API Key for your user:', type='input', defaultInput='' )
+        print('Failed to validate user.\n \
+                NIM Security is set to require the use of API Keys.\n \
+                Please obtain a valid NIM API KEY from your NIM Administrator.')
+        api_key=raw_input('Enter the NIM API Key for your user: ')
 
     if api_key is None :
         return False
@@ -250,7 +329,14 @@ def setApiKey( url='' ) :
             if type(testAPI[0])==type(dict()) :
                 if testAPI[0]['error'] != '':
                     P.error( testAPI[0]['error'] )
-                    response = popup( title='NIM API Invalid', msg='The NIM API Key entered is invalid.\n\nRe-enter API Key?', type='okCancel')
+                    if isGUI :
+                        response = popup( title='NIM API Invalid', msg='The NIM API Key entered is invalid.\n\nRe-enter API Key?', type='okCancel')
+                    else :
+                        print('The NIM API Key entered is invalid.')
+                        response=raw_input('Re-enter API Key? (Y/N): ')
+                        if response == 'Y' or response == 'y' :
+                            response = 'OK'
+
                     if(response=='OK'):
                         setApiKey( url=url )
                     else :
@@ -274,23 +360,43 @@ def setApiKey( url='' ) :
                             keyFO.write(api_key)
                             keyFO.truncate()
                             keyFO.close()
-                            popup( title='NIM API Key Set', msg='The NIM API Key has been set.\n\nPlease retry your last command.')
+                            if isGUI :
+                                popup( title='NIM API Key Set', msg='The NIM API Key has been set.\n\nPlease retry your last command.')
+                            else :
+                                print('The NIM API Key has been set.\nPlease retry your last command.')
                             return True
                         except :
                             P.error('Failed writing NIM Key file.')
                             P.error( '    %s' % traceback.print_exc() )
-                            popup(title='Error', msg='Failed writing NIM Key File.')
+                            if isGUI :
+                                popup(title='Error', msg='Failed writing NIM Key File.')
+                            else :
+                                print('Failed writing NIM Key File.')
                             return False
                     else :
                         P.error( 'Failed to validate NIM API.' )
-                        response = popup( title='NIM API Invalid', msg='The NIM API Key entered is invalid.\n\nRe-enter API Key?', type='okCancel')
+                        if isGUI :
+                            response = popup( title='NIM API Invalid', msg='The NIM API Key entered is invalid.\n\nRe-enter API Key?', type='okCancel')
+                        else :
+                            print('The NIM API Key entered is invalid.')
+                            response=raw_input('Re-enter API Key? (Y/N): ')
+                            if response == 'Y' or response == 'y' :
+                                response = 'OK'
+
                         if(response=='OK'):
                             setApiKey( url=url )
                         else :
                             return False
             else :
                 P.error( 'Failed to validate NIM API.' )
-                response = popup( title='NIM API Invalid', msg='The NIM API Key entered is invalid.\n\nRe-enter API Key?', type='okCancel')
+                if isGUI :
+                    response = popup( title='NIM API Invalid', msg='The NIM API Key entered is invalid.\n\nRe-enter API Key?', type='okCancel')
+                else :
+                    print('The NIM API Key entered is invalid.')
+                    response=raw_input('Re-enter API Key? (Y/N): ')
+                    if response == 'Y' or response == 'y' :
+                        response = 'OK'
+
                 if(response=='OK'):
                     setApiKey( url=url )
                 else :

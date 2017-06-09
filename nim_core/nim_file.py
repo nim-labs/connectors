@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: nim_file.py
-# Version:  v2.6.01.170417
+# Version:  v2.6.50.170609
 #
 # Copyright (c) 2017 NIM Labs LLC
 # All rights reserved.
@@ -23,7 +23,7 @@ import nim as Nim
 
 
 #  Variables :
-version='v2.5.0'
+version='v2.6.0'
 winTitle='NIM_'+version
 _os=platform.system().lower()
 #  Compiled REGEX Searches :
@@ -75,13 +75,17 @@ def get_app() :
     try:
         import cinesync
         return 'Cinesync'
-    except:
-        pass
+    except: pass
+    try :
+        nim_app = os.environ.get('NIM_APP', '-1')
+        if nim_app == 'Flame':
+            return 'Flame'
+    except: pass
     return None
 
 def get_apps() :
     'Provides a list of supported applications'
-    return ['Maya', 'Nuke', 'C4D', 'Hiero', '3dsMax', 'Houdini']
+    return ['Maya', 'Nuke', 'C4D', 'Hiero', '3dsMax', 'Houdini', 'Flame']
 
 def get_ext( filePath='' ) :
     'Retrieves the extension of a given file'
@@ -116,6 +120,8 @@ def get_ext( filePath='' ) :
             ext='.max'
         elif app=='Houdini' :
             ext='.hip'
+        elif app=='Flame' :
+            ext='.batch'
         if ext :
             return ext
         else :
@@ -318,14 +324,13 @@ def verUp( nim=None, padding=2, selected=False, win_launch=False, pub=False, sym
         else : nim.set_name( elem='filter', name='Work' )
     
 
-    ''' TEST SETTING THE SERVER ID HERE'''
-    #P.info("TEST SERVER ID: %s" % str(nim.server(get='ID')))
+    #P.info("SERVER ID: %s" % str(nim.server(get='ID')))
     # Get Server OS Path from server ID
     serverOsPathInfo = Api.get_serverOSPath( nim.server(get='ID'), platform.system() )
     P.info("Server OS Path: %s" % serverOsPathInfo)
     serverOSPath = serverOsPathInfo[0]['serverOSPath']
     nim.set_server( path=serverOSPath )
-    ''' END TEST '''
+
 
     #  Attempt to get current file information :
     if nim.filePath() :
@@ -539,7 +544,12 @@ def verUp( nim=None, padding=2, selected=False, win_launch=False, pub=False, sym
             nuke.scriptSaveAs( new_filePath )
         elif selected :
             P.info( 'Saving selected items as %s \n' % new_filePath )
-            nuke.nodeCopy( new_filePath )
+            try :
+                nuke.nodeCopy( new_filePath )
+            except RuntimeError:
+                P.info( 'Failed to selected items... Possibly no items selected.' )
+                return False
+
     
     #  Cinema 4D :
     elif nim.app()=='C4D' :
@@ -607,11 +617,21 @@ def verUp( nim=None, padding=2, selected=False, win_launch=False, pub=False, sym
             #Save File
             P.info( 'Saving file as %s \n' % new_filePath )
             hou.hipFile.save(file_name=str(new_filePath))
+            #Set $HIP var to location of current file
+            hou.hscript("set -g HIP = '" + str(projDir) + "'")
+            #Set $HIPNAME var to current file
+            hipName = os.path.splitext(new_fileName)[0]
+            hou.hscript("set -g HIPNAME = '" + str(hipName) + "'")
         else :
             #Save Selected Items
             #TODO: set to saveSelect items... currently saving entire scene
             P.info( 'Saving selected items as %s \n' % new_filePath )
             hou.hipFile.save(file_name=str(new_filePath))
+            #Set $HIP var to location of current file
+            hou.hscript("set -g HIP = '" + str(projDir) + "'")
+            #Set $HIPNAME var to current file
+            hipName = os.path.splitext(new_fileName)[0]
+            hou.hscript("set -g HIPNAME = '" + str(hipName) + "'")
 
     #  Make a copy of the file, if publishing :
     if pub and not symLink :

@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: nim_prefs.py
-# Version:  v2.6.01.170417
+# Version:  v2.6.50.170609
 #
 # Copyright (c) 2017 NIM Labs LLC
 # All rights reserved.
@@ -14,18 +14,39 @@
 
 
 #  General Imports :
-import os, re, traceback
+import os, sys, re, traceback
+import urlparse
+
 #  NIM Imports :
 import nim_api as Api
 import nim_file as F
 import nim_print as P
 import nim_win as Win
 
+'''
+isGUI = True
+try :
+    #Validate Against Terminal
+    if sys.stdin.isatty():
+        isGUI = False
+except :
+    pass
+'''
+
+isGUI = False
+try :
+    #Validate Against DCC Environment
+    if F.get_app() is not None :
+        isGUI = True
+except :
+    pass
+
+#print "isGUI: %s" % isGUI
 
 #  Variables :
 prefs_dirName='.nim'
 prefs_fileName='prefs.nim'
-version='v2.5.0'
+version='v2.6.0'
 winTitle='NIM_'+version
 nim_URL='http://hostname/nimAPI.php'
 nim_useSLL='False'
@@ -162,23 +183,59 @@ def _inputURL() :
     'Gets the NIM API URL from the user, via a popup'
     global nim_URL, version
 
+    isGUI = False
+    try :
+        #Validate Against DCC Environment
+        if F.get_app() is not None :
+            isGUI = True
+    except :
+        pass
+
     #  Prompt user to input URL :
-    msg='Please input the NIM API URL :\n'
-    url=Win.popup( title=winTitle+' - Get URL', msg=msg, type='input', defaultInput=nim_URL )
+    msg='Please input the NIM API URL :'
+    if isGUI :
+        url=Win.popup( title=winTitle+' - Get URL', msg=msg, type='input', defaultInput=nim_URL )
+    else :
+        url=raw_input(msg)
     #P.info( 'NIM URL Set to: %s' % url ) 
     if url : 
+        # Check for '/nimAPI.php?' at end of URL
+        if not url.endswith('/nimAPI.php?'):
+            if not url.endswith('/'):
+                url = url+"/nimAPI.php?"
+            else :
+                url = url+"nimAPI.php?"
+
         # Check for ? at end of url
         # Append if missing
-        if not url.endswith('?'):
+        #if not url.endswith('?'):
+        #    url = url+"?"
+        if url.endswith('nimAPI.php') :
             url = url+"?"
+
         return url
-    else : return False
+
+    else : 
+        return False
 
 
 def _verifyURL( url='' ) :
     'Verifies a given URL as valid'
     #  Verify URL :
     if not url : return False
+
+    # Validate URL Pattern
+    parsedURL = urlparse.urlparse(url)
+    min_attributes = ('scheme', 'netloc')
+    if not all([getattr(parsedURL, attr) for attr in min_attributes]):
+        #error = "'{url}' string has no scheme or netloc.".format(url=parsedURL.geturl())
+        #print(error)
+        print("URL Format is invalid")
+        return False
+    else:
+        print("Valid URL Format Entered")
+
+
     result=Api.get( sqlCmd={'q': 'testAPI'}, debug=False, nimURL=url )
     P.info('Validating API: %s' % result)
     if result : 
@@ -204,7 +261,7 @@ def _prefsFail() :
 
 
 def _nimPrefs() :
-    'Returns a list of NIM preferences'
+    'Returns a dictionary of NIM preferences'
     nimDict={
         'NIM_URL': nim_URL,
         'NIM_User': nim_user,
@@ -223,7 +280,7 @@ def _nimPrefsList() :
 
 
 def _appPrefs( app='Maya' ) :
-    'Returns a list of NIM Preferences Dictionary, common for all applications.'
+    'Returns a dictionary of NIM Preferences Dictionary, common for all applications.'
     appDict={
         app+'_WinPosX': '250',
         app+'_WinPosY': '250',
@@ -235,6 +292,7 @@ def _appPrefs( app='Maya' ) :
         app+'_Job': '',
         #app+'_DefaultServerPath': '',
         app+'_ServerPath': '',
+        app+'_ServerID': '',
         app+'_Tab': 'SHOT',
         app+'_Asset': '',
         app+'_Show': '',
@@ -251,7 +309,7 @@ def _appPrefsList( app='Maya' ) :
     'Returns a list of keys from the Application Preferences Dictionary, for orderly printing'
     appList=[app+'_WinPosX', app+'_WinPosY', app+'_WinWidth', app+'_WinHeight', \
         app+'_StyleSheetDir', app+'_UseStyleSheet', app+'_Job', \
-        app+'_ServerPath', app+'_Tab', app+'_Asset', app+'_Show', app+'_Shot', app+'_Filter', \
+        app+'_ServerPath', app+'_ServerID', app+'_Tab', app+'_Asset', app+'_Show', app+'_Shot', app+'_Filter', \
         app+'_Task', app+'_Basename', app+'_Version']
     return appList
 
@@ -290,6 +348,15 @@ def mk_default( recreatePrefs=False, notify_success=True ) :
     global nim_api
     global nim_user, nim_userID
     global nim_URL
+
+    isGUI = False
+    try :
+        #Validate Against DCC Environment
+        if F.get_app() is not None :
+            isGUI = True
+    except :
+        pass
+    
     nimHome=mk_home()
     prefsFile=get_path()
     apps=F.get_apps()
@@ -328,9 +395,15 @@ def mk_default( recreatePrefs=False, notify_success=True ) :
         else :            
             #  Ask to recreate existing preferences :
             if recreatePrefs :
-                recreate=Win.popup( title=winTitle+' - Prefs Exist', \
-                    msg='Preferences already exist.\nWould you like to re-create your preferences?', \
-                    type='okCancel' )
+                if isGUI :
+                    recreate=Win.popup( title=winTitle+' - Prefs Exist', \
+                        msg='Preferences already exist.\nWould you like to re-create your preferences?', \
+                        type='okCancel' )
+                else :
+                    recreate=raw_input("Preferences already exist. Would you like to re-create your preferences? (Y\N) ")
+                    if recreate == 'Y' or recreate == 'y':
+                        recreate='OK'
+
                 if recreate=='OK' :
                     P.info( 'Deleting previous preferences file...' )
                     try :
@@ -358,7 +431,13 @@ def mk_default( recreatePrefs=False, notify_success=True ) :
                 break
             else:
                 msg='The NIM API URL entered is invalid :\n %s \nTry Again?' % url
-                keepGoing=Win.popup( title=winTitle+' - Get URL', msg=msg, type='okCancel' )
+                if isGUI :
+                    keepGoing=Win.popup( title=winTitle+' - Get URL', msg=msg, type='okCancel' )
+                else :
+                    keepGoing=raw_input('The NIM API URL entered is invalid. Try Again? (Y/N):' )
+                    if keepGoing == 'Y' or keepGoing == 'y' :
+                        keepGoing = 'OK'
+
                 if keepGoing != 'OK':
                     P.error('Exiting without setting NIM Preferences.')
                     search_for_url = False
@@ -368,15 +447,6 @@ def mk_default( recreatePrefs=False, notify_success=True ) :
         #  Verify User :
         if search_for_user :
             P.info('Searching for NIM User')
-            '''
-            nim_userID=Api.get( sqlCmd={ 'q': 'getUserID', 'u': nim_user}, debug=False, nimURL=nim_URL )
-            if not nim_userID :
-                P.info("User ID not found")
-                result=get_userInfo( url=nim_URL )
-                if type(result)==type(tuple()) and len(result)==2 :
-                    nim_user=result[0]
-                    nim_userID=result[1]
-            '''
             #Force input of username at preference creation
             result=get_userInfo( url=nim_URL )
             if type(result)==type(tuple()) and len(result)==2 :
@@ -453,7 +523,6 @@ def read() :
         return prefs
     except Exception, e :
         P.error( 'Unable to read preferences.' )
-        #Win.popup( title='NIM_v'+version+' - Preferences Error', msg='Unable to read preferences.' )
         return False
 
 

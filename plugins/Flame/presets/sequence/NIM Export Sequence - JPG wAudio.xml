@@ -1,0 +1,84 @@
+<?xml version="1.0"?>
+<preset version="7">
+	<type>sequence</type>
+	<comment>Publish sequence to NIM as Original Media JPG including 10 frame handles, keeping all tracks, and AIFF Audio using the job&apos;s seleted project structure.</comment>
+	<sequence>
+		<fileType>NONE</fileType>
+		<namePattern></namePattern>
+		<includeVideo>True</includeVideo>
+		<exportVideo>True</exportVideo>
+		<videoMedia>
+			<mediaFileType>image</mediaFileType>
+			<commit>Original</commit>
+			<flatten>NoChange</flatten>
+			<exportHandles>True</exportHandles>
+			<nbHandles>10</nbHandles>
+		</videoMedia>
+		<includeAudio>True</includeAudio>
+		<exportAudio>True</exportAudio>
+		<audioMedia>
+			<mediaFileType>audio</mediaFileType>
+			<commit>Original</commit>
+			<flatten>NoChange</flatten>
+			<exportHandles>True</exportHandles>
+			<nbHandles>10</nbHandles>
+		</audioMedia>
+	</sequence>
+	<video>
+		<fileType>Jpeg</fileType>
+		<codec>923688</codec>
+		<codecProfile></codecProfile>
+		<namePattern>&lt;nim_shot_plates&gt;/&lt;segment name&gt;_&lt;shot name&gt;_&lt;version name&gt;/&lt;segment name&gt;_&lt;shot name&gt;_&lt;version name&gt;.</namePattern>
+		<compressionQuality>80</compressionQuality>
+		<transferCharacteristic>2</transferCharacteristic>
+		<colorimetricSpecification>4</colorimetricSpecification>
+		<publishLinked>False</publishLinked>
+		<overwriteWithVersions>False</overwriteWithVersions>
+		<resize>
+			<resizeType>fit</resizeType>
+			<resizeFilter>lanczos</resizeFilter>
+			<width>0</width>
+			<height>0</height>
+			<bitsPerChannel>8</bitsPerChannel>
+			<numChannels>3</numChannels>
+			<floatingPoint>False</floatingPoint>
+			<bigEndian>True</bigEndian>
+			<pixelRatio>1</pixelRatio>
+		<scanFormat>P</scanFormat>
+		</resize>
+	</video>
+	<audio>
+		<fileType>AIFF</fileType>
+		<codec>923818</codec>
+		<codecProfile></codecProfile>
+		<namePattern>&lt;nim_shot_plates&gt;/&lt;segment name&gt;_&lt;shot name&gt;_&lt;version name&gt;/&lt;segment name&gt;_&lt;shot name&gt;_&lt;version name&gt;</namePattern>
+		<mixdown>AsIs</mixdown>
+		<sampleRate>-1</sampleRate>
+		<bitRate>128</bitRate>
+		<bitDepth>-1</bitDepth>
+	</audio>
+	<name>
+		<framePadding>4</framePadding>
+		<startFrame>1</startFrame>
+		<useTimecode>False</useTimecode>
+	</name>
+	<createOpenClip>
+		<namePattern>&lt;nim_shot_root&gt;/FLAME/sources/&lt;segment name&gt;</namePattern>
+		<version>
+			<index>0</index>
+			<padding>2</padding>
+			<name>v&lt;version&gt;</name>
+		</version>
+		<batchSetup>
+			<namePattern>&lt;nim_shot_root&gt;/FLAME/batch/&lt;shot name&gt;_COMP_&lt;version name&gt;</namePattern>
+			<exportNamePattern>&lt;nim_shot_comp&gt;/FLAME/&lt;shot name&gt;_COMP</exportNamePattern>
+			<outputPathPattern>&lt;nim_shot_comp&gt;/&lt;shot name&gt;_COMP_&lt;version name&gt;/&lt;shot name&gt;_COMP_&lt;version name&gt;.</outputPathPattern>
+			<batchGroup>False</batchGroup>
+			<keepClipNodes>False</keepClipNodes>
+			<batchGroupPath>/Desktop</batchGroupPath>
+		</batchSetup>
+	</createOpenClip>
+	<reImport>
+		<namePattern></namePattern>
+	</reImport>
+</preset>

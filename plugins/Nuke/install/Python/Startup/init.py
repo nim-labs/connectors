@@ -16,10 +16,14 @@ try:
 				print "Loading NIM Hiero Connector for Hiero 10.0vX"
 				sys.path.append(nim_root+'/plugins/Nuke/v10/Python/Startup/nim_hiero_connector')
 				hiero.core.addPluginPath(nim_root+'/plugins/Nuke/v10/Python/Startup/nim_hiero_connector')
-			else:
+			elif NukeVersionMajor == 10 and NukeVersionMinor == 5:
 				print "Loading NIM Hiero Connector for Hiero 10.5vX"
 				sys.path.append(nim_root+'/plugins/Nuke/v10.5/Python/Startup/nim_hiero_connector')
 				hiero.core.addPluginPath(nim_root+'/plugins/Nuke/v10.5/Python/Startup/nim_hiero_connector')
+			else:
+				print "Loading NIM Hiero Connector for Hiero 11.0vX"
+				sys.path.append(nim_root+'/plugins/Nuke/v11/Python/Startup/nim_hiero_connector')
+				hiero.core.addPluginPath(nim_root+'/plugins/Nuke/v11/Python/Startup/nim_hiero_connector')
 	except:
 		print "Loading NIM Hiero Connector for Hiero 9.XvX"
 		sys.path.append(nim_root+'/plugins/Nuke/v09/Python/Startup/nim_hiero_connector')

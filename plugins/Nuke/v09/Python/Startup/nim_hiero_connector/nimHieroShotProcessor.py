@@ -1403,11 +1403,11 @@ class NimShotProcessor(hiero.core.ProcessorBase, hiero.ui.ProcessorUIBase, PySid
             print "     startFrame=", element_startFrame 
             print "     endFrame=", element_endFrame
             print "     cutHandles=", cutHandles
-            
-            element_result = nimAPI.add_element( parent='shot', parentID=nim_shotID, typeID=nimHieroConnector.g_nim_elementTypeID, \
-                                                  path=element_filePath, name=element_fileName, startFrame=element_startFrame, endFrame=element_endFrame, \
-                                                  handles=cutHandles, isPublished=nimHieroConnector.g_nim_publishElement )
-            
+          
+            element_result = nimAPI.add_element( parent='shot', parentID=nim_shotID, userID=userID, typeID=nimHieroConnector.g_nim_elementTypeID, \
+                                                    path=element_filePath, name=element_fileName, startFrame=element_startFrame, endFrame=element_endFrame, \
+                                                    handles=cutHandles, isPublished=nimHieroConnector.g_nim_publishElement )
+
           ''' ****************** NIM END PUBLISH ELEMENT ****************** '''
       
       # Dont add empty groups

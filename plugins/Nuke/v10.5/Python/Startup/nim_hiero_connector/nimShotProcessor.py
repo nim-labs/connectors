@@ -590,6 +590,17 @@ class NimShotProcessor(hiero.core.ProcessorBase):
           print "preset name: %s" % presetName
           #print "export name: %s" % presetExportName
 
+          nim_prefInfo = nimPrefs.read()
+          user = nim_prefInfo['NIM_User']
+          userID = nimAPI.get_userID(user)
+          if not userID :
+            nimUI.GUI().update_user()
+            userInfo=nim.NIM().userInfo()
+            user = userInfo['name']
+            userID = userInfo['ID']
+          print "NIM: user=%s" % user
+          print "NIM: userID: %s" % userID
+              
           if presetName == 'hiero.exporters.FnTranscodeExporter.TranscodeExporter':
             if nimHieroConnector.g_nim_publishElement == True:
               print "NIM: Publish Element"
@@ -601,8 +612,8 @@ class NimShotProcessor(hiero.core.ProcessorBase):
               print "     startFrame=", element_startFrame 
               print "     endFrame=", element_endFrame
               print "     cutHandles=", cutHandles
-              
-              element_result = nimAPI.add_element( parent='shot', parentID=nim_shotID, typeID=nimHieroConnector.g_nim_elementTypeID, \
+            
+              element_result = nimAPI.add_element( parent='shot', parentID=nim_shotID, userID=userID, typeID=nimHieroConnector.g_nim_elementTypeID, \
                                                     path=element_filePath, name=element_fileName, startFrame=element_startFrame, endFrame=element_endFrame, \
                                                     handles=cutHandles, isPublished=nimHieroConnector.g_nim_publishElement )
 
@@ -624,18 +635,6 @@ class NimShotProcessor(hiero.core.ProcessorBase):
                 print "No Task selected for Nuke Comp Export.\n \
                        The Nuke comp will be created but not logged into NIM."
                 nim_doSave = False
-              
-
-              nim_prefInfo = nimPrefs.read()
-              user = nim_prefInfo['NIM_User']
-              userID = nimAPI.get_userID(user)
-              if not userID :
-                nimUI.GUI().update_user()
-                userInfo=nim.NIM().userInfo()
-                user = userInfo['name']
-                userID = userInfo['ID']
-              print "NIM: user=%s" % user
-              print "NIM: userID: %s" % userID
 
               #Derive basename from file ( TODO: give option to use shot_task_tag_ver.nk method )
               #Using filename entered in Export window

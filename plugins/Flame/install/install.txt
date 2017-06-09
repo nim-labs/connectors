@@ -1,0 +1,34 @@
+Flame Install:
+
+Linux:
+
+	Set the DL_PYTHON_HOOK_PATH environment variable to the [NIM_CONNECTOR_ROOT]/plugins/Flame/python location
+
+	Edit the ~/.cshrc file to include the following:
+
+	setenv DL_PYTHON_HOOK_PATH [NIM_CONNECTOR_ROOT]/plugins/Flame/python
+
+	Replace [NIM_CONNECTOR_ROOT] with the full path to the NIM Connector root folder.
+
+
+
+OSX 10.12.x:
+
+	Edit the setenv.DL_PYTHON_HOOK_PATH.plist file and replace [NIM_CONNECTOR_ROOT] with the full path to the NIM Connector root folder.
+
+	Copy the file to: ~/Library/LaunchAgents/setenv.DL_PYTHON_HOOK_PATH.plist
+
+	Reboot
+
+
+OSX 10.11.x
+
+	Edit the launchd.conf file and replace [NIM_CONNECTOR_ROOT] with the full path to the NIM Connector root folder. 
+	
+	Copy the the file to: /etc/launchd.conf
+
+	If the /etc/launchd.conf file exists, append the following line to the file updating the [NIM_CONNECTOR_ROOT] with the full path to the NIM Connector root folder.)
+
+	setenv DL_PYTHON_HOOK_PATH [NIM_CONNECTOR_ROOT]/plugins/Flame/python
+
+	

@@ -16,9 +16,13 @@ else:
 		print "Loading NIM for Nuke 10.0vX"
 		nuke.pluginAddPath(nim_root+'/plugins/Nuke/v10')
 		nuke.pluginAddPath(nim_root+'/plugins/Nuke/v10/gizmos')
-	else:
+	elif NukeVersionMajor == 10 and NukeVersionMinor == 5:
 		print "Loading NIM for Nuke 10.5vX"
 		nuke.pluginAddPath(nim_root+'/plugins/Nuke/v10.5')
 		nuke.pluginAddPath(nim_root+'/plugins/Nuke/v10.5/gizmos')
+	else:
+		print "Loading NIM for Nuke 11.0vX"
+		nuke.pluginAddPath(nim_root+'/plugins/Nuke/v11')
+		nuke.pluginAddPath(nim_root+'/plugins/Nuke/v11/gizmos')
 
 # END NIM Nuke Connector

@@ -16,8 +16,8 @@
 # NIM MENU
 
 #  Make prefs:
-import nim_core.nim_prefs as Prefs
-Prefs.mk_default( notify_success=True )
+#import nim_core.nim_prefs as Prefs
+#Prefs.mk_default( notify_success=True )
 
 try:
 	isNuke = False
