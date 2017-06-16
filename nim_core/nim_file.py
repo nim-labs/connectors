@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: nim_file.py
-# Version:  v2.6.50.170609
+# Version:  v2.6.51.170615
 #
 # Copyright (c) 2017 NIM Labs LLC
 # All rights reserved.
@@ -615,20 +615,28 @@ def verUp( nim=None, padding=2, selected=False, win_launch=False, pub=False, sym
             import nim_houdini as Houdini
             Houdini.set_vars( nim=nim )
             #Save File
-            P.info( 'Saving file as %s \n' % new_filePath )
-            hou.hipFile.save(file_name=str(new_filePath))
+            if _os.lower() in ['windows', 'win32'] :
+                hipFilePath = new_filePath.replace('\\','/')
+            P.info( 'Saving file as %s \n' % hipFilePath )
+            hou.hipFile.save(file_name=str(hipFilePath))
             #Set $HIP var to location of current file
-            hou.hscript("set -g HIP = '" + str(projDir) + "'")
+            if _os.lower() in ['windows', 'win32'] :
+                hipProj = projDir.replace('\\','/')
+            hou.hscript("set -g HIP = '" + str(hipProj) + "'")
             #Set $HIPNAME var to current file
             hipName = os.path.splitext(new_fileName)[0]
             hou.hscript("set -g HIPNAME = '" + str(hipName) + "'")
         else :
             #Save Selected Items
             #TODO: set to saveSelect items... currently saving entire scene
-            P.info( 'Saving selected items as %s \n' % new_filePath )
-            hou.hipFile.save(file_name=str(new_filePath))
+            if _os.lower() in ['windows', 'win32'] :
+                hipFilePath = new_filePath.replace('\\','/')
+            P.info( 'Saving selected items as %s \n' % hipFilePath )
+            hou.hipFile.save(file_name=str(hipFilePath))
             #Set $HIP var to location of current file
-            hou.hscript("set -g HIP = '" + str(projDir) + "'")
+            if _os.lower() in ['windows', 'win32'] :
+                hipProj = projDir.replace('\\','/')
+            hou.hscript("set -g HIP = '" + str(hipProj) + "'")
             #Set $HIPNAME var to current file
             hipName = os.path.splitext(new_fileName)[0]
             hou.hscript("set -g HIPNAME = '" + str(hipName) + "'")
