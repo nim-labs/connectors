@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: UI.py
-# Version:  v2.6.50.170609
+# Version:  v2.6.70.170619
 #
 # Copyright (c) 2017 NIM Labs LLC
 # All rights reserved.
@@ -1324,13 +1324,19 @@ class GUI(QtGui.QMainWindow) :
                     #  Add normal versions :
                     else :
                         if self.nim.name('filter')=='Asset Master' :
+                            
                             assetInfo=Api.get_assetInfo( assetID=self.nim.ID('asset') )
+
                             amrPath=os.path.normpath( assetInfo[0]['AMR_path'] )
+                            amrFileID=assetInfo[0]['AMR_file_ID']
                             fileName=assetInfo[0]['AMR_filename']
-                            #fileDir=os.path.normpath( os.path.join( self.nim.server(get='path'), amrPath ) )
-                            serverOsPathInfo = Api.get_serverOSPath( self.nim.server(get='ID'), platform.system() )
-                            #P.info("SERVER OS PATH: %s" % serverOsPathInfo)
+
+                            amrFileInfo=Api.get_verInfo( verID=amrFileID )
+                            amrServerID = amrFileInfo[0]['serverID']
+
+                            serverOsPathInfo = Api.get_serverOSPath( amrServerID, platform.system() )
                             serverOSPath = serverOsPathInfo[0]['serverOSPath']
+
                             fileDir=os.path.normpath( os.path.join( serverOSPath, amrPath ) )
                             filePath=os.path.normpath( os.path.join( fileDir, fileName ) )
                             if os.path.isfile( filePath ) :
@@ -1625,13 +1631,19 @@ class GUI(QtGui.QMainWindow) :
             if elem=='filter' :
                 #  Set Asset Master :
                 if self.nim.name( elem )=='Asset Master' :
+
                     assetInfo=Api.get_assetInfo( assetID=self.nim.ID('asset') )
+                    
                     amrPath=os.path.normpath( assetInfo[0]['AMR_path'] )
+                    amrFileID=assetInfo[0]['AMR_file_ID']
                     fileName=assetInfo[0]['AMR_filename']
-                    #fileDir=os.path.normpath( os.path.join( self.nim.server(get='path'), amrPath ) )
-                    serverOsPathInfo = Api.get_serverOSPath( self.nim.server(get='ID'), platform.system() )
-                    #P.info(serverOsPathInfo)
+
+                    amrFileInfo=Api.get_verInfo( verID=amrFileID )
+                    amrServerID = amrFileInfo[0]['serverID']
+
+                    serverOsPathInfo = Api.get_serverOSPath( amrServerID, platform.system() )
                     serverOSPath = serverOsPathInfo[0]['serverOSPath']
+
                     fileDir=os.path.normpath( os.path.join( serverOSPath, amrPath ) )
                     filePath=os.path.normpath( os.path.join( fileDir, fileName ) )
                     if os.path.isfile( filePath ) :
