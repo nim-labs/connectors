@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: UI.py
-# Version:  v2.6.70.170619
+# Version:  v2.6.75.170620
 #
 # Copyright (c) 2017 NIM Labs LLC
 # All rights reserved.
@@ -43,7 +43,7 @@ except ImportError :
 #  Variables :
 WIN=''
 startTime=''
-version='v2.6.0'
+version='v2.6.75'
 winTitle='NIM_'+version
 _os=platform.system().lower()
 _osCap=platform.system()
@@ -2577,8 +2577,7 @@ class GUI(QtGui.QMainWindow) :
                 P.info( '    %s' % filePath )
                 if self.checkBox.checkState() :
                     #  Import file as a group :
-                    mc.file( filePath, i=True, force=True, groupReference=True,
-                        groupName=grpName+'_GRP' )
+                    mc.file( filePath, i=True, force=True, groupReference=True, groupName=grpName+'_GRP' )
                 else :
                     #  Import file :
                     mc.file( filePath, i=True, force=True )
@@ -2666,7 +2665,9 @@ class GUI(QtGui.QMainWindow) :
         tag=self.nim.Input('tag').text()
         task=self.nim.Input('task').currentText()
         basename=Api.to_basename( nim=self.nim )
-        if self.app=='Maya' : ext=self.nim.Input('fileExt').currentText()
+        if self.app=='Maya' : 
+            import maya.cmds as mc
+            ext=self.nim.Input('fileExt').currentText()
         elif self.app=='Nuke' : 
             import nuke
             if nuke.env['nc'] :
@@ -2689,9 +2690,20 @@ class GUI(QtGui.QMainWindow) :
                     return False
         
         
-        #  Version up file and add to API :
-        Api.versionUp( nim=self.nim, selected=selected, win_launch=True )
+        # Stop Maya Undo Queue
+        if self.app=='Maya' :
+            mc.undoInfo(openChunk=True)
         
+        #  Version up file and add to API :
+        try : 
+            Api.versionUp( nim=self.nim, selected=selected, win_launch=True )
+        except :
+            P.error("Failed to Save File")
+        
+        # Start Maya Undo Queue
+        if self.app=='Maya' :    
+            mc.undoInfo(closeChunk=True)
+
         self.saveServerPref = True
 
         #  Refresh the Window :
@@ -2706,7 +2718,9 @@ class GUI(QtGui.QMainWindow) :
     def file_verUp(self) :
         'Versions up the file, when the Version Up button is pressed'
         #  Get File Extension :
-        if self.app=='Maya' : ext=self.nim['fileExt']['input'].currentText()
+        if self.app=='Maya' : 
+            import maya.cmds as mc
+            ext=self.nim['fileExt']['input'].currentText()
         elif self.app=='Nuke' : 
             import nuke
             if nuke.env['nc'] :
@@ -2716,13 +2730,26 @@ class GUI(QtGui.QMainWindow) :
         elif self.app=='C4D' : ext='.c4d'
         elif self.app=='3dsMax' : ext='.max'
         elif self.app=='Houdini' : ext='.hip'
+
+        # Stop Maya Undo Queue
+        if self.app=='Maya' :
+            mc.undoInfo(openChunk=True)
+
         #  Version Up :
-        if self.nim.tab()=='SHOT' :
-            Api.versionUp( projPath=self.nim.Input('server').currentText(), app=self.app, shotID=self.nim.ID('shot'), \
-                task=self.nim.name('task'), basename=self.nim.name('base'), ext=ext )
-        elif self.nim.tab()=='ASSET' :
-            Api.versionUp( projPath=self.nim.Input('server').currentText(), app=self.app, assetID=self.nim.ID('asset'), \
-                task=self.nim.name('task'), basename=self.nim.name('base'), ext=ext )
+        try :
+            if self.nim.tab()=='SHOT' :
+                Api.versionUp( projPath=self.nim.Input('server').currentText(), app=self.app, shotID=self.nim.ID('shot'), \
+                    task=self.nim.name('task'), basename=self.nim.name('base'), ext=ext )
+            elif self.nim.tab()=='ASSET' :
+                Api.versionUp( projPath=self.nim.Input('server').currentText(), app=self.app, assetID=self.nim.ID('asset'), \
+                    task=self.nim.name('task'), basename=self.nim.name('base'), ext=ext )
+        except :
+            P.error("Failed to Version File")
+
+        # Start Maya Undo Queue
+        if self.app=='Maya' :    
+            mc.undoInfo(closeChunk=True)
+
         #  Close window upon completion :
         self.close()
         return
@@ -2735,7 +2762,9 @@ class GUI(QtGui.QMainWindow) :
         self.update_server()
 
         #  Get File Extension :
-        if self.app=='Maya' : ext=self.nim.Input('fileExt').currentText()
+        if self.app=='Maya' : 
+            import maya.cmds as mc
+            ext=self.nim.Input('fileExt').currentText()
         elif self.app=='Nuke' : 
             import nuke
             if nuke.env['nc'] :
@@ -2745,9 +2774,25 @@ class GUI(QtGui.QMainWindow) :
         elif self.app=='C4D' :  ext='.c4d'
         elif self.app=='3dsMax' : ext='.max'
         elif self.app=='Houdini' : ext='.hip'
+        
         #  Version Up File :
         P.info('\nPublish Step #1 - Versioning Up the file...')
-        ver_filePath=Api.versionUp( nim=self.nim, win_launch=True )
+        
+        # Stop Maya Undo Queue
+        if self.app=='Maya' :
+            mc.undoInfo(openChunk=True)
+
+        #  Version up file and add to API :
+        try :
+            ver_filePath=Api.versionUp( nim=self.nim, win_launch=True )
+        except :
+            P.error("Failed to Save Working File")
+
+        # Start Maya Undo Queue
+        if self.app=='Maya' :    
+            mc.undoInfo(closeChunk=True)
+
+
         if ver_filePath :
             #  Run Checks :
             P.info('\nPublishing Step #2 - Running publish checks...')
@@ -2756,7 +2801,22 @@ class GUI(QtGui.QMainWindow) :
             #  Publish :
             P.info('\nPublishing Step #3 - Publishing work file and sym-link...\n')
             symLink=self.checkBox.isChecked()
-            pub_filePath=Api.versionUp( nim=self.nim, win_launch=True, pub=True, symLink=symLink )
+
+            # Stop Maya Undo Queue
+            if self.app=='Maya' :
+                mc.undoInfo(openChunk=True)
+
+            #  Version up file and add to API :
+            try :
+                pub_filePath=Api.versionUp( nim=self.nim, win_launch=True, pub=True, symLink=symLink )
+            except :
+                P.error("Failed to Save Publish")
+
+            # Start Maya Undo Queue
+            if self.app=='Maya' :    
+                mc.undoInfo(closeChunk=True)
+
+
             #  Prompt to open work version :
             P.info('\nPublishing Step #4 - Prompting to open work file...\n')
             result=Win.popup( title=winTitle+' - Open Work File?', type='okCancel', \
@@ -2842,8 +2902,7 @@ class GUI(QtGui.QMainWindow) :
 
         #  Reference the file :
         if self.checkBox.checkState() :
-            mc.file( filePath, force=True, reference=True, namespace=fileName, groupReference=True, \
-                groupName=fileName+'_GRP' )
+            mc.file( filePath, force=True, reference=True, namespace=fileName, groupReference=True, groupName=fileName+'_GRP' )
         else :
             mc.file( filePath, force=True, reference=True, namespace=fileName )
         

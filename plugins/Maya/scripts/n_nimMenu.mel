@@ -22,7 +22,7 @@ global proc n_nimMenu()
 	string $nimOpen = "python(\"import nim_core.UI as UI; UI.mk('FILE')\")";
 	string $nimImport = "python(\"import nim_core.UI as UI; UI.mk('LOAD', _import=True )\")";
 	string $nimReferece = "python(\"import nim_core.UI as UI; UI.mk('LOAD', ref=True)\")";
-	string $nimSaveAs = "python(\"import nim_core.UI as UI; UI.mk('SAVE')\")";
+	string $nimSaveAs = "python(\"import nim_core.UI as UI; UI.mk('SAVE')\");";
 	string $nimExportSelected = "python(\"import nim_core.UI as UI; UI.mk( mode='SAVE', _export=True )\")";
 	string $nimVersionUp = "python(\"import nim_core.nim_api as Api; Api.versionUp()\")";
 	string $nimPublish = "python(\"import nim_core.UI as UI; UI.mk('PUB')\")";
