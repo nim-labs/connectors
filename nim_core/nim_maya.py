@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: nim_maya.py
-# Version:  v2.6.50.170609
+# Version:  v2.6.75.170620
 #
 # Copyright (c) 2017 NIM Labs LLC
 # All rights reserved.
@@ -60,6 +60,8 @@ def get_mainWin() :
 def set_vars( nim=None ) :
     'Add variables to Maya Render Globals'
     
+    mc.undoInfo(openChunk=True)
+
     P.info( '\nSetting Render Globals variables...' )
     
     #  User :
@@ -157,11 +159,15 @@ def set_vars( nim=None ) :
     P.info('    Completed setting NIM attributes on the defaultRenderGlobals node.')
     #nim.Print()
     
+    mc.undoInfo(closeChunk=True)
     return
 
 
 def get_vars( nim=None ) :
     'Gets NIM settings from the defaultRenderGlobals node in Maya.'
+    
+    mc.undoInfo(openChunk=True)
+
     P.info('Getting information from NIM attributes on the defaultRenderGlobals node...')
     
     #  User :
@@ -282,7 +288,7 @@ def get_vars( nim=None ) :
     #  Print dictionary :
     #P.info('\nNIM Dictionary from get vars...')
     #nim.Print()
-    
+    mc.undoInfo(closeChunk=True)
     return
 
 #DEPRICATED
