@@ -1,7 +1,7 @@
 /* ****************************************************************************
 #
 # Filename: Photoshop/nimMain.jsx
-# Version:  v2.0.0.160511
+# Version:  v2.6.77.170630
 #
 # Copyright (c) 2016 NIM Labs LLC
 # All rights reserved.
@@ -13,8 +13,10 @@
 
 
 // Declare global variables
-var loadingPanel = new Window('palette', 'Loading...', undefined),
-	loadingLabel = loadingPanel.add('statictext', undefined, 'Loading NIM Connector...'),
+//var loadingPanel = new Window('palette', 'Loading...', undefined),
+//	loadingLabel = loadingPanel.add('statictext', undefined, 'Loading NIM Connector...'),
+var loadingPanel = null,
+	loadingLabel = null,
 	os = getOperatingSystem(),
 	userID,
 	username,
@@ -22,6 +24,8 @@ var loadingPanel = new Window('palette', 'Loading...', undefined),
 	winUserPath = '';
 
 if (os == 'win') {
+	loadingPanel = new Window('palette', 'Loading...', undefined);
+	loadingLabel = loadingPanel.add('statictext', undefined, 'Loading NIM Connector...');
 	loadingPanel.show();
 	try { winUserPath = $.getenv('userprofile'); }
 	catch (e) { winUserPath = ''; }
