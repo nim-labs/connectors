@@ -900,13 +900,47 @@ def get_elements( parent='shot', parentID=None, elementTypeID=None, getLastEleme
     publishedElements=get( {'q': 'getElements', 'parent': parent, 'parentID': parentID, 'elementTypeID': elementTypeID, 'getLastElement': getLastElement, 'isPublished': isPublished} )
     return publishedElements
 
-def add_element( parent='shot', parentID=None, userID=None, typeID='', path='', name='', startFrame=None, endFrame=None, handles=None, isPublished=False, nimURL=None, apiKey=None, metadata='' ):
+def add_element( parent='shot', parentID=None, userID=None, typeID='', path='', name='', startFrame=None, endFrame=None, handles=None, padding=None, isPublished=False, nimURL=None, apiKey=None, metadata='' ):
     'Adds an element to an asset, shot, task, or render'
     # nimURL and apiKey are optional for Render API Key overrride
     params = {'q': 'addElement', 'parent': parent, 'userID':userID, 'typeID': typeID, 'parentID': parentID, 'path': path, \
                 'name': name, 'startFrame': startFrame, 'endFrame': endFrame, 'handles': handles, 'isPublished': isPublished, 'metadata': metadata}
     result = connect( method='get', params=params, nimURL=nimURL, apiKey=apiKey )
     return result
+
+def update_element(ID=None, userID=None, jobID=None, assetID=None, shotID=None, taskID=None, renderID=None, elementTypeID=None, name=None, path=None, startFrame=None, endFrame=None, handles=None, isPublished=None, nimURL=None, apiKey=None ):
+    'Updates an existing element by element ID'
+    # nimURL and apiKey are optional for Render API Key overrride
+    params = {'q': 'updateElement'}
+
+    if ID is not None : params['ID'] = ID
+    if userID is not None : params['userID'] = userID
+    if jobID is not None : params['jobID'] = jobID
+    if assetID is not None : params['assetID'] = assetID
+    if shotID is not None : params['shotID'] = shotID
+    if taskID is not None : params['taskID'] = taskID
+    if renderID is not None : params['renderID'] = renderID
+    if elementTypeID is not None : params['elementTypeID'] = elementTypeID
+    if name is not None : params['name'] = name
+    if path is not None : params['path'] = path
+    if startFrame is not None : params['startFrame'] = startFrame
+    if endFrame is not None : params['endFrame'] = endFrame
+    if handles is not None : params['handles'] = handles
+    if isPublished is not None : params['isPublished'] = isPublished
+
+    result = connect( method='get', params=params, nimURL=nimURL, apiKey=apiKey )
+    return result
+
+def delete_element(ID=None, nimURL=None, apiKey=None):
+    'Deletes an existing element by element ID'
+    # nimURL and apiKey are optional for Render API Key overrride
+
+    params = {'q': 'deleteElement'}
+    if ID is not None : params['ID'] = ID
+
+    result = connect( method='get', params=params, nimURL=nimURL, apiKey=apiKey )
+    return result
+
 
 #  Files :
 #===------
