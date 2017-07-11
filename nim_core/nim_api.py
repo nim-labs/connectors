@@ -704,13 +704,16 @@ def get_tasks(app='all', userType='artist') :
     tasks=get( {'q': 'getTaskTypes', 'app': app, 'type': userType} )
     return tasks
 
-def get_taskInfo(itemClass='', itemID=0) :
+def get_taskInfo(ID=None, itemClass=None, itemID=None) :
     'Retrieves a dictionary of task information for a given asset or shot item from the API'
-    if itemID==0:
-        return False
-    else:
-        taskInfo=get( {'q': 'getTaskInfo', 'class': itemClass, 'itemID': itemID } )
-        return taskInfo
+
+    params = {'q': 'getTaskInfo'}
+    if ID is not None : params['ID'] = ID
+    if itemClass is not None : params['class'] = itemClass
+    if itemID is not None : params['itemID'] = itemID
+
+    result = connect( method='get', params=params )
+    return result
 
 def get_bases( shotID=None, assetID=None, showID=None, task='', taskID=None, pub=False ) :
     'Retrieves the dictionary of available basenames from the API'
