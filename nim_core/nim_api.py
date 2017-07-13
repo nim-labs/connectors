@@ -24,9 +24,9 @@
 # if result['success'] == 'true':
 #    nimAPI.upload_renderIcon(renderID=result['ID'],img='/path/to/icon.jpeg')
 #    nimAPI.upload_dailies(renderID=result['ID'],path='/path/to/movie/myImages.mov')
-#    nimAPI.add_element( parent='render', parentID=result['ID'], path='/path/to/frames/myImage.####.exr', name='myImage', \
+#    nimAPI.add_element( parent='render', parentID=result['ID'], path='/path/to/frames', name='myImage.####.exr', \
 #                           startFrame=1, endFrame=128, handles=12, isPublished=False )
-#    nimAPI.add_element( parent='render', parentID=result['ID'], path='/path/to/frames/myImage_matte.####.exr', name='myImage_matte', \
+#    nimAPI.add_element( parent='render', parentID=result['ID'], path='/path/to/frames', name='myImage_matte.####.exr', \
 #                           startFrame=1, endFrame=128, handles=12, isPublished=False )
 #
 
