@@ -24,9 +24,9 @@
 # if result['success'] == 'true':
 #    nimAPI.upload_renderIcon(renderID=result['ID'],img='/path/to/icon.jpeg')
 #    nimAPI.upload_dailies(renderID=result['ID'],path='/path/to/movie/myImages.mov')
-#    nimAPI.add_element( parent='render', parentID=result['ID'], path='/path/to/frames/myImage.####.exr', name='myImage', \
+#    nimAPI.add_element( parent='render', parentID=result['ID'], path='/path/to/frames', name='myImage.####.exr', \
 #                           startFrame=1, endFrame=128, handles=12, isPublished=False )
-#    nimAPI.add_element( parent='render', parentID=result['ID'], path='/path/to/frames/myImage_matte.####.exr', name='myImage_matte', \
+#    nimAPI.add_element( parent='render', parentID=result['ID'], path='/path/to/frames', name='myImage_matte.####.exr', \
 #                           startFrame=1, endFrame=128, handles=12, isPublished=False )
 #
 
@@ -704,13 +704,16 @@ def get_tasks(app='all', userType='artist') :
     tasks=get( {'q': 'getTaskTypes', 'app': app, 'type': userType} )
     return tasks
 
-def get_taskInfo(itemClass='', itemID=0) :
+def get_taskInfo(ID=None, itemClass=None, itemID=None) :
     'Retrieves a dictionary of task information for a given asset or shot item from the API'
-    if itemID==0:
-        return False
-    else:
-        taskInfo=get( {'q': 'getTaskInfo', 'class': itemClass, 'itemID': itemID } )
-        return taskInfo
+
+    params = {'q': 'getTaskInfo'}
+    if ID is not None : params['ID'] = ID
+    if itemClass is not None : params['class'] = itemClass
+    if itemID is not None : params['itemID'] = itemID
+
+    result = connect( method='get', params=params )
+    return result
 
 def get_bases( shotID=None, assetID=None, showID=None, task='', taskID=None, pub=False ) :
     'Retrieves the dictionary of available basenames from the API'
@@ -907,6 +910,40 @@ def add_element( parent='shot', parentID=None, userID=None, typeID='', path='', 
                 'name': name, 'startFrame': startFrame, 'endFrame': endFrame, 'handles': handles, 'isPublished': isPublished, 'metadata': metadata}
     result = connect( method='get', params=params, nimURL=nimURL, apiKey=apiKey )
     return result
+
+def update_element(ID=None, userID=None, jobID=None, assetID=None, shotID=None, taskID=None, renderID=None, elementTypeID=None, name=None, path=None, startFrame=None, endFrame=None, handles=None, isPublished=None, nimURL=None, apiKey=None ):
+    'Updates an existing element by element ID'
+    # nimURL and apiKey are optional for Render API Key overrride
+    params = {'q': 'updateElement'}
+
+    if ID is not None : params['ID'] = ID
+    if userID is not None : params['userID'] = userID
+    if jobID is not None : params['jobID'] = jobID
+    if assetID is not None : params['assetID'] = assetID
+    if shotID is not None : params['shotID'] = shotID
+    if taskID is not None : params['taskID'] = taskID
+    if renderID is not None : params['renderID'] = renderID
+    if elementTypeID is not None : params['elementTypeID'] = elementTypeID
+    if name is not None : params['name'] = name
+    if path is not None : params['path'] = path
+    if startFrame is not None : params['startFrame'] = startFrame
+    if endFrame is not None : params['endFrame'] = endFrame
+    if handles is not None : params['handles'] = handles
+    if isPublished is not None : params['isPublished'] = isPublished
+
+    result = connect( method='get', params=params, nimURL=nimURL, apiKey=apiKey )
+    return result
+
+def delete_element(ID=None, nimURL=None, apiKey=None):
+    'Deletes an existing element by element ID'
+    # nimURL and apiKey are optional for Render API Key overrride
+
+    params = {'q': 'deleteElement'}
+    if ID is not None : params['ID'] = ID
+
+    result = connect( method='get', params=params, nimURL=nimURL, apiKey=apiKey )
+    return result
+
 
 #  Files :
 #===------
