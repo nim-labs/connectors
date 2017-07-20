@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: Nuke/nim_tools.py
-# Version:  v2.6.78.170712
+# Version:  v2.6.80.1719
 #
 # Copyright (c) 2015 NIM Labs LLC
 # All rights reserved.
@@ -65,6 +65,8 @@ def logNimRender(writeNode=None):
         handles = 0
         isPublished = False
         
+        folderPath = nimPath+"/"+nimFolder
+
         # Below commented out till taskID and elementTypeID can be read from node
         '''
         result = nimAPI.add_render(taskID=taskID, renderName=nimFolder)
@@ -81,7 +83,7 @@ def logNimRender(writeNode=None):
         '''
         
         nimAPI.add_element( parent='shot', parentID=shotID, \
-                            path=nimPath, name=nimFileName, \
+                            path=folderPath, name=nimFileName, \
                             typeID=elementTypeID, \
                             startFrame=startFrame, endFrame=endFrame, \
                             handles=handles, isPublished=isPublished )
