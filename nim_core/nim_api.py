@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: nim_api.py
-# Version:  v2.6.50.170609
+# Version:  v2.6.80.170718
 #
 # Copyright (c) 2017 NIM Labs LLC
 # All rights reserved.
@@ -889,9 +889,9 @@ def find_files( name='', path='', metadata=''):
     files=get( {'q': 'findFiles', 'name': name, 'path': path, 'metadata': metadata} )
     return files
 
-def find_elements( name='', path='', jobID='', showID='', shotID='', assetID='', elementTypeID='', ext='' ,metadata=''):
-    'Retrieves a dictionary of elements matching the file path'
-    elements=get( {'q': 'findElements', 'name': name, 'path': path, 'jobID': jobID, 'showID': showID, 'shotID': shotID, 'assetID': assetID, 'ext': ext, 'elementTypeID': elementTypeID, 'metadata': metadata} )
+def find_elements( name='', path='', jobID='', showID='', shotID='', assetID='', taskID='', renderID='', elementTypeID='', ext='' ,metadata=''):
+    'Retrieves a dictionary of elements matching one of the included IDs plus name, path, elementTypeID, ext, or metadata'
+    elements=get( {'q': 'findElements', 'name': name, 'path': path, 'jobID': jobID, 'showID': showID, 'shotID': shotID, 'assetID': assetID, 'taskID': taskID, 'renderID': renderID, 'elementTypeID': elementTypeID, 'ext': ext, 'metadata': metadata} )
     return elements
 
 def get_elements( parent='shot', parentID=None, elementTypeID=None, getLastElement=False, isPublished=False):
