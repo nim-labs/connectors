@@ -1816,75 +1816,8 @@ class GUI(QtGui.QMainWindow) :
         #===-----
         
         if elem in ['shot', 'asset'] :
-            work, pub={}, {}
-            #  Iterate over all possible Tasks :
-            #for task in Api.get_tasks() :
-            
-            '''
-            ORIG CODE
-            for task in Api.get_tasks(app=self.app) :
-                task_work, task_pub=[], []
-                valid_bases, valid_basesPub, valid_basesAllPub=[], [], []
-                task_bases, task_basesAllPub, item_name=None, None, None
-                #  Get Shot Basenames :
-                if self.nim.tab()=='SHOT' :
-                    task_bases=Api.get_bases( shotID=self.nim.ID('shot'), task=task['name'].upper() )
-                    task_basesAllPub=Api.get_basesAllPub( shotID=self.nim.ID('shot'), task=task['name'].upper() )
-                #  Get Asset Basenames :
-                elif self.nim.tab()=='ASSET' :
-                    task_bases=Api.get_bases( assetID=self.nim.ID( 'asset' ), task=task['name'].upper() )
-                    task_basesAllPub=Api.get_basesAllPub( assetID=self.nim.ID( 'asset' ), task=task['name'].upper() )
-                #  Get Work Basenames :
-                if task_bases :
-                    for base in task_bases :
-                        task_work.append( base['basename'] )
-                    work[task['name']]=task_work
-                #  Get Published Basenames :
-                if task_basesAllPub :
-                    for base in task_basesAllPub :
-                        task_pub.append( base['basename'] )
-                    pub[task['name']]=task_work
-            '''
-            
-            ''' TESTING COMM OUT'''
-            '''
-            currentTaskType = self.nim.Input( 'task' ).currentText()
-            task_work, task_pub=[], []
-            valid_bases, valid_basesPub, valid_basesAllPub=[], [], []
-            task_bases, task_basesAllPub, item_name=None, None, None
-            #  Get Shot Basenames :
-            if self.nim.tab()=='SHOT' :
-                task_bases=Api.get_bases( shotID=self.nim.ID('shot'), task=currentTaskType.upper() )
-                task_basesAllPub=Api.get_basesAllPub( shotID=self.nim.ID('shot'), task=currentTaskType.upper() )
-
-                print task_bases
-                print task_basesAllPub
-
-            #  Get Asset Basenames :
-            elif self.nim.tab()=='ASSET' :
-                task_bases=Api.get_bases( assetID=self.nim.ID( 'asset' ), task=currentTaskType.upper() )
-                task_basesAllPub=Api.get_basesAllPub( assetID=self.nim.ID( 'asset' ), task=currentTaskType.upper() )
-            
-            #  Get Work Basenames :
-            if task_bases :
-                for base in task_bases :
-                    task_work.append( base['basename'] )
-                work[currentTaskType]=task_work
-            #  Get Published Basenames :
-            if task_basesAllPub :
-                for base in task_basesAllPub :
-                    task_pub.append( base['basename'] )
-                pub[currentTaskType]=task_work
-
-            if work :
-                P.info( '    Working Basenames Found.' )
-                for key in work.keys() : P.info( '      %s - %s' % (key, ', '.join( work[key]) ) )
-            else : P.info( '    No Working Basenames Found.' )
-            if pub :
-                P.info( '    Published Basenames Found.' )
-                for key in pub.keys() : P.info( '      %s - %s' % (key, ', '.join( pub[key]) ) )
-            else : P.info( '    No Published Basenames Found.' )
-            '''
+            # Large Section of old code removed
+            pass
         
         #  Finish :
         #===-------
@@ -1991,7 +1924,7 @@ class GUI(QtGui.QMainWindow) :
                 self.nim.label( _type ).setPixmap( self.nim.pix( _type ) )
             except :
                 pass
-                
+
             return None
         
         # Get domain name from URL
