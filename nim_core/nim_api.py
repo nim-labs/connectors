@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: nim_api.py
-# Version:  v2.6.80.170718
+# Version:  v2.6.81.170720
 #
 # Copyright (c) 2017 NIM Labs LLC
 # All rights reserved.
@@ -579,12 +579,10 @@ def get_user() :
 
 def get_userID( user='' ) :
     'Retrieves the current user\'s user ID'
-    print "get_userID: %s" % user
     if not user :
         user=get_user()
     try :
         userID=get( {'q': 'getUserID', 'u': str(user)} )
-        print userID
         if type(userID)==type(list()) and len(userID)==1 :
             return userID[0]['ID']
         else :
