@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: Nuke/Python/Startup/nim_hiero_connector/nim_nukeStudioUI.py
-# Version:  v2.6.01.170417
+# Version:  v2.6.80.170724
 #
 # Copyright (c) 2017 NIM Labs LLC
 # All rights reserved.
@@ -16,32 +16,8 @@ from hiero.core import *
 import hiero.ui
 from hiero.core import log
 
-#from PySide.QtGui import *
-#from PySide.QtCore import *
-
-#from PySide2 import (QtCore, QtWidgets)
 from PySide2.QtWidgets import *
 from PySide2.QtCore import *
-
-'''
-#  Import Python GUI packages :
-try : 
-    from PySide2 import QtWidgets as QtGui
-    from PySide2 import QtGui as QtGui2
-    from PySide2 import QtCore
-except ImportError :
-    try : 
-    	#from PySide import QtCore, QtGui
-    	from PySide.QtGui import *
-    	from PySide.QtCore import *
-    except ImportError :
-        try : 
-        	#from PyQt4 import QtCore, QtGui
-        	from PySide.QtGui import *
-    		from PySide.QtCore import *
-        except ImportError : 
-            print "NIM: Failed to UI Modules - UI"
-'''
 
 import sys,os,re,string
 import base64

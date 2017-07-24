@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: Nuke/Python/Startup/nim_hiero_connector/nimProcessorUI.py
-# Version:  v2.6.10.170428
+# Version:  v2.6.80.170724
 #
 # Nuke 11.0v0
 #
