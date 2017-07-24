@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: UI.py
-# Version:  v2.6.75.170620
+# Version:  v2.6.81.170720
 #
 # Copyright (c) 2017 NIM Labs LLC
 # All rights reserved.
@@ -237,6 +237,7 @@ class GUI(QtGui.QMainWindow) :
     def mk_vars( self ) :
         'Instantiates variables'
         self.app=F.get_app()
+
         P.debug( '\n%.3f => Starting to read preferences' % (time.time()-startTime) )
 
         #  Preferences :
@@ -1815,43 +1816,8 @@ class GUI(QtGui.QMainWindow) :
         #===-----
         
         if elem in ['shot', 'asset'] :
-            work, pub={}, {}
-            #  Iterate over all possible Tasks :
-            for task in Api.get_tasks() :
-                task_work, task_pub=[], []
-                valid_bases, valid_basesPub, valid_basesAllPub=[], [], []
-                task_bases, task_basesAllPub, item_name=None, None, None
-                #  Get Shot Basenames :
-                if self.nim.tab()=='SHOT' :
-                    task_bases=Api.get_bases( shotID=self.nim.ID('shot'), \
-                        task=task['name'].upper() )
-                    task_basesAllPub=Api.get_basesAllPub( shotID=self.nim.ID('shot'), \
-                        task=task['name'].upper() )
-                #  Get Asset Basenames :
-                elif self.nim.tab()=='ASSET' :
-                    task_bases=Api.get_bases( assetID=self.nim.ID( 'asset' ), \
-                        task=task['name'].upper() )
-                    task_basesAllPub=Api.get_basesAllPub( assetID=self.nim.ID( 'asset' ), \
-                        task=task['name'].upper() )
-                #  Get Work Basenames :
-                if task_bases :
-                    for base in task_bases :
-                        task_work.append( base['basename'] )
-                    work[task['name']]=task_work
-                #  Get Published Basenames :
-                if task_basesAllPub :
-                    for base in task_basesAllPub :
-                        task_pub.append( base['basename'] )
-                    pub[task['name']]=task_work
-            if work :
-                P.info( '    Valid WORK tasks/basenames...' )
-                for key in work.keys() : P.info( '      %s - %s' % (key, ', '.join( work[key]) ) )
-            else : P.info( '    NO valid WORK tasks/basenames.' )
-            if pub :
-                P.info( '    Valid PUBLISHED tasks/basenames...' )
-                for key in pub.keys() : P.info( '      %s - %s' % (key, ', '.join( pub[key]) ) )
-            else : P.info( '    NO valid PUBLISHED tasks/basenames.' )
-        
+            # Large Section of old code removed
+            pass
         
         #  Finish :
         #===-------
@@ -1953,8 +1919,12 @@ class GUI(QtGui.QMainWindow) :
                 self.nim.set_pic( elem=_type, widget=QtGui.QPixmap().fromImage( QtGui.QImage( self.pref_imgDefault ) ) )
                 self.nim.pix( _type ).fromImage( QtGui.QImage( self.pref_imgDefault ) )
 
-            self.nim.set_pic( elem=_type, widget=self.nim.pix( _type ).scaled( self.img_size, self.img_size, QtCore.Qt.KeepAspectRatio ) )
-            self.nim.label( _type ).setPixmap( self.nim.pix( _type ) )
+            try :
+                self.nim.set_pic( elem=_type, widget=self.nim.pix( _type ).scaled( self.img_size, self.img_size, QtCore.Qt.KeepAspectRatio ) )
+                self.nim.label( _type ).setPixmap( self.nim.pix( _type ) )
+            except :
+                pass
+
             return None
         
         # Get domain name from URL
@@ -1965,15 +1935,15 @@ class GUI(QtGui.QMainWindow) :
         nimURL = connect_info['nim_apiURL']
         parsed_uri = urlparse(nimURL)   
         nim_domain = '{uri.scheme}://{uri.netloc}/'.format(uri=parsed_uri)
-        print( 'NIM Domain: %s' % nim_domain)
+        #print( 'NIM Domain: %s' % nim_domain)
 
         try:        
             if img[0]['img_link']:
                 try :
                     img_loc=nim_domain+img[0]['img_link']
                     img_dir=os.path.dirname( img_loc )+'/'
-                    print('img_loc: %s' % img_loc)
-                    print('img_dir: %s' % img_dir)
+                    #print('img_loc: %s' % img_loc)
+                    #print('img_dir: %s' % img_dir)
                 except :
                     #Failed to build img path
                     print('Failed to build icon path')
@@ -1986,7 +1956,7 @@ class GUI(QtGui.QMainWindow) :
 
         #  Set Shot/Asset image :
         if _type and img_loc :
-            print("set image")
+            #print("set image")
             try :
                 myssl = ssl.create_default_context()
                 myssl.check_hostname=False
@@ -1995,15 +1965,19 @@ class GUI(QtGui.QMainWindow) :
             except :
                 _data=urllib.urlopen( img_loc ).read()
             
-            self.nim.pix( _type ).loadFromData( _data )
-            self.nim.set_pic( elem=_type, widget=self.nim.pix( _type ).scaled( self.img_size, self.img_size, QtCore.Qt.KeepAspectRatio ) )
-            self.nim.label( _type ).setPixmap( self.nim.pix( _type ) )
-            _set=True
-            P.debug( '%s image URL = "%s"' % (_type.upper(), img_loc) )
+            if _data is not None :
+                try :
+                    self.nim.pix( _type ).loadFromData( _data )
+                    self.nim.set_pic( elem=_type, widget=self.nim.pix( _type ).scaled( self.img_size, self.img_size, QtCore.Qt.KeepAspectRatio ) )
+                    self.nim.label( _type ).setPixmap( self.nim.pix( _type ) )
+                    _set=True
+                    P.debug( '%s image URL = "%s"' % (_type.upper(), img_loc) )
+                except :
+                    pass
         
         #  Set default image :
         if _type and not _set :
-            print("default image")
+            #print("default image")
             try :
                 self.nim.set_pic( elem=_type, widget=QtGui2.QPixmap().fromImage( QtGui2.QImage( self.pref_imgDefault ) ) )
                 self.nim.pix( _type ).fromImage( QtGui2.QImage( self.pref_imgDefault ) )
@@ -2011,12 +1985,15 @@ class GUI(QtGui.QMainWindow) :
                 self.nim.set_pic( elem=_type, widget=QtGui.QPixmap().fromImage( QtGui.QImage( self.pref_imgDefault ) ) )
                 self.nim.pix( _type ).fromImage( QtGui.QImage( self.pref_imgDefault ) )
 
-            self.nim.set_pic( elem=_type, widget=self.nim.pix( _type ).scaled( self.img_size, self.img_size, QtCore.Qt.KeepAspectRatio ) )
-            self.nim.label( _type ).setPixmap( self.nim.pix( _type ) )
-            P.debug( '%s image URL set to default : "%s"' % (_type.upper(), self.pref_imgDefault) )
+            try :
+                self.nim.set_pic( elem=_type, widget=self.nim.pix( _type ).scaled( self.img_size, self.img_size, QtCore.Qt.KeepAspectRatio ) )
+                self.nim.label( _type ).setPixmap( self.nim.pix( _type ) )
+                P.debug( '%s image URL set to default : "%s"' % (_type.upper(), self.pref_imgDefault) )
+            except :
+                pass
         
         if not _type and not _set :
-            print("default image")
+            #print("default image")
             _type = 'shot'
             try :
                 self.nim.set_pic( elem=_type, widget=QtGui2.QPixmap().fromImage( QtGui2.QImage( self.pref_imgDefault ) ) )
@@ -2025,10 +2002,12 @@ class GUI(QtGui.QMainWindow) :
                 self.nim.set_pic( elem=_type, widget=QtGui.QPixmap().fromImage( QtGui.QImage( self.pref_imgDefault ) ) )
                 self.nim.pix( _type ).fromImage( QtGui.QImage( self.pref_imgDefault ) )
 
-            self.nim.set_pic( elem=_type, widget=self.nim.pix( _type ).scaled( \
-                self.img_size, self.img_size, QtCore.Qt.KeepAspectRatio ) )
-            self.nim.label( _type ).setPixmap( self.nim.pix( _type ) )
-            P.debug( '%s image URL set to default : "%s"' % (_type.upper(), self.pref_imgDefault) )
+            try :
+                self.nim.set_pic( elem=_type, widget=self.nim.pix( _type ).scaled( self.img_size, self.img_size, QtCore.Qt.KeepAspectRatio ) )
+                self.nim.label( _type ).setPixmap( self.nim.pix( _type ) )
+                P.debug( '%s image URL set to default : "%s"' % (_type.upper(), self.pref_imgDefault) )
+            except :
+                pass
 
         return
     
