@@ -12,16 +12,23 @@ Linux:
 
 
 
-OSX 10.12.x:
+OSX +10.11.x:
 
 	Edit the setenv.DL_PYTHON_HOOK_PATH.plist file and replace [NIM_CONNECTOR_ROOT] with the full path to the NIM Connector root folder.
 
-	Copy the file to: ~/Library/LaunchAgents/setenv.DL_PYTHON_HOOK_PATH.plist
+	Copy the file to: /Library/LaunchAgents/setenv.DL_PYTHON_HOOK_PATH.plist
+
+	Execute the folowing lines to modify the plist permissions.
+	The plist will not run if the permissions are not correct.
+
+		sudo chown root /Library/LaunchAgents/setenv.DL_PYTHON_HOOK_PATH.plist
+		sudo chgrp wheel /Library/LaunchAgents/setenv.DL_PYTHON_HOOK_PATH.plist
+		sudo chmod o-w /Library/LaunchAgents/setenv.DL_PYTHON_HOOK_PATH.plist
 
 	Reboot
 
 
-OSX 10.11.x
+OSX 10.10.x
 
 	Edit the launchd.conf file and replace [NIM_CONNECTOR_ROOT] with the full path to the NIM Connector root folder. 
 	
