@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Configuration version="3.1.24">
+<Configuration version="3.1.25">
 <Product name="Virtual Product" id="0">
 <Data key="others-destination">$downloads</Data>
 </Product>
@@ -3132,6 +3132,103 @@
     <Data key="FamilyName">Dreamweaver</Data>
     <Data key="$IconPath">$installfolder/configuration/Icon.png</Data>
     <Data key="MinExManVersion">7.3.2</Data>
+</Product>
+<Product name="bridge-6.032" platform="win" id="104">
+    <Data key="$bridge">$InstallFolder</Data>
+    <Data key="$ExtensionInstallFolder">$adobecommon/Bridge CC Extensions</Data>
+    <Data key="ProductName">Bridge32</Data>
+    <Data key="DisplayName">Bridge CC 32</Data>
+    <Data key="HostNameForCSXS">BRDG</Data>
+	<Data key="FamilyName">Bridge</Data>
+    <Data key="Bit">32</Data>
+    <Data key="MinExManVersion">7.3.3</Data>
+</Product>
+<Product name="bridge-6.064" platform="win" id="105">
+    <Data key="$bridge">$InstallFolder</Data>
+    <Data key="$ExtensionInstallFolder">$applicationsupport64/Common Files/Adobe/Bridge CC Extensions</Data>
+    <Data key="ProductName">Bridge64</Data>
+    <Data key="DisplayName">Bridge CC</Data>
+    <Data key="HostNameForCSXS">BRDG</Data>
+    <Data key="FamilyName">Bridge</Data>
+    <Data key="Bit">64</Data>
+    <Data key="MinExManVersion">7.3.3</Data>
+</Product>
+<Product name="bridge-6.064" platform="mac" id="106">
+    <Data key="$bridge">$InstallFolder</Data>
+    <Data key="$ExtensionInstallFolder">$adobecommon/Bridge CC Extensions</Data>
+    <Data key="ProductName">Bridge64</Data>
+    <Data key="DisplayName">Bridge CC</Data>
+    <Data key="HostNameForCSXS">BRDG</Data>
+	<Data key="FamilyName">Bridge</Data>
+    <Data key="Bit">64</Data>
+    <Data key="MinExManVersion">7.3.3</Data>
+</Product>
+<Product name="bridge-6.332" platform="win" id="107">
+    <Data key="$bridge">$InstallFolder</Data>
+    <Data key="$ExtensionInstallFolder">$adobecommon/Bridge CC 2015 Extensions</Data>
+    <Data key="ProductName">Bridge32</Data>
+    <Data key="DisplayName">Bridge CC 2015 32</Data>
+    <Data key="suite">2015</Data>
+    <Data key="HostNameForCSXS">BRDG</Data>
+	<Data key="FamilyName">Bridge</Data>
+    <Data key="Bit">32</Data>
+    <Data key="MinExManVersion">7.3.3</Data>
+</Product>
+<Product name="bridge-6.364" platform="win" id="108">
+    <Data key="$bridge">$InstallFolder</Data>
+    <Data key="$ExtensionInstallFolder">$applicationsupport64/Common Files/Adobe/Bridge CC 2015 Extensions</Data>
+    <Data key="ProductName">Bridge64</Data>
+    <Data key="DisplayName">Bridge CC 2015</Data>
+    <Data key="suite">2015</Data>
+    <Data key="HostNameForCSXS">BRDG</Data>
+    <Data key="FamilyName">Bridge</Data>
+    <Data key="Bit">64</Data>
+    <Data key="MinExManVersion">7.3.3</Data>
+</Product>
+<Product name="bridge-6.364" platform="mac" id="109">
+    <Data key="$bridge">$InstallFolder</Data>
+    <Data key="$ExtensionInstallFolder">$adobecommon/Bridge CC 2015 Extensions</Data>
+    <Data key="ProductName">Bridge64</Data>
+    <Data key="DisplayName">Bridge CC 2015</Data>
+    <Data key="suite">2015</Data>
+    <Data key="HostNameForCSXS">BRDG</Data>
+	<Data key="FamilyName">Bridge</Data>
+    <Data key="Bit">64</Data>
+    <Data key="MinExManVersion">7.3.3</Data>
+</Product>
+
+<Product name="bridge-7.032" platform="win" id="110">
+    <Data key="$bridge">$InstallFolder</Data>
+    <Data key="$ExtensionInstallFolder">$adobecommon/Bridge CC 2017 Extensions</Data>
+    <Data key="ProductName">Bridge32</Data>
+    <Data key="DisplayName">Bridge CC 2017 32</Data>
+    <Data key="suite">2017</Data>
+	<Data key="FamilyName">Bridge</Data>
+    <Data key="HostNameForCSXS">BRDG</Data>
+    <Data key="Bit">32</Data>
+    <Data key="MinExManVersion">7.3.3</Data>
+</Product>
+<Product name="bridge-7.064" platform="win" id="111">
+    <Data key="$bridge">$InstallFolder</Data>
+    <Data key="$ExtensionInstallFolder">$applicationsupport64/Common Files/Adobe/Bridge CC 2017 Extensions</Data>
+    <Data key="ProductName">Bridge64</Data>
+    <Data key="DisplayName">Bridge CC 2017</Data>
+    <Data key="suite">2017</Data>
+    <Data key="FamilyName">Bridge</Data>
+    <Data key="HostNameForCSXS">BRDG</Data>
+    <Data key="Bit">64</Data>
+    <Data key="MinExManVersion">7.3.3</Data>
+</Product>
+<Product name="bridge-7.064" platform="mac" id="112">
+    <Data key="$bridge">$InstallFolder</Data>
+    <Data key="$ExtensionInstallFolder">$adobecommon/Bridge CC 2017 Extensions</Data>
+    <Data key="ProductName">Bridge64</Data>
+    <Data key="DisplayName">Bridge CC 2017</Data>
+    <Data key="suite">2017</Data>
+	<Data key="FamilyName">Bridge</Data>
+    <Data key="HostNameForCSXS">BRDG</Data>
+    <Data key="Bit">64</Data>
+    <Data key="MinExManVersion">7.3.3</Data>
 </Product>
 </Configuration>
 <!-- Extension Manager -->

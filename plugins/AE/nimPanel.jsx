@@ -25,10 +25,11 @@ function buildPanelUI(userID, action) {
 		}
 		if (nameField instanceof Array) {
 			var nameFieldLength = nameField.length;
-			for (var x = 0; x < dataArrayLength; x++) {
+			for (var x = 0; x < dataArrayLength && x < 40; x++) {
 				var thisItemName = [];
 				for (var y = 0; y < nameFieldLength; y++)
 					thisItemName.push(dataArray[x][nameField[y]]);
+				//dropdown.add('item', thisItemName.join('_'));
 				dropdown.add('item', thisItemName.join('_'));
 			}
 		}
