@@ -19,7 +19,7 @@ import ntpath
 import json
 import xml.dom.minidom as minidom
 import shutil
-
+import subprocess
 
 try:
 	import xml.etree.cElementTree as ET
@@ -3823,28 +3823,15 @@ def updateOpenClip( masterFile, elementPath, elementName ) :
 			print "Temp File: %s" % tmpfile
 
 		try :
-			# Randomly failing on OSX with: IOError: [Errno 4] Interrupted system call
-			# Catch Fail and return failed value
-			res = os.popen4("%s -r %s" % ( getMediaScript, apath ) )[1].readlines()
+			# Write output directly to file
+			f = open(tmpfile,"w")
+			subprocess.check_output([getMediaScript,'-r',apath], stdout=f)
+			f.close()
 		except :
 			print "Failed to read media: %s" % apath
 			print'%s' % traceback.print_exc()
 			return -1
 
-
-		try :
-			tmpStart = False
-			with open(tmpfile,"w") as f:
-				for line in res:
-					# Skip lines till first <?xml
-					if tmpStart == False and line.startswith('<?xml ') :
-						tmpStart = True
-					if tmpStart == True :
-						f.write( line )
-		except :
-			print "Failed to read temp file: %s" % tmpfile
-			print'%s' % traceback.print_exc()
-			return -1
 
 		# Only splice XML when masterFile does not exist
 		if not createNewClip :
@@ -3914,9 +3901,7 @@ def updateOpenClip( masterFile, elementPath, elementName ) :
 					print " Adding feed version %s" % vuid
 					
 					with open(outFile,"w") as f:
-						#f = open(outFile, "w")	
 						f.write( resultXML )
-						#f.close()
 
 					clipUpdated = True
 
