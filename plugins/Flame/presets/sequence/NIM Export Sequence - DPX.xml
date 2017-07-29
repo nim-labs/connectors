@@ -50,7 +50,7 @@
 	<name>
 		<framePadding>4</framePadding>
 		<startFrame>1</startFrame>
-		<useTimecode>False</useTimecode>
+		<useTimecode>True</useTimecode>
 	</name>
 	<createOpenClip>
 		<namePattern>&lt;nim_shot_root&gt;/FLAME/sources/&lt;segment name&gt;</namePattern>
