@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: Flame/python/nimFlameExport.py
-# Version:  v2.6.02.170728
+# Version:  v2.6.03.170728
 #
 # Copyright (c) 2017 NIM Labs LLC
 # All rights reserved.
@@ -3825,7 +3825,7 @@ def updateOpenClip( masterFile, elementPath, elementName ) :
 		try :
 			# Write output directly to file
 			f = open(tmpfile,"w")
-			subprocess.check_output([getMediaScript,'-r',apath], stdout=f)
+			subprocess.call([getMediaScript,'-r',apath], stdout=f)
 			f.close()
 		except :
 			print "Failed to read media: %s" % apath
