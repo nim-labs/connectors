@@ -200,18 +200,17 @@ def _inputURL() :
     #P.info( 'NIM URL Set to: %s' % url ) 
     if url : 
         # Check for '/nimAPI.php?' at end of URL
+
+        if url.endswith('nimAPI.php') :
+            url = url+"?"
+        
+        '''
         if not url.endswith('/nimAPI.php?'):
             if not url.endswith('/'):
                 url = url+"/nimAPI.php?"
             else :
                 url = url+"nimAPI.php?"
-
-        # Check for ? at end of url
-        # Append if missing
-        #if not url.endswith('?'):
-        #    url = url+"?"
-        if url.endswith('nimAPI.php') :
-            url = url+"?"
+        '''
 
         return url
 
