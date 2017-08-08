@@ -170,7 +170,7 @@ if nuke.env[ 'studio' ]:
 
 # NIM Settings Menu --------------------------------------------------------------------
 if nuke.env[ 'studio' ]:
-	nimSettingsMenu = nimMainMenu.addMenu('Settings')
+	nimSettingsMenu = nimMainMenu.addMenu('NIM Settings')
 else:
 	nimSettingsMenu = nimMainMenu
 	nimMainMenu.addSeparator()

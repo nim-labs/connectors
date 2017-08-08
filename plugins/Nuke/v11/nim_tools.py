@@ -67,6 +67,8 @@ def logNimRender(writeNode=None):
         
         folderPath = nimPath+"/"+nimFolder
 
+        nimFileName = nimFileName.replace('%04d','####')
+
         # Below commented out till taskID and elementTypeID can be read from node
         '''
         result = nimAPI.add_render(taskID=taskID, renderName=nimFolder)
