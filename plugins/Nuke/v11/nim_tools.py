@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: Nuke/nim_tools.py
-# Version:  v2.6.80.170724
+# Version:  v2.6.86.170808
 #
 # Copyright (c) 2015 NIM Labs LLC
 # All rights reserved.
@@ -66,6 +66,8 @@ def logNimRender(writeNode=None):
         isPublished = False
         
         folderPath = nimPath+"/"+nimFolder
+
+        nimFileName = nimFileName.replace('%04d','####')
 
         # Below commented out till taskID and elementTypeID can be read from node
         '''
