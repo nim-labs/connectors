@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: Nuke/nim_tools.py
-# Version:  v2.6.80.170724
+# Version:  v2.6.86.170808
 #
 # Copyright (c) 2015 NIM Labs LLC
 # All rights reserved.

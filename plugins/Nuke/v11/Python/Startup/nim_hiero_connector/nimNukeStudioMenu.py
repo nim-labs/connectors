@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: Nuke/Python/Startup/nim_hiero_connector/nimNukeStudioMenu.py
-# Version:  v2.6.80.170724
+# Version:  v2.6.86.170808
 #
 # Copyright (c) 2017 NIM Labs LLC
 # All rights reserved.
