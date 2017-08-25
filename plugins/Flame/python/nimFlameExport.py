@@ -3261,72 +3261,9 @@ def nimScanForVersions(nim_showID=None, nim_shotID=None) :
 	# find_elements in show with metadata flameAssetType : batchOpenClip
 	# get element type
 	# find all elements of type in shot
+	#print("nimScanForVersions")
 	clipCount = 0
 	clipFail = 0
-	'''
-	# Get elements by metadata - batchOpenClip
-	# add elements to batchOpenClip
-	metadata = {}
-	metadata['flameAssetType'] = 'batchOpenClip'
-	metadata = json.dumps(metadata)
-	openClipElements = nimAPI.find_elements(showID=nim_showID, metadata=metadata)
-	print openClipElements
-
-	for openClipElement in openClipElements :
-		clipID = openClipElement['ID']
-		shotID = openClipElement['shotID']
-		clipPath = openClipElement['path'].encode('utf-8')
-		clipName = openClipElement['name'].encode('utf-8')
-		clipFile = os.path.join(clipPath,clipName)
-
-		elementTypeID = openClipElement['elementTypeID']
-		elements = nimAPI.find_elements(shotID=shotID, elementTypeID=elementTypeID)
-		print "matching elements found"
-		print elements
-
-		for element in elements :
-			if element['ID'] != clipID :
-				print "Element found for shotID %s" % shotID
-				elementPath = element['path'].encode('utf-8')
-				elementName = element['name'].encode('utf-8')
-				print os.path.join(elementPath,elementName)
-				
-				clipUpdated = updateOpenClip( clipFile, elementPath, elementName )
-				if clipUpdated :
-					clipCount += 1
-
-
-	# Get elements by metadata - openClip
-	# add elements to openClip
-	metadata = {}
-	metadata['flameAssetType'] = 'openClip'
-	metadata = json.dumps(metadata)
-	openClipElements = nimAPI.find_elements(showID=nim_showID, metadata=metadata)
-	print openClipElements
-
-	for openClipElement in openClipElements :
-		clipID = openClipElement['ID']
-		shotID = openClipElement['shotID']
-		clipPath = openClipElement['path'].encode('utf-8')
-		clipName = openClipElement['name'].encode('utf-8')
-		clipFile = os.path.join(clipPath,clipName)
-
-		elementTypeID = openClipElement['elementTypeID']
-		elements = nimAPI.find_elements(shotID=shotID, elementTypeID=elementTypeID)
-		print "matching elements found"
-		print elements
-
-		for element in elements :
-			if element['ID'] != clipID :
-				print "Element found for shotID %s" % shotID
-				elementPath = element['path'].encode('utf-8')
-				elementName = element['name'].encode('utf-8')
-				print os.path.join(elementPath,elementName)
-				
-				clipUpdated = updateOpenClip( clipFile, elementPath, elementName ) 
-				if clipUpdated :
-					clipCount += 1
-	'''
 
 	if nim_showID :
 		shots = nimAPI.get_shots(showID=nim_showID)
@@ -3365,8 +3302,9 @@ def nimScanForVersions(nim_showID=None, nim_shotID=None) :
 						elementName = element['name'].encode('utf-8')
 						
 						# Update elementPath using server os resolution
-						elementPath = resolveServerOsPath(elementPath)
-						print "OS ElementPath: %s" % elementPath
+						print "Raw Element Path: %s" % elementPath
+						elementPath = resolveServerOsPath(path=elementPath)
+						print "OS Element Path: %s" % elementPath
 
 						print os.path.join(elementPath,elementName)
 						clipUpdated = updateOpenClip( clipFile, elementPath, elementName )
@@ -3388,7 +3326,7 @@ def nimBuildOpenClipFromElements(nim_showID=None, nim_shotID=None, nim_serverID=
 	# Create newClip if no matching type
 	# TODO: Update to only create element Clips... ignore duplicate clips
 	# 		This could be just assuming that the clip doesn't exist
-
+	#print("nimBuildOpenClipFromElements")
 	clipCount = 0
 	clipFail = 0
 
@@ -3449,6 +3387,7 @@ def nimBuildOpenClipFromElements(nim_showID=None, nim_shotID=None, nim_serverID=
 							print os.path.join(elementPath,elementName)
 							
 							# Update elementPath using server os resolution
+							print "Raw ElementPath: %s" % elementPath
 							elementPath = resolveServerOsPath(elementPath)
 							print "OS ElementPath: %s" % elementPath
 
@@ -3476,7 +3415,7 @@ def nimBuildOpenClipFromFolders(nim_showID=None, nim_shotID=None, nim_serverID=N
 	# Create newClip if no matching type
 	# TODO: Update to only create element Clips... ignore duplicate clips
 	# 		This could be just assuming that the clip doesn't exist
-
+	#print("nimBuildOpenClipFromFolders")
 	clipCount = 0
 	clipFail = 0
 
@@ -3694,47 +3633,72 @@ def resolveBatchSetupNamePattern(namePattern=None, sequenceName='', tapeName='')
 
 def resolveServerOsPath(path='') :
 	#Convert path from known NIM server to OS relavtive path
+	#print("resolveServerOsPath")
 
 	_os = platform.system()
+	serverID = ''
 	servers = {}
 	servers = nimAPI.get_allServers()
-	serverID = ''
-
+	
+	path = path.replace('\\', '/')
 	resolvedPath = path
 
 	# Find matching server from path
 	if len(servers) > 0:
 		print "Servers Found: %s" % str(len(servers))
 		for server in servers :
-			linuxPath 	= server['path'].replace('\\', '/')
-			winPath 	= server['winPath'].replace('/', '\\')
-			osxPath 	= server['osxPath'].replace('\\', '/')
+			linuxPath = ""
+			winPath = ""
+			osxPath = ""
+
+			if server['path'] :
+				linuxPath 	= server['path'].replace('\\', '/')
+			if server['winPath'] :
+				winPath 	= server['winPath'].replace('\\', '/')
+			if server['osxPath'] :
+				osxPath 	= server['osxPath'].replace('\\', '/')
+
+			#print "Linux Path: %s" % linuxPath
+			#print "Windows Path: %s" % winPath
+			#print "OSX Path: %s" % osxPath
 
 			if _os.lower() in ['darwin', 'mac'] :
-				targetPath = osxPath
+				print "OS: OSX"
 				# Compare against windows and linux & set to osx
-				if path.startswith(winPath) :
+				if winPath and path.startswith(winPath) :
+					print "Translating Windows Path"
 					pathTail = path[path.startswith(winPath) and len(winPath):]
-					resolvedPath = os.path.join(targetPath,pathTail)
+					if pathTail.startswith('/') :
+						pathTail = pathTail[1:]
+					resolvedPath = os.path.join(osxPath,pathTail)
 					break
 
-				elif path.startswith(linuxPath) :
-					pathTail = path[path.startswith(winPath) and len(winPath):]
-					resolvedPath = os.path.join(targetPath,pathTail)
+				elif linuxPath and path.startswith(linuxPath) :
+					print "Translating Linux Path"
+					pathTail = path[path.startswith(linuxPath) and len(linuxPath):]
+					if pathTail.startswith('/') :
+						pathTail = pathTail[1:]
+					resolvedPath = os.path.join(osxPath,pathTail)
 					break
 
 
 			elif _os.lower() in ['linux', 'linux2'] :
-				targetPath = linuxPath
-				# Compare against windows and linux & set to linux
-				if path.startswith(winPath) :
+				print "OS: Linux"
+				# Compare against windows and osx & set to linux
+				if winPath and path.startswith(winPath) :
+					print "Translating Windows Path"
 					pathTail = path[path.startswith(winPath) and len(winPath):]
-					resolvedPath = os.path.join(targetPath,pathTail)
+					if pathTail.startswith('/') :
+						pathTail = pathTail[1:]
+					resolvedPath = os.path.join(linuxPath,pathTail)
 					break
 
-				elif path.startswith(linuxPath) :
-					pathTail = path[path.startswith(winPath) and len(winPath):]
-					resolvedPath = os.path.join(targetPath,pathTail)
+				elif osxPath and path.startswith(osxPath) :
+					print "Translating OSX Path"
+					pathTail = path[path.startswith(osxPath) and len(osxPath):]
+					if pathTail.startswith('/') :
+						pathTail = pathTail[1:]
+					resolvedPath = os.path.join(linuxPath,pathTail)
 					break
 
 	return resolvedPath

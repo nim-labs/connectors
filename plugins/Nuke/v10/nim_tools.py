@@ -45,7 +45,12 @@ def updateNimWriteNodes():
                     print("No NIM Write Nodes Found.")
 
 def logNimRender(writeNode=None):
-    # Add to writeNIM node - afterRender: import nim_tools; nim_tools.logNimRender(nuke.thisNode())
+    # Use this function by adding the following command to a writeNIM node's afterRender Python hook
+    #
+    #     import nim_tools; nim_tools.logNimRender(nuke.thisNode())
+    #
+    # You will need to set the frame range on the writeNIM node to match that of your output range
+    # Currently this function is hardcoded to a single elementTypeID until a dropdown picker is added to the writeNIM node
 
     if writeNode is not None :
         print "Logging Render to NIM"
