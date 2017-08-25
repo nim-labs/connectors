@@ -527,7 +527,6 @@ def read() :
 
 def update( attr=None, app='', value='' ) :
     'Updates the preferences file with whatever attribute is specified'
-    
     #P.info('nim_prefs.update')
 
     #  Variables :
