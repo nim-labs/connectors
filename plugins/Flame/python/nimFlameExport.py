@@ -1829,7 +1829,7 @@ class NimExportSequenceDialog(QDialog):
 						serverIter += 1
 
 					if self.flamePrefs['serverID'] != '':
-						self.nim_showChooser.setCurrentIndex(serverIndex)
+						self.nim_serverChooser.setCurrentIndex(serverIndex)
 		except:
 			pass
 
@@ -2277,7 +2277,7 @@ class NimExportEditDialog(QDialog):
 						serverIter += 1
 
 					if self.flamePrefs['serverID'] != '':
-						self.nim_showChooser.setCurrentIndex(serverIndex)
+						self.nim_serverChooser.setCurrentIndex(serverIndex)
 		except:
 			pass
 
@@ -2708,7 +2708,7 @@ class NimExportDailyDialog(QDialog):
 						serverIter += 1
 
 					if self.flamePrefs['serverID'] != '':
-						self.nim_showChooser.setCurrentIndex(serverIndex)
+						self.nim_serverChooser.setCurrentIndex(serverIndex)
 		except:
 			pass
 
@@ -3961,6 +3961,7 @@ def readFlamePrefs() :
 		print "Error: Unable to read Flame NIM preferences."
 		
 	return flamePrefs
+
 
 def writeFlamePrefs( flamePrefs=None ) :
 	# Write Flame Specifc Preferences
