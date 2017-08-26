@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: nim_api.py
-# Version:  v2.6.81.170720
+# Version:  v2.7.21.170825
 #
 # Copyright (c) 2017 NIM Labs LLC
 # All rights reserved.
@@ -618,7 +618,7 @@ def get_jobs( userID=None, folders=False ) :
 
 def get_allServers( locationID='' ) :
     'Retrieves all servers optionally filtered by locationID'
-    servers=get( {'q':'getJobServers', 'ID':locationID} )
+    servers=get( {'q':'getServers', 'ID':locationID} )
     return servers
 
 def get_servers( ID=None ) :

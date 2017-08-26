@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: Flame/python/nimFlameExport.py
-# Version:  v2.6.03.170728
+# Version:  v2.7.21.170825
 #
 # Copyright (c) 2017 NIM Labs LLC
 # All rights reserved.
@@ -64,10 +64,12 @@ from PySide.QtCore import *
 print "NIM - Loading nimFlameExport"
 
 
-#  Make prefs:
-import nim_core.nim_prefs as menuPrefs
-menuPrefs.mk_default( notify_success=True )
+#  Make NIM prefs:
+nimPrefs.mk_default( notify_success=True )
 
+# Set Flame prefs location:
+flamePrefFile = os.path.normpath( os.path.join( nimPrefs.get_home(), "apps","Flame","flame.nim" ) )
+print "Flame Prefs: %s" % flamePrefFile
 
 try :
 	# from libwiretapPythonClientAPI import *
@@ -85,7 +87,7 @@ class NimScanForVersionsDialog(QDialog):
 		super(NimScanForVersionsDialog, self).__init__(parent)
 
 		self.result = ""
-
+		QApplication.setOverrideCursor(Qt.ArrowCursor)
 		try:
 			#self.app=nimFile.get_app()
 			self.app = 'Flame'
@@ -97,6 +99,9 @@ class NimScanForVersionsDialog(QDialog):
 				self.user=self.prefs['NIM_User']
 			else :
 				self.user = ''
+
+			# Using Flame Specific Prefs file
+
 
 			if self.app+'_Job' in self.prefs:
 				self.pref_job=self.prefs[self.app+'_Job']
@@ -410,7 +415,7 @@ class NimBuildOpenClipsFromElementDialog(QDialog):
 		super(NimBuildOpenClipsFromElementDialog, self).__init__(parent)
 
 		self.result = ""
-		
+		QApplication.setOverrideCursor(Qt.ArrowCursor)
 		try:
 			#self.app=nimFile.get_app()
 			self.app = 'Flame'
@@ -794,7 +799,7 @@ class NimBuildOpenClipsFromProjectDialog(QDialog):
 		super(NimBuildOpenClipsFromProjectDialog, self).__init__(parent)
 
 		self.result = ""
-		
+		QApplication.setOverrideCursor(Qt.ArrowCursor)
 		try:
 			#self.app=nimFile.get_app()
 			self.app = 'Flame'
@@ -1292,9 +1297,8 @@ class NimExportSequenceDialog(QDialog):
 		super(NimExportSequenceDialog, self).__init__(parent)
 
 		self.result = ""
-
+		QApplication.setOverrideCursor(Qt.ArrowCursor)
 		try:
-			#self.app=nimFile.get_app()
 			self.app = 'Flame'
 			self.prefs=nimPrefs.read()
 			print "NIM - Prefs: "
@@ -1305,25 +1309,8 @@ class NimExportSequenceDialog(QDialog):
 			else :
 				self.user = ''
 
-			if self.app+'_Job' in self.prefs:
-				self.pref_job=self.prefs[self.app+'_Job']
-			else :
-				self.pref_job = ''
-
-			if self.app+'_Show' in self.prefs:
-				self.pref_show=self.prefs[self.app+'_Show']
-			else :
-				self.pref_show= ''
-
-			if self.app+'_ServerPath' in self.prefs:
-				self.pref_server=self.prefs[self.app+'_ServerPath']
-			else :
-				self.pref_server= ''
-
-			if self.app+'_ServerID' in self.prefs:
-				self.pref_serverID=self.prefs[self.app+'_ServerID']
-			else :
-				self.pref_serverID= ''
+			# Read Flame specific prefs
+			self.flamePrefs = readFlamePrefs()
 
 			print "NIM - Prefs successfully read"
 
@@ -1331,11 +1318,7 @@ class NimExportSequenceDialog(QDialog):
 			print "NIM - Failed to read NIM prefs"
 			print 'NIM - ERROR: %s' % traceback.print_exc()
 			self.app='Flame'
-			self.prefs=''
-			self.user='andrew'
-			self.pref_job=0
-			self.pref_show=0
-			self.pref_server=''
+			self.user=''
 			pass
 
 		self.nim_OS = platform.system()
@@ -1354,7 +1337,6 @@ class NimExportSequenceDialog(QDialog):
 
 		print "NIM - user=%s" % self.user
 		print "NIM - userID=%s" % self.nim_userID
-		print "NIM - default job=%s" % self.pref_job
 
 		self.nim_jobPaths = {}
 		self.nim_showPaths = {}
@@ -1451,7 +1433,7 @@ class NimExportSequenceDialog(QDialog):
 		horizontalLayout_preset.setObjectName("horizontalLayout_preset")
 		self.nimPresetLabel = QLabel()
 		self.nimPresetLabel.setFixedWidth(120)
-		self.nimPresetLabel.setText("Export Preset:")
+		self.nimPresetLabel.setText("Preset:")
 		horizontalLayout_preset.addWidget(self.nimPresetLabel)
 		self.nim_presetChooser = QComboBox()
 		self.nim_presetChooser.setToolTip("Choose the NIM preset to use for this export.")
@@ -1461,9 +1443,19 @@ class NimExportSequenceDialog(QDialog):
 		horizontalLayout_preset.setStretch(1, 40)
 
 		presetList = self.nim_getPresets()
+
 		if len(presetList) > 0:
+			presetIndex = 0
+			presetIter = 0
 			for preset in presetList :
-				 self.nim_presetChooser.addItem(self.clearPix, preset)
+				self.nim_presetChooser.addItem(self.clearPix, preset)
+				# Set Preference
+				if self.flamePrefs['sequencePreset'] == preset:
+					presetIndex = presetIter
+				presetIter += 1
+
+			if self.flamePrefs['sequencePreset'] != '':
+				self.nim_presetChooser.setCurrentIndex(presetIndex)
 
 		self.nim_presetChooser.currentIndexChanged.connect(self.nim_presetChanged)
 
@@ -1490,18 +1482,12 @@ class NimExportSequenceDialog(QDialog):
 		if len(self.nim_jobs)>0:
 			for key, value in sorted(self.nim_jobs.items(), reverse=True):
 				self.nim_jobChooser.addItem(self.clearPix, key)
-				if self.nim_jobID:
-					if self.nim_jobID == value:
-						print "Found matching jobID, job=", key
-						self.pref_job = key
-						jobIndex = jobIter
-				else:
-					if self.pref_job == key:
-						print "Found matching Job Name, job=", key
-						jobIndex = jobIter
-				jobIter += 1
+				if self.flamePrefs['jobID'] == value:
+					print "Found matching Job Name, job=", key
+					jobIndex = jobIter
+			jobIter += 1
 
-			if self.pref_job != '':
+			if self.flamePrefs['jobID'] != '':
 				self.nim_jobChooser.setCurrentIndex(jobIndex)
 
 		self.nim_jobChooser.currentIndexChanged.connect(self.nim_jobChanged)
@@ -1584,8 +1570,18 @@ class NimExportSequenceDialog(QDialog):
 		horizontalLayout_video.addWidget(self.nim_videoChooser)
 		horizontalLayout_video.setStretch(1, 40)
 
-		for key, value in sorted(self.nim_elementTypesDict.items(), reverse=False):
-			self.nim_videoChooser.addItem(self.clearPix, key)
+		if len(self.nim_elementTypesDict)>0:
+			videoIndex = 0
+			videoIter = 0
+			for key, value in sorted(self.nim_elementTypesDict.items(), reverse=False):
+				self.nim_videoChooser.addItem(self.clearPix, key)
+				if self.flamePrefs['videoElementID'] == value:
+					print "Found video element preference=", key
+					videoIndex = videoIter
+				videoIter += 1
+
+			if self.flamePrefs['videoElementID'] != '':
+				self.nim_videoChooser.setCurrentIndex(videoIndex)
 
 		self.nim_videoChooser.currentIndexChanged.connect(self.nim_videoElementChanged)
 
@@ -1606,8 +1602,18 @@ class NimExportSequenceDialog(QDialog):
 		horizontalLayout_audio.addWidget(self.nim_audioChooser)
 		horizontalLayout_audio.setStretch(1, 40)
 
-		for key, value in sorted(self.nim_elementTypesDict.items(), reverse=False):
-			self.nim_audioChooser.addItem(self.clearPix, key)
+		if len(self.nim_elementTypesDict)>0:
+			audioIndex = 0
+			audioIter = 0
+			for key, value in sorted(self.nim_elementTypesDict.items(), reverse=False):
+				self.nim_audioChooser.addItem(self.clearPix, key)
+				if self.flamePrefs['audioElementID'] == value:
+					print "Found audio element preference=", key
+					audioIndex = audioIter
+				audioIter += 1
+
+			if self.flamePrefs['audioElementID'] != '':
+				self.nim_audioChooser.setCurrentIndex(audioIndex)
 		
 		self.nim_audioChooser.currentIndexChanged.connect(self.nim_audioElementChanged)
 
@@ -1618,7 +1624,7 @@ class NimExportSequenceDialog(QDialog):
 		horizontalLayout_openClip.setObjectName("horizontalLayout_openClip")
 		self.nimOpenClipLabel = QLabel()
 		self.nimOpenClipLabel.setFixedWidth(120)
-		self.nimOpenClipLabel.setText("Source OpenClip:")
+		self.nimOpenClipLabel.setText("Source:")
 		horizontalLayout_openClip.addWidget(self.nimOpenClipLabel)
 		self.nim_openClipChooser = QComboBox()
 		self.nim_openClipChooser.setToolTip("Choose the NIM element type for openClip media.")
@@ -1627,8 +1633,18 @@ class NimExportSequenceDialog(QDialog):
 		horizontalLayout_openClip.addWidget(self.nim_openClipChooser)
 		horizontalLayout_openClip.setStretch(1, 40)
 		
-		for key, value in sorted(self.nim_elementTypesDict.items(), reverse=False):
-			self.nim_openClipChooser.addItem(self.clearPix, key)
+		if len(self.nim_elementTypesDict)>0:
+			sourceIndex = 0
+			sourceIter = 0
+			for key, value in sorted(self.nim_elementTypesDict.items(), reverse=False):
+				self.nim_openClipChooser.addItem(self.clearPix, key)
+				if self.flamePrefs['sourceElementID'] == value:
+					print "Found source element preference=", key
+					sourceIndex = sourceIter
+				sourceIter += 1
+
+			if self.flamePrefs['sourceElementID'] != '':
+				self.nim_openClipChooser.setCurrentIndex(sourceIndex)
 		
 		self.nim_openClipChooser.currentIndexChanged.connect(self.nim_openClipElementChanged)
 
@@ -1639,7 +1655,7 @@ class NimExportSequenceDialog(QDialog):
 		horizontalLayout_batchOpenClip.setObjectName("horizontalLayout_batchOpenClip")
 		self.nimBatchOpenClipLabel = QLabel()
 		self.nimBatchOpenClipLabel.setFixedWidth(120)
-		self.nimBatchOpenClipLabel.setText("Batch OpenClip:")
+		self.nimBatchOpenClipLabel.setText("Batch:")
 		horizontalLayout_batchOpenClip.addWidget(self.nimBatchOpenClipLabel)
 		self.nim_batchOpenClipChooser = QComboBox()
 		self.nim_batchOpenClipChooser.setToolTip("Choose the NIM element type for batchOpenClip media.")
@@ -1648,8 +1664,18 @@ class NimExportSequenceDialog(QDialog):
 		horizontalLayout_batchOpenClip.addWidget(self.nim_batchOpenClipChooser)
 		horizontalLayout_batchOpenClip.setStretch(1, 40)
 		
-		for key, value in sorted(self.nim_elementTypesDict.items(), reverse=False):
-			self.nim_batchOpenClipChooser.addItem(self.clearPix, key)
+		if len(self.nim_elementTypesDict)>0:
+			batchIndex = 0
+			batchIter = 0
+			for key, value in sorted(self.nim_elementTypesDict.items(), reverse=False):
+				self.nim_batchOpenClipChooser.addItem(self.clearPix, key)
+				if self.flamePrefs['batchElementID'] == value:
+					print "Found batch element preference=", key
+					batchIndex = batchIter
+				batchIter += 1
+
+			if self.flamePrefs['batchElementID'] != '':
+				self.nim_batchOpenClipChooser.setCurrentIndex(batchIndex)
 		
 		self.nim_batchOpenClipChooser.currentIndexChanged.connect(self.nim_batchOpenClipElementChanged)
 
@@ -1693,8 +1719,18 @@ class NimExportSequenceDialog(QDialog):
 		horizontalLayout_batch.addWidget(self.nim_batchChooser)
 		horizontalLayout_batch.setStretch(1, 40)
 
-		for key, value in sorted(self.nim_taskTypesDict.items(), reverse=False):
-			self.nim_batchChooser.addItem(self.clearPix, key)
+		if len(self.nim_taskTypesDict)>0:
+			batchFileIndex = 0
+			batchFileIter = 0
+			for key, value in sorted(self.nim_taskTypesDict.items(), reverse=False):
+				self.nim_batchChooser.addItem(self.clearPix, key)
+				if self.flamePrefs['batchTaskTypeID'] == value:
+					print "Found batchFile element preference=", key
+					batchFileIndex = batchFileIter
+				batchFileIter += 1
+
+			if self.flamePrefs['batchTaskTypeID'] != '':
+				self.nim_batchChooser.setCurrentIndex(batchFileIndex)
 
 		self.nim_batchChooser.currentIndexChanged.connect(self.nim_batchTaskChanged)
 
@@ -1775,6 +1811,8 @@ class NimExportSequenceDialog(QDialog):
 		self.nim_serverID = ''
 		self.nim_serverOSPath = ''
 		self.nim_serverDict = {}
+		serverIndex = 0
+		serverIter = 0
 		try:
 			self.nim_serverChooser.clear()
 			if self.nim_serverChooser:
@@ -1783,6 +1821,15 @@ class NimExportSequenceDialog(QDialog):
 						self.nim_serverDict[server['server']] = server['ID']
 					for key, value in sorted(self.nim_serverDict.items(), reverse=False):
 						self.nim_serverChooser.addItem(self.clearPix, key)
+
+						if self.flamePrefs['serverID'] == value:
+							print "Found server preference=", key
+							serverIndex = serverIter
+						
+						serverIter += 1
+
+					if self.flamePrefs['serverID'] != '':
+						self.nim_serverChooser.setCurrentIndex(serverIndex)
 		except:
 			pass
 
@@ -1810,7 +1857,6 @@ class NimExportSequenceDialog(QDialog):
 	def nim_updateShow(self):
 		self.nim_shows = {}
 		self.nim_shows = nimAPI.get_shows(self.nim_jobID)
-		#print self.nim_shows
 
 		showIndex = 0
 		showIter = 0
@@ -1823,20 +1869,14 @@ class NimExportSequenceDialog(QDialog):
 						self.nim_showDict[show['showname']] = show['ID']
 					for key, value in sorted(self.nim_showDict.items(), reverse=False):
 						self.nim_showChooser.addItem(self.clearPix, key)
-						'''
-						if self.nim_showID:
-							if self.nim_showID == value:
-								print "Found matching showID, show=", key
-								self.pref_show == key
-								showIndex = showIter
-						else:
-							if self.pref_show == key:
-								print "Found matching Show Name, show=", key
-								showIndex = showIter
-						'''
+
+						if self.flamePrefs['showID'] == value:
+							print "Found show preference=", key
+							showIndex = showIter
+						
 						showIter += 1
 
-					if self.pref_show != '':
+					if self.flamePrefs['showID'] != '':
 						self.nim_showChooser.setCurrentIndex(showIndex)
 		except:
 			pass
@@ -1911,12 +1951,22 @@ class NimExportSequenceDialog(QDialog):
 		self.batchTaskTypeID = self.nim_taskTypesDict[self.batchTaskType]
 		self.batchTaskTypeFolder = self.nim_taskFolderDict[self.batchTaskTypeID]
 
-		# Saving Preferences
+		# Saving NIM Preferences
 		nimPrefs.update( 'Job', 'Flame', self.nim_jobID )
 		nimPrefs.update( 'ServerID', 'Flame', self.nim_serverID )
 		nimPrefs.update( 'Show', 'Flame', self.nim_showID )
 
-		# TODO: Save custom Flame-NIM preferences for element associations
+		# Save Flame-NIM preferences for element associations
+		self.flamePrefs["sequencePreset"] = self.nim_preset
+		self.flamePrefs["jobID"] = self.nim_jobID
+		self.flamePrefs["serverID"] = self.nim_serverID
+		self.flamePrefs["showID"] = self.nim_showID
+		self.flamePrefs["videoElementID"] = self.videoElementID
+		self.flamePrefs["audioElementID"] = self.audioElementID
+		self.flamePrefs["sourceElementID"] = self.openClipElementID
+		self.flamePrefs["batchElementID"] = self.batchOpenClipElementID
+		self.flamePrefs["batchTaskTypeID"] = self.batchTaskTypeID
+		writeFlamePrefs(self.flamePrefs)
 
 		self.accept()
 
@@ -1926,7 +1976,7 @@ class NimExportEditDialog(QDialog):
 		super(NimExportEditDialog, self).__init__(parent)
 
 		self.result = ""
-
+		QApplication.setOverrideCursor(Qt.ArrowCursor)
 		try:
 			#self.app=nimFile.get_app()
 			self.app = 'Flame'
@@ -1939,25 +1989,8 @@ class NimExportEditDialog(QDialog):
 			else :
 				self.user = ''
 
-			if self.app+'_Job' in self.prefs:
-				self.pref_job=self.prefs[self.app+'_Job']
-			else :
-				self.pref_job = ''
-
-			if self.app+'_Show' in self.prefs:
-				self.pref_show=self.prefs[self.app+'_Show']
-			else :
-				self.pref_show= ''
-
-			if self.app+'_ServerPath' in self.prefs:
-				self.pref_server=self.prefs[self.app+'_ServerPath']
-			else :
-				self.pref_server= ''
-
-			if self.app+'_ServerID' in self.prefs:
-				self.pref_serverID=self.prefs[self.app+'_ServerID']
-			else :
-				self.pref_serverID= ''
+			# Read Flame specific prefs
+			self.flamePrefs = readFlamePrefs()
 
 			print "NIM - Prefs successfully read"
 
@@ -1965,11 +1998,7 @@ class NimExportEditDialog(QDialog):
 			print "NIM - Failed to read NIM prefs"
 			print 'NIM - ERROR: %s' % traceback.print_exc()
 			self.app='Flame'
-			self.prefs=''
-			self.user='andrew'
-			self.pref_job=0
-			self.pref_show=0
-			self.pref_server=''
+			self.user=''
 			pass
 
 		self.nim_OS = platform.system()
@@ -1988,7 +2017,6 @@ class NimExportEditDialog(QDialog):
 
 		print "NIM - user=%s" % self.user
 		print "NIM - userID=%s" % self.nim_userID
-		print "NIM - default job=%s" % self.pref_job
 
 		self.nim_jobPaths = {}
 		self.nim_showPaths = {}
@@ -2050,7 +2078,7 @@ class NimExportEditDialog(QDialog):
 		horizontalLayout_preset.setObjectName("horizontalLayout_preset")
 		self.nimPresetLabel = QLabel()
 		self.nimPresetLabel.setFixedWidth(120)
-		self.nimPresetLabel.setText("Export Preset:")
+		self.nimPresetLabel.setText("Preset:")
 		horizontalLayout_preset.addWidget(self.nimPresetLabel)
 		self.nim_presetChooser = QComboBox()
 		self.nim_presetChooser.setToolTip("Choose the NIM preset to use for this export.")
@@ -2060,9 +2088,19 @@ class NimExportEditDialog(QDialog):
 		horizontalLayout_preset.setStretch(1, 40)
 
 		presetList = self.nim_getPresets()
+
 		if len(presetList) > 0:
+			presetIndex = 0
+			presetIter = 0
 			for preset in presetList :
-				 self.nim_presetChooser.addItem(self.clearPix, preset)
+				self.nim_presetChooser.addItem(self.clearPix, preset)
+				# Set Preference
+				if self.flamePrefs['editPreset'] == preset:
+					presetIndex = presetIter
+				presetIter += 1
+
+			if self.flamePrefs['editPreset'] != '':
+				self.nim_presetChooser.setCurrentIndex(presetIndex)
 
 		self.nim_presetChooser.currentIndexChanged.connect(self.nim_presetChanged)
 
@@ -2107,18 +2145,12 @@ class NimExportEditDialog(QDialog):
 		if len(self.nim_jobs)>0:
 			for key, value in sorted(self.nim_jobs.items(), reverse=True):
 				self.nim_jobChooser.addItem(self.clearPix, key)
-				if self.nim_jobID:
-					if self.nim_jobID == value:
-						print "Found matching jobID, job=", key
-						self.pref_job = key
-						jobIndex = jobIter
-				else:
-					if self.pref_job == key:
-						print "Found matching Job Name, job=", key
-						jobIndex = jobIter
-				jobIter += 1
+				if self.flamePrefs['jobID'] == value:
+					print "Found Job Preferences"
+					jobIndex = jobIter
+			jobIter += 1
 
-			if self.pref_job != '':
+			if self.flamePrefs['jobID'] != '':
 				self.nim_jobChooser.setCurrentIndex(jobIndex)
 
 		self.nim_jobChooser.currentIndexChanged.connect(self.nim_jobChanged)
@@ -2227,6 +2259,8 @@ class NimExportEditDialog(QDialog):
 		self.nim_serverID = ''
 		self.nim_serverOSPath = ''
 		self.nim_serverDict = {}
+		serverIndex = 0
+		serverIter = 0
 		try:
 			self.nim_serverChooser.clear()
 			if self.nim_serverChooser:
@@ -2235,6 +2269,15 @@ class NimExportEditDialog(QDialog):
 						self.nim_serverDict[server['server']] = server['ID']
 					for key, value in sorted(self.nim_serverDict.items(), reverse=False):
 						self.nim_serverChooser.addItem(self.clearPix, key)
+
+						if self.flamePrefs['serverID'] == value:
+							print "Found server preference=", key
+							serverIndex = serverIter
+						
+						serverIter += 1
+
+					if self.flamePrefs['serverID'] != '':
+						self.nim_serverChooser.setCurrentIndex(serverIndex)
 		except:
 			pass
 
@@ -2262,8 +2305,6 @@ class NimExportEditDialog(QDialog):
 	def nim_updateShow(self):
 		self.nim_shows = {}
 		self.nim_shows = nimAPI.get_shows(self.nim_jobID)
-		#print self.nim_shows
-
 		showIndex = 0
 		showIter = 0
 		self.nim_showDict = {}
@@ -2275,20 +2316,14 @@ class NimExportEditDialog(QDialog):
 						self.nim_showDict[show['showname']] = show['ID']
 					for key, value in sorted(self.nim_showDict.items(), reverse=False):
 						self.nim_showChooser.addItem(self.clearPix, key)
-						'''
-						if self.nim_showID:
-							if self.nim_showID == value:
-								print "Found matching showID, show=", key
-								self.pref_show == key
-								showIndex = showIter
-						else:
-							if self.pref_show == key:
-								print "Found matching Show Name, show=", key
-								showIndex = showIter
-						'''
+
+						if self.flamePrefs['showID'] == value:
+							print "Found show preference=", key
+							showIndex = showIter
+						
 						showIter += 1
 
-					if self.pref_show != '':
+					if self.flamePrefs['showID'] != '':
 						self.nim_showChooser.setCurrentIndex(showIndex)
 		except:
 			pass
@@ -2316,6 +2351,7 @@ class NimExportEditDialog(QDialog):
 			else:
 				print "NIM: No Data Returned"
 	
+
 	def acceptTest(self):
 		# Get Current Values For Static Objects
 		self.nim_preset = self.nim_presetChooser.currentText()
@@ -2330,6 +2366,13 @@ class NimExportEditDialog(QDialog):
 		nimPrefs.update( 'ServerID', 'Flame', self.nim_serverID )
 		nimPrefs.update( 'Show', 'Flame', self.nim_showID )
 
+		# Save Flame-NIM preferences for element associations
+		self.flamePrefs["editPreset"] = self.nim_preset
+		self.flamePrefs["jobID"] = self.nim_jobID
+		self.flamePrefs["serverID"] = self.nim_serverID
+		self.flamePrefs["showID"] = self.nim_showID
+		writeFlamePrefs(self.flamePrefs)
+
 		self.accept()
 
 
@@ -2338,7 +2381,7 @@ class NimExportDailyDialog(QDialog):
 		super(NimExportDailyDialog, self).__init__(parent)
 
 		self.result = ""
-
+		QApplication.setOverrideCursor(Qt.ArrowCursor)
 		try:
 			#self.app=nimFile.get_app()
 			self.app = 'Flame'
@@ -2351,25 +2394,8 @@ class NimExportDailyDialog(QDialog):
 			else :
 				self.user = ''
 
-			if self.app+'_Job' in self.prefs:
-				self.pref_job=self.prefs[self.app+'_Job']
-			else :
-				self.pref_job = ''
-
-			if self.app+'_Show' in self.prefs:
-				self.pref_show=self.prefs[self.app+'_Show']
-			else :
-				self.pref_show= ''
-
-			if self.app+'_ServerPath' in self.prefs:
-				self.pref_server=self.prefs[self.app+'_ServerPath']
-			else :
-				self.pref_server= ''
-
-			if self.app+'_ServerID' in self.prefs:
-				self.pref_serverID=self.prefs[self.app+'_ServerID']
-			else :
-				self.pref_serverID= ''
+			# Read Flame specific prefs
+			self.flamePrefs = readFlamePrefs()
 
 			print "NIM - Prefs successfully read"
 
@@ -2377,11 +2403,7 @@ class NimExportDailyDialog(QDialog):
 			print "NIM - Failed to read NIM prefs"
 			print 'NIM - ERROR: %s' % traceback.print_exc()
 			self.app='Flame'
-			self.prefs=''
-			self.user='andrew'
-			self.pref_job=0
-			self.pref_show=0
-			self.pref_server=''
+			self.user=''
 			pass
 
 		self.nim_OS = platform.system()
@@ -2400,7 +2422,6 @@ class NimExportDailyDialog(QDialog):
 
 		print "NIM - user=%s" % self.user
 		print "NIM - userID=%s" % self.nim_userID
-		print "NIM - default job=%s" % self.pref_job
 
 		self.nim_jobPaths = {}
 		self.nim_showPaths = {}
@@ -2470,7 +2491,7 @@ class NimExportDailyDialog(QDialog):
 		horizontalLayout_preset.setObjectName("horizontalLayout_preset")
 		self.nimPresetLabel = QLabel()
 		self.nimPresetLabel.setFixedWidth(120)
-		self.nimPresetLabel.setText("Export Preset:")
+		self.nimPresetLabel.setText("Preset:")
 		horizontalLayout_preset.addWidget(self.nimPresetLabel)
 		self.nim_presetChooser = QComboBox()
 		self.nim_presetChooser.setToolTip("Choose the NIM preset to use for this export.")
@@ -2481,10 +2502,20 @@ class NimExportDailyDialog(QDialog):
 
 		presetList = self.nim_getPresets()
 		if len(presetList) > 0:
+			presetIndex = 0
+			presetIter = 0
 			for preset in presetList :
-				 self.nim_presetChooser.addItem(self.clearPix, preset)
+				self.nim_presetChooser.addItem(self.clearPix, preset)
+				# Set Preference
+				if self.flamePrefs['dailyPreset'] == preset:
+					presetIndex = presetIter
+				presetIter += 1
+
+			if self.flamePrefs['dailyPreset'] != '':
+				self.nim_presetChooser.setCurrentIndex(presetIndex)
 
 		self.nim_presetChooser.currentIndexChanged.connect(self.nim_presetChanged)
+
 
 		# JOBS: List box for job selection
 		horizontalLayout_job = QHBoxLayout()
@@ -2509,18 +2540,12 @@ class NimExportDailyDialog(QDialog):
 		if len(self.nim_jobs)>0:
 			for key, value in sorted(self.nim_jobs.items(), reverse=True):
 				self.nim_jobChooser.addItem(self.clearPix, key)
-				if self.nim_jobID:
-					if self.nim_jobID == value:
-						print "Found matching jobID, job=", key
-						self.pref_job = key
-						jobIndex = jobIter
-				else:
-					if self.pref_job == key:
-						print "Found matching Job Name, job=", key
-						jobIndex = jobIter
-				jobIter += 1
+				if self.flamePrefs['jobID'] == value:
+					print "Found Job Preferences"
+					jobIndex = jobIter
+			jobIter += 1
 
-			if self.pref_job != '':
+			if self.flamePrefs['jobID'] != '':
 				self.nim_jobChooser.setCurrentIndex(jobIndex)
 
 		self.nim_jobChooser.currentIndexChanged.connect(self.nim_jobChanged)
@@ -2665,6 +2690,8 @@ class NimExportDailyDialog(QDialog):
 		self.nim_serverID = ''
 		self.nim_serverOSPath = ''
 		self.nim_serverDict = {}
+		serverIndex = 0
+		serverIter = 0
 		try:
 			self.nim_serverChooser.clear()
 			if self.nim_serverChooser:
@@ -2673,6 +2700,15 @@ class NimExportDailyDialog(QDialog):
 						self.nim_serverDict[server['server']] = server['ID']
 					for key, value in sorted(self.nim_serverDict.items(), reverse=False):
 						self.nim_serverChooser.addItem(self.clearPix, key)
+
+						if self.flamePrefs['serverID'] == value:
+							print "Found server preference=", key
+							serverIndex = serverIter
+						
+						serverIter += 1
+
+					if self.flamePrefs['serverID'] != '':
+						self.nim_serverChooser.setCurrentIndex(serverIndex)
 		except:
 			pass
 
@@ -2700,8 +2736,6 @@ class NimExportDailyDialog(QDialog):
 	def nim_updateShow(self):
 		self.nim_shows = {}
 		self.nim_shows = nimAPI.get_shows(self.nim_jobID)
-		#print self.nim_shows
-
 		showIndex = 0
 		showIter = 0
 		self.nim_showDict = {}
@@ -2713,20 +2747,14 @@ class NimExportDailyDialog(QDialog):
 						self.nim_showDict[show['showname']] = show['ID']
 					for key, value in sorted(self.nim_showDict.items(), reverse=False):
 						self.nim_showChooser.addItem(self.clearPix, key)
-						'''
-						if self.nim_showID:
-							if self.nim_showID == value:
-								print "Found matching showID, show=", key
-								self.pref_show == key
-								showIndex = showIter
-						else:
-							if self.pref_show == key:
-								print "Found matching Show Name, show=", key
-								showIndex = showIter
-						'''
+						
+						if self.flamePrefs['showID'] == value:
+							print "Found show preference=", key
+							showIndex = showIter
+						
 						showIter += 1
 
-					if self.pref_show != '':
+					if self.flamePrefs['showID'] != '':
 						self.nim_showChooser.setCurrentIndex(showIndex)
 		except:
 			pass
@@ -2773,20 +2801,14 @@ class NimExportDailyDialog(QDialog):
 						self.nim_shotDict[shot['name']] = shot['ID']
 					for key, value in sorted(self.nim_shotDict.items(), reverse=False):
 						self.nim_shotChooser.addItem(self.clearPix, key)
-						'''
-						if self.nim_shotID:
-							if self.nim_shotID == value:
-								print "Found matching shotID, shot=", key
-								self.pref_shot == key
-								shotIndex = shotIter
-						else:
-							if self.pref_shot == key:
-								print "Found matching Show Name, shot=", key
-								shotIndex = shotIter
-						'''
+						
+						if self.flamePrefs['shotID'] == value:
+							print "Found shot preference=", key
+							shotIndex = shotIter
+						
 						shotIter += 1
 
-					if self.pref_shot != '':
+					if self.flamePrefs['shotID'] != '':
 						self.nim_shotChooser.setCurrentIndex(shotIndex)
 		except:
 			pass
@@ -2830,20 +2852,14 @@ class NimExportDailyDialog(QDialog):
 						print "taskTitle: %s" % taskTitle
 					for key, value in sorted(self.nim_taskDict.items(), reverse=False):
 						self.nim_taskChooser.addItem(self.clearPix, key)
-						'''
-						if self.nim_taskID:
-							if self.nim_taskID == value:
-								print "Found matching taskID, task=", key
-								self.pref_task == key
-								taskIndex = taskIter
-						else:
-							if self.pref_task == key:
-								print "Found matching Show Name, task=", key
-								taskIndex = taskIter
-						'''
+						
+						if self.flamePrefs['taskID'] == value:
+							print "Found task preference=", key
+							taskIndex = taskIter
+						
 						taskIter += 1
 
-					if self.pref_task != '':
+					if self.flamePrefs['taskID'] != '':
 						self.nim_taskChooser.setCurrentIndex(taskIndex)
 		except:
 			pass
@@ -2860,8 +2876,6 @@ class NimExportDailyDialog(QDialog):
 			self.nim_taskID = taskID
 
 
-	
-
 	def acceptTest(self):
 		# Get Current Values For Static Objects
 		self.nim_preset = self.nim_presetChooser.currentText()
@@ -2871,6 +2885,14 @@ class NimExportDailyDialog(QDialog):
 		nimPrefs.update( 'ServerID', 'Flame', self.nim_serverID )
 		nimPrefs.update( 'Show', 'Flame', self.nim_showID )
 
+		# Save Flame-NIM preferences for element associations
+		self.flamePrefs["dailyPreset"] = self.nim_preset
+		self.flamePrefs["jobID"] = self.nim_jobID
+		self.flamePrefs["serverID"] = self.nim_serverID
+		self.flamePrefs["showID"] = self.nim_showID
+		self.flamePrefs["shotID"] = self.nim_shotID
+		self.flamePrefs["taskID"] = self.nim_taskID
+		writeFlamePrefs(self.flamePrefs)
 
 		self.accept()
 
@@ -3261,72 +3283,9 @@ def nimScanForVersions(nim_showID=None, nim_shotID=None) :
 	# find_elements in show with metadata flameAssetType : batchOpenClip
 	# get element type
 	# find all elements of type in shot
+	#print("nimScanForVersions")
 	clipCount = 0
 	clipFail = 0
-	'''
-	# Get elements by metadata - batchOpenClip
-	# add elements to batchOpenClip
-	metadata = {}
-	metadata['flameAssetType'] = 'batchOpenClip'
-	metadata = json.dumps(metadata)
-	openClipElements = nimAPI.find_elements(showID=nim_showID, metadata=metadata)
-	print openClipElements
-
-	for openClipElement in openClipElements :
-		clipID = openClipElement['ID']
-		shotID = openClipElement['shotID']
-		clipPath = openClipElement['path'].encode('utf-8')
-		clipName = openClipElement['name'].encode('utf-8')
-		clipFile = os.path.join(clipPath,clipName)
-
-		elementTypeID = openClipElement['elementTypeID']
-		elements = nimAPI.find_elements(shotID=shotID, elementTypeID=elementTypeID)
-		print "matching elements found"
-		print elements
-
-		for element in elements :
-			if element['ID'] != clipID :
-				print "Element found for shotID %s" % shotID
-				elementPath = element['path'].encode('utf-8')
-				elementName = element['name'].encode('utf-8')
-				print os.path.join(elementPath,elementName)
-				
-				clipUpdated = updateOpenClip( clipFile, elementPath, elementName )
-				if clipUpdated :
-					clipCount += 1
-
-
-	# Get elements by metadata - openClip
-	# add elements to openClip
-	metadata = {}
-	metadata['flameAssetType'] = 'openClip'
-	metadata = json.dumps(metadata)
-	openClipElements = nimAPI.find_elements(showID=nim_showID, metadata=metadata)
-	print openClipElements
-
-	for openClipElement in openClipElements :
-		clipID = openClipElement['ID']
-		shotID = openClipElement['shotID']
-		clipPath = openClipElement['path'].encode('utf-8')
-		clipName = openClipElement['name'].encode('utf-8')
-		clipFile = os.path.join(clipPath,clipName)
-
-		elementTypeID = openClipElement['elementTypeID']
-		elements = nimAPI.find_elements(shotID=shotID, elementTypeID=elementTypeID)
-		print "matching elements found"
-		print elements
-
-		for element in elements :
-			if element['ID'] != clipID :
-				print "Element found for shotID %s" % shotID
-				elementPath = element['path'].encode('utf-8')
-				elementName = element['name'].encode('utf-8')
-				print os.path.join(elementPath,elementName)
-				
-				clipUpdated = updateOpenClip( clipFile, elementPath, elementName ) 
-				if clipUpdated :
-					clipCount += 1
-	'''
 
 	if nim_showID :
 		shots = nimAPI.get_shots(showID=nim_showID)
@@ -3365,8 +3324,9 @@ def nimScanForVersions(nim_showID=None, nim_shotID=None) :
 						elementName = element['name'].encode('utf-8')
 						
 						# Update elementPath using server os resolution
-						elementPath = resolveServerOsPath(elementPath)
-						print "OS ElementPath: %s" % elementPath
+						print "Raw Element Path: %s" % elementPath
+						elementPath = resolveServerOsPath(path=elementPath)
+						print "OS Element Path: %s" % elementPath
 
 						print os.path.join(elementPath,elementName)
 						clipUpdated = updateOpenClip( clipFile, elementPath, elementName )
@@ -3388,7 +3348,7 @@ def nimBuildOpenClipFromElements(nim_showID=None, nim_shotID=None, nim_serverID=
 	# Create newClip if no matching type
 	# TODO: Update to only create element Clips... ignore duplicate clips
 	# 		This could be just assuming that the clip doesn't exist
-
+	#print("nimBuildOpenClipFromElements")
 	clipCount = 0
 	clipFail = 0
 
@@ -3449,6 +3409,7 @@ def nimBuildOpenClipFromElements(nim_showID=None, nim_shotID=None, nim_serverID=
 							print os.path.join(elementPath,elementName)
 							
 							# Update elementPath using server os resolution
+							print "Raw ElementPath: %s" % elementPath
 							elementPath = resolveServerOsPath(elementPath)
 							print "OS ElementPath: %s" % elementPath
 
@@ -3476,7 +3437,7 @@ def nimBuildOpenClipFromFolders(nim_showID=None, nim_shotID=None, nim_serverID=N
 	# Create newClip if no matching type
 	# TODO: Update to only create element Clips... ignore duplicate clips
 	# 		This could be just assuming that the clip doesn't exist
-
+	#print("nimBuildOpenClipFromFolders")
 	clipCount = 0
 	clipFail = 0
 
@@ -3694,47 +3655,72 @@ def resolveBatchSetupNamePattern(namePattern=None, sequenceName='', tapeName='')
 
 def resolveServerOsPath(path='') :
 	#Convert path from known NIM server to OS relavtive path
+	#print("resolveServerOsPath")
 
 	_os = platform.system()
+	serverID = ''
 	servers = {}
 	servers = nimAPI.get_allServers()
-	serverID = ''
-
+	
+	path = path.replace('\\', '/')
 	resolvedPath = path
 
 	# Find matching server from path
 	if len(servers) > 0:
 		print "Servers Found: %s" % str(len(servers))
 		for server in servers :
-			linuxPath 	= server['path'].replace('\\', '/')
-			winPath 	= server['winPath'].replace('/', '\\')
-			osxPath 	= server['osxPath'].replace('\\', '/')
+			linuxPath = ""
+			winPath = ""
+			osxPath = ""
+
+			if server['path'] :
+				linuxPath 	= server['path'].replace('\\', '/')
+			if server['winPath'] :
+				winPath 	= server['winPath'].replace('\\', '/')
+			if server['osxPath'] :
+				osxPath 	= server['osxPath'].replace('\\', '/')
+
+			#print "Linux Path: %s" % linuxPath
+			#print "Windows Path: %s" % winPath
+			#print "OSX Path: %s" % osxPath
 
 			if _os.lower() in ['darwin', 'mac'] :
-				targetPath = osxPath
+				print "OS: OSX"
 				# Compare against windows and linux & set to osx
-				if path.startswith(winPath) :
+				if winPath and path.startswith(winPath) :
+					print "Translating Windows Path"
 					pathTail = path[path.startswith(winPath) and len(winPath):]
-					resolvedPath = os.path.join(targetPath,pathTail)
+					if pathTail.startswith('/') :
+						pathTail = pathTail[1:]
+					resolvedPath = os.path.join(osxPath,pathTail)
 					break
 
-				elif path.startswith(linuxPath) :
-					pathTail = path[path.startswith(winPath) and len(winPath):]
-					resolvedPath = os.path.join(targetPath,pathTail)
+				elif linuxPath and path.startswith(linuxPath) :
+					print "Translating Linux Path"
+					pathTail = path[path.startswith(linuxPath) and len(linuxPath):]
+					if pathTail.startswith('/') :
+						pathTail = pathTail[1:]
+					resolvedPath = os.path.join(osxPath,pathTail)
 					break
 
 
 			elif _os.lower() in ['linux', 'linux2'] :
-				targetPath = linuxPath
-				# Compare against windows and linux & set to linux
-				if path.startswith(winPath) :
+				print "OS: Linux"
+				# Compare against windows and osx & set to linux
+				if winPath and path.startswith(winPath) :
+					print "Translating Windows Path"
 					pathTail = path[path.startswith(winPath) and len(winPath):]
-					resolvedPath = os.path.join(targetPath,pathTail)
+					if pathTail.startswith('/') :
+						pathTail = pathTail[1:]
+					resolvedPath = os.path.join(linuxPath,pathTail)
 					break
 
-				elif path.startswith(linuxPath) :
-					pathTail = path[path.startswith(winPath) and len(winPath):]
-					resolvedPath = os.path.join(targetPath,pathTail)
+				elif osxPath and path.startswith(osxPath) :
+					print "Translating OSX Path"
+					pathTail = path[path.startswith(osxPath) and len(osxPath):]
+					if pathTail.startswith('/') :
+						pathTail = pathTail[1:]
+					resolvedPath = os.path.join(linuxPath,pathTail)
 					break
 
 	return resolvedPath
@@ -3943,3 +3929,85 @@ def updateOpenClip( masterFile, elementPath, elementName ) :
 	return clipUpdated
 
 
+def readFlamePrefs() :
+	# Read Flame Specific Preferences
+	
+	flamePrefs = {}
+	flamePrefs["sequencePreset"] = ""
+	flamePrefs["editPreset"] = ""
+	flamePrefs["dailyPreset"] = ""
+
+	flamePrefs["jobID"] = ""
+	flamePrefs["serverID"] = ""
+	flamePrefs["showID"] = ""
+	flamePrefs["shotID"] = ""
+	flamePrefs["taskID"] = ""
+
+	flamePrefs["videoElementID"] = ""
+	flamePrefs["audioElementID"] = ""
+	flamePrefs["sourceElementID"] = ""
+	flamePrefs["batchElementID"] = ""
+	flamePrefs["batchTaskTypeID"] = ""
+
+	try :
+		#  Read NIM preferences file :
+		if os.path.isfile( flamePrefFile ) :
+			with open(flamePrefFile) as flameFile :
+				for line in flameFile :
+					lineValues = line.rstrip('\n').split('=', 1)
+					if lineValues[0] and lineValues[1] :
+						flamePrefs[lineValues[0]] = lineValues[1]
+	except Exception, e :
+		print "Error: Unable to read Flame NIM preferences."
+		
+	return flamePrefs
+
+
+def writeFlamePrefs( flamePrefs=None ) :
+	# Write Flame Specifc Preferences
+	if not flamePrefs :
+		print "No preferences found. Not updating NIM Flame preferences."
+		return False
+
+	#  Retrieve old preferences :
+	oldPrefs = {}
+	try :
+		if os.path.isfile( flamePrefFile ) :
+			with open(flamePrefFile) as flameFile :
+				for line in flameFile :
+					lineValues = line.rstrip('\n').split('=', 1)
+					if lineValues[0] and lineValues[1] :
+						oldPrefs[lineValues[0]] = lineValues[1]
+	except :
+		print "Failed to read NIM Flame Preferences for updating"
+		print 'NIM - ERROR: %s' % traceback.print_exc()
+		return False
+
+	# Update All Exsting Keys
+	for oldKey, oldValue in oldPrefs.iteritems() :
+		for key, value in flamePrefs.iteritems() :
+			if key == oldKey :
+				oldPrefs[oldKey] = value
+
+	# Add New Keys
+	for key, value in flamePrefs.iteritems() :
+		keyFound = False
+		for oldKey, oldValue in oldPrefs.iteritems() :
+			if oldKey == key :
+				keyFound = True
+				break
+		if not keyFound :
+			oldPrefs[key] = value
+
+	#  Write new preferences :
+	try :
+		with open(flamePrefFile, 'w') as flameFile :
+			for key, value in oldPrefs.iteritems() :
+				line = key+"="+value+"\n"
+				flameFile.write(line)
+	except :
+		print "Failed to write NIM Flame Preferences"
+		print 'NIM - ERROR: %s' % traceback.print_exc()
+		return False
+
+	return True
