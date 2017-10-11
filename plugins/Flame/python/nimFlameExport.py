@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: Flame/python/nimFlameExport.py
-# Version:  v2.7.21.170825
+# Version:  v2.7.26.171011
 #
 # Copyright (c) 2017 NIM Labs LLC
 # All rights reserved.
@@ -1369,7 +1369,7 @@ class NimExportSequenceDialog(QDialog):
 		self.nim_taskTypes = []
 		self.nim_taskTypesDict = {}
 		self.nim_taskFolderDict = {}
-		self.nim_taskTypes = nimAPI.get_tasks(app='NUKE', userType='all')
+		self.nim_taskTypes = nimAPI.get_tasks(app='FLAME', userType='all')
 		if len(self.nim_taskTypes)>0:
 			for task in self.nim_taskTypes:
 				self.nim_taskTypesDict[task['name']] = task['ID']
