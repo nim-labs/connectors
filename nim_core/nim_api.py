@@ -1774,7 +1774,7 @@ def add_render( jobID=0, itemType='shot', taskID=0, fileID=0, \
                 'renderKey':str(renderKey), 'renderName':str(renderName), 'renderType':str(renderType), 'renderComment':str(renderComment), \
                 'outputDirs':str(outputDirs), 'outputFiles':str(outputFiles), 'elementTypeID':str(elementTypeID), \
                 'start_datetime':str(start_datetime), 'end_datetime':str(end_datetime), \
-                'avgTime':str(avgTime), 'totalTime':str(totalTime), 'frame':str(frame) }
+                'avgTime':str(avgTime), 'totalTime':str(totalTime), 'frames':str(frame) }
     result = connect( method='get', params=params, nimURL=nimURL, apiKey=apiKey )
     return result
 
