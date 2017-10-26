@@ -608,12 +608,15 @@ def get_jobs( userID=None, folders=False ) :
     try:
         for job in _jobs :
             if not folders :
-                jobDict[str(job['number'])+'_'+str(job['jobname'])]=str(job['ID'])
+                #jobDict[str(job['number'])+'_'+str(job['jobname'])]=str(job['ID'])
+                jobDict[ u' '.join((job['number'],job['jobname'])).encode('utf-8') ] = job['ID'].encode('utf-8')
             else :
-                jobDict[str(job['number'])+'_'+str(job['folder'])]=str(job['ID'])
+                #jobDict[str(job['number'])+'_'+str(job['folder'])]=str(job['ID'])
+                jobDict[ u' '.join((job['number'],'_',job['folder'])).encode('utf-8') ] = job['ID'].encode('utf-8')
         return jobDict
     except :
         P.error("Failed to get jobs")
+        P.error( traceback.print_exc() )
         return False
 
 def get_allServers( locationID='' ) :
