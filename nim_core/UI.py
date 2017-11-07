@@ -2010,7 +2010,7 @@ class GUI(QtGui.QMainWindow) :
                 pass
 
         return
-    
+
     
     def update_tag(self) :
         'Updates the tag string in the main NIM dictionary'

@@ -699,10 +699,9 @@ def get_assetIcon( assetID=None ) :
     assetIcon=get( {'q': 'getAssetIcon', 'ID': assetID} )
     return assetIcon
 
-def get_tasks(app='all', userType='artist') :
-    'Retrieves the dictionary of available tasks from the API'
-    #tasks=get( {'q': 'getTaskTypes', 'type': 'artist'} )
-    tasks=get( {'q': 'getTaskTypes', 'app': app, 'type': userType} )
+def get_tasks(app='all', userType='artist', assetID=None, shotID=None) :
+    'Retrieves the dictionary of available tasks from the API optionally including all in-use tasks on an asset or shot'
+    tasks=get( {'q': 'getTaskTypes', 'app': app, 'type': userType, 'assetID': assetID, 'shotID': shotID} )
     return tasks
 
 def get_taskInfo(ID=None, itemClass=None, itemID=None) :
