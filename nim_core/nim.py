@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: nim.py
-# Version:  v2.7.26.171011
+# Version:  v2.7.27.171106
 #
 # Copyright (c) 2017 NIM Labs LLC
 # All rights reserved.
@@ -533,6 +533,7 @@ class NIM( object ) :
     
     def set_dict( self, elem='job', pub=False ) :
         'Sets the dictionary for a given element'
+        #print "set_dict: %s" % elem
         dic={}
         
         if elem=='job' :
@@ -564,19 +565,43 @@ class NIM( object ) :
                             self.nim[elem]['Dict']=['Published', 'Work']
             else :
                 self.nim[elem]['Dict']=['Work']
+        
+
         elif elem=='task' :
-            if self.nim['mode'] and self.nim['mode'].lower() in ['load', 'open', 'file'] :
-                if self.nim['filter']['name'] not in ['Select...', 'None', ''] and self.nim['filter']['name'] !='Asset Master' :
-                    self.nim[elem]['Dict']=Api.get( {'q': 'getTaskTypes', 'app': self.nim['app'].upper()} )
-                elif self.nim['filter']['name']=='Asset Master' :
-                    self.nim[elem]['Dict']={}
-            else :
+            #REMOVED AS REDUNDANT
+            #if self.nim['mode'] and self.nim['mode'].lower() in ['load', 'open', 'file'] :
+            
+            # WAS INSIDE IF
+            if self.nim['filter']['name'] not in ['Select...', 'None', ''] and self.nim['filter']['name'] !='Asset Master' :
+                
+                #NOT INCLUDING CLASS WHEN LOADING TASKS
+                #self.nim[elem]['Dict']=Api.get( {'q': 'getTaskTypes', 'app': self.nim['app'].upper()} )
+
+                #print "Loading %s tasks" % self.nim['class']
+
                 if self.nim['class']=='SHOT' :
                     if self.nim['shot']['name'] not in ['Select...', 'None', ''] :
-                        self.nim[elem]['Dict']=Api.get( {'q': 'getTaskTypes', 'app': self.nim['app'].upper()} )
+                        #self.nim[elem]['Dict']=Api.get( {'q': 'getTaskTypes', 'app': self.nim['app'].upper()} )
+                        self.nim[elem]['Dict']=Api.get_tasks(app=self.nim['app'].upper(), shotID=self.nim['shot']['ID'])
                 elif self.nim['class']=='ASSET' :
                     if self.nim['asset']['name'] not in ['Select...', 'None', ''] :
-                        self.nim[elem]['Dict']=Api.get( {'q': 'getTaskTypes', 'app': self.nim['app'].upper()} )
+                        #self.nim[elem]['Dict']=Api.get( {'q': 'getTaskTypes', 'app': self.nim['app'].upper()} )
+                        self.nim[elem]['Dict']=Api.get_tasks(app=self.nim['app'].upper(), assetID=self.nim['asset']['ID'])
+
+            elif self.nim['filter']['name']=='Asset Master' :
+                self.nim[elem]['Dict']={}
+
+            # REMOVED AS REDUNDANT
+            #else :
+            #    if self.nim['class']=='SHOT' :
+            #        if self.nim['shot']['name'] not in ['Select...', 'None', ''] :
+            #            #self.nim[elem]['Dict']=Api.get( {'q': 'getTaskTypes', 'app': self.nim['app'].upper()} )
+            #            self.nim[elem]['Dict']=Api.get_tasks(app=self.nim['app'].upper(), shotID=self.nim['shot']['ID'])
+            #    elif self.nim['class']=='ASSET' :
+            #        if self.nim['asset']['name'] not in ['Select...', 'None', ''] :
+            #            #self.nim[elem]['Dict']=Api.get( {'q': 'getTaskTypes', 'app': self.nim['app'].upper()} )
+            #            self.nim[elem]['Dict']=Api.get_tasks(app=self.nim['app'].upper(), assetID=self.nim['asset']['ID'])
+
         elif elem=='base' :
             if self.nim['filter']['name']=='Published' :
                 if self.nim['class']=='SHOT' and self.nim['task']['name'] :

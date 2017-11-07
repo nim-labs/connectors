@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: nim_api.py
-# Version:  v2.7.26.171011
+# Version:  v2.7.27.171106
 #
 # Copyright (c) 2017 NIM Labs LLC
 # All rights reserved.
@@ -608,12 +608,15 @@ def get_jobs( userID=None, folders=False ) :
     try:
         for job in _jobs :
             if not folders :
-                jobDict[str(job['number'])+'_'+str(job['jobname'])]=str(job['ID'])
+                #jobDict[str(job['number'])+'_'+str(job['jobname'])]=str(job['ID'])
+                jobDict[ u' '.join((job['number'],job['jobname'])).encode('utf-8') ] = job['ID'].encode('utf-8')
             else :
-                jobDict[str(job['number'])+'_'+str(job['folder'])]=str(job['ID'])
+                #jobDict[str(job['number'])+'_'+str(job['folder'])]=str(job['ID'])
+                jobDict[ u' '.join((job['number'],'_',job['folder'])).encode('utf-8') ] = job['ID'].encode('utf-8')
         return jobDict
     except :
         P.error("Failed to get jobs")
+        P.error( traceback.print_exc() )
         return False
 
 def get_allServers( locationID='' ) :
@@ -696,10 +699,9 @@ def get_assetIcon( assetID=None ) :
     assetIcon=get( {'q': 'getAssetIcon', 'ID': assetID} )
     return assetIcon
 
-def get_tasks(app='all', userType='artist') :
-    'Retrieves the dictionary of available tasks from the API'
-    #tasks=get( {'q': 'getTaskTypes', 'type': 'artist'} )
-    tasks=get( {'q': 'getTaskTypes', 'app': app, 'type': userType} )
+def get_tasks(app='all', userType='artist', assetID=None, shotID=None) :
+    'Retrieves the dictionary of available tasks from the API optionally including all in-use tasks on an asset or shot'
+    tasks=get( {'q': 'getTaskTypes', 'app': app, 'type': userType, 'assetID': assetID, 'shotID': shotID} )
     return tasks
 
 def get_taskInfo(ID=None, itemClass=None, itemID=None) :
@@ -1774,7 +1776,7 @@ def add_render( jobID=0, itemType='shot', taskID=0, fileID=0, \
                 'renderKey':str(renderKey), 'renderName':str(renderName), 'renderType':str(renderType), 'renderComment':str(renderComment), \
                 'outputDirs':str(outputDirs), 'outputFiles':str(outputFiles), 'elementTypeID':str(elementTypeID), \
                 'start_datetime':str(start_datetime), 'end_datetime':str(end_datetime), \
-                'avgTime':str(avgTime), 'totalTime':str(totalTime), 'frame':str(frame) }
+                'avgTime':str(avgTime), 'totalTime':str(totalTime), 'frames':str(frame) }
     result = connect( method='get', params=params, nimURL=nimURL, apiKey=apiKey )
     return result
 

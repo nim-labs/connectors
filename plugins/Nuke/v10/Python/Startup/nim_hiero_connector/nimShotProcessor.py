@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: Nuke/Python/Startup/nim_hiero_connector/nimShotProcessor.py
-# Version:  v2.5.10.161121
+# Version:  v2.7.27.171106
 #
 # *****************************************************************************
 
@@ -600,7 +600,9 @@ class NimShotProcessor(hiero.core.ProcessorBase):
           print "NIM: user=%s" % user
           print "NIM: userID: %s" % userID
 
-          if presetName == 'hiero.exporters.FnTranscodeExporter.TranscodeExporter':
+          if presetName == 'hiero.exporters.FnTranscodeExporter.TranscodeExporter' \
+            or presetName == 'hiero.exporters.FnCopyExporter.CopyExporter' \
+            or presetName == 'hiero.exporters.FnSymLinkExporter.SymLinkExporter' :
             if nimHieroConnector.g_nim_publishElement == True:
               print "NIM: Publish Element"
               print "     shotID=", nim_shotID

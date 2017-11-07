@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: nim_c4d.py
-# Version:  v2.7.26.171011
+# Version:  v2.7.27.171017
 #
 # Copyright (c) 2017 NIM Labs LLC
 # All rights reserved.
@@ -28,7 +28,7 @@ import nim_print as P
 import nim_win as Win
 
 #  Variables :
-version='v2.7.26'
+version='v2.7.27'
 winTitle='NIM_'+version+' - '
 _os=platform.system().lower()
 nim_plugin_ID=1032427
@@ -105,55 +105,55 @@ def get_vars( nim=None, ID=None ) :
     'Get variables from a C4D file.'
     
     doc=c4d.documents.GetActiveDocument()
-    container=doc.GetDataInstance()
-    
+    container=doc[ID]
+
     #  Server :
-    serverString=container[ID].GetData( 9111 )
+    serverString=container.GetData( 9111 )
     nim.set_server( path=serverString )
-    serverID=container[ID].GetData( 9112)
+    serverID=container.GetData( 9112)
     nim.set_server( ID=serverID )
     #  Job :
-    jobString=container[ID].GetData( 9113 )
+    jobString=container.GetData( 9113 )
     nim.set_name( elem='job', name=jobString )
-    jobID=container[ID].GetData( 9114 )
+    jobID=container.GetData( 9114 )
     nim.set_ID( elem='job', ID=str(jobID) )
     #  Tab :
-    tabString=container[ID].GetData( 9115 )
+    tabString=container.GetData( 9115 )
     nim.set_tab( tabString )
     #  Asset :
-    assetString=container[ID].GetData( 9116 )
+    assetString=container.GetData( 9116 )
     nim.set_name( elem='asset', name=assetString )
-    assetID=container[ID].GetData( 9117 )
+    assetID=container.GetData( 9117 )
     nim.set_ID( elem='asset', ID=str(assetID) )
     #  Show :
-    showString=container[ID].GetData( 9118 )
+    showString=container.GetData( 9118 )
     nim.set_name( elem='show', name=showString )
-    showID=container[ID].GetData( 9119 )
+    showID=container.GetData( 9119 )
     nim.set_ID( elem='show', ID=str(showID) )
     #  Shot :
-    shotString=container[ID].GetData( 9120 )
+    shotString=container.GetData( 9120 )
     nim.set_name( elem='shot', name=shotString )
-    shotID=container[ID].GetData( 9121 )
+    shotID=container.GetData( 9121 )
     nim.set_ID( elem='shot', ID=str(shotID) )
     #  Filter :
-    filterString=container[ID].GetData( 9122 )
+    filterString=container.GetData( 9122 )
     nim.set_name( elem='filter', name=filterString )
-    filterID=container[ID].GetData( 9123 )
+    filterID=container.GetData( 9123 )
     nim.set_ID( elem='filter', ID=str(filterID) )
     #  Task :
-    taskString=container[ID].GetData( 9124 )
+    taskString=container.GetData( 9124 )
     nim.set_name( elem='task', name=taskString )
-    taskFolder=container[ID].GetData( 9128 )
+    taskFolder=container.GetData( 9128 )
     nim.set_taskFolder( folder=taskFolder )
-    taskID=container[ID].GetData( 9125 )
+    taskID=container.GetData( 9125 )
     nim.set_ID( elem='task', ID=str(taskID) )
     #  Basename :
-    baseString=container[ID].GetData( 9126 )
+    baseString=container.GetData( 9126 )
     nim.set_name( elem='base', name=baseString )
     #  Version :
-    verString=container[ID].GetData( 9127 )
+    verString=container.GetData( 9127 )
     nim.set_name( elem='ver', name=verString )
-    verID=container[ID].GetData( 9128 )
+    verID=container.GetData( 9128 )
     nim.set_ID( elem='ver', ID=str(verID) )
     P.debug('NIM values after reading C4D attributes...')
     nim.Print()
