@@ -619,6 +619,222 @@ def get_jobs( userID=None, folders=False ) :
         P.error( traceback.print_exc() )
         return False
 
+def add_job( name=None, number=None, numberTemplate=None, description=None, client=None, agency=None, producer=None, agency_producer=None, \
+    phone=None, email=None, prod_co=None, prod_director=None, prod_contact=None, prod_phone=None, prod_email=None, \
+    prod_shoot_date=None, prod_location=None, prod_supervised=None, editorial=None, editor=None, grading=None, colorist=None, \
+    music=None, mix=None, sound=None, creative_lead=None, jobStatusID=None, jobStatus=None, biddingLocationID=None, biddingLocation=None, \
+    assignedLocationID=None, assignedLocation=None, startDate=None, endDate=None, currency=None, customKeys=None) :
+    '''
+    Creates a new job. If no default job number template is set, either number or numberTemplate must be included.
+
+        Parameters              Type
+
+    Required:
+        name                    string
+
+    Optional:
+        number                  string
+        numberTemplate          string
+        description             string
+        client                  string
+        agency                  string
+        producer                string
+        agency_producer         string
+        phone                   string
+        email                   string
+        prod_co                 string
+        prod_director           string
+        prod_contact            string
+        prod_phone              string
+        prod_email              string
+        prod_shoot_date         date (YYYY-mm-dd)
+        prod_location           string
+        prod_supervised         boolean (0/1)
+        editorial               string
+        editor                  string
+        grading                 string
+        colorist                string
+        music                   string
+        mix                     string
+        sound                   string
+        creative_lead           string
+        
+        jobStatusID OR jobStatus
+            jobStatusID         integer
+            jobStatus           string
+
+        biddingLocationID OR biddingLocation
+            biddingLocationID   integer
+            biddingLocation     string
+
+        assignedLocationID OR assignedLocation
+            assignedLocationID  integer
+            assignedLocation    string
+        
+        start_date       date (YYYY-mm-dd)
+        end_date         date (YYYY-mm-dd)
+        currency         string (3 digit currency code)
+        customKeys       dictionary {"Custom Key Name" : "Value"}
+        
+    '''
+    params = {'q': 'addJob'}
+
+    if name is not None : params['name'] = name
+    if number is not None : params['number'] = number
+    if numberTemplate is not None : params['numberTemplate'] = numberTemplate
+    if description is not None : params['description'] = description
+    if client is not None : params['client'] = client
+    if agency is not None : params['agency'] = agency
+    if producer is not None : params['producer'] = producer
+    if agency_producer is not None : params['agency_producer'] = agency_producer
+    if phone is not None : params['phone'] = phone
+    if email is not None : params['email'] = email
+    if prod_co is not None : params['prod_co'] = prod_co
+    if prod_director is not None : params['prod_director'] = prod_director
+    if prod_contact is not None : params['prod_contact'] = prod_contact
+    if prod_phone is not None : params['prod_phone'] = prod_phone
+    if prod_email is not None : params['prod_email'] = prod_email
+    if prod_shoot_date is not None : params['prod_shoot_date'] = prod_shoot_date
+    if prod_location is not None : params['prod_location'] = prod_location
+    if prod_supervised is not None : params['prod_supervised'] = prod_supervised
+    if editorial is not None : params['editorial'] = editorial
+    if editor is not None : params['editor'] = editor
+    if grading is not None : params['grading'] = grading
+    if colorist is not None : params['colorist'] = colorist
+    if music is not None : params['music'] = music
+    if mix is not None : params['mix'] = mix
+    if sound is not None : params['sound'] = sound
+    if creative_lead is not None : params['creative_lead'] = creative_lead
+    if jobStatusID is not None : params['jobStatusID'] = jobStatusID
+    if jobStatus is not None : params['jobStatus'] = jobStatus
+    if biddingLocationID is not None : params['biddingLocationID'] = biddingLocationID
+    if biddingLocation is not None : params['biddingLocation'] = biddingLocation
+    if assignedLocationID is not None : params['assignedLocationID'] = assignedLocationID
+    if assignedLocation is not None : params['assignedLocation'] = assignedLocation
+    if startDate is not None : params['start_date'] = startDate
+    if endDate is not None : params['end_date'] = endDate
+    if currency is not None : params['currency'] = currency
+    if customKeys is not None : params['customKeys'] = customKeys
+
+    result = connect( method='get', params=params )
+    return result
+
+def update_job( jobID=None, name=None, number=None, description=None, client=None, agency=None, producer=None, agency_producer=None, \
+    phone=None, email=None, prod_co=None, prod_director=None, prod_contact=None, prod_phone=None, prod_email=None, \
+    prod_shoot_date=None, prod_location=None, prod_supervised=None, editorial=None, editor=None, grading=None, colorist=None, \
+    music=None, mix=None, sound=None, creative_lead=None, jobStatusID=None, jobStatus=None, biddingLocationID=None, biddingLocation=None, \
+    assignedLocationID=None, assignedLocation=None, startDate=None, endDate=None, currency=None, customKeys=None) :
+    '''
+    Updates an existing job based on the jobID.
+
+        Parameters          Type
+
+    Required:
+        jobID               integer
+
+    Optional:
+        name                string
+        number              string
+        description         string
+        client              string
+        agency              string
+        producer            string
+        agency_producer     string
+        phone               string
+        email               string
+        prod_co             string
+        prod_director       string
+        prod_contact        string
+        prod_phone          string
+        prod_email          string
+        prod_shoot_date     string
+        prod_location       string
+        prod_supervised     string
+        editorial           string
+        editor              string
+        grading             string
+        colorist            string
+        music               string
+        mix                 string
+        sound               string
+        creative_lead       string
+
+        jobStatusID OR jobStatus
+            jobStatusID         integer
+            jobStatus           string
+
+        biddingLocationID OR biddingLocation
+            biddingLocationID   integer
+            biddingLocation     string
+
+        assignedLocationID OR assignedLocation
+            assignedLocationID  integer
+            assignedLocation    string
+
+        start_date          date (YYYY-mm-dd)
+        end_date            date (YYYY-mm-dd)
+        currency            string (3 digit currency code)
+        customKeys          dictionary {"Custom Key Name" : "Value"}
+    '''
+    params = {'q': 'updateJob'}
+
+    if jobID is not None : params['jobID'] = jobID
+    if name is not None : params['name'] = name
+    if number is not None : params['number'] = number
+    if description is not None : params['description'] = description
+    if client is not None : params['client'] = client
+    if agency is not None : params['agency'] = agency
+    if producer is not None : params['producer'] = producer
+    if agency_producer is not None : params['agency_producer'] = agency_producer
+    if phone is not None : params['phone'] = phone
+    if email is not None : params['email'] = email
+    if prod_co is not None : params['prod_co'] = prod_co
+    if prod_director is not None : params['prod_director'] = prod_director
+    if prod_contact is not None : params['prod_contact'] = prod_contact
+    if prod_phone is not None : params['prod_phone'] = prod_phone
+    if prod_email is not None : params['prod_email'] = prod_email
+    if prod_shoot_date is not None : params['prod_shoot_date'] = prod_shoot_date
+    if prod_location is not None : params['prod_location'] = prod_location
+    if prod_supervised is not None : params['prod_supervised'] = prod_supervised
+    if editorial is not None : params['editorial'] = editorial
+    if editor is not None : params['editor'] = editor
+    if grading is not None : params['grading'] = grading
+    if colorist is not None : params['colorist'] = colorist
+    if music is not None : params['music'] = music
+    if mix is not None : params['mix'] = mix
+    if sound is not None : params['sound'] = sound
+    if creative_lead is not None : params['creative_lead'] = creative_lead
+    if jobStatusID is not None : params['jobStatusID'] = jobStatusID
+    if jobStatus is not None : params['jobStatus'] = jobStatus
+    if biddingLocationID is not None : params['biddingLocationID'] = biddingLocationID
+    if biddingLocation is not None : params['biddingLocation'] = biddingLocation
+    if assignedLocationID is not None : params['assignedLocationID'] = assignedLocationID
+    if assignedLocation is not None : params['assignedLocation'] = assignedLocation
+    if startDate is not None : params['start_date'] = startDate
+    if endDate is not None : params['end_date'] = endDate
+    if currency is not None : params['currency'] = currency
+    if customKeys is not None : params['customKeys'] = customKeys
+
+    result = connect( method='get', params=params )
+    return result
+
+def delete_job( jobID=None) :
+    '''
+    Deletes a job based on jobID. This is a soft delete and these jobs can be recovered or permanently deleted from the Admin UI.
+
+        Parameters      Type
+
+    Required:
+        jobID           integer
+
+    '''
+    params = {'q': 'deleteJob'}
+
+    if jobID is not None : params['jobID'] = jobID
+
+    result = connect( method='get', params=params )
+    return result
+
 def get_allServers( locationID='' ) :
     'Retrieves all servers optionally filtered by locationID'
     servers=get( {'q':'getServers', 'ID':locationID} )
@@ -663,6 +879,85 @@ def get_assets( jobID=None ) :
     'Builds a dictionary of all assets for a given job'
     return get( {'q': 'getAssets', 'ID': str(jobID)} )
 
+def add_asset( jobID=None, name=None, assetStatusID=None, assetStatus=None, description=None, customKeys=None ) :
+    '''
+    Adds a new asset to a job and returns the new assetID.
+
+    If an asset with the specified name already exists, NIM wil update 
+    the existing asset instead of creating a new one with a duplicate name.
+
+    An asset status can be passed by either name or ID. If both are passed the ID will be used.
+
+        Parameters      Type
+
+    Required:
+        jobID           integer
+        name            string
+
+    Optional:
+        assetStatusID   integer
+        assetStatus     string
+        description     string
+        customKeys      dictionary {"Custom Key Name" : "Value"}
+
+    '''
+    params = {'q': 'addAsset'}
+
+    if jobID is not None : params['jobID'] = jobID
+    if name is not None : params['name'] = name
+    if assetStatusID is not None : params['assetStatusID'] = assetStatusID
+    if assetStatus is not None : params['assetStatus'] = assetStatus
+    if description is not None : params['description'] = description
+    if customKeys is not None : params['customKeys'] = customKeys
+
+    result = connect( method='get', params=params )
+    return result
+
+def update_asset( assetID=None, assetStatusID=None, assetStatus=None, description=None, customKeys=None ) :
+    '''
+    Updates an existing asset based on the assetID.
+
+    An asset status can be passed by either name or ID. If both are passed the ID will be used.
+
+        Parameters      Type
+
+    Required:
+        assetID         integer
+
+    Optional:
+        assetStatusID   integer
+        assetStatus     string
+        description     string
+        customKeys      dictionary {"Custom Key Name" : "Value"}
+    '''
+    params = {'q': 'updateAsset'}
+
+    if assetID is not None : params['assetID'] = assetID
+    if assetStatusID is not None : params['assetStatusID'] = assetStatusID
+    if assetStatus is not None : params['assetStatus'] = assetStatus
+    if description is not None : params['description'] = description
+    if customKeys is not None : params['customKeys'] = customKeys
+
+    result = connect( method='get', params=params )
+    return result
+
+def delete_asset( assetID=None) :
+    '''
+    Deletes an asset based on assetID.
+
+        Parameters      Type
+
+    Required:
+        assetID           integer
+
+    '''
+    params = {'q': 'deleteAsset'}
+    
+    if assetID is not None : params['assetID'] = assetID
+
+    result = connect( method='get', params=params )
+    return result
+
 def get_assetInfo( assetID=None ) :
     'Retrieves information for a given asset'
     assetInfo=get( {'q': 'getAssetInfo', 'ID': assetID} )
@@ -703,6 +998,127 @@ def get_tasks(app='all', userType='artist', assetID=None, shotID=None) :
     'Retrieves the dictionary of available tasks from the API optionally including all in-use tasks on an asset or shot'
     tasks=get( {'q': 'getTaskTypes', 'app': app, 'type': userType, 'assetID': assetID, 'shotID': shotID} )
     return tasks
+
+def add_task( assetID=None, shotID=None, taskTypeID=None, taskTypeName=None, userID=None, username=None, \
+    taskStatusID=None, taskStatus=None, description=None, estimatedHours=None, startDate=None, endDate=None, customKeys=None) :
+    '''
+    Adds a new task to an asset or shot.
+
+    AssetID or shotID can be passed. If both are passed, assetID will be used.
+
+    The task type can be determined by passing taskTypeID or taskTypeName. If both are passed, taskTypeID will be used.
+
+    A user can be attached to the task by passing either userID or username. If both are passed, userID will be used.
+    
+        Parameters              Type
+    Required:
+        assetID or shotID
+            assetID             integer
+            shotID              integer
+
+        taskTypeID or taskTypeName
+            taskTypeID          integer
+            taskTypeName        string
+
+    Optional:
+        userID OR username
+            userID              integer
+            username            string
+
+        taskStatusID OR taskStatus
+            taskStatusID        integer
+            taskStatus          string
+
+        description             string
+        estimated_hours         float
+        startDate               (UTC datetime string: "2017-01-01 08:00:00")
+        endDate                 (UTC datetime string: "2017-01-01 08:00:00")
+        customKeys              dictionary {"Custom Key Name" : "Value"}
+    '''
+    params = {'q': 'addTask'}
+
+    if assetID is not None : params['assetID'] = assetID
+    if shotID is not None : params['shotID'] = shotID
+    if taskTypeID is not None : params['taskTypeID'] = taskTypeID
+    if taskTypeName is not None : params['taskTypeName'] = taskTypeName
+    if userID is not None : params['userID'] = userID
+    if username is not None : params['username'] = username
+    if taskStatusID is not None : params['taskStatusID'] = taskStatusID
+    if taskStatus is not None : params['taskStatus'] = taskStatus
+    if description is not None : params['description'] = description
+    if estimatedHours is not None : params['estimated_hours'] = estimatedHours
+    if startDate is not None : params['startDate'] = startDate
+    if endDate is not None : params['endDate'] = endDate
+    if customKeys is not None : params['customKeys'] = customKeys
+
+    result = connect( method='get', params=params )
+    return result
+
+def update_task( taskID=None, taskTypeID=None, taskTypeName=None, userID=None, username=None, \
+    taskStatusID=None, taskStatus=None, description=None, estimatedHours=None, startDate=None, endDate=None, customKeys=None) :
+    '''
+    Updates an existing task based on taskID.
+
+    The task type can be determined by passing taskTypeID or taskTypeName. If both are passed, taskTypeID will be used.
+
+    A user can be attached to the task by passing either userID or username. If both are passed, userID will be used.
+
+        Parameters              Type
+    Required:
+        taskID                  integer
+
+    Optional:
+        taskTypeID or taskTypeName
+            taskTypeID          integer
+            taskTypeName        string
+        userID OR username
+            userID              integer
+            username            string
+
+        taskStatusID OR taskStatus
+            taskStatusID        integer
+            taskStatus          string
+
+        description             string
+        estimated_hours         float
+        startDate               (UTC datetime string: "2017-01-01 08:00:00")
+        endDate                 (UTC datetime string: "2017-01-01 08:00:00")
+        customKeys              dictionary {"Custom Key Name" : "Value"}
+    '''
+    params = {'q': 'updateTask'}
+
+    if taskID is not None : params['taskID'] = taskID
+    if taskTypeID is not None : params['taskTypeID'] = taskTypeID
+    if taskTypeName is not None : params['taskTypeName'] = taskTypeName
+    if userID is not None : params['userID'] = userID
+    if username is not None : params['username'] = username
+    if taskStatusID is not None : params['taskStatusID'] = taskStatusID
+    if taskStatus is not None : params['taskStatus'] = taskStatus
+    if description is not None : params['description'] = description
+    if estimatedHours is not None : params['estimated_hours'] = estimatedHours
+    if startDate is not None : params['startDate'] = startDate
+    if endDate is not None : params['endDate'] = endDate
+    if customKeys is not None : params['customKeys'] = customKeys
+
+    result = connect( method='get', params=params )
+    return result
+
+def delete_task( taskID=None) :
+    '''
+    Deletes a task based on taskID.
+
+        Parameters      Type
+
+    Required:
+        taskID           integer
+
+    '''
+    params = {'q': 'deleteTask'}
+    
+    if taskID is not None : params['taskID'] = taskID
+
+    result = connect( method='get', params=params )
+    return result
 
 def get_taskInfo(ID=None, itemClass=None, itemID=None) :
     'Retrieves a dictionary of task information for a given asset or shot item from the API'
@@ -1732,13 +2148,179 @@ def bring_online( item='shot', assetID=0, shotID=0 ) :
     result = connect( method='get', params=params )
     return result
 
-def add_shot( showID=None, shotName=None, shotDuration=None ) :
-    'Adds a shot to a show and returns the new ID'
-    return get( {'q': 'addShot', 'showID': str(showID), 'name': str(shotName), 'duration': str(shotDuration) } )
+def add_shot( showID=None, shotName=None, name=None, shotStatusID=None, shotStatus=None, description=None, vfx=None, fps=None, frames=None, shotDuration=None, \
+    handles=None, heads=None, tails=None, height=None, pan=None, tilt=None, roll=None, lens=None, fstop=None, filter=None, \
+    dts=None, focus=None, ia=None, convergence=None, cam_roll=None, stock=None, format=None, crop=None, protect=None, customKeys=None ) :
+    '''
+    Adds a shot to a show and returns the new ID.
 
-def update_shot( shotID=None, duration=None) :
-    'Update current shot information'
-    return get( {'q': 'updateShot', 'shotID': str(shotID), 'duration': str(duration) } )
+    If a shot with the specified name already exists, NIM wil update 
+    the existing shot instead of creating a new one with a duplicate name.
+
+    A shot status can be passed by either name or ID. If both are passed the ID will be used.
+
+        Parameters              Type
+
+    Required:
+        showID                  integer
+        shotName/name           string
+
+    Optional:
+        shotStatusID            integer
+        shotStatus              string
+        description             string
+        vfx                     string
+        fps                     string
+        frames/shotDuration     string
+        handles                 string
+        heads                   string
+        tails                   string
+        height                  string
+        pan                     string
+        tilt                    string
+        roll                    string
+        lens                    string
+        fstop                   string
+        filter                  string
+        dts                     string
+        focus                   string
+        ia                      string
+        convergence             string
+        cam_roll                string
+        stock                   string
+        format                  string
+        crop                    string
+        protect                 string
+        customKeys              dictionary {"Custom Key Name" : "Value"}
+
+    '''
+    params = {'q': 'addShot'}
+
+    if showID is not None : params['showID'] = showID
+    if shotName is not None : params['name'] = shotName
+    if shotStatusID is not None : params['shotStatusID'] = shotStatusID
+    if shotStatus is not None : params['shotStatus'] = shotStatus
+    if name is not None : params['name'] = name
+    if description is not None : params['description'] = description
+    if vfx is not None : params['vfx'] = vfx
+    if fps is not None : params['fps'] = fps
+    if shotDuration is not None : params['frames'] = shotDuration
+    if frames is not None : params['frames'] = frames
+    if handles is not None : params['handles'] = handles
+    if heads is not None : params['heads'] = heads
+    if tails is not None : params['tails'] = tails
+    if height is not None : params['height'] = height
+    if pan is not None : params['pan'] = pan
+    if tilt is not None : params['tilt'] = tilt
+    if roll is not None : params['roll'] = roll
+    if lens is not None : params['lens'] = lens
+    if fstop is not None : params['fstop'] = fstop
+    if filter is not None : params['filter'] = filter
+    if dts is not None : params['dts'] = dts
+    if focus is not None : params['focus'] = focus
+    if ia is not None : params['ia'] = ia
+    if convergence is not None : params['convergence'] = convergence
+    if cam_roll is not None : params['cam_roll'] = cam_roll
+    if stock is not None : params['stock'] = stock
+    if format is not None : params['format'] = format
+    if crop is not None : params['crop'] = crop
+    if protect is not None : params['protect'] = protect
+    if customKeys is not None : params['customKeys'] = customKeys
+
+    result = connect( method='get', params=params )
+    return result
+
+def update_shot( shotID=None, shotStatusID=None, shotStatus=None, description=None, vfx=None, fps=None, frames=None, duration=None, \
+    handles=None, heads=None, tails=None, height=None, pan=None, tilt=None, roll=None, lens=None, fstop=None, filter=None, \
+    dts=None, focus=None, ia=None, convergence=None, cam_roll=None, stock=None, format=None, crop=None, protect=None, customKeys=None ) :
+    '''
+    Updates an existing shot based on the shotID.
+
+    An shot status can be passed by either name or ID. If both are passed the ID will be used.
+
+        Parameters          Type
+
+    Required:
+        shotID              integer
+    
+    Optional:
+        shotStatusID            integer
+        shotStatus              string
+        description         string
+        vfx                 string
+        fps                 string
+        frames/duration     string
+        handles             string
+        heads               string
+        tails               string
+        height              string
+        pan                 string
+        tilt                string
+        roll                string
+        lens                string
+        fstop               string
+        filter              string
+        dts                 string
+        focus               string
+        ia                  string
+        convergence         string
+        cam_roll            string
+        stock               string
+        format              string
+        crop                string
+        protect             string
+        customKeys          dictionary {"Custom Key Name" : "Value"}
+    '''
+    params = {'q': 'updateShot'}
+
+    if shotID is not None : params['shotID'] = shotID
+    if shotStatusID is not None : params['shotStatusID'] = shotStatusID
+    if shotStatus is not None : params['shotStatus'] = shotStatus
+    if description is not None : params['description'] = description
+    if vfx is not None : params['vfx'] = vfx
+    if fps is not None : params['fps'] = fps
+    if duration is not None : params['frames'] = duration
+    if frames is not None : params['frames'] = frames
+    if handles is not None : params['handles'] = handles
+    if heads is not None : params['heads'] = heads
+    if tails is not None : params['tails'] = tails
+    if height is not None : params['height'] = height
+    if pan is not None : params['pan'] = pan
+    if tilt is not None : params['tilt'] = tilt
+    if roll is not None : params['roll'] = roll
+    if lens is not None : params['lens'] = lens
+    if fstop is not None : params['fstop'] = fstop
+    if filter is not None : params['filter'] = filter
+    if dts is not None : params['dts'] = dts
+    if focus is not None : params['focus'] = focus
+    if ia is not None : params['ia'] = ia
+    if convergence is not None : params['convergence'] = convergence
+    if cam_roll is not None : params['cam_roll'] = cam_roll
+    if stock is not None : params['stock'] = stock
+    if format is not None : params['format'] = format
+    if crop is not None : params['crop'] = crop
+    if protect is not None : params['protect'] = protect
+    if customKeys is not None : params['customKeys'] = customKeys
+
+    result = connect( method='get', params=params )
+    return result
+
+def delete_shot( shotID=None) :
+    '''
+    Deletes a shot based on shotID.
+
+        Parameters      Type
+
+    Required:
+        shotID           integer
+
+    '''
+    params = {'q': 'deleteShot'}
+    
+    if shotID is not None : params['shotID'] = shotID
+
+    result = connect( method='get', params=params )
+    return result
 
 def upload_shotIcon( shotID=None, img=None, nimURL=None, apiKey=None ) :
     'Upload shot icon'
