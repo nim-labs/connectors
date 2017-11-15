@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: nim_api.py
-# Version:  v2.7.27.171106
+# Version:  v2.8.18.171114
 #
 # Copyright (c) 2017 NIM Labs LLC
 # All rights reserved.
@@ -56,7 +56,7 @@ import nim_tools
 import nim_win as Win
 
 #  Variables :
-version='v2.7.26'
+version='v2.8.18'
 winTitle='NIM_'+version
 
 '''
@@ -632,7 +632,7 @@ def add_job( name=None, number=None, numberTemplate=None, description=None, clie
     '''
     Creates a new job. If no default job number template is set, either number or numberTemplate must be included.
 
-        Parameters              Type        Values
+        Parameters              Type            Values                      Default
 
     Required:
         name                    string
@@ -652,9 +652,9 @@ def add_job( name=None, number=None, numberTemplate=None, description=None, clie
         prod_contact            string
         prod_phone              string
         prod_email              string
-        prod_shoot_date         date        (YYYY-mm-dd)
+        prod_shoot_date         date            YYYY-mm-dd
         prod_location           string
-        prod_supervised         boolean     (0/1)
+        prod_supervised         boolean         0/1                         0
         editorial               string
         editor                  string
         grading                 string
@@ -664,7 +664,7 @@ def add_job( name=None, number=None, numberTemplate=None, description=None, clie
         sound                   string
         creative_lead           string
         
-        projectStatus           string      (ACTIVE or INACTIVE)
+        projectStatus           string          ACTIVE / INACTIVE           ACTIVE
 
         jobStatusID OR jobStatus
             jobStatusID         integer
@@ -678,10 +678,10 @@ def add_job( name=None, number=None, numberTemplate=None, description=None, clie
             assignedLocationID  integer
             assignedLocation    string
         
-        start_date              date        (YYYY-mm-dd)
-        end_date                date        (YYYY-mm-dd)
-        currency                string      (3 digit currency code)
-        customKeys              dictionary  {"Custom Key Name" : "Value"}
+        start_date              date            YYYY-mm-dd
+        end_date                date            YYYY-mm-dd
+        currency                string          3 digit currency code
+        customKeys              dictionary      {"Custom Key Name" : "Value"}
         
     '''
     params = {'q': 'addJob'}
@@ -735,7 +735,7 @@ def update_job( jobID=None, name=None, number=None, description=None, client=Non
     '''
     Updates an existing job based on the jobID.
 
-        Parameters              Type        Values
+        Parameters              Type            Values                      Default
 
     Required:
         jobID                   integer
@@ -755,9 +755,9 @@ def update_job( jobID=None, name=None, number=None, description=None, client=Non
         prod_contact            string
         prod_phone              string
         prod_email              string
-        prod_shoot_date         string      (YYYY-mm-dd)
+        prod_shoot_date         string          YYYY-mm-dd
         prod_location           string
-        prod_supervised         boolean     (0/1)
+        prod_supervised         boolean         0 / 1                       0
         editorial               string
         editor                  string
         grading                 string
@@ -767,7 +767,7 @@ def update_job( jobID=None, name=None, number=None, description=None, client=Non
         sound                   string
         creative_lead           string
 
-        projectStatus           string      (ACTIVE / INACTIVE)
+        projectStatus           string          ACTIVE / INACTIVE           ACTIVE
 
         jobStatusID OR jobStatus
             jobStatusID         integer
@@ -781,10 +781,10 @@ def update_job( jobID=None, name=None, number=None, description=None, client=Non
             assignedLocationID  integer
             assignedLocation    string
 
-        start_date              date        (YYYY-mm-dd)
-        end_date                date        (YYYY-mm-dd)
-        currency                string      (3 digit currency code)
-        customKeys              dictionary  {"Custom Key Name" : "Value"}
+        start_date              date            YYYY-mm-dd
+        end_date                date            YYYY-mm-dd
+        currency                string          3 digit currency code
+        customKeys              dictionary      {"Custom Key Name" : "Value"}
     '''
     params = {'q': 'updateJob'}
 
@@ -1057,6 +1057,68 @@ def get_shows( jobID=None ) :
 def get_showInfo( showID=None ) :
     'Builds a dictionary of all shows for a given show'
     return get( {'q': 'getShowInfo', 'ID': str(showID)} )
+
+def add_show( jobID=None, name=None, trt=None, has_previs=None) :
+    '''
+    Adds a new show to a job and returns the new showID
+
+        Parameters      Type        Value
+
+    Required:
+        jobID           integer
+        name            string
+
+    Optional:
+        trt             string
+        has_previs      boolean      0/1   (a value of 1 will create an associated previs show)
+    '''
+    params = {'q': 'addShow'}
+
+    if jobID is not None : params['jobID'] = jobID
+    if name is not None : params['name'] = name
+    if trt is not None : params['trt'] = trt
+    if has_previs is not None : params['has_previs'] = has_previs
+
+    result = connect( method='get', params=params )
+    return result
+
+def update_show( showID=None, name=None, trt=None) :
+    '''
+    Updates an existing show based on the showID.
+
+        Parameters      Type        Value
+
+    Required:
+        showID          integer
+
+    Optional:
+        name            string
+        trt             string
+    '''
+    params = {'q': 'updateShow'}
+
+    if showID is not None : params['showID'] = showID
+    if name is not None : params['name'] = name
+    if trt is not None : params['trt'] = trt
+
+    result = connect( method='get', params=params )
+    return result
+
+def delete_show( showID=None ) :
+    '''
+    Delets an existing show based on the showID.
+
+        Parameters      Type
+
+    Required:
+        showID          integer
+    '''
+    params = {'q': 'deleteShow'}
+
+    if showID is not None : params['showID'] = showID
+
+    result = connect( method='get', params=params )
+    return result
 
 
 #  Shots  #
