@@ -627,12 +627,12 @@ def get_jobs( userID=None, folders=False ) :
 def add_job( name=None, number=None, numberTemplate=None, description=None, client=None, agency=None, producer=None, agency_producer=None, \
     phone=None, email=None, prod_co=None, prod_director=None, prod_contact=None, prod_phone=None, prod_email=None, \
     prod_shoot_date=None, prod_location=None, prod_supervised=None, editorial=None, editor=None, grading=None, colorist=None, \
-    music=None, mix=None, sound=None, creative_lead=None, jobStatusID=None, jobStatus=None, biddingLocationID=None, biddingLocation=None, \
+    music=None, mix=None, sound=None, creative_lead=None, projectStatus=None, jobStatusID=None, jobStatus=None, biddingLocationID=None, biddingLocation=None, \
     assignedLocationID=None, assignedLocation=None, startDate=None, endDate=None, currency=None, customKeys=None) :
     '''
     Creates a new job. If no default job number template is set, either number or numberTemplate must be included.
 
-        Parameters              Type
+        Parameters              Type        Values
 
     Required:
         name                    string
@@ -652,9 +652,9 @@ def add_job( name=None, number=None, numberTemplate=None, description=None, clie
         prod_contact            string
         prod_phone              string
         prod_email              string
-        prod_shoot_date         date (YYYY-mm-dd)
+        prod_shoot_date         date        (YYYY-mm-dd)
         prod_location           string
-        prod_supervised         boolean (0/1)
+        prod_supervised         boolean     (0/1)
         editorial               string
         editor                  string
         grading                 string
@@ -664,6 +664,8 @@ def add_job( name=None, number=None, numberTemplate=None, description=None, clie
         sound                   string
         creative_lead           string
         
+        projectStatus           string      (ACTIVE or INACTIVE)
+
         jobStatusID OR jobStatus
             jobStatusID         integer
             jobStatus           string
@@ -676,10 +678,10 @@ def add_job( name=None, number=None, numberTemplate=None, description=None, clie
             assignedLocationID  integer
             assignedLocation    string
         
-        start_date       date (YYYY-mm-dd)
-        end_date         date (YYYY-mm-dd)
-        currency         string (3 digit currency code)
-        customKeys       dictionary {"Custom Key Name" : "Value"}
+        start_date              date        (YYYY-mm-dd)
+        end_date                date        (YYYY-mm-dd)
+        currency                string      (3 digit currency code)
+        customKeys              dictionary  {"Custom Key Name" : "Value"}
         
     '''
     params = {'q': 'addJob'}
@@ -710,6 +712,7 @@ def add_job( name=None, number=None, numberTemplate=None, description=None, clie
     if mix is not None : params['mix'] = mix
     if sound is not None : params['sound'] = sound
     if creative_lead is not None : params['creative_lead'] = creative_lead
+    if projectStatus is not None : params['projectStatus'] = projectStatus
     if jobStatusID is not None : params['jobStatusID'] = jobStatusID
     if jobStatus is not None : params['jobStatus'] = jobStatus
     if biddingLocationID is not None : params['biddingLocationID'] = biddingLocationID
@@ -727,42 +730,44 @@ def add_job( name=None, number=None, numberTemplate=None, description=None, clie
 def update_job( jobID=None, name=None, number=None, description=None, client=None, agency=None, producer=None, agency_producer=None, \
     phone=None, email=None, prod_co=None, prod_director=None, prod_contact=None, prod_phone=None, prod_email=None, \
     prod_shoot_date=None, prod_location=None, prod_supervised=None, editorial=None, editor=None, grading=None, colorist=None, \
-    music=None, mix=None, sound=None, creative_lead=None, jobStatusID=None, jobStatus=None, biddingLocationID=None, biddingLocation=None, \
+    music=None, mix=None, sound=None, creative_lead=None, projectStatus=None, jobStatusID=None, jobStatus=None, biddingLocationID=None, biddingLocation=None, \
     assignedLocationID=None, assignedLocation=None, startDate=None, endDate=None, currency=None, customKeys=None) :
     '''
     Updates an existing job based on the jobID.
 
-        Parameters          Type
+        Parameters              Type        Values
 
     Required:
-        jobID               integer
+        jobID                   integer
 
     Optional:
-        name                string
-        number              string
-        description         string
-        client              string
-        agency              string
-        producer            string
-        agency_producer     string
-        phone               string
-        email               string
-        prod_co             string
-        prod_director       string
-        prod_contact        string
-        prod_phone          string
-        prod_email          string
-        prod_shoot_date     string
-        prod_location       string
-        prod_supervised     string
-        editorial           string
-        editor              string
-        grading             string
-        colorist            string
-        music               string
-        mix                 string
-        sound               string
-        creative_lead       string
+        name                    string
+        number                  string
+        description             string
+        client                  string
+        agency                  string
+        producer                string
+        agency_producer         string
+        phone                   string
+        email                   string
+        prod_co                 string
+        prod_director           string
+        prod_contact            string
+        prod_phone              string
+        prod_email              string
+        prod_shoot_date         string      (YYYY-mm-dd)
+        prod_location           string
+        prod_supervised         boolean     (0/1)
+        editorial               string
+        editor                  string
+        grading                 string
+        colorist                string
+        music                   string
+        mix                     string
+        sound                   string
+        creative_lead           string
+
+        projectStatus           string      (ACTIVE / INACTIVE)
 
         jobStatusID OR jobStatus
             jobStatusID         integer
@@ -776,10 +781,10 @@ def update_job( jobID=None, name=None, number=None, description=None, client=Non
             assignedLocationID  integer
             assignedLocation    string
 
-        start_date          date (YYYY-mm-dd)
-        end_date            date (YYYY-mm-dd)
-        currency            string (3 digit currency code)
-        customKeys          dictionary {"Custom Key Name" : "Value"}
+        start_date              date        (YYYY-mm-dd)
+        end_date                date        (YYYY-mm-dd)
+        currency                string      (3 digit currency code)
+        customKeys              dictionary  {"Custom Key Name" : "Value"}
     '''
     params = {'q': 'updateJob'}
 
@@ -809,6 +814,7 @@ def update_job( jobID=None, name=None, number=None, description=None, client=Non
     if mix is not None : params['mix'] = mix
     if sound is not None : params['sound'] = sound
     if creative_lead is not None : params['creative_lead'] = creative_lead
+    if projectStatus is not None : params['projectStatus'] = projectStatus
     if jobStatusID is not None : params['jobStatusID'] = jobStatusID
     if jobStatus is not None : params['jobStatus'] = jobStatus
     if biddingLocationID is not None : params['biddingLocationID'] = biddingLocationID
