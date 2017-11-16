@@ -108,7 +108,7 @@ class NimHieroConnector():
 				sequence.addTag(nim_sequence_tag)
 				
 
-			shotInfo = nimAPI.add_shot( showID, trackItem.name(), trackItem.duration() )
+			shotInfo = nimAPI.add_shot( showID=showID, name=trackItem.name(), frames=trackItem.duration() )
 			#print shotInfo
 			if shotInfo['success'] == 'true':
 				shotID = shotInfo['ID']
