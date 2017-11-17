@@ -605,27 +605,21 @@ class NIM( object ) :
         elif elem=='base' :
             if self.nim['filter']['name']=='Published' :
                 if self.nim['class']=='SHOT' and self.nim['task']['name'] :
-                    self.nim[elem]['Dict']=Api.get_basesAllPub( shotID=self.nim['shot']['ID'], \
-                        taskID=self.nim['task']['ID'] )
+                    self.nim[elem]['Dict']=Api.get_basesAllPub( shotID=self.nim['shot']['ID'], taskID=self.nim['task']['ID'], username=self.userInfo()['name'] )
                 elif self.nim['class']=='ASSET' and self.nim['task']['name'] :
-                    self.nim[elem]['Dict']=Api.get_basesAllPub( assetID=self.nim['asset']['ID'], \
-                        taskID=self.nim['task']['ID'] )
+                    self.nim[elem]['Dict']=Api.get_basesAllPub( assetID=self.nim['asset']['ID'], taskID=self.nim['task']['ID'], username=self.userInfo()['name'] )
             else :
                 if self.nim['class']=='SHOT' and self.nim['task']['name'] :
-                    self.nim[elem]['Dict']=Api.get_bases( shotID=self.nim['shot']['ID'], \
-                        taskID=self.nim['task']['ID'] )
+                    self.nim[elem]['Dict']=Api.get_bases( shotID=self.nim['shot']['ID'], taskID=self.nim['task']['ID'] )
                 elif self.nim['class']=='ASSET' and self.nim['task']['name'] :
-                    self.nim[elem]['Dict']=Api.get_bases( assetID=self.nim['asset']['ID'], \
-                        taskID=self.nim['task']['ID'] )
+                    self.nim[elem]['Dict']=Api.get_bases( assetID=self.nim['asset']['ID'], taskID=self.nim['task']['ID'] )
         elif elem=='ver' :
             if self.nim['filter']['name']=='Published' :
                 if self.nim['mode'] and self.nim['mode'].lower()=='load' :
                     if self.nim['class']=='SHOT' and self.nim['base']['name'] :
-                        self.nim[elem]['Dict']=Api.get_basesPub( shotID=self.nim['shot']['ID'], \
-                            basename=self.nim['base']['name'] )
+                        self.nim[elem]['Dict']=Api.get_basesPub( shotID=self.nim['shot']['ID'], basename=self.nim['base']['name'], username=self.userInfo()['name'] )
                     elif self.nim['class']=='ASSET' and self.nim['base']['name'] :
-                        self.nim[elem]['Dict']=Api.get_basesPub( assetID=self.nim['asset']['ID'], \
-                            basename=self.nim['base']['name'] )
+                        self.nim[elem]['Dict']=Api.get_basesPub( assetID=self.nim['asset']['ID'], basename=self.nim['base']['name'], username=self.userInfo()['name'] )
                 elif self.nim['mode'] and self.nim['mode'].lower() in ['open', 'file'] :
                     if self.nim['class']=='SHOT' and self.nim['base']['name']  :
                         self.nim[elem]['Dict']=Api.get_vers( shotID=self.nim['shot']['ID'], basename=self.nim['base']['name'], pub=True, username=self.userInfo()['name'] )

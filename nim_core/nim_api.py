@@ -1696,42 +1696,107 @@ def get_bases( shotID=None, assetID=None, showID=None, task='', taskID=None, pub
             basenameDict=get( {'q': 'getBasenameAllPub', 'ID': str(ID), 'class': _type, 'task_type_ID': taskID} )
     return basenameDict
 
-def get_basesPub( shotID=None, assetID=None, basename='' ) :
-    'Retrieves the dictionary of available basenames from the API'
-    if shotID and not assetID :
-        ID=shotID
-        _type='SHOT'
-    else :
-        ID=assetID
-        _type='ASSET'
-    basenameDict=get( {'q': 'getBasenamePub', 'itemID': ID, 'class': _type, 'basename': basename} )
-    return basenameDict
+def get_basesPub( shotID=None, assetID=None, basename='', username=None ) :
+    '''
+    Retrieves the dictionary of available basenames from the API
+    The optional username is used to return the date information in the users seleted timezone.
 
-def get_basesAllPub( shotID=None, assetID=None, task='', taskID=None ) :
-    'Retrieves the dictionary of all available published basenames from the API'
-    if shotID and not assetID :
-        ID=shotID
-        _type='SHOT'
-    else :
-        ID=assetID
-        _type='ASSET'
-    if task and not taskID :
-        basenameDict=get( {'q': 'getBasenameAllPub', 'itemID': ID, 'class': _type, 'type': task.upper()} )
-    elif not task and taskID :
-        basenameDict=get( {'q': 'getBasenameAllPub', 'itemID': ID, 'class': _type,
-            'task_type_ID': taskID} )
-    return basenameDict
+        Parameters              Type
 
-def get_baseInfo( shotID=None, assetID=None, basename='' ) :
-    'Retrieves information for a given basename'
-    if shotID and not assetID :
-        ID=shotID
-        _type='SHOT'
-    else :
-        ID=assetID
-        _type='ASSET'
-    baseInfo=get( {'q': 'getBasenameVersion', 'itemID': ID, 'class': _type, 'basename': basename} )
-    return baseInfo
+    Required:
+        shotID OR assetID
+        shotID                  integer
+        assetID                 integer
+        basename                string
+
+    Optional:
+        username                string
+    '''
+
+    params = {'q': 'getBasenamePub'}
+
+    if shotID is not None : 
+        params['itemID'] = shotID
+        params['class'] = 'SHOT'
+
+    elif assetID is not None : 
+        params['itemID'] = assetID
+        params['class'] = 'ASSET'
+
+    if basename is not None : params['basename'] = basename
+    if username is not None : params['username'] = username
+
+    result = connect( method='get', params=params )
+    return result
+
+def get_basesAllPub( shotID=None, assetID=None, task=None, taskID=None, username=None ) :
+    '''
+    Retrieves the dictionary of all available published basenames from the API.
+    The optional username is used to return the date information in the users seleted timezone.
+
+        Parameters              Type
+
+    Required:
+        shotID OR assetID
+            shotID              integer
+            assetID             integer
+
+        task OR taskID
+            task                string
+            taskID              integer
+
+        basename                string
+
+    Optional:
+        username                string
+    '''
+
+    params = {'q': 'getBasenameAllPub'}
+
+    if shotID is not None : 
+        params['itemID'] = shotID
+        params['class'] = 'SHOT'
+
+    if assetID is not None : 
+        params['itemID'] = assetID
+        params['class'] = 'ASSET'
+
+    if task is not None : params['type'] = task.upper()
+    if taskID is not None: params['task_type_ID'] = taskID
+    if username is not None : params['username'] = username
+
+    result = connect( method='get', params=params )
+    return result
+
+def get_baseInfo( shotID=None, assetID=None, basename=None ) :
+    '''
+    Retrieves information for a given basename
+    The optional username is used to return the date information in the users seleted timezone.
+
+        Parameters              Type
+
+    Required:
+        shotID OR assetID
+            shotID              integer
+            assetID             integer
+
+        basename                string
+    '''
+
+    params = {'q': 'getBasenameVersion'}
+
+    if shotID is not None : 
+        params['itemID'] = shotID
+        params['class'] = 'SHOT'
+
+    if assetID is not None : 
+        params['itemID'] = assetID
+        params['class'] = 'ASSET'
+
+    if basename is not None : params['basename'] = basename
+
+    result = connect( method='get', params=params )
+    return result
 
 def get_baseVer( shotID=None, assetID=None, showID=None, basename='' ) :
     'Retrieves the highest version number for a given basename'
