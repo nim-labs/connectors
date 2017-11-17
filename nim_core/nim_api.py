@@ -1757,36 +1757,74 @@ def get_baseVer( shotID=None, assetID=None, showID=None, basename='' ) :
     return basenameDict
 
 
-def get_vers( shotID=None, assetID=None, showID=None, basename=None, pub=False ) :
-    'Retrieves the dictionary of available versions from the API'
+def get_vers( shotID=None, assetID=None, showID=None, basename=None, pub=False, username=None ) :
     '''
-    if shotID and not assetID :
-        ID=shotID
-        _type='SHOT'
-    else :
-        ID=assetID
-        _type='ASSET'
-    '''
-    if shotID :
-        ID=shotID
-        _type='SHOT'
-    elif assetID :
-        ID=assetID
-        _type='ASSET'
-    else :
-        ID=showID
-        _type='SHOW'
-    if pub :
-        versionDict=get( { 'q':'getVersions', 'itemID':ID, 'type':_type, 'basename': basename, 'pub': 1 } )
-    else :
-        versionDict=get( { 'q':'getVersions', 'itemID':ID, 'type':_type, 'basename': basename, 'pub': 0 } )
-    
-    return versionDict
+    Retrieves the dictionary of available versions from the API.
+    The optional username is used to return the date information in the users seleted timezone.
 
-def get_verInfo( verID=None ) :
-    'Retrieves the information for a given version ID'
-    verInfo=get( {'q': 'getVersionInfo', 'ID': verID} )
-    return verInfo
+        Parameters              Type            Value       Default
+
+    Required:
+        shotID OR assetID OR showID
+        shotID                  integer
+        assetID                 integer
+        showID                  integer
+        basename                string
+
+    Optional:
+        pub                     boolean         0/1         0
+        username                string
+    
+    '''
+        
+    params = {'q': 'getVersions'}
+
+    if shotID is not None : 
+        params['itemID'] = shotID
+        params['type'] = 'SHOT'
+
+    elif assetID is not None : 
+        params['itemID'] = assetID
+        params['type'] = 'ASSET'
+    
+    else :
+        params['itemID'] = showID
+        params['type'] = 'SHOW'
+
+    if basename is not None : params['basename'] = basename
+
+    if pub :
+        params['pub'] = 1
+    else :
+        params['pub'] = 0
+
+    if username is not None : params['username'] = username
+
+    result = connect( method='get', params=params )
+    return result
+
+def get_verInfo( verID=None, username=None ) :
+    '''
+    Retrieves the information for a given version ID.
+    The optional username is used to return the date information in the users seleted timezone.
+
+        Parameters              Type
+
+    Required:
+        verID                   integer
+
+    Optional:
+        username                string
+    
+    '''
+
+    params = {'q': 'getVersionInfo'}
+
+    if verID is not None : params['ID'] = verID
+    if username is not None : params['username'] = username
+
+    result = connect( method='get', params=params )
+    return result
 
 def versionUp( nim=None, padding=2, selected=False, win_launch=False, pub=False, symLink=True ) :
     'Function used to save/publish/version up files'
