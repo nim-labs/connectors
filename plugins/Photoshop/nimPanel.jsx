@@ -1069,7 +1069,7 @@ function buildPanelUI(userID, action, metadata) {
 			taskName = tasks[this.selection.index].name;
 			taskFolder = tasks[this.selection.index].folder;
 			if (showPub)
-				basenames = nimAPI({ q: 'getBasenameAllPub', task_type_ID: taskID, itemID: classID, 'class': className });
+				basenames = nimAPI({ q: 'getBasenameAllPub', task_type_ID: taskID, itemID: classID, 'class': className, username: username });
 			else
 				basenames = nimAPI({ q: 'getBasenamesInfo', task_type_ID: taskID, ID: classID, 'class': className });
 			populateListbox(basenameListbox, basenames, 'basename');
@@ -1098,7 +1098,7 @@ function buildPanelUI(userID, action, metadata) {
 			if (this.selection.text == 'Published') {
 				showPub = 1;
 				if (!taskID) return;
-				basenames = nimAPI({ q: 'getBasenameAllPub', task_type_ID: taskID, itemID: classID, 'class': className });
+				basenames = nimAPI({ q: 'getBasenameAllPub', task_type_ID: taskID, itemID: classID, 'class': className, username: username });
 			}
 			else {
 				showPub = 0;
@@ -1135,7 +1135,7 @@ function buildPanelUI(userID, action, metadata) {
 			}
 			basename = basenames[this.selection.index].basename;
 			maxVersion = basenames[this.selection.index].maxVersion;
-			versions = nimAPI({ q: 'getVersions', itemID: classID, type: className, basename: basename, pub: showPub });
+			versions = nimAPI({ q: 'getVersions', itemID: classID, type: className, basename: basename, pub: showPub, username: username });
 			populateListbox(versionListbox, versions, ['filename', 'note']);
 			if (serverID && action == 'saveAs')
 				versionListbox.enabled = false;
