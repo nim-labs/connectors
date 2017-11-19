@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: nim_api.py
-# Version:  v2.7.27.171106
+# Version:  v2.8.18.171114
 #
 # Copyright (c) 2017 NIM Labs LLC
 # All rights reserved.
@@ -56,7 +56,7 @@ import nim_tools
 import nim_win as Win
 
 #  Variables :
-version='v2.7.26'
+version='v2.8.18'
 winTitle='NIM_'+version
 
 '''
@@ -524,8 +524,7 @@ class FormPostHandler(urllib2.BaseHandler):
         return self.http_request(request)
 
 
-#  Job/Show/Shot data retrievers :
-#===------------------------------------------
+#  API Functions  #
 
 def get_app() :
     'Figure out what app is running.'
@@ -565,6 +564,9 @@ def get_app() :
     except: pass
     return None
 
+
+#  Users  #
+
 def get_user() :
     'Retrieves the current user\'s username'
     #  Get username :
@@ -600,6 +602,9 @@ def get_userList( url=None ) :
         usrList=get( sqlCmd={'q': 'getUsers'} )
     return usrList
 
+
+#  Jobs  #
+
 def get_jobs( userID=None, folders=False ) :
     'Builds a dictionary of all jobs for a given user'
     jobDict={}
@@ -618,6 +623,235 @@ def get_jobs( userID=None, folders=False ) :
         P.error("Failed to get jobs")
         P.error( traceback.print_exc() )
         return False
+
+def add_job( name=None, number=None, numberTemplate=None, description=None, client=None, agency=None, producer=None, agency_producer=None, \
+    phone=None, email=None, prod_co=None, prod_director=None, prod_contact=None, prod_phone=None, prod_email=None, \
+    prod_shoot_date=None, prod_location=None, prod_supervised=None, editorial=None, editor=None, grading=None, colorist=None, \
+    music=None, mix=None, sound=None, creative_lead=None, projectStatus=None, jobStatusID=None, jobStatus=None, biddingLocationID=None, biddingLocation=None, \
+    assignedLocationID=None, assignedLocation=None, startDate=None, endDate=None, currency=None, customKeys=None) :
+    '''
+    Creates a new job. If no default job number template is set, either number or numberTemplate must be included.
+
+        Parameters              Type            Values                      Default
+
+    Required:
+        name                    string
+
+    Optional:
+        number                  string
+        numberTemplate          string
+        description             string
+        client                  string
+        agency                  string
+        producer                string
+        agency_producer         string
+        phone                   string
+        email                   string
+        prod_co                 string
+        prod_director           string
+        prod_contact            string
+        prod_phone              string
+        prod_email              string
+        prod_shoot_date         date            YYYY-mm-dd
+        prod_location           string
+        prod_supervised         boolean         0/1                         0
+        editorial               string
+        editor                  string
+        grading                 string
+        colorist                string
+        music                   string
+        mix                     string
+        sound                   string
+        creative_lead           string
+        
+        projectStatus           string          ACTIVE / INACTIVE           ACTIVE
+
+        jobStatusID OR jobStatus
+            jobStatusID         integer
+            jobStatus           string
+
+        biddingLocationID OR biddingLocation
+            biddingLocationID   integer
+            biddingLocation     string
+
+        assignedLocationID OR assignedLocation
+            assignedLocationID  integer
+            assignedLocation    string
+        
+        start_date              date            YYYY-mm-dd
+        end_date                date            YYYY-mm-dd
+        currency                string          3 digit currency code
+        customKeys              dictionary      {"Custom Key Name" : "Value"}
+        
+    '''
+    params = {'q': 'addJob'}
+
+    if name is not None : params['name'] = name
+    if number is not None : params['number'] = number
+    if numberTemplate is not None : params['numberTemplate'] = numberTemplate
+    if description is not None : params['description'] = description
+    if client is not None : params['client'] = client
+    if agency is not None : params['agency'] = agency
+    if producer is not None : params['producer'] = producer
+    if agency_producer is not None : params['agency_producer'] = agency_producer
+    if phone is not None : params['phone'] = phone
+    if email is not None : params['email'] = email
+    if prod_co is not None : params['prod_co'] = prod_co
+    if prod_director is not None : params['prod_director'] = prod_director
+    if prod_contact is not None : params['prod_contact'] = prod_contact
+    if prod_phone is not None : params['prod_phone'] = prod_phone
+    if prod_email is not None : params['prod_email'] = prod_email
+    if prod_shoot_date is not None : params['prod_shoot_date'] = prod_shoot_date
+    if prod_location is not None : params['prod_location'] = prod_location
+    if prod_supervised is not None : params['prod_supervised'] = prod_supervised
+    if editorial is not None : params['editorial'] = editorial
+    if editor is not None : params['editor'] = editor
+    if grading is not None : params['grading'] = grading
+    if colorist is not None : params['colorist'] = colorist
+    if music is not None : params['music'] = music
+    if mix is not None : params['mix'] = mix
+    if sound is not None : params['sound'] = sound
+    if creative_lead is not None : params['creative_lead'] = creative_lead
+    if projectStatus is not None : params['projectStatus'] = projectStatus
+    if jobStatusID is not None : params['jobStatusID'] = jobStatusID
+    if jobStatus is not None : params['jobStatus'] = jobStatus
+    if biddingLocationID is not None : params['biddingLocationID'] = biddingLocationID
+    if biddingLocation is not None : params['biddingLocation'] = biddingLocation
+    if assignedLocationID is not None : params['assignedLocationID'] = assignedLocationID
+    if assignedLocation is not None : params['assignedLocation'] = assignedLocation
+    if startDate is not None : params['start_date'] = startDate
+    if endDate is not None : params['end_date'] = endDate
+    if currency is not None : params['currency'] = currency
+    if customKeys is not None : params['customKeys'] = json.dumps(customKeys)
+
+    result = connect( method='get', params=params )
+    return result
+
+def update_job( jobID=None, name=None, number=None, description=None, client=None, agency=None, producer=None, agency_producer=None, \
+    phone=None, email=None, prod_co=None, prod_director=None, prod_contact=None, prod_phone=None, prod_email=None, \
+    prod_shoot_date=None, prod_location=None, prod_supervised=None, editorial=None, editor=None, grading=None, colorist=None, \
+    music=None, mix=None, sound=None, creative_lead=None, projectStatus=None, jobStatusID=None, jobStatus=None, biddingLocationID=None, biddingLocation=None, \
+    assignedLocationID=None, assignedLocation=None, startDate=None, endDate=None, currency=None, customKeys=None) :
+    '''
+    Updates an existing job based on the jobID.
+
+        Parameters              Type            Values                      Default
+
+    Required:
+        jobID                   integer
+
+    Optional:
+        name                    string
+        number                  string
+        description             string
+        client                  string
+        agency                  string
+        producer                string
+        agency_producer         string
+        phone                   string
+        email                   string
+        prod_co                 string
+        prod_director           string
+        prod_contact            string
+        prod_phone              string
+        prod_email              string
+        prod_shoot_date         string          YYYY-mm-dd
+        prod_location           string
+        prod_supervised         boolean         0 / 1                       0
+        editorial               string
+        editor                  string
+        grading                 string
+        colorist                string
+        music                   string
+        mix                     string
+        sound                   string
+        creative_lead           string
+
+        projectStatus           string          ACTIVE / INACTIVE           ACTIVE
+
+        jobStatusID OR jobStatus
+            jobStatusID         integer
+            jobStatus           string
+
+        biddingLocationID OR biddingLocation
+            biddingLocationID   integer
+            biddingLocation     string
+
+        assignedLocationID OR assignedLocation
+            assignedLocationID  integer
+            assignedLocation    string
+
+        start_date              date            YYYY-mm-dd
+        end_date                date            YYYY-mm-dd
+        currency                string          3 digit currency code
+        customKeys              dictionary      {"Custom Key Name" : "Value"}
+    '''
+    params = {'q': 'updateJob'}
+
+    if jobID is not None : params['jobID'] = jobID
+    if name is not None : params['name'] = name
+    if number is not None : params['number'] = number
+    if description is not None : params['description'] = description
+    if client is not None : params['client'] = client
+    if agency is not None : params['agency'] = agency
+    if producer is not None : params['producer'] = producer
+    if agency_producer is not None : params['agency_producer'] = agency_producer
+    if phone is not None : params['phone'] = phone
+    if email is not None : params['email'] = email
+    if prod_co is not None : params['prod_co'] = prod_co
+    if prod_director is not None : params['prod_director'] = prod_director
+    if prod_contact is not None : params['prod_contact'] = prod_contact
+    if prod_phone is not None : params['prod_phone'] = prod_phone
+    if prod_email is not None : params['prod_email'] = prod_email
+    if prod_shoot_date is not None : params['prod_shoot_date'] = prod_shoot_date
+    if prod_location is not None : params['prod_location'] = prod_location
+    if prod_supervised is not None : params['prod_supervised'] = prod_supervised
+    if editorial is not None : params['editorial'] = editorial
+    if editor is not None : params['editor'] = editor
+    if grading is not None : params['grading'] = grading
+    if colorist is not None : params['colorist'] = colorist
+    if music is not None : params['music'] = music
+    if mix is not None : params['mix'] = mix
+    if sound is not None : params['sound'] = sound
+    if creative_lead is not None : params['creative_lead'] = creative_lead
+    if projectStatus is not None : params['projectStatus'] = projectStatus
+    if jobStatusID is not None : params['jobStatusID'] = jobStatusID
+    if jobStatus is not None : params['jobStatus'] = jobStatus
+    if biddingLocationID is not None : params['biddingLocationID'] = biddingLocationID
+    if biddingLocation is not None : params['biddingLocation'] = biddingLocation
+    if assignedLocationID is not None : params['assignedLocationID'] = assignedLocationID
+    if assignedLocation is not None : params['assignedLocation'] = assignedLocation
+    if startDate is not None : params['start_date'] = startDate
+    if endDate is not None : params['end_date'] = endDate
+    if currency is not None : params['currency'] = currency
+    if customKeys is not None : params['customKeys'] = json.dumps(customKeys)
+
+    result = connect( method='get', params=params )
+    return result
+
+def delete_job( jobID=None) :
+    '''
+    Deletes a job based on jobID. This is a soft delete and these jobs can be recovered or permanently deleted from the Admin UI.
+
+        Parameters      Type
+
+    Required:
+        jobID           integer
+
+    '''
+    params = {'q': 'deleteJob'}
+
+    if jobID is not None : params['jobID'] = jobID
+
+    result = connect( method='get', params=params )
+    return result
+
+def get_jobInfo( jobID=None ) :
+    'Builds a dictionary of job information including ID, number, jobname, and folder'
+    return get( {'q': 'getJobInfo', 'ID': str(jobID)} )
+
+
+#  Servers & Project Stuctures  #
 
 def get_allServers( locationID='' ) :
     'Retrieves all servers optionally filtered by locationID'
@@ -658,19 +892,163 @@ def get_osPath( fileID=None, os='' ) :
     else:
         #return "File ID Missing"
         return False
-        
+
+def get_paths( item='', ID=None) :
+    'Retrieves nim path for project structure - items options: job / show / shot / asset'
+    if ID :
+        path=get( {'q':'getPaths', 'type':item, 'ID':ID} )
+        return path
+    else:
+        P.error ('get_paths: Missing ID')
+        return False
+
+def can_bringOnline( item='shot', jobID=0, assetID=0, showID=0, shotID=0 ) :
+    'Tests item against variable based project structure to see if it can be brought online'
+    'Item types can be asset or shot'
+    '   -if asset, jobID OR assetID must be passed'
+    '   -if shot, showID or shotID must be passed'
+
+    params = {}
+    params["q"] = 'canBringOnline'
+    params["type"] = str(item)
+    if jobID > 0 :
+        params["jobID"] = str(jobID)
+    if assetID > 0 :
+        params["assetID"] = str(assetID)
+    if showID > 0 :
+        params["showID"] = str(showID)
+    if shotID > 0 :
+        params["shotID"] = str(shotID)
+    result = connect( method='get', params=params )
+    return result
+
+def bring_online( item='shot', assetID=0, shotID=0 ) :
+    'Brings assets and shots online creating folders from project structure'
+    'Item types can be asset or shot'
+    '   -if asset, assetID must be passed'
+    '   -if shot, shotID must be passed'
+
+    params = {}
+    params["q"] = 'bringOnline'
+    params["type"] = str(item)
+    if assetID > 0 :
+        params["assetID"] = str(assetID)
+    if shotID > 0 :
+        params["shotID"] = str(shotID)
+    result = connect( method='get', params=params )
+    return result
+
+
+#  Assets  #
+
 def get_assets( jobID=None ) :
     'Builds a dictionary of all assets for a given job'
     return get( {'q': 'getAssets', 'ID': str(jobID)} )
+
+def add_asset( jobID=None, name=None, assetStatusID=None, assetStatus=None, description=None, customKeys=None ) :
+    '''
+    Adds a new asset to a job and returns the new assetID.
+
+    If an asset with the specified name already exists, NIM wil update 
+    the existing asset instead of creating a new one with a duplicate name.
+
+    An asset status can be passed by either name or ID. If both are passed the ID will be used.
+
+        Parameters      Type
+
+    Required:
+        jobID           integer
+        name            string
+
+    Optional:
+        assetStatusID   integer
+        assetStatus     string
+        description     string
+        customKeys      dictionary {"Custom Key Name" : "Value"}
+
+    '''
+    params = {'q': 'addAsset'}
+
+    if jobID is not None : params['jobID'] = jobID
+    if name is not None : params['name'] = name
+    if assetStatusID is not None : params['assetStatusID'] = assetStatusID
+    if assetStatus is not None : params['assetStatus'] = assetStatus
+    if description is not None : params['description'] = description
+    if customKeys is not None : params['customKeys'] = json.dumps(customKeys)
+
+    result = connect( method='get', params=params )
+    return result
+
+def update_asset( assetID=None, assetStatusID=None, assetStatus=None, description=None, customKeys=None ) :
+    '''
+    Updates an existing asset based on the assetID.
+
+    An asset status can be passed by either name or ID. If both are passed the ID will be used.
+
+        Parameters      Type
+
+    Required:
+        assetID         integer
+
+    Optional:
+        assetStatusID   integer
+        assetStatus     string
+        description     string
+        customKeys      dictionary {"Custom Key Name" : "Value"}
+    '''
+    params = {'q': 'updateAsset'}
+
+    if assetID is not None : params['assetID'] = assetID
+    if assetStatusID is not None : params['assetStatusID'] = assetStatusID
+    if assetStatus is not None : params['assetStatus'] = assetStatus
+    if description is not None : params['description'] = description
+    if customKeys is not None : params['customKeys'] = json.dumps(customKeys)
+
+    result = connect( method='get', params=params )
+    return result
+
+def delete_asset( assetID=None) :
+    '''
+    Deletes an asset based on assetID.
+
+        Parameters      Type
+
+    Required:
+        assetID           integer
+
+    '''
+    params = {'q': 'deleteAsset'}
+    
+    if assetID is not None : params['assetID'] = assetID
+
+    result = connect( method='get', params=params )
+    return result
+
+def upload_assetIcon( assetID=None, img=None, nimURL=None, apiKey=None ) :
+    'Upload asset icon'
+    params = {}
+    action = "uploadAssetIcon"
+    asset_str = str(assetID)
+
+    params["q"] = action.encode('ascii')
+    params["assetID"] = asset_str.encode('ascii')
+    params["file"] = open(img,'rb')
+
+    result = upload(params=params, nimURL=nimURL, apiKey=apiKey)
+    return result
 
 def get_assetInfo( assetID=None ) :
     'Retrieves information for a given asset'
     assetInfo=get( {'q': 'getAssetInfo', 'ID': assetID} )
     return assetInfo
 
-def get_jobInfo( jobID=None ) :
-    'Builds a dictionary of job information including ID, number, jobname, and folder'
-    return get( {'q': 'getJobInfo', 'ID': str(jobID)} )
+def get_assetIcon( assetID=None ) :
+    'Retrieves information for a given asset'
+    assetIcon=get( {'q': 'getAssetIcon', 'ID': assetID} )
+    return assetIcon
+
+
+#  Shows  #
 
 def get_shows( jobID=None ) :
     'Builds a dictionary of all shows for a given job'
@@ -680,9 +1058,261 @@ def get_showInfo( showID=None ) :
     'Builds a dictionary of all shows for a given show'
     return get( {'q': 'getShowInfo', 'ID': str(showID)} )
 
+def add_show( jobID=None, name=None, trt=None, has_previs=None) :
+    '''
+    Adds a new show to a job and returns the new showID
+
+        Parameters      Type        Value
+
+    Required:
+        jobID           integer
+        name            string
+
+    Optional:
+        trt             string
+        has_previs      boolean      0/1   (a value of 1 will create an associated previs show)
+    '''
+    params = {'q': 'addShow'}
+
+    if jobID is not None : params['jobID'] = jobID
+    if name is not None : params['name'] = name
+    if trt is not None : params['trt'] = trt
+    if has_previs is not None : params['has_previs'] = has_previs
+
+    result = connect( method='get', params=params )
+    return result
+
+def update_show( showID=None, name=None, trt=None) :
+    '''
+    Updates an existing show based on the showID.
+
+        Parameters      Type        Value
+
+    Required:
+        showID          integer
+
+    Optional:
+        name            string
+        trt             string
+    '''
+    params = {'q': 'updateShow'}
+
+    if showID is not None : params['showID'] = showID
+    if name is not None : params['name'] = name
+    if trt is not None : params['trt'] = trt
+
+    result = connect( method='get', params=params )
+    return result
+
+def delete_show( showID=None ) :
+    '''
+    Delets an existing show based on the showID.
+
+        Parameters      Type
+
+    Required:
+        showID          integer
+    '''
+    params = {'q': 'deleteShow'}
+
+    if showID is not None : params['showID'] = showID
+
+    result = connect( method='get', params=params )
+    return result
+
+
+#  Shots  #
+
 def get_shots( showID=None ) :
     'Builds a dictionary of all shots for a given show'
     return get( {'q': 'getShots', 'ID': showID} )
+
+def add_shot( showID=None, shotName=None, name=None, shotStatusID=None, shotStatus=None, description=None, vfx=None, fps=None, frames=None, shotDuration=None, \
+    handles=None, heads=None, tails=None, height=None, pan=None, tilt=None, roll=None, lens=None, fstop=None, filter=None, \
+    dts=None, focus=None, ia=None, convergence=None, cam_roll=None, stock=None, format=None, crop=None, protect=None, customKeys=None ) :
+    '''
+    Adds a shot to a show and returns the new ID.
+
+    If a shot with the specified name already exists, NIM wil update 
+    the existing shot instead of creating a new one with a duplicate name.
+
+    A shot status can be passed by either name or ID. If both are passed the ID will be used.
+
+        Parameters              Type
+
+    Required:
+        showID                  integer
+        shotName/name           string
+
+    Optional:
+        shotStatusID            integer
+        shotStatus              string
+        description             string
+        vfx                     string
+        fps                     string
+        frames/shotDuration     string
+        handles                 string
+        heads                   string
+        tails                   string
+        height                  string
+        pan                     string
+        tilt                    string
+        roll                    string
+        lens                    string
+        fstop                   string
+        filter                  string
+        dts                     string
+        focus                   string
+        ia                      string
+        convergence             string
+        cam_roll                string
+        stock                   string
+        format                  string
+        crop                    string
+        protect                 string
+        customKeys              dictionary {"Custom Key Name" : "Value"}
+
+    '''
+    params = {'q': 'addShot'}
+
+    if showID is not None : params['showID'] = showID
+    if shotName is not None : params['name'] = shotName
+    if shotStatusID is not None : params['shotStatusID'] = shotStatusID
+    if shotStatus is not None : params['shotStatus'] = shotStatus
+    if name is not None : params['name'] = name
+    if description is not None : params['description'] = description
+    if vfx is not None : params['vfx'] = vfx
+    if fps is not None : params['fps'] = fps
+    if shotDuration is not None : params['frames'] = shotDuration
+    if frames is not None : params['frames'] = frames
+    if handles is not None : params['handles'] = handles
+    if heads is not None : params['heads'] = heads
+    if tails is not None : params['tails'] = tails
+    if height is not None : params['height'] = height
+    if pan is not None : params['pan'] = pan
+    if tilt is not None : params['tilt'] = tilt
+    if roll is not None : params['roll'] = roll
+    if lens is not None : params['lens'] = lens
+    if fstop is not None : params['fstop'] = fstop
+    if filter is not None : params['filter'] = filter
+    if dts is not None : params['dts'] = dts
+    if focus is not None : params['focus'] = focus
+    if ia is not None : params['ia'] = ia
+    if convergence is not None : params['convergence'] = convergence
+    if cam_roll is not None : params['cam_roll'] = cam_roll
+    if stock is not None : params['stock'] = stock
+    if format is not None : params['format'] = format
+    if crop is not None : params['crop'] = crop
+    if protect is not None : params['protect'] = protect
+    if customKeys is not None : params['customKeys'] = json.dumps(customKeys)
+
+    result = connect( method='get', params=params )
+    return result
+
+def update_shot( shotID=None, shotStatusID=None, shotStatus=None, description=None, vfx=None, fps=None, frames=None, duration=None, \
+    handles=None, heads=None, tails=None, height=None, pan=None, tilt=None, roll=None, lens=None, fstop=None, filter=None, \
+    dts=None, focus=None, ia=None, convergence=None, cam_roll=None, stock=None, format=None, crop=None, protect=None, customKeys=None ) :
+    '''
+    Updates an existing shot based on the shotID.
+
+    An shot status can be passed by either name or ID. If both are passed the ID will be used.
+
+        Parameters          Type
+
+    Required:
+        shotID              integer
+    
+    Optional:
+        shotStatusID            integer
+        shotStatus              string
+        description         string
+        vfx                 string
+        fps                 string
+        frames/duration     string
+        handles             string
+        heads               string
+        tails               string
+        height              string
+        pan                 string
+        tilt                string
+        roll                string
+        lens                string
+        fstop               string
+        filter              string
+        dts                 string
+        focus               string
+        ia                  string
+        convergence         string
+        cam_roll            string
+        stock               string
+        format              string
+        crop                string
+        protect             string
+        customKeys          dictionary {"Custom Key Name" : "Value"}
+    '''
+    params = {'q': 'updateShot'}
+
+    if shotID is not None : params['shotID'] = shotID
+    if shotStatusID is not None : params['shotStatusID'] = shotStatusID
+    if shotStatus is not None : params['shotStatus'] = shotStatus
+    if description is not None : params['description'] = description
+    if vfx is not None : params['vfx'] = vfx
+    if fps is not None : params['fps'] = fps
+    if duration is not None : params['frames'] = duration
+    if frames is not None : params['frames'] = frames
+    if handles is not None : params['handles'] = handles
+    if heads is not None : params['heads'] = heads
+    if tails is not None : params['tails'] = tails
+    if height is not None : params['height'] = height
+    if pan is not None : params['pan'] = pan
+    if tilt is not None : params['tilt'] = tilt
+    if roll is not None : params['roll'] = roll
+    if lens is not None : params['lens'] = lens
+    if fstop is not None : params['fstop'] = fstop
+    if filter is not None : params['filter'] = filter
+    if dts is not None : params['dts'] = dts
+    if focus is not None : params['focus'] = focus
+    if ia is not None : params['ia'] = ia
+    if convergence is not None : params['convergence'] = convergence
+    if cam_roll is not None : params['cam_roll'] = cam_roll
+    if stock is not None : params['stock'] = stock
+    if format is not None : params['format'] = format
+    if crop is not None : params['crop'] = crop
+    if protect is not None : params['protect'] = protect
+    if customKeys is not None : params['customKeys'] = json.dumps(customKeys)
+
+    result = connect( method='get', params=params )
+    return result
+
+def delete_shot( shotID=None) :
+    '''
+    Deletes a shot based on shotID.
+
+        Parameters      Type
+
+    Required:
+        shotID           integer
+
+    '''
+    params = {'q': 'deleteShot'}
+    
+    if shotID is not None : params['shotID'] = shotID
+
+    result = connect( method='get', params=params )
+    return result
+
+def upload_shotIcon( shotID=None, img=None, nimURL=None, apiKey=None ) :
+    'Upload shot icon'
+    params = {}
+    action = "uploadShotIcon"
+    shot_str = str(shotID)
+
+    params["q"] = action.encode('ascii')
+    params["shotID"] = shot_str.encode('ascii')
+    params["file"] = open(img,'rb')
+
+    result = upload(params=params, nimURL=nimURL, apiKey=apiKey)
+    return result
 
 def get_shotInfo( shotID=None ) :
     'Retrieves information for a given shot'
@@ -694,17 +1324,136 @@ def get_shotIcon( shotID=None ) :
     shotIcon=get( {'q': 'getShotIcon', 'ID': shotID} )
     return shotIcon
 
-def get_assetIcon( assetID=None ) :
-    'Retrieves information for a given asset'
-    assetIcon=get( {'q': 'getAssetIcon', 'ID': assetID} )
-    return assetIcon
 
-def get_tasks(app='all', userType='artist', assetID=None, shotID=None) :
+#  Tasks  #
+
+def get_tasks( app='all', userType='artist', assetID=None, shotID=None ) :
     'Retrieves the dictionary of available tasks from the API optionally including all in-use tasks on an asset or shot'
     tasks=get( {'q': 'getTaskTypes', 'app': app, 'type': userType, 'assetID': assetID, 'shotID': shotID} )
     return tasks
 
-def get_taskInfo(ID=None, itemClass=None, itemID=None) :
+def add_task( assetID=None, shotID=None, taskTypeID=None, taskTypeName=None, userID=None, username=None, \
+    taskStatusID=None, taskStatus=None, description=None, estimatedHours=None, startDate=None, endDate=None, customKeys=None) :
+    '''
+    Adds a new task to an asset or shot.
+
+    AssetID or shotID can be passed. If both are passed, assetID will be used.
+
+    The task type can be determined by passing taskTypeID or taskTypeName. If both are passed, taskTypeID will be used.
+
+    A user can be attached to the task by passing either userID or username. If both are passed, userID will be used.
+    
+        Parameters              Type
+    Required:
+        assetID or shotID
+            assetID             integer
+            shotID              integer
+
+        taskTypeID or taskTypeName
+            taskTypeID          integer
+            taskTypeName        string
+
+    Optional:
+        userID OR username
+            userID              integer
+            username            string
+
+        taskStatusID OR taskStatus
+            taskStatusID        integer
+            taskStatus          string
+
+        description             string
+        estimated_hours         float
+        startDate               (UTC datetime string: "2017-01-01 08:00:00")
+        endDate                 (UTC datetime string: "2017-01-01 08:00:00")
+        customKeys              dictionary {"Custom Key Name" : "Value"}
+    '''
+    params = {'q': 'addTask'}
+
+    if assetID is not None : params['assetID'] = assetID
+    if shotID is not None : params['shotID'] = shotID
+    if taskTypeID is not None : params['taskTypeID'] = taskTypeID
+    if taskTypeName is not None : params['taskTypeName'] = taskTypeName
+    if userID is not None : params['userID'] = userID
+    if username is not None : params['username'] = username
+    if taskStatusID is not None : params['taskStatusID'] = taskStatusID
+    if taskStatus is not None : params['taskStatus'] = taskStatus
+    if description is not None : params['description'] = description
+    if estimatedHours is not None : params['estimated_hours'] = estimatedHours
+    if startDate is not None : params['startDate'] = startDate
+    if endDate is not None : params['endDate'] = endDate
+    if customKeys is not None : params['customKeys'] = json.dumps(customKeys)
+
+    result = connect( method='get', params=params )
+    return result
+
+def update_task( taskID=None, taskTypeID=None, taskTypeName=None, userID=None, username=None, \
+    taskStatusID=None, taskStatus=None, description=None, estimatedHours=None, startDate=None, endDate=None, customKeys=None) :
+    '''
+    Updates an existing task based on taskID.
+
+    The task type can be determined by passing taskTypeID or taskTypeName. If both are passed, taskTypeID will be used.
+
+    A user can be attached to the task by passing either userID or username. If both are passed, userID will be used.
+
+        Parameters              Type
+    Required:
+        taskID                  integer
+
+    Optional:
+        taskTypeID or taskTypeName
+            taskTypeID          integer
+            taskTypeName        string
+        userID OR username
+            userID              integer
+            username            string
+
+        taskStatusID OR taskStatus
+            taskStatusID        integer
+            taskStatus          string
+
+        description             string
+        estimated_hours         float
+        startDate               (UTC datetime string: "2017-01-01 08:00:00")
+        endDate                 (UTC datetime string: "2017-01-01 08:00:00")
+        customKeys              dictionary {"Custom Key Name" : "Value"}
+    '''
+    params = {'q': 'updateTask'}
+
+    if taskID is not None : params['taskID'] = taskID
+    if taskTypeID is not None : params['taskTypeID'] = taskTypeID
+    if taskTypeName is not None : params['taskTypeName'] = taskTypeName
+    if userID is not None : params['userID'] = userID
+    if username is not None : params['username'] = username
+    if taskStatusID is not None : params['taskStatusID'] = taskStatusID
+    if taskStatus is not None : params['taskStatus'] = taskStatus
+    if description is not None : params['description'] = description
+    if estimatedHours is not None : params['estimated_hours'] = estimatedHours
+    if startDate is not None : params['startDate'] = startDate
+    if endDate is not None : params['endDate'] = endDate
+    if customKeys is not None : params['customKeys'] = json.dumps(customKeys)
+
+    result = connect( method='get', params=params )
+    return result
+
+def delete_task( taskID=None) :
+    '''
+    Deletes a task based on taskID.
+
+        Parameters      Type
+
+    Required:
+        taskID           integer
+
+    '''
+    params = {'q': 'deleteTask'}
+    
+    if taskID is not None : params['taskID'] = taskID
+
+    result = connect( method='get', params=params )
+    return result
+
+def get_taskInfo( ID=None, itemClass=None, itemID=None ) :
     'Retrieves a dictionary of task information for a given asset or shot item from the API'
 
     params = {'q': 'getTaskInfo'}
@@ -715,238 +1464,8 @@ def get_taskInfo(ID=None, itemClass=None, itemID=None) :
     result = connect( method='get', params=params )
     return result
 
-def get_bases( shotID=None, assetID=None, showID=None, task='', taskID=None, pub=False ) :
-    'Retrieves the dictionary of available basenames from the API'
-    '''
-    if shotID and not assetID :
-        ID=shotID
-        _type='SHOT'
-    else :
-        ID=assetID
-        _type='ASSET'
-    '''
-    if shotID :
-        ID=shotID
-        _type='SHOT'
-    elif assetID :
-        ID=assetID
-        _type='ASSET'
-    else :
-        ID=showID
-        _type='SHOW'
 
-    if not pub :
-        if task and not taskID :
-            basenameDict=get( {'q': 'getBasenames', 'ID': str(ID), 'class': _type, 'type': task.upper()} )
-        elif not task and taskID :
-            basenameDict=get( {'q': 'getBasenames', 'ID': str(ID), 'class': _type, 'task_type_ID': taskID} )
-    elif pub :
-        if task and not taskID :
-            basenameDict=get( {'q': 'getBasenameAllPub', 'ID': str(ID), 'class': _type, 'type': task.upper()} )
-        elif not task and taskID :
-            basenameDict=get( {'q': 'getBasenameAllPub', 'ID': str(ID), 'class': _type, 'task_type_ID': taskID} )
-    return basenameDict
-
-def get_basesPub( shotID=None, assetID=None, basename='' ) :
-    'Retrieves the dictionary of available basenames from the API'
-    if shotID and not assetID :
-        ID=shotID
-        _type='SHOT'
-    else :
-        ID=assetID
-        _type='ASSET'
-    basenameDict=get( {'q': 'getBasenamePub', 'itemID': ID, 'class': _type, 'basename': basename} )
-    return basenameDict
-
-def get_basesAllPub( shotID=None, assetID=None, task='', taskID=None ) :
-    'Retrieves the dictionary of all available published basenames from the API'
-    if shotID and not assetID :
-        ID=shotID
-        _type='SHOT'
-    else :
-        ID=assetID
-        _type='ASSET'
-    if task and not taskID :
-        basenameDict=get( {'q': 'getBasenameAllPub', 'itemID': ID, 'class': _type, 'type': task.upper()} )
-    elif not task and taskID :
-        basenameDict=get( {'q': 'getBasenameAllPub', 'itemID': ID, 'class': _type,
-            'task_type_ID': taskID} )
-    return basenameDict
-
-def get_baseInfo( shotID=None, assetID=None, basename='' ) :
-    'Retrieves information for a given basename'
-    if shotID and not assetID :
-        ID=shotID
-        _type='SHOT'
-    else :
-        ID=assetID
-        _type='ASSET'
-    baseInfo=get( {'q': 'getBasenameVersion', 'itemID': ID, 'class': _type, 'basename': basename} )
-    return baseInfo
-
-def get_baseVer( shotID=None, assetID=None, showID=None, basename='' ) :
-    'Retrieves the highest version number for a given basename'
-    '''
-    if shotID and not assetID :
-        ID=shotID
-        _type='SHOT'
-    else :
-        ID=assetID
-        _type='ASSET'
-    '''
-    if shotID :
-        ID=shotID
-        _type='SHOT'
-    elif assetID :
-        ID=assetID
-        _type='ASSET'
-    else :
-        ID=showID
-        _type='SHOW'
-    basenameDict=get( {'q': 'getBasenameVersion', 'class': _type, 'itemID': ID, \
-        'basename': basename} )
-    return basenameDict
-
-def get_vers( shotID=None, assetID=None, showID=None, basename=None, pub=False ) :
-    'Retrieves the dictionary of available versions from the API'
-    '''
-    if shotID and not assetID :
-        ID=shotID
-        _type='SHOT'
-    else :
-        ID=assetID
-        _type='ASSET'
-    '''
-    if shotID :
-        ID=shotID
-        _type='SHOT'
-    elif assetID :
-        ID=assetID
-        _type='ASSET'
-    else :
-        ID=showID
-        _type='SHOW'
-    if pub :
-        versionDict=get( { 'q':'getVersions', 'itemID':ID, 'type':_type, 'basename': basename, 'pub': 1 } )
-    else :
-        versionDict=get( { 'q':'getVersions', 'itemID':ID, 'type':_type, 'basename': basename, 'pub': 0 } )
-    
-    return versionDict
-
-def get_verInfo( verID=None ) :
-    'Retrieves the information for a given version ID'
-    verInfo=get( {'q': 'getVersionInfo', 'ID': verID} )
-    return verInfo
-
-def clear_pubFlags( shotID=None, assetID=None, showID=None, fileID=None, basename='' ) :
-    'Run before publishing to clear previous basename published flags'
-    P.info('Clearing Published Flags')
-    if shotID :
-        ID=shotID
-        _type='SHOT'
-    elif assetID :
-        ID=assetID
-        _type='ASSET'
-    elif showID:
-        ID=showID
-        _type='SHOW'
-    elif fileID:
-        ID=fileID
-        _type='FILE'
-    else:
-        P.error ('clear_pubFlags: Missing ID')
-        return False
-
-    pubFlags=get( {'q': 'clearPubFlags', 'class': _type, 'itemID': ID, 'basename': basename} )
-    return pubFlags
-
-def get_paths( item='', ID=None) :
-    'Retrieves nim path for project structure - items options: job / show / shot / asset'
-    if ID :
-        path=get( {'q':'getPaths', 'type':item, 'ID':ID} )
-        return path
-    else:
-        P.error ('get_paths: Missing ID')
-        return False
-
-def get_lastShotRender( shotID=None ):
-    'Retrieves the last render added to the shot'
-    lastRender=get( {'q': 'getLastShotRender', 'ID': shotID} )
-    return lastRender
-
-def get_elementTypes():
-    'Retrieves a dictionary of global element types'
-    elementTypes=get( {'q': 'getElementTypes'} )
-    return elementTypes
-
-def get_elementType( ID=None):
-    'Retrieves a dictionary of global element types'
-    elementType=get( {'q': 'getElementType', 'ID': ID} )
-    return elementType
-
-def find_files( name='', path='', metadata=''):
-    'Retrieves a dictionary of files matching the file path'
-    files=get( {'q': 'findFiles', 'name': name, 'path': path, 'metadata': metadata} )
-    return files
-
-def find_elements( name='', path='', jobID='', showID='', shotID='', assetID='', taskID='', renderID='', elementTypeID='', ext='' ,metadata=''):
-    'Retrieves a dictionary of elements matching one of the included IDs plus name, path, elementTypeID, ext, or metadata'
-    elements=get( {'q': 'findElements', 'name': name, 'path': path, 'jobID': jobID, 'showID': showID, 'shotID': shotID, 'assetID': assetID, 'taskID': taskID, 'renderID': renderID, 'elementTypeID': elementTypeID, 'ext': ext, 'metadata': metadata} )
-    return elements
-
-def get_elements( parent='shot', parentID=None, elementTypeID=None, getLastElement=False, isPublished=False):
-    ''' Retrieves a dictionary of elements for a particular type given parentID.
-        If no elementTypeID is given will return elements for all types.
-        parent is the parent of the element.  acceptable values are shot, asset, task, render.
-        getLastElement will return only the last published element.
-        isPublished will return only the published elements.'''
-    publishedElements=get( {'q': 'getElements', 'parent': parent, 'parentID': parentID, 'elementTypeID': elementTypeID, 'getLastElement': getLastElement, 'isPublished': isPublished} )
-    return publishedElements
-
-def add_element( parent='shot', parentID=None, userID=None, typeID='', path='', name='', startFrame=None, endFrame=None, handles=None, isPublished=False, nimURL=None, apiKey=None, metadata='' ):
-    'Adds an element to an asset, shot, task, or render'
-    # nimURL and apiKey are optional for Render API Key overrride
-    params = {'q': 'addElement', 'parent': parent, 'userID':userID, 'typeID': typeID, 'parentID': parentID, 'path': path, \
-                'name': name, 'startFrame': startFrame, 'endFrame': endFrame, 'handles': handles, 'isPublished': isPublished, 'metadata': metadata}
-    result = connect( method='get', params=params, nimURL=nimURL, apiKey=apiKey )
-    return result
-
-def update_element(ID=None, userID=None, jobID=None, assetID=None, shotID=None, taskID=None, renderID=None, elementTypeID=None, name=None, path=None, startFrame=None, endFrame=None, handles=None, isPublished=None, nimURL=None, apiKey=None ):
-    'Updates an existing element by element ID'
-    # nimURL and apiKey are optional for Render API Key overrride
-    params = {'q': 'updateElement'}
-
-    if ID is not None : params['ID'] = ID
-    if userID is not None : params['userID'] = userID
-    if jobID is not None : params['jobID'] = jobID
-    if assetID is not None : params['assetID'] = assetID
-    if shotID is not None : params['shotID'] = shotID
-    if taskID is not None : params['taskID'] = taskID
-    if renderID is not None : params['renderID'] = renderID
-    if elementTypeID is not None : params['elementTypeID'] = elementTypeID
-    if name is not None : params['name'] = name
-    if path is not None : params['path'] = path
-    if startFrame is not None : params['startFrame'] = startFrame
-    if endFrame is not None : params['endFrame'] = endFrame
-    if handles is not None : params['handles'] = handles
-    if isPublished is not None : params['isPublished'] = isPublished
-
-    result = connect( method='get', params=params, nimURL=nimURL, apiKey=apiKey )
-    return result
-
-def delete_element(ID=None, nimURL=None, apiKey=None):
-    'Deletes an existing element by element ID'
-    # nimURL and apiKey are optional for Render API Key overrride
-
-    params = {'q': 'deleteElement'}
-    if ID is not None : params['ID'] = ID
-
-    result = connect( method='get', params=params, nimURL=nimURL, apiKey=apiKey )
-    return result
-
-
-#  Files :
-#===------
+#  Files  #
 
 def to_nimDir( nim=None ) :
     'Derives the Project Directory to use for the current Asset/Shot'
@@ -1144,178 +1663,233 @@ def to_filePath( nim=None, padding=2, pub=False ) :
         P.error( 'Function api.to_filePath() was unable to derive a file path' )
         return False
 
-def to_renPath( nim=None ) :
-    'Derives a render path, from a NIM dictionary'
-    renPath=''
-    #  Error Check :
-    if not nim :
-        P.error( 'Please pass nim_api.to_filePath a nim dictionary.' )
-        return False
-    #  Derive file path :
-    try :
-        if nim.tab()=='SHOT' :
-            renPath=os.path.join( nim.server(), nim.name('job'), nim.name('show'), \
-                'IMG', nim.name('shot'), 'RENDER' )
-        elif nim.tab()=='ASSET' :
-            renPath=os.path.join( nim.server(), nim.name('job'), '_DEV', 'IMG', \
-                nim.name('asset'), 'RENDER' )
-        return os.path.normpath( renPath )
-    except :
-        return False
 
-def add_file( nim=None, filePath='', comment='', pub=False ) :
-    'Adds a file to the NIM API'
-    
-    #  Get nim info from filepath :
-    if filePath and not nim :
-        nim=filePath2API( filePath=filePath )
-    if not filePath and not nim :
-        P.error( 'Unable to derive filepath/API information, sorry.' )
-        Win.popup( title='NIM Error', msg='Unable to derive filepath, sorry.' )
-        return False
-    fileDir=os.path.normpath( os.path.dirname( filePath ) )+os.sep
-    
-    #  Get user information :
-    usrID=nim.userInfo()['ID']
-    if not usrID :
-        P.error( 'Sorry, unable to retrieve user information.' )
-        Win.popup( title='NIM Error', msg='Sorry, unable to retrieve user information.' )
-        return False
-    
-    projPath=nim.name( 'server' )
-
-    # When saving a version - nim.name('server') does not exist
-    # Need to load from file info
-
-    if not projPath :
-        projPath = nim.server(get='path')
-        #P.error( 'AS - projPath: %s' % projPath )
-
-    # If info not found on server check prefs for a serverPath
-    if not projPath :
-        app=F.get_app()
-        prefs=Prefs.read()
-        ''' DEPREICATED - REMOVING DEFAULT SERVER PATH FROM PREFS
-        if prefs and app+'_DefaultServerPath' in prefs.keys() :
-            projPath=prefs[app+'_DefaultServerPath']
-        '''
-        # TODO: VERIFY AS REPLACE FOR _DefaultServerPath
-        if prefs and app+'_ServerPath' in prefs.keys() :
-            projPath=prefs[app+'_ServerPath']
-            #P.error( 'AS - projPath: %s' % prefs[app+'_ServerPath'] )
-
-        if prefs and app+'_ServerID' in prefs.keys() :
-            projPath=prefs[app+'_ServerID']
-
-
-    ver=F.get_ver( filePath )
-    ext=F.get_ext( filePath )
-    app=get_app()
-    
-    #  Get basename :
-    fileBase=to_basename( nim=nim )
-    
-    #  Error check input :
-    if not projPath or not app or not nim.name( 'task' ) or not fileBase or not ext or not ver :
-        P.error( 'api.add_file function did not get the proper variables passed to it...  Exiting.' )
-        return False
-    if not nim.ID( 'asset' ) and not nim.ID( 'shot' ) :
-        P.error( 'api.add_file function needs to be given either a shot, or asset, ID number...  Exiting.' )
-        return False
-    if not nim.name( 'comment' ) :
-        nim.set_name( elem='comment', name=nim_tools.get_comment( app=app, num_requests=1 ) )
-        if not nim.name( 'comment' ) :
-            P.warning( '\nNo comment entered.  Tsk, tsk...\n' )
-    
-    #  Get Asset information :
-    if nim.ID( 'asset' ) and nim.ID( 'asset' ) != 'None' :
-        P.info('Retrieving Asset Information')
-        assetInfo=get( {'q': 'getAssetInfo', 'ID': nim.ID( 'asset' )} )
-        basenameInfo=get( {'q':'getBasenameVersion', 'class':'ASSET', \
-            'itemID': nim.ID( 'asset' ), 'basename': nim.name( 'base' )} )
-        #  Error check dictionaries :
-        if not assetInfo or not basenameInfo or not len(assetInfo) or not len(basenameInfo) :
-            P.warning( 'Problem retrieving Asset/Basename information from the database.' )
-        if assetInfo[0]['jobFolder']=='NULL' :
-            P.error( 'Selected Job is not online, sorry.' )
-            return False
-        #  Construct variables :
-        jobName=assetInfo[0]['jobNumber']+'_'+assetInfo[0]['jobName']
-        if assetInfo[0]['jobFolder'] :
-            jobFolder=assetInfo[0]['jobNumber']+'_'+assetInfo[0]['jobFolder']
-        else :
-            jobFolder=assetInfo[0]['jobNumber']+'_'+assetInfo[0]['jobName']
-        assetName=assetInfo[0]['assetName']
-    
-    #  Get Shot information :
-    elif nim.ID( 'shot' ) and nim.ID( 'shot' ) != 'None' :
-        P.info('Retrieving Shot Information')
-        shotInfo=get( {'q': 'getShotInfo', 'ID':nim.ID( 'shot' )} )
-        basenameInfo=get( {'q': 'getBasenameVersion', 'class': 'SHOT', \
-            'itemID': nim.ID( 'shot' ), 'basename': nim.name('base')} )
-        '''
-        #  Error check dictionaries :
-        if not shotInfo or not basenameInfo or not len(shotInfo) or not len(basenameInfo) :
-            P.warning( '\nProblem retrieving Shot/Basename information from the database.' )
-            P.warning( 'Shot Info = %s' % shotInfo )
-            P.warning( 'Basename Info = %s' % basenameInfo )
-        '''
-        if shotInfo[0]['jobFolder']=='NULL' or shotInfo[0]['showFolder']=='NULL' :
-            P.error( 'Specified Job/Show is not online, sorry.' )
-            return False
-        #  Construct variables :
-        jobName=shotInfo[0]['jobNumber']+'_'+shotInfo[0]['jobName']
-        if shotInfo[0]['jobFolder'] :
-            jobFolder=shotInfo[0]['jobNumber']+'_'+shotInfo[0]['jobFolder']
-        else :
-            jobFolder=shotInfo[0]['jobNumber']+'_'+shotInfo[0]['jobName']
-        showName=shotInfo[0]['showName']
-        showFolder=shotInfo[0]['showFolder']
-        shotName=shotInfo[0]['shotName']
-    
-    #  API call :
-    if nim.tab()=='ASSET' :
-        _task=F.task_toAbbrev( nim.name( 'task' ) )
-        
-        print 'Task Folder = %s' % nim.taskFolder()
-        
-        if not pub :
-            result=get( {'q': 'addFile', 'class': 'ASSET', 'itemID': nim.ID( 'asset' ), 
-                'task_type_ID': str(nim.ID('task')), 'task_type_folder': nim.taskFolder(),
-                'userID': str(usrID), 'basename': fileBase, 'filename': os.path.basename(filePath),
-                'filepath': fileDir, 'ext': ext, 'version': str(ver), 'note': nim.name( 'comment' ),
-                'serverID': str(nim.server( get='ID' ))} )
-        elif pub :
-            clear_pubFlags( assetID=nim.ID( 'asset' ), basename=fileBase )
-            result=get( {'q': 'addFile', 'class': 'ASSET', 'itemID': nim.ID( 'asset' ),
-                'task_type_ID': str(nim.ID('task')), 'task_type_folder': nim.taskFolder(),
-                'userID': str(usrID), 'basename': fileBase, 'filename': os.path.basename(filePath),
-                'filepath': fileDir, 'ext': ext, 'version': str(ver), 'note': nim.name( 'comment' ),
-                'serverID': str(nim.server( get='ID' )), 'isPub': 1, 'isWork': 0} )
-    elif nim.tab()=='SHOT' :
-        if not pub :
-            result=get( {'q': 'addFile', 'class': 'SHOT', 'itemID': nim.ID( 'shot' ),
-                'task_type_ID': str(nim.ID('task')), 'task_type_folder': nim.taskFolder(),
-                'userID': str(usrID), 'basename': fileBase, 'filename': os.path.basename(filePath),
-                'filepath': fileDir, 'ext': ext, 'version': str(ver), 'note': nim.name( 'comment' ),
-                'serverID': str(nim.server( get='ID' ))} )
-        elif pub :
-            clear_pubFlags( shotID=nim.ID( 'shot' ), basename=fileBase )
-            result=get( {'q': 'addFile', 'class': 'SHOT', 'itemID': nim.ID( 'shot' ),
-                'task_type_ID': str(nim.ID('task')), 'task_type_folder': nim.taskFolder(),
-                'userID': str(usrID), 'basename': fileBase, 'filename': os.path.basename(filePath),
-                'filepath': fileDir, 'ext': ext, 'version': str(ver), 'note': nim.name( 'comment' ),
-                'serverID': str(nim.server( get='ID' )), 'isPub': 1, 'isWork': 0} )
-    if  not result :
-        P.error( 'File saved, but there was a problem writing to the NIM database.' )
-        P.error( '    Database has not been populated with your file.' )
-        P.error( str(result) )
-        return False
+def get_bases( shotID=None, assetID=None, showID=None, task='', taskID=None, pub=False ) :
+    'Retrieves the dictionary of available basenames from the API'
+    '''
+    if shotID and not assetID :
+        ID=shotID
+        _type='SHOT'
     else :
-        P.info( 'NIM API updated with new file.' )
-        P.info( '      File ID = %s' % result )
+        ID=assetID
+        _type='ASSET'
+    '''
+    if shotID :
+        ID=shotID
+        _type='SHOT'
+    elif assetID :
+        ID=assetID
+        _type='ASSET'
+    else :
+        ID=showID
+        _type='SHOW'
+
+    if not pub :
+        if task and not taskID :
+            basenameDict=get( {'q': 'getBasenames', 'ID': str(ID), 'class': _type, 'type': task.upper()} )
+        elif not task and taskID :
+            basenameDict=get( {'q': 'getBasenames', 'ID': str(ID), 'class': _type, 'task_type_ID': taskID} )
+    elif pub :
+        if task and not taskID :
+            basenameDict=get( {'q': 'getBasenameAllPub', 'ID': str(ID), 'class': _type, 'type': task.upper()} )
+        elif not task and taskID :
+            basenameDict=get( {'q': 'getBasenameAllPub', 'ID': str(ID), 'class': _type, 'task_type_ID': taskID} )
+    return basenameDict
+
+def get_basesPub( shotID=None, assetID=None, basename='', username=None ) :
+    '''
+    Retrieves the dictionary of available basenames from the API
+    The optional username is used to return the date information in the users seleted timezone.
+
+        Parameters              Type
+
+    Required:
+        shotID OR assetID
+        shotID                  integer
+        assetID                 integer
+        basename                string
+
+    Optional:
+        username                string
+    '''
+
+    params = {'q': 'getBasenamePub'}
+
+    if shotID is not None : 
+        params['itemID'] = shotID
+        params['class'] = 'SHOT'
+
+    elif assetID is not None : 
+        params['itemID'] = assetID
+        params['class'] = 'ASSET'
+
+    if basename is not None : params['basename'] = basename
+    if username is not None : params['username'] = username
+
+    result = connect( method='get', params=params )
+    return result
+
+def get_basesAllPub( shotID=None, assetID=None, task=None, taskID=None, username=None ) :
+    '''
+    Retrieves the dictionary of all available published basenames from the API.
+    The optional username is used to return the date information in the users seleted timezone.
+
+        Parameters              Type
+
+    Required:
+        shotID OR assetID
+            shotID              integer
+            assetID             integer
+
+        task OR taskID
+            task                string
+            taskID              integer
+
+        basename                string
+
+    Optional:
+        username                string
+    '''
+
+    params = {'q': 'getBasenameAllPub'}
+
+    if shotID is not None : 
+        params['itemID'] = shotID
+        params['class'] = 'SHOT'
+
+    if assetID is not None : 
+        params['itemID'] = assetID
+        params['class'] = 'ASSET'
+
+    if task is not None : params['type'] = task.upper()
+    if taskID is not None: params['task_type_ID'] = taskID
+    if username is not None : params['username'] = username
+
+    result = connect( method='get', params=params )
+    return result
+
+def get_baseInfo( shotID=None, assetID=None, basename=None ) :
+    '''
+    Retrieves information for a given basename
+    The optional username is used to return the date information in the users seleted timezone.
+
+        Parameters              Type
+
+    Required:
+        shotID OR assetID
+            shotID              integer
+            assetID             integer
+
+        basename                string
+    '''
+
+    params = {'q': 'getBasenameVersion'}
+
+    if shotID is not None : 
+        params['itemID'] = shotID
+        params['class'] = 'SHOT'
+
+    if assetID is not None : 
+        params['itemID'] = assetID
+        params['class'] = 'ASSET'
+
+    if basename is not None : params['basename'] = basename
+
+    result = connect( method='get', params=params )
+    return result
+
+def get_baseVer( shotID=None, assetID=None, showID=None, basename='' ) :
+    'Retrieves the highest version number for a given basename'
+    '''
+    if shotID and not assetID :
+        ID=shotID
+        _type='SHOT'
+    else :
+        ID=assetID
+        _type='ASSET'
+    '''
+    if shotID :
+        ID=shotID
+        _type='SHOT'
+    elif assetID :
+        ID=assetID
+        _type='ASSET'
+    else :
+        ID=showID
+        _type='SHOW'
+    basenameDict=get( {'q': 'getBasenameVersion', 'class': _type, 'itemID': ID, \
+        'basename': basename} )
+    return basenameDict
+
+
+def get_vers( shotID=None, assetID=None, showID=None, basename=None, pub=False, username=None ) :
+    '''
+    Retrieves the dictionary of available versions from the API.
+    The optional username is used to return the date information in the users seleted timezone.
+
+        Parameters              Type            Value       Default
+
+    Required:
+        shotID OR assetID OR showID
+        shotID                  integer
+        assetID                 integer
+        showID                  integer
+        basename                string
+
+    Optional:
+        pub                     boolean         0/1         0
+        username                string
     
-    return True
+    '''
+        
+    params = {'q': 'getVersions'}
+
+    if shotID is not None : 
+        params['itemID'] = shotID
+        params['type'] = 'SHOT'
+
+    elif assetID is not None : 
+        params['itemID'] = assetID
+        params['type'] = 'ASSET'
+    
+    else :
+        params['itemID'] = showID
+        params['type'] = 'SHOW'
+
+    if basename is not None : params['basename'] = basename
+
+    if pub :
+        params['pub'] = 1
+    else :
+        params['pub'] = 0
+
+    if username is not None : params['username'] = username
+
+    result = connect( method='get', params=params )
+    return result
+
+def get_verInfo( verID=None, username=None ) :
+    '''
+    Retrieves the information for a given version ID.
+    The optional username is used to return the date information in the users seleted timezone.
+
+        Parameters              Type
+
+    Required:
+        verID                   integer
+
+    Optional:
+        username                string
+    
+    '''
+
+    params = {'q': 'getVersionInfo'}
+
+    if verID is not None : params['ID'] = verID
+    if username is not None : params['username'] = username
+
+    result = connect( method='get', params=params )
+    return result
 
 def versionUp( nim=None, padding=2, selected=False, win_launch=False, pub=False, symLink=True ) :
     'Function used to save/publish/version up files'
@@ -1583,6 +2157,198 @@ def versionUp( nim=None, padding=2, selected=False, win_launch=False, pub=False,
             msg='FAILED to Version Up the file.' )
         return False
 
+
+def clear_pubFlags( shotID=None, assetID=None, showID=None, fileID=None, basename='' ) :
+    'Run before publishing to clear previous basename published flags'
+    P.info('Clearing Published Flags')
+    if shotID :
+        ID=shotID
+        _type='SHOT'
+    elif assetID :
+        ID=assetID
+        _type='ASSET'
+    elif showID:
+        ID=showID
+        _type='SHOW'
+    elif fileID:
+        ID=fileID
+        _type='FILE'
+    else:
+        P.error ('clear_pubFlags: Missing ID')
+        return False
+
+    pubFlags=get( {'q': 'clearPubFlags', 'class': _type, 'itemID': ID, 'basename': basename} )
+    return pubFlags
+
+def publish_symLink( fileID=None, elementID=None, forceLink=1 ) :
+    '''Creates the symbolic link for a published file'''
+    result = ''
+    if fileID :
+        P.info('Creating SymLink for Published File')
+        result=get( {'q': 'publishSymlink', 'fileID': str(fileID), 'forceLink': str(forceLink) } )
+    elif elementID :
+        P.info('Creating SymLink for Published Element')
+        result=get( {'q': 'publishSymlink', 'elementID': str(elementID), 'forceLink': str(forceLink) } )
+    else :
+        P.error( 'Sorry!  Problem retrieving Item ID.' )
+        return False
+    return result
+
+
+def add_file( nim=None, filePath='', comment='', pub=False ) :
+    'Adds a file to the NIM API'
+    
+    #  Get nim info from filepath :
+    if filePath and not nim :
+        nim=filePath2API( filePath=filePath )
+    if not filePath and not nim :
+        P.error( 'Unable to derive filepath/API information, sorry.' )
+        Win.popup( title='NIM Error', msg='Unable to derive filepath, sorry.' )
+        return False
+    fileDir=os.path.normpath( os.path.dirname( filePath ) )+os.sep
+    
+    #  Get user information :
+    usrID=nim.userInfo()['ID']
+    if not usrID :
+        P.error( 'Sorry, unable to retrieve user information.' )
+        Win.popup( title='NIM Error', msg='Sorry, unable to retrieve user information.' )
+        return False
+    
+    projPath=nim.name( 'server' )
+
+    # When saving a version - nim.name('server') does not exist
+    # Need to load from file info
+
+    if not projPath :
+        projPath = nim.server(get='path')
+        #P.error( 'AS - projPath: %s' % projPath )
+
+    # If info not found on server check prefs for a serverPath
+    if not projPath :
+        app=F.get_app()
+        prefs=Prefs.read()
+        ''' DEPREICATED - REMOVING DEFAULT SERVER PATH FROM PREFS
+        if prefs and app+'_DefaultServerPath' in prefs.keys() :
+            projPath=prefs[app+'_DefaultServerPath']
+        '''
+        # TODO: VERIFY AS REPLACE FOR _DefaultServerPath
+        if prefs and app+'_ServerPath' in prefs.keys() :
+            projPath=prefs[app+'_ServerPath']
+            #P.error( 'AS - projPath: %s' % prefs[app+'_ServerPath'] )
+
+        if prefs and app+'_ServerID' in prefs.keys() :
+            projPath=prefs[app+'_ServerID']
+
+
+    ver=F.get_ver( filePath )
+    ext=F.get_ext( filePath )
+    app=get_app()
+    
+    #  Get basename :
+    fileBase=to_basename( nim=nim )
+    
+    #  Error check input :
+    if not projPath or not app or not nim.name( 'task' ) or not fileBase or not ext or not ver :
+        P.error( 'api.add_file function did not get the proper variables passed to it...  Exiting.' )
+        return False
+    if not nim.ID( 'asset' ) and not nim.ID( 'shot' ) :
+        P.error( 'api.add_file function needs to be given either a shot, or asset, ID number...  Exiting.' )
+        return False
+    if not nim.name( 'comment' ) :
+        nim.set_name( elem='comment', name=nim_tools.get_comment( app=app, num_requests=1 ) )
+        if not nim.name( 'comment' ) :
+            P.warning( '\nNo comment entered.  Tsk, tsk...\n' )
+    
+    #  Get Asset information :
+    if nim.ID( 'asset' ) and nim.ID( 'asset' ) != 'None' :
+        P.info('Retrieving Asset Information')
+        assetInfo=get( {'q': 'getAssetInfo', 'ID': nim.ID( 'asset' )} )
+        basenameInfo=get( {'q':'getBasenameVersion', 'class':'ASSET', \
+            'itemID': nim.ID( 'asset' ), 'basename': nim.name( 'base' )} )
+        #  Error check dictionaries :
+        if not assetInfo or not basenameInfo or not len(assetInfo) or not len(basenameInfo) :
+            P.warning( 'Problem retrieving Asset/Basename information from the database.' )
+        if assetInfo[0]['jobFolder']=='NULL' :
+            P.error( 'Selected Job is not online, sorry.' )
+            return False
+        #  Construct variables :
+        jobName=assetInfo[0]['jobNumber']+'_'+assetInfo[0]['jobName']
+        if assetInfo[0]['jobFolder'] :
+            jobFolder=assetInfo[0]['jobNumber']+'_'+assetInfo[0]['jobFolder']
+        else :
+            jobFolder=assetInfo[0]['jobNumber']+'_'+assetInfo[0]['jobName']
+        assetName=assetInfo[0]['assetName']
+    
+    #  Get Shot information :
+    elif nim.ID( 'shot' ) and nim.ID( 'shot' ) != 'None' :
+        P.info('Retrieving Shot Information')
+        shotInfo=get( {'q': 'getShotInfo', 'ID':nim.ID( 'shot' )} )
+        basenameInfo=get( {'q': 'getBasenameVersion', 'class': 'SHOT', \
+            'itemID': nim.ID( 'shot' ), 'basename': nim.name('base')} )
+        '''
+        #  Error check dictionaries :
+        if not shotInfo or not basenameInfo or not len(shotInfo) or not len(basenameInfo) :
+            P.warning( '\nProblem retrieving Shot/Basename information from the database.' )
+            P.warning( 'Shot Info = %s' % shotInfo )
+            P.warning( 'Basename Info = %s' % basenameInfo )
+        '''
+        if shotInfo[0]['jobFolder']=='NULL' or shotInfo[0]['showFolder']=='NULL' :
+            P.error( 'Specified Job/Show is not online, sorry.' )
+            return False
+        #  Construct variables :
+        jobName=shotInfo[0]['jobNumber']+'_'+shotInfo[0]['jobName']
+        if shotInfo[0]['jobFolder'] :
+            jobFolder=shotInfo[0]['jobNumber']+'_'+shotInfo[0]['jobFolder']
+        else :
+            jobFolder=shotInfo[0]['jobNumber']+'_'+shotInfo[0]['jobName']
+        showName=shotInfo[0]['showName']
+        showFolder=shotInfo[0]['showFolder']
+        shotName=shotInfo[0]['shotName']
+    
+    #  API call :
+    if nim.tab()=='ASSET' :
+        _task=F.task_toAbbrev( nim.name( 'task' ) )
+        
+        print 'Task Folder = %s' % nim.taskFolder()
+        
+        if not pub :
+            result=get( {'q': 'addFile', 'class': 'ASSET', 'itemID': nim.ID( 'asset' ), 
+                'task_type_ID': str(nim.ID('task')), 'task_type_folder': nim.taskFolder(),
+                'userID': str(usrID), 'basename': fileBase, 'filename': os.path.basename(filePath),
+                'filepath': fileDir, 'ext': ext, 'version': str(ver), 'note': nim.name( 'comment' ),
+                'serverID': str(nim.server( get='ID' ))} )
+        elif pub :
+            clear_pubFlags( assetID=nim.ID( 'asset' ), basename=fileBase )
+            result=get( {'q': 'addFile', 'class': 'ASSET', 'itemID': nim.ID( 'asset' ),
+                'task_type_ID': str(nim.ID('task')), 'task_type_folder': nim.taskFolder(),
+                'userID': str(usrID), 'basename': fileBase, 'filename': os.path.basename(filePath),
+                'filepath': fileDir, 'ext': ext, 'version': str(ver), 'note': nim.name( 'comment' ),
+                'serverID': str(nim.server( get='ID' )), 'isPub': 1, 'isWork': 0} )
+    elif nim.tab()=='SHOT' :
+        if not pub :
+            result=get( {'q': 'addFile', 'class': 'SHOT', 'itemID': nim.ID( 'shot' ),
+                'task_type_ID': str(nim.ID('task')), 'task_type_folder': nim.taskFolder(),
+                'userID': str(usrID), 'basename': fileBase, 'filename': os.path.basename(filePath),
+                'filepath': fileDir, 'ext': ext, 'version': str(ver), 'note': nim.name( 'comment' ),
+                'serverID': str(nim.server( get='ID' ))} )
+        elif pub :
+            clear_pubFlags( shotID=nim.ID( 'shot' ), basename=fileBase )
+            result=get( {'q': 'addFile', 'class': 'SHOT', 'itemID': nim.ID( 'shot' ),
+                'task_type_ID': str(nim.ID('task')), 'task_type_folder': nim.taskFolder(),
+                'userID': str(usrID), 'basename': fileBase, 'filename': os.path.basename(filePath),
+                'filepath': fileDir, 'ext': ext, 'version': str(ver), 'note': nim.name( 'comment' ),
+                'serverID': str(nim.server( get='ID' )), 'isPub': 1, 'isWork': 0} )
+    if  not result :
+        P.error( 'File saved, but there was a problem writing to the NIM database.' )
+        P.error( '    Database has not been populated with your file.' )
+        P.error( str(result) )
+        return False
+    else :
+        P.info( 'NIM API updated with new file.' )
+        P.info( '      File ID = %s' % result )
+    
+    return True
+
 def save_file( parent='SHOW', parentID=0, task_type_ID=0, task_folder='', userID=0, basename='', filename='', path='', ext='', version='', comment='', serverID=0, pub=False, forceLink=1, work=True, metadata='' ):
     '''General Purpose Save File Function that Adds a File to the NIM Database with brute force data'''
     parent = parent.upper()
@@ -1680,91 +2446,100 @@ def update_file( ID=0, task_type_ID=0, task_folder='', userID=0, basename='', fi
                         Please check to make sure the file exists on disk.')
     return result
 
-def publish_symLink( fileID=None, elementID=None, forceLink=1 ) :
-    '''Creates the symbolic link for a published file'''
-    result = ''
-    if fileID :
-        P.info('Creating SymLink for Published File')
-        result=get( {'q': 'publishSymlink', 'fileID': str(fileID), 'forceLink': str(forceLink) } )
-    elif elementID :
-        P.info('Creating SymLink for Published Element')
-        result=get( {'q': 'publishSymlink', 'elementID': str(elementID), 'forceLink': str(forceLink) } )
-    else :
-        P.error( 'Sorry!  Problem retrieving Item ID.' )
+def find_files( name='', path='', metadata=''):
+    'Retrieves a dictionary of files matching the file path'
+    files=get( {'q': 'findFiles', 'name': name, 'path': path, 'metadata': metadata} )
+    return files
+
+
+#  Elements  #
+
+def get_elementTypes():
+    'Retrieves a dictionary of global element types'
+    elementTypes=get( {'q': 'getElementTypes'} )
+    return elementTypes
+
+def get_elementType( ID=None):
+    'Retrieves a dictionary of global element types'
+    elementType=get( {'q': 'getElementType', 'ID': ID} )
+    return elementType
+
+def find_elements( name='', path='', jobID='', showID='', shotID='', assetID='', taskID='', renderID='', elementTypeID='', ext='' ,metadata=''):
+    'Retrieves a dictionary of elements matching one of the included IDs plus name, path, elementTypeID, ext, or metadata'
+    elements=get( {'q': 'findElements', 'name': name, 'path': path, 'jobID': jobID, 'showID': showID, 'shotID': shotID, 'assetID': assetID, 'taskID': taskID, 'renderID': renderID, 'elementTypeID': elementTypeID, 'ext': ext, 'metadata': metadata} )
+    return elements
+
+def get_elements( parent='shot', parentID=None, elementTypeID=None, getLastElement=False, isPublished=False):
+    ''' Retrieves a dictionary of elements for a particular type given parentID.
+        If no elementTypeID is given will return elements for all types.
+        parent is the parent of the element.  acceptable values are shot, asset, task, render.
+        getLastElement will return only the last published element.
+        isPublished will return only the published elements.'''
+    publishedElements=get( {'q': 'getElements', 'parent': parent, 'parentID': parentID, 'elementTypeID': elementTypeID, 'getLastElement': getLastElement, 'isPublished': isPublished} )
+    return publishedElements
+
+def add_element( parent='shot', parentID=None, userID=None, typeID='', path='', name='', startFrame=None, endFrame=None, handles=None, isPublished=False, nimURL=None, apiKey=None, metadata='' ):
+    'Adds an element to an asset, shot, task, or render'
+    # nimURL and apiKey are optional for Render API Key overrride
+    params = {'q': 'addElement', 'parent': parent, 'userID':userID, 'typeID': typeID, 'parentID': parentID, 'path': path, \
+                'name': name, 'startFrame': startFrame, 'endFrame': endFrame, 'handles': handles, 'isPublished': isPublished, 'metadata': metadata}
+    result = connect( method='get', params=params, nimURL=nimURL, apiKey=apiKey )
+    return result
+
+def update_element(ID=None, userID=None, jobID=None, assetID=None, shotID=None, taskID=None, renderID=None, elementTypeID=None, name=None, path=None, startFrame=None, endFrame=None, handles=None, isPublished=None, nimURL=None, apiKey=None ):
+    'Updates an existing element by element ID'
+    # nimURL and apiKey are optional for Render API Key overrride
+    params = {'q': 'updateElement'}
+
+    if ID is not None : params['ID'] = ID
+    if userID is not None : params['userID'] = userID
+    if jobID is not None : params['jobID'] = jobID
+    if assetID is not None : params['assetID'] = assetID
+    if shotID is not None : params['shotID'] = shotID
+    if taskID is not None : params['taskID'] = taskID
+    if renderID is not None : params['renderID'] = renderID
+    if elementTypeID is not None : params['elementTypeID'] = elementTypeID
+    if name is not None : params['name'] = name
+    if path is not None : params['path'] = path
+    if startFrame is not None : params['startFrame'] = startFrame
+    if endFrame is not None : params['endFrame'] = endFrame
+    if handles is not None : params['handles'] = handles
+    if isPublished is not None : params['isPublished'] = isPublished
+
+    result = connect( method='get', params=params, nimURL=nimURL, apiKey=apiKey )
+    return result
+
+def delete_element(ID=None, nimURL=None, apiKey=None):
+    'Deletes an existing element by element ID'
+    # nimURL and apiKey are optional for Render API Key overrride
+
+    params = {'q': 'deleteElement'}
+    if ID is not None : params['ID'] = ID
+
+    result = connect( method='get', params=params, nimURL=nimURL, apiKey=apiKey )
+    return result
+
+
+#  Renders  #
+
+def to_renPath( nim=None ) :
+    'Derives a render path, from a NIM dictionary'
+    renPath=''
+    #  Error Check :
+    if not nim :
+        P.error( 'Please pass nim_api.to_filePath a nim dictionary.' )
         return False
-    return result
-
-#  Shots :
-#===------
-def can_bringOnline( item='shot', jobID=0, assetID=0, showID=0, shotID=0 ) :
-    'Tests item against variable based project structure to see if it can be brought online'
-    'Item types can be asset or shot'
-    '   -if asset, jobID OR assetID must be passed'
-    '   -if shot, showID or shotID must be passed'
-
-    params = {}
-    params["q"] = 'canBringOnline'
-    params["type"] = str(item)
-    if jobID > 0 :
-        params["jobID"] = str(jobID)
-    if assetID > 0 :
-        params["assetID"] = str(assetID)
-    if showID > 0 :
-        params["showID"] = str(showID)
-    if shotID > 0 :
-        params["shotID"] = str(shotID)
-    result = connect( method='get', params=params )
-    return result
-
-def bring_online( item='shot', assetID=0, shotID=0 ) :
-    'Brings assets and shots online creating folders from project structure'
-    'Item types can be asset or shot'
-    '   -if asset, assetID must be passed'
-    '   -if shot, shotID must be passed'
-
-    params = {}
-    params["q"] = 'bringOnline'
-    params["type"] = str(item)
-    if assetID > 0 :
-        params["assetID"] = str(assetID)
-    if shotID > 0 :
-        params["shotID"] = str(shotID)
-    result = connect( method='get', params=params )
-    return result
-
-def add_shot( showID=None, shotName=None, shotDuration=None ) :
-    'Adds a shot to a show and returns the new ID'
-    return get( {'q': 'addShot', 'showID': str(showID), 'name': str(shotName), 'duration': str(shotDuration) } )
-
-def update_shot( shotID=None, duration=None) :
-    'Update current shot information'
-    return get( {'q': 'updateShot', 'shotID': str(shotID), 'duration': str(duration) } )
-
-def upload_shotIcon( shotID=None, img=None, nimURL=None, apiKey=None ) :
-    'Upload shot icon'
-    params = {}
-    action = "uploadShotIcon"
-    shot_str = str(shotID)
-
-    params["q"] = action.encode('ascii')
-    params["shotID"] = shot_str.encode('ascii')
-    params["file"] = open(img,'rb')
-
-    result = upload(params=params, nimURL=nimURL, apiKey=apiKey)
-    return result
-
-def upload_assetIcon( assetID=None, img=None, nimURL=None, apiKey=None ) :
-    'Upload asset icon'
-    params = {}
-    action = "uploadAssetIcon"
-    asset_str = str(assetID)
-
-    params["q"] = action.encode('ascii')
-    params["assetID"] = asset_str.encode('ascii')
-    params["file"] = open(img,'rb')
-
-    result = upload(params=params, nimURL=nimURL, apiKey=apiKey)
-    return result
+    #  Derive file path :
+    try :
+        if nim.tab()=='SHOT' :
+            renPath=os.path.join( nim.server(), nim.name('job'), nim.name('show'), \
+                'IMG', nim.name('shot'), 'RENDER' )
+        elif nim.tab()=='ASSET' :
+            renPath=os.path.join( nim.server(), nim.name('job'), '_DEV', 'IMG', \
+                nim.name('asset'), 'RENDER' )
+        return os.path.normpath( renPath )
+    except :
+        return False
 
 def add_render( jobID=0, itemType='shot', taskID=0, fileID=0, \
     renderKey='', renderName='', renderType='', renderComment='', \
@@ -1798,6 +2573,14 @@ def upload_renderIcon( renderID=None, renderKey='', img=None, nimURL=None, apiKe
 
     result = upload(params=params, nimURL=nimURL, apiKey=apiKey)
     return result
+
+def get_lastShotRender( shotID=None ):
+    'Retrieves the last render added to the shot'
+    lastRender=get( {'q': 'getLastShotRender', 'ID': shotID} )
+    return lastRender
+
+
+#  Dailies  #
 
 def get_taskDailies( taskID=None ) :
     'Retrieves the dictionary of dailies for the specified taskID from the API'

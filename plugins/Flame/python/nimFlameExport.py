@@ -2921,7 +2921,7 @@ def nimCreateShot(nim_showID=None, info=None) :
 		#TODO: If shotName is '' then set to assetName
 
 		print "NIM - Exporting Shot Info"
-		shotInfo = nimAPI.add_shot( nim_showID, nim_shotName, nim_duration )
+		shotInfo = nimAPI.add_shot( showID=nim_showID, name=nim_shotName, frames=nim_duration )
 
 		if shotInfo['success'] == 'true':
 			result['success'] = True
