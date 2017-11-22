@@ -641,10 +641,11 @@ class NimShotProcessor(hiero.core.ProcessorBase):
                 if nim_doUpdate is True:
                   print "Updating file data in NIM"
                   file_apiResult = nimAPI.update_file( nim_versionID, task_type_ID, task_folder, userID, basename, filename, filepath, ext, version, comment, serverID, pub, work )
+                  print file_apiResult
                 else:
                   print "Saving file data to NIM"
                   file_apiResult = nimAPI.save_file( 'shot', nim_shotID, task_type_ID, task_folder, userID, basename, filename, filepath, ext, version, comment, serverID, pub, work )
-
+                  print file_apiResult
           elif presetName == 'hiero.exporters.FnExternalRender.NukeRenderTask':
             #Skip - user to publish element at comp render time
             pass

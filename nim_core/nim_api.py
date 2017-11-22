@@ -2349,16 +2349,36 @@ def add_file( nim=None, filePath='', comment='', pub=False ) :
     
     return True
 
-def save_file( parent='SHOW', parentID=0, task_type_ID=0, task_folder='', userID=0, basename='', filename='', path='', ext='', version='', comment='', serverID=0, pub=False, forceLink=1, work=True, metadata='' ):
+def save_file( parent='SHOW', parentID=0, task_type_ID=0, task_folder='', userID=0, basename='', filename='', path='', ext='', version='', comment='', serverID=0, pub=False, forceLink=1, work=True, metadata='', customKeys=None ):
     '''General Purpose Save File Function that Adds a File to the NIM Database with brute force data'''
     parent = parent.upper()
 
     if not pub :
-        result=get( {'q': 'addFile', 'class': parent, 'itemID': str(parentID), 
-            'task_type_ID': str(task_type_ID), 'task_type_folder': task_folder,
-            'userID': str(userID), 'basename': basename, 'filename': filename,
-            'filepath': path, 'ext': ext, 'version': str(version), 'note': comment,
-            'serverID': str(serverID), 'metadata': metadata } )
+        #result=get( {'q': 'addFile', 'class': parent, 'itemID': str(parentID), 
+        #    'task_type_ID': str(task_type_ID), 'task_type_folder': task_folder,
+        #    'userID': str(userID), 'basename': basename, 'filename': filename,
+        #    'filepath': path, 'ext': ext, 'version': str(version), 'note': comment,
+        #    'serverID': str(serverID), 'metadata': metadata } )
+
+        params = {'q': 'addFile'}
+
+        if parent is not None : params['class'] = parent
+        if parentID is not None : params['itemID'] = parentID
+        if task_type_ID is not None : params['task_type_ID'] = task_type_ID
+        if task_folder is not None : params['task_type_folder'] = task_folder
+        if userID is not None : params['userID'] = userID
+        if basename is not None : params['basename'] = basename
+        if filename is not None : params['filename'] = filename
+        if path is not None : params['filepath'] = path
+        if ext is not None : params['ext'] = ext
+        if version is not None : params['version'] = version
+        if comment is not None : params['note'] = comment
+        if serverID is not None : params['serverID'] = serverID
+        if metadata is not None : params['metadata'] = metadata
+        if customKeys is not None : params['customKeys'] = json.dumps(customKeys)
+
+        result = connect( method='get', params=params )
+
     elif pub :
         if parent == "SHOW":
             clear_pubFlags( showID=parentID, basename=basename )
@@ -2374,24 +2394,44 @@ def save_file( parent='SHOW', parentID=0, task_type_ID=0, task_folder='', userID
         if work:
             is_work = 1
 
-        result=get( {'q': 'addFile', 'class': parent, 'itemID': str(parentID),
-            'task_type_ID': str(task_type_ID), 'task_type_folder': task_folder,
-            'userID': str(userID), 'basename': basename, 'filename': filename,
-            'filepath': path, 'ext': ext, 'version': str(version), 'note': comment,
-            'serverID': str(serverID), 'isPub': 1, 'isWork': is_work, 'metadata': metadata } )
-        
+        #result=get( {'q': 'addFile', 'class': parent, 'itemID': str(parentID),
+        #    'task_type_ID': str(task_type_ID), 'task_type_folder': task_folder,
+        #    'userID': str(userID), 'basename': basename, 'filename': filename,
+        #    'filepath': path, 'ext': ext, 'version': str(version), 'note': comment,
+        #    'serverID': str(serverID), 'isPub': 1, 'isWork': is_work, 'metadata': metadata } )
 
-    if  not result :
+        params = {'q': 'addFile'}
+
+        if parent is not None : params['class'] = parent
+        if parentID is not None : params['itemID'] = parentID
+        if task_type_ID is not None : params['task_type_ID'] = task_type_ID
+        if task_folder is not None : params['task_type_folder'] = task_folder
+        if userID is not None : params['userID'] = userID
+        if basename is not None : params['basename'] = basename
+        if filename is not None : params['filename'] = filename
+        if path is not None : params['filepath'] = path
+        if ext is not None : params['ext'] = ext
+        if version is not None : params['version'] = version
+        if comment is not None : params['note'] = comment
+        if serverID is not None : params['serverID'] = serverID
+        params['isPub'] = 1
+        params['isWork'] = is_work
+        if metadata is not None : params['metadata'] = metadata
+        if customKeys is not None : params['customKeys'] = json.dumps(customKeys)
+
+        result = connect( method='get', params=params )
+        
+    if result['success'].lower() == 'false' :
         P.error( 'There was a problem writing to the NIM database.' )
         P.error( '    Database has not been populated with your file.' )
-        P.error( str(result) )
+        P.error( result['error'] )
         return False
     else :
         P.info( 'NIM API updated with new file.' )
         P.info( '      File ID = %s' % result )
 
         if pub:
-            ID = result
+            ID = result['ID']
             #Create symlink for published files
             pub_result = publish_symLink(fileID=ID, forceLink=forceLink)
             P.error('pub_result: %s' % pub_result)
@@ -2402,18 +2442,37 @@ def save_file( parent='SHOW', parentID=0, task_type_ID=0, task_folder='', userID
                         Please check to make sure the file exists on disk.')
     return result
 
-def update_file( ID=0, task_type_ID=0, task_folder='', userID=0, basename='', filename='', path='', ext='', version='', comment='', serverID=0, pub=False, forceLink=1, work=True, metadata='' ):
+def update_file( ID=0, task_type_ID=0, task_folder='', userID=0, basename='', filename='', path='', ext='', version='', comment='', serverID=0, pub=False, forceLink=1, work=True, metadata='', customKeys=None ):
     '''General Purpose Update File Function that Updates and existing File in the NIM Database'''
     is_work = 0
     if work:
         is_work = 1
     
     if not pub :
-        result=get( {'q': 'updateFile', 'ID': str(ID),
-                    'task_type_ID': str(task_type_ID), 'task_type_folder': task_folder,
-                    'userID': str(userID), 'basename': basename, 'filename': filename,
-                    'filepath': path, 'ext': ext, 'version': str(version), 'note': comment,
-                    'serverID': str(serverID), 'metadata': metadata } )
+        #result=get( {'q': 'updateFile', 'ID': str(ID),
+        #            'task_type_ID': str(task_type_ID), 'task_type_folder': task_folder,
+        #            'userID': str(userID), 'basename': basename, 'filename': filename,
+        #            'filepath': path, 'ext': ext, 'version': str(version), 'note': comment,
+        #            'serverID': str(serverID), 'metadata': metadata } )
+
+        params = {'q': 'updateFile'}
+
+        if ID is not None : params['ID'] = ID
+        if task_type_ID is not None : params['task_type_ID'] = task_type_ID
+        if task_folder is not None : params['task_type_folder'] = task_folder
+        if userID is not None : params['userID'] = userID
+        if basename is not None : params['basename'] = basename
+        if filename is not None : params['filename'] = filename
+        if path is not None : params['filepath'] = path
+        if ext is not None : params['ext'] = ext
+        if version is not None : params['version'] = version
+        if comment is not None : params['note'] = comment
+        if serverID is not None : params['serverID'] = serverID
+        if metadata is not None : params['metadata'] = metadata
+        if customKeys is not None : params['customKeys'] = json.dumps(customKeys)
+
+        result = connect( method='get', params=params )
+
     elif pub :
         P.info('')
         clear_pubFlags( fileID=ID, basename=basename )
@@ -2422,20 +2481,40 @@ def update_file( ID=0, task_type_ID=0, task_folder='', userID=0, basename='', fi
         if work:
             is_work = 1
 
-        result=get( {'q': 'updateFile', 'ID': str(ID),
-                    'task_type_ID': str(task_type_ID), 'task_type_folder': task_folder,
-                    'userID': str(userID), 'basename': basename, 'filename': filename,
-                    'filepath': path, 'ext': ext, 'version': str(version), 'note': comment,
-                    'serverID': str(serverID), 'isPub': 1, 'isWork': is_work, 'metadata': metadata } )
+        #result=get( {'q': 'updateFile', 'ID': str(ID),
+        #            'task_type_ID': str(task_type_ID), 'task_type_folder': task_folder,
+        #            'userID': str(userID), 'basename': basename, 'filename': filename,
+        #            'filepath': path, 'ext': ext, 'version': str(version), 'note': comment,
+        #            'serverID': str(serverID), 'isPub': 1, 'isWork': is_work, 'metadata': metadata } )
 
-    if  not result :
+        params = {'q': 'updateFile'}
+
+        if ID is not None : params['ID'] = ID
+        if task_type_ID is not None : params['task_type_ID'] = task_type_ID
+        if task_folder is not None : params['task_type_folder'] = task_folder
+        if userID is not None : params['userID'] = userID
+        if basename is not None : params['basename'] = basename
+        if filename is not None : params['filename'] = filename
+        if path is not None : params['filepath'] = path
+        if ext is not None : params['ext'] = ext
+        if version is not None : params['version'] = version
+        if comment is not None : params['note'] = comment
+        if serverID is not None : params['serverID'] = serverID
+        params['isPub'] = 1
+        params['isWork'] = is_work
+        if metadata is not None : params['metadata'] = metadata
+        if customKeys is not None : params['customKeys'] = json.dumps(customKeys)
+
+        result = connect( method='get', params=params )
+
+    if result['success'].lower() == 'false' :
         P.error( 'There was a problem writing to the NIM database.' )
         P.error( '    Database has not been updated with your file.' )
-        P.error( str(result) )
+        P.error( result['error'] )
         return False
     else :
         P.info( 'NIM API updated existing file.' )
-        P.info( '      File ID = %s' % result )
+        P.info( '      File ID = %s' % result['ID'] )
         if pub:
             #Create symlink for published files
             pub_result = publish_symLink(fileID=ID, forceLink=forceLink)
@@ -2547,7 +2626,7 @@ def add_render( jobID=0, itemType='shot', taskID=0, fileID=0, \
     avgTime='', totalTime='', frame=0, nimURL=None, apiKey=None ) :
     'Add a render to a task'
     # nimURL and apiKey are optional for Render API Key overrride
-    params = {'q': 'addRender', 'jobID': str(jobID), 'class': str(itemType), 'taskID': str(taskID), 'fileID': str(fileID), \
+    params = {'q': 'addRender', 'jobID': str(jobID), 'ID': str(itemType), 'taskID': str(taskID), 'fileID': str(fileID), \
                 'renderKey':str(renderKey), 'renderName':str(renderName), 'renderType':str(renderType), 'renderComment':str(renderComment), \
                 'outputDirs':str(outputDirs), 'outputFiles':str(outputFiles), 'elementTypeID':str(elementTypeID), \
                 'start_datetime':str(start_datetime), 'end_datetime':str(end_datetime), \
