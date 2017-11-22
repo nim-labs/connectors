@@ -834,6 +834,7 @@ function saveFile(classID, className, serverID, serverPath, taskID, taskName, ta
 		fullFilePath = '',
 		nimMetadata,
 		metadataSet,
+		newFileInfo,
 		newFileID,
 		filesCreated = 0,
 		workingFilePath = '',
@@ -882,7 +883,7 @@ function saveFile(classID, className, serverID, serverPath, taskID, taskName, ta
 	while (filesCreated == 0 || (publish && filesCreated == 1)) {
 
 		// Add file to files table in NIM and get new fileID
-		newFileID = nimAPI({
+		newFileInfo = nimAPI({
 			q: 'addFile',
 			itemID: classID,
 			'class': className,
@@ -899,6 +900,11 @@ function saveFile(classID, className, serverID, serverPath, taskID, taskName, ta
 			isPub: isPub,
 			isWork: isWork
 		});
+		if (newFileInfo.success == 'false') {
+			alert('Error: ' + newFileInfo.error);
+			return false;
+		}
+		newFileID = newFileInfo.ID;
 
 		nimMetadata = {
 			classID: classID,
