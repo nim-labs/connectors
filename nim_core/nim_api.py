@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: nim_api.py
-# Version:  v2.8.18.171114
+# Version:  v2.8.20.171122
 #
 # Copyright (c) 2017 NIM Labs LLC
 # All rights reserved.
@@ -2425,10 +2425,10 @@ def save_file( parent='SHOW', parentID=0, task_type_ID=0, task_folder='', userID
         P.error( 'There was a problem writing to the NIM database.' )
         P.error( '    Database has not been populated with your file.' )
         P.error( result['error'] )
-        return False
+        return result
     else :
         P.info( 'NIM API updated with new file.' )
-        P.info( '      File ID = %s' % result )
+        P.info( '      File ID = %s' % result['ID'] )
 
         if pub:
             ID = result['ID']
@@ -2511,7 +2511,7 @@ def update_file( ID=0, task_type_ID=0, task_folder='', userID=0, basename='', fi
         P.error( 'There was a problem writing to the NIM database.' )
         P.error( '    Database has not been updated with your file.' )
         P.error( result['error'] )
-        return False
+        return result
     else :
         P.info( 'NIM API updated existing file.' )
         P.info( '      File ID = %s' % result['ID'] )
