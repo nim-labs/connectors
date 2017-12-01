@@ -1223,8 +1223,8 @@ def update_shot( shotID=None, shotStatusID=None, shotStatus=None, description=No
         shotID              integer
     
     Optional:
-        shotStatusID            integer
-        shotStatus              string
+        shotStatusID        integer
+        shotStatus          string
         description         string
         vfx                 string
         fps                 string
@@ -2722,6 +2722,120 @@ def upload_dailiesNote( dailiesID=None, name='', img=None, note='', frame=0, tim
 
     result = upload(params=params, nimURL=nimURL, apiKey=apiKey)
     return result
+
+
+#  Timecards  #
+def add_timecard( date=None, userID=None, jobID=None, taskTypesID=None, taskID=None, \
+    startTime=None, endTime=None, hrs=None, breakHrs=None, ot=None, dt=None, \
+    locationID=None, description=None, customKeys=None) :
+    '''
+    Adds a new timecard
+
+    If a taskID is passed, the tasks values will override userID, jobID, and task_types_ID 
+
+        Parameters          Type            Values
+    Required:
+        date                date            format: 2017-11-30
+
+    Optional:
+        userID              integer
+        jobID               integer
+        task_types_ID       integer
+        taskID              integer
+        start_time          string          range: 00:00:00 to 23:59:59
+        end_time            string          range: 00:00:00 to 23:59:59
+        hrs                 decimal         hours between start_time and end_time, including break_hrs, ot, and dt; max 24
+        break_hrs           decimal         must fit within hrs
+        ot                  decimal         must fit within hrs - break_hrs
+        dt                  decimal         must fit within hrs - (break_hrs + ot)
+        locationID          integer
+        description         string
+        customKeys          dictionary {"Custom Key Name" : "Value"}
+    '''
+    params = {'q': 'addTimecard'}
+
+    if date is not None : params['date'] = date
+    if userID is not None : params['userID'] = userID
+    if jobID is not None : params['jobID'] = jobID
+    if taskTypesID is not None : params['task_types_ID'] = taskTypesID
+    if taskID is not None : params['taskID'] = taskID
+    if startTime is not None : params['start_time'] = startTime
+    if endTime is not None : params['end_time'] = endTime
+    if hrs is not None : params['hrs'] = hrs
+    if breakHrs is not None : params['break_hrs'] = breakHrs
+    if ot is not None : params['ot'] = ot
+    if dt is not None : params['dt'] = dt
+    if locationID is not None : params['locationID'] = locationID
+    if description is not None : params['description'] = description
+    if customKeys is not None : params['customKeys'] = json.dumps(customKeys)
+
+    result = connect( method='get', params=params )
+    return result
+
+def update_timecard( timecardID=None, date=None, userID=None, jobID=None, taskTypesID=None, taskID=None, \
+    startTime=None, endTime=None, hrs=None, breakHrs=None, ot=None, dt=None, \
+    locationID=None, description=None, customKeys=None):
+    '''
+    Updates an existing timecard
+
+    If a taskID is passed, the tasks values will override userID, jobID, and task_types_ID 
+
+        Parameters          Type            Values
+    Required:
+        timecardID          integer         
+
+    Optional:
+        date                date            format: 2017-11-30
+        userID              integer
+        jobID               integer
+        task_types_ID       integer
+        taskID              integer
+        start_time          string          range: 00:00:00 to 23:59:59
+        end_time            string          range: 00:00:00 to 23:59:59
+        hrs                 decimal         hours between start_time and end_time, including break_hrs, ot, and dt; max 24
+        break_hrs           decimal         must fit within hrs
+        ot                  decimal         must fit within hrs - break_hrs
+        dt                  decimal         must fit within hrs - (break_hrs + ot)
+        locationID          integer
+        description         string
+        customKeys          dictionary {"Custom Key Name" : "Value"}
+    '''
+    params = {'q': 'updateTimecard'}
+
+    if timecardID is not None : params['timecardID'] = timecardID
+    if date is not None : params['date'] = date
+    if userID is not None : params['userID'] = userID
+    if jobID is not None : params['jobID'] = jobID
+    if taskTypesID is not None : params['task_types_ID'] = taskTypesID
+    if taskID is not None : params['taskID'] = taskID
+    if startTime is not None : params['start_time'] = startTime
+    if endTime is not None : params['end_time'] = endTime
+    if hrs is not None : params['hrs'] = hrs
+    if breakHrs is not None : params['break_hrs'] = breakHrs
+    if ot is not None : params['ot'] = ot
+    if dt is not None : params['dt'] = dt
+    if locationID is not None : params['locationID'] = locationID
+    if description is not None : params['description'] = description
+    if customKeys is not None : params['customKeys'] = json.dumps(customKeys)
+
+    result = connect( method='get', params=params )
+    return result
+
+def delete_timecard( timecardID=None ) :
+    '''
+    Deletes an existing timecard
+
+        Parameters          Type
+    Required:
+        timecardID          integer         
+    '''
+    params = {'q': 'deleteTimecard'}
+
+    if timecardID is not None : params['timecardID'] = timecardID
+
+    result = connect( method='get', params=params )
+    return result
+
 
 #  End
 
