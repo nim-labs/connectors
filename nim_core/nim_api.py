@@ -2725,13 +2725,41 @@ def upload_dailiesNote( dailiesID=None, name='', img=None, note='', frame=0, tim
 
 
 #  Timecards  #
+def get_timecards( startDate=None, endDate=None, jobID=None, userID=None, taskTypeID=None, taskID=None, locationID=None ):
+    '''
+    Retrieves a timecard, or array of timecards based on search criteria
+
+        Parameters          Type            Values                  Note
+    Required:
+        startDate           date            format: 2017-11-30      not required if jobID provided
+        endDate             date            format: 2017-11-30      not required if jobID provided
+    Optional:
+        jobID               integer
+        userID              integer
+        taskTypeID          integer
+        taskID              integer
+        locationID          integer
+    '''
+    params = {'q': 'getTimecards'}
+
+    if startDate is not None : params['startDate'] = startDate
+    if endDate is not None : params['endDate'] = endDate
+    if jobID is not None : params['jobID'] = jobID
+    if userID is not None : params['userID'] = userID
+    if taskTypeID is not None : params['taskTypeID'] = taskTypeID
+    if taskID is not None : params['taskID'] = taskID
+    if locationID is not None : params['locationID'] = locationID
+
+    result = connect( method='get', params=params )
+    return result
+
 def add_timecard( date=None, userID=None, jobID=None, taskTypeID=None, taskID=None, \
     startTime=None, endTime=None, hrs=None, breakHrs=None, ot=None, dt=None, \
     locationID=None, description=None, customKeys=None) :
     '''
     Adds a new timecard
 
-    If a taskID is passed, the tasks values will override userID, jobID, and task_types_ID 
+    If a taskID is passed, the tasks values will override userID, jobID, and taskTypeID 
 
         Parameters          Type            Values
     Required:
@@ -2740,12 +2768,12 @@ def add_timecard( date=None, userID=None, jobID=None, taskTypeID=None, taskID=No
     Optional:
         userID              integer
         jobID               integer
-        task_types_ID       integer
+        taskTypeID          integer
         taskID              integer
-        start_time          string          range: 00:00:00 to 23:59:59
-        end_time            string          range: 00:00:00 to 23:59:59
+        startTime           string          range: 00:00:00 to 23:59:59
+        endTime             string          range: 00:00:00 to 23:59:59
         hrs                 decimal         hours between start_time and end_time, including break_hrs, ot, and dt; max 24
-        break_hrs           decimal         must fit within hrs
+        breakHrs            decimal         must fit within hrs
         ot                  decimal         must fit within hrs - break_hrs
         dt                  decimal         must fit within hrs - (break_hrs + ot)
         locationID          integer
@@ -2788,12 +2816,12 @@ def update_timecard( timecardID=None, date=None, userID=None, jobID=None, taskTy
         date                date            format: 2017-11-30
         userID              integer
         jobID               integer
-        task_types_ID       integer
+        taskTypeID          integer
         taskID              integer
-        start_time          string          range: 00:00:00 to 23:59:59
-        end_time            string          range: 00:00:00 to 23:59:59
+        startTime           string          range: 00:00:00 to 23:59:59
+        endTime             string          range: 00:00:00 to 23:59:59
         hrs                 decimal         hours between start_time and end_time, including break_hrs, ot, and dt; max 24
-        break_hrs           decimal         must fit within hrs
+        breakHrs            decimal         must fit within hrs
         ot                  decimal         must fit within hrs - break_hrs
         dt                  decimal         must fit within hrs - (break_hrs + ot)
         locationID          integer
@@ -2830,6 +2858,21 @@ def delete_timecard( timecardID=None ) :
         timecardID          integer         
     '''
     params = {'q': 'deleteTimecard'}
+
+    if timecardID is not None : params['timecardID'] = timecardID
+
+    result = connect( method='get', params=params )
+    return result
+
+def get_timecardInfo( timecardID=None ) :
+    '''
+    Retrieves information for an existing timecard
+
+        Parameters          Type
+    Required:
+        timecardID          integer         
+    '''
+    params = {'q': 'getTimecardInfo'}
 
     if timecardID is not None : params['timecardID'] = timecardID
 
