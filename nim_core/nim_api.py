@@ -1333,7 +1333,7 @@ def get_tasks( app='all', userType='artist', assetID=None, shotID=None ) :
     return tasks
 
 def add_task( assetID=None, shotID=None, taskTypeID=None, taskTypeName=None, userID=None, username=None, \
-    taskStatusID=None, taskStatus=None, description=None, estimatedHours=None, startDate=None, endDate=None, customKeys=None) :
+    taskStatusID=None, taskStatus=None, description=None, estimatedHours=None, startDate=None, endDate=None, customKeys=None ) :
     '''
     Adds a new task to an asset or shot.
 
@@ -2725,7 +2725,7 @@ def upload_dailiesNote( dailiesID=None, name='', img=None, note='', frame=0, tim
 
 
 #  Timecards  #
-def add_timecard( date=None, userID=None, jobID=None, taskTypesID=None, taskID=None, \
+def add_timecard( date=None, userID=None, jobID=None, taskTypeID=None, taskID=None, \
     startTime=None, endTime=None, hrs=None, breakHrs=None, ot=None, dt=None, \
     locationID=None, description=None, customKeys=None) :
     '''
@@ -2757,7 +2757,7 @@ def add_timecard( date=None, userID=None, jobID=None, taskTypesID=None, taskID=N
     if date is not None : params['date'] = date
     if userID is not None : params['userID'] = userID
     if jobID is not None : params['jobID'] = jobID
-    if taskTypesID is not None : params['task_types_ID'] = taskTypesID
+    if taskTypeID is not None : params['taskTypeID'] = taskTypeID
     if taskID is not None : params['taskID'] = taskID
     if startTime is not None : params['start_time'] = startTime
     if endTime is not None : params['end_time'] = endTime
@@ -2772,7 +2772,7 @@ def add_timecard( date=None, userID=None, jobID=None, taskTypesID=None, taskID=N
     result = connect( method='get', params=params )
     return result
 
-def update_timecard( timecardID=None, date=None, userID=None, jobID=None, taskTypesID=None, taskID=None, \
+def update_timecard( timecardID=None, date=None, userID=None, jobID=None, taskTypeID=None, taskID=None, \
     startTime=None, endTime=None, hrs=None, breakHrs=None, ot=None, dt=None, \
     locationID=None, description=None, customKeys=None):
     '''
@@ -2806,7 +2806,7 @@ def update_timecard( timecardID=None, date=None, userID=None, jobID=None, taskTy
     if date is not None : params['date'] = date
     if userID is not None : params['userID'] = userID
     if jobID is not None : params['jobID'] = jobID
-    if taskTypesID is not None : params['task_types_ID'] = taskTypesID
+    if taskTypeID is not None : params['taskTypeID'] = taskTypeID
     if taskID is not None : params['taskID'] = taskID
     if startTime is not None : params['start_time'] = startTime
     if endTime is not None : params['end_time'] = endTime
