@@ -627,10 +627,15 @@ def get_jobs( userID=None, folders=False ) :
 def add_job( name=None, number=None, numberTemplate=None, description=None, client=None, agency=None, producer=None, agency_producer=None, \
     phone=None, email=None, prod_co=None, prod_director=None, prod_contact=None, prod_phone=None, prod_email=None, \
     prod_shoot_date=None, prod_location=None, prod_supervised=None, editorial=None, editor=None, grading=None, colorist=None, \
-    music=None, mix=None, sound=None, creative_lead=None, projectStatus=None, jobStatusID=None, jobStatus=None, biddingLocationID=None, biddingLocation=None, \
+    music=None, mix=None, sound=None, creative_lead=None, projectStatus=None, folder=None, projectStructureID=None, projectStructureNone, \
+    jobStatusID=None, jobStatus=None, biddingLocationID=None, biddingLocation=None, \
     assignedLocationID=None, assignedLocation=None, startDate=None, endDate=None, currency=None, customKeys=None) :
     '''
-    Creates a new job. If no default job number template is set, either number or numberTemplate must be included.
+    Creates a new job. 
+
+    If no default job number template is set, either number or numberTemplate must be included.
+
+    ___________________________________________________________________________________
 
         Parameters              Type            Values                      Default
 
@@ -666,6 +671,12 @@ def add_job( name=None, number=None, numberTemplate=None, description=None, clie
         
         projectStatus           string          ACTIVE / INACTIVE           ACTIVE
 
+        folder                  string
+
+        projectStructureID OR projectStructure
+            projectStructureID  integer
+            projectStructure    string  
+        
         jobStatusID OR jobStatus
             jobStatusID         integer
             jobStatus           string
@@ -713,6 +724,9 @@ def add_job( name=None, number=None, numberTemplate=None, description=None, clie
     if sound is not None : params['sound'] = sound
     if creative_lead is not None : params['creative_lead'] = creative_lead
     if projectStatus is not None : params['projectStatus'] = projectStatus
+    if folder is not None : params['folder'] = folder
+    if projectStructureID is not None : params['projectStructureID'] = projectStructureID
+    if projectStructure is not None : params['projectStructure'] = projectStructure
     if jobStatusID is not None : params['jobStatusID'] = jobStatusID
     if jobStatus is not None : params['jobStatus'] = jobStatus
     if biddingLocationID is not None : params['biddingLocationID'] = biddingLocationID
@@ -730,10 +744,18 @@ def add_job( name=None, number=None, numberTemplate=None, description=None, clie
 def update_job( jobID=None, name=None, number=None, description=None, client=None, agency=None, producer=None, agency_producer=None, \
     phone=None, email=None, prod_co=None, prod_director=None, prod_contact=None, prod_phone=None, prod_email=None, \
     prod_shoot_date=None, prod_location=None, prod_supervised=None, editorial=None, editor=None, grading=None, colorist=None, \
-    music=None, mix=None, sound=None, creative_lead=None, projectStatus=None, jobStatusID=None, jobStatus=None, biddingLocationID=None, biddingLocation=None, \
+    music=None, mix=None, sound=None, creative_lead=None, projectStatus=None, folder=None, projectStructureID=None, projectStructureNone, \
+    jobStatusID=None, jobStatus=None, biddingLocationID=None, biddingLocation=None, \
     assignedLocationID=None, assignedLocation=None, startDate=None, endDate=None, currency=None, customKeys=None) :
     '''
     Updates an existing job based on the jobID.
+
+    The following values will only be updated if the job is offline:
+        folder
+        projectStructureID
+        projectStructure
+
+    ___________________________________________________________________________________
 
         Parameters              Type            Values                      Default
 
@@ -768,6 +790,12 @@ def update_job( jobID=None, name=None, number=None, description=None, client=Non
         creative_lead           string
 
         projectStatus           string          ACTIVE / INACTIVE           ACTIVE
+
+        folder                  string
+
+        projectStructureID OR projectStructure
+            projectStructureID  integer
+            projectStructure    string                  
 
         jobStatusID OR jobStatus
             jobStatusID         integer
@@ -815,6 +843,9 @@ def update_job( jobID=None, name=None, number=None, description=None, client=Non
     if sound is not None : params['sound'] = sound
     if creative_lead is not None : params['creative_lead'] = creative_lead
     if projectStatus is not None : params['projectStatus'] = projectStatus
+    if folder is not None : params['folder'] = folder
+    if projectStructureID is not None : params['projectStructureID'] = projectStructureID
+    if projectStructure is not None : params['projectStructure'] = projectStructure
     if jobStatusID is not None : params['jobStatusID'] = jobStatusID
     if jobStatus is not None : params['jobStatus'] = jobStatus
     if biddingLocationID is not None : params['biddingLocationID'] = biddingLocationID
