@@ -1215,7 +1215,7 @@ def update_shot( shotID=None, shotStatusID=None, shotStatus=None, description=No
     '''
     Updates an existing shot based on the shotID.
 
-    An shot status can be passed by either name or ID. If both are passed the ID will be used.
+    A shot status can be passed by either name or ID. If both are passed the ID will be used.
 
         Parameters          Type
 
@@ -2725,9 +2725,13 @@ def upload_dailiesNote( dailiesID=None, name='', img=None, note='', frame=0, tim
 
 
 #  Timecards  #
-def get_timecards( startDate=None, endDate=None, jobID=None, userID=None, taskTypeID=None, taskID=None, locationID=None ):
+def get_timecards( startDate=None, endDate=None, jobID=None, userID=None, username=None, taskTypeID=None, taskType=None, taskID=None, locationID=None, location=None ):
     '''
     Retrieves a timecard, or array of timecards based on search criteria
+
+    A user can be passed by either username or userID. If both are passed the userID will be used.
+    A taskType can be passed by either the name using taskType or ID with taskTypeID. If both are passed the taskTypeID will be used.
+    A location can be passed by either the name using location or ID with locationID. If both are passed the locationID will be used.
 
         Parameters          Type            Values                  Note
     Required:
@@ -2735,10 +2739,13 @@ def get_timecards( startDate=None, endDate=None, jobID=None, userID=None, taskTy
         endDate             date            format: 2017-11-30      not required if jobID provided
     Optional:
         jobID               integer
-        userID              integer
+        userID              integer         
+        username            string
         taskTypeID          integer
+        taskType            string
         taskID              integer
         locationID          integer
+        location            string
     '''
     params = {'q': 'getTimecards'}
 
@@ -2746,18 +2753,25 @@ def get_timecards( startDate=None, endDate=None, jobID=None, userID=None, taskTy
     if endDate is not None : params['endDate'] = endDate
     if jobID is not None : params['jobID'] = jobID
     if userID is not None : params['userID'] = userID
+    if username is not None : params['username'] = username
     if taskTypeID is not None : params['taskTypeID'] = taskTypeID
+    if taskType is not None : params['taskType'] = taskType
     if taskID is not None : params['taskID'] = taskID
     if locationID is not None : params['locationID'] = locationID
+    if location is not None : params['location'] = location
 
     result = connect( method='get', params=params )
     return result
 
-def add_timecard( date=None, userID=None, jobID=None, taskTypeID=None, taskID=None, \
+def add_timecard( date=None, userID=None, username=None, jobID=None, taskTypeID=None, taskType=None, taskID=None, \
     startTime=None, endTime=None, hrs=None, breakHrs=None, ot=None, dt=None, \
-    locationID=None, description=None, customKeys=None) :
+    locationID=None, location=None, description=None, customKeys=None) :
     '''
     Adds a new timecard
+    
+    A user can be passed by either username or userID. If both are passed the userID will be used.
+    A taskType can be passed by either the name using taskType or ID with taskTypeID. If both are passed the taskTypeID will be used.
+    A location can be passed by either the name using location or ID with locationID. If both are passed the locationID will be used.
 
     If a taskID is passed, the tasks values will override userID, jobID, and taskTypeID 
 
@@ -2767,8 +2781,10 @@ def add_timecard( date=None, userID=None, jobID=None, taskTypeID=None, taskID=No
 
     Optional:
         userID              integer
+        username            string
         jobID               integer
         taskTypeID          integer
+        taskType            string
         taskID              integer
         startTime           string          range: 00:00:00 to 23:59:59
         endTime             string          range: 00:00:00 to 23:59:59
@@ -2777,6 +2793,7 @@ def add_timecard( date=None, userID=None, jobID=None, taskTypeID=None, taskID=No
         ot                  decimal         must fit within hrs - break_hrs
         dt                  decimal         must fit within hrs - (break_hrs + ot)
         locationID          integer
+        location            string
         description         string
         customKeys          dictionary {"Custom Key Name" : "Value"}
     '''
@@ -2784,8 +2801,10 @@ def add_timecard( date=None, userID=None, jobID=None, taskTypeID=None, taskID=No
 
     if date is not None : params['date'] = date
     if userID is not None : params['userID'] = userID
+    if username is not None : params['username'] = username
     if jobID is not None : params['jobID'] = jobID
     if taskTypeID is not None : params['taskTypeID'] = taskTypeID
+    if taskType is not None : params['taskType'] = taskType
     if taskID is not None : params['taskID'] = taskID
     if startTime is not None : params['start_time'] = startTime
     if endTime is not None : params['end_time'] = endTime
@@ -2794,17 +2813,22 @@ def add_timecard( date=None, userID=None, jobID=None, taskTypeID=None, taskID=No
     if ot is not None : params['ot'] = ot
     if dt is not None : params['dt'] = dt
     if locationID is not None : params['locationID'] = locationID
+    if location is not None : params['location'] = location
     if description is not None : params['description'] = description
     if customKeys is not None : params['customKeys'] = json.dumps(customKeys)
 
     result = connect( method='get', params=params )
     return result
 
-def update_timecard( timecardID=None, date=None, userID=None, jobID=None, taskTypeID=None, taskID=None, \
+def update_timecard( timecardID=None, date=None, userID=None, username=None, jobID=None, taskTypeID=None, taskType=None, taskID=None, \
     startTime=None, endTime=None, hrs=None, breakHrs=None, ot=None, dt=None, \
-    locationID=None, description=None, customKeys=None):
+    locationID=None, location=None, description=None, customKeys=None):
     '''
     Updates an existing timecard
+
+    A user can be passed by either username or userID. If both are passed the userID will be used.
+    A taskType can be passed by either the name using taskType or ID with taskTypeID. If both are passed the taskTypeID will be used.
+    A location can be passed by either the name using location or ID with locationID. If both are passed the locationID will be used.
 
     If a taskID is passed, the tasks values will override userID, jobID, and task_types_ID 
 
@@ -2815,8 +2839,10 @@ def update_timecard( timecardID=None, date=None, userID=None, jobID=None, taskTy
     Optional:
         date                date            format: 2017-11-30
         userID              integer
+        username            string
         jobID               integer
         taskTypeID          integer
+        taskType            string
         taskID              integer
         startTime           string          range: 00:00:00 to 23:59:59
         endTime             string          range: 00:00:00 to 23:59:59
@@ -2825,6 +2851,7 @@ def update_timecard( timecardID=None, date=None, userID=None, jobID=None, taskTy
         ot                  decimal         must fit within hrs - break_hrs
         dt                  decimal         must fit within hrs - (break_hrs + ot)
         locationID          integer
+        location            string
         description         string
         customKeys          dictionary {"Custom Key Name" : "Value"}
     '''
@@ -2833,8 +2860,10 @@ def update_timecard( timecardID=None, date=None, userID=None, jobID=None, taskTy
     if timecardID is not None : params['timecardID'] = timecardID
     if date is not None : params['date'] = date
     if userID is not None : params['userID'] = userID
+    if username is not None : params['username'] = username
     if jobID is not None : params['jobID'] = jobID
     if taskTypeID is not None : params['taskTypeID'] = taskTypeID
+    if taskType is not None : params['taskType'] = taskType
     if taskID is not None : params['taskID'] = taskID
     if startTime is not None : params['start_time'] = startTime
     if endTime is not None : params['end_time'] = endTime
@@ -2843,6 +2872,7 @@ def update_timecard( timecardID=None, date=None, userID=None, jobID=None, taskTy
     if ot is not None : params['ot'] = ot
     if dt is not None : params['dt'] = dt
     if locationID is not None : params['locationID'] = locationID
+    if location is not None : params['location'] = location
     if description is not None : params['description'] = description
     if customKeys is not None : params['customKeys'] = json.dumps(customKeys)
 
