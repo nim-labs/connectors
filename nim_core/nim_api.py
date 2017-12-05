@@ -627,7 +627,7 @@ def get_jobs( userID=None, folders=False ) :
 def add_job( name=None, number=None, numberTemplate=None, description=None, client=None, agency=None, producer=None, agency_producer=None, \
     phone=None, email=None, prod_co=None, prod_director=None, prod_contact=None, prod_phone=None, prod_email=None, \
     prod_shoot_date=None, prod_location=None, prod_supervised=None, editorial=None, editor=None, grading=None, colorist=None, \
-    music=None, mix=None, sound=None, creative_lead=None, projectStatus=None, folder=None, projectStructureID=None, projectStructureNone, \
+    music=None, mix=None, sound=None, creative_lead=None, projectStatus=None, folder=None, projectStructureID=None, projectStructureNone=None, \
     jobStatusID=None, jobStatus=None, biddingLocationID=None, biddingLocation=None, \
     assignedLocationID=None, assignedLocation=None, startDate=None, endDate=None, currency=None, customKeys=None) :
     '''
@@ -744,7 +744,7 @@ def add_job( name=None, number=None, numberTemplate=None, description=None, clie
 def update_job( jobID=None, name=None, number=None, description=None, client=None, agency=None, producer=None, agency_producer=None, \
     phone=None, email=None, prod_co=None, prod_director=None, prod_contact=None, prod_phone=None, prod_email=None, \
     prod_shoot_date=None, prod_location=None, prod_supervised=None, editorial=None, editor=None, grading=None, colorist=None, \
-    music=None, mix=None, sound=None, creative_lead=None, projectStatus=None, folder=None, projectStructureID=None, projectStructureNone, \
+    music=None, mix=None, sound=None, creative_lead=None, projectStatus=None, folder=None, projectStructureID=None, projectStructure=None, \
     jobStatusID=None, jobStatus=None, biddingLocationID=None, biddingLocation=None, \
     assignedLocationID=None, assignedLocation=None, startDate=None, endDate=None, currency=None, customKeys=None) :
     '''
