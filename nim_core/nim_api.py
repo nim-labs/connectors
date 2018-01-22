@@ -2717,6 +2717,19 @@ def upload_edit( showID=None, path=None, nimURL=None, apiKey=None ) :
 def upload_dailies( taskID=None, renderID=None, renderKey='', path=None, submit=None, nimURL=None, apiKey=None ) :
     'Upload Dailies - 2 required fields: (taskID, renderID, or renderKey) and path to movie'
     # nimURL and apiKey are optional for Render API Key overrride
+    #
+    # 2 required fields:
+    #      renderID or renderKey or taskID
+    #      $_FILE[]
+    #
+    # renderKey is passed for association from render manager (deadlineID)
+    # free association is made with render based on renderKey 
+    #      should look up jobID and taskID from renderKey and set based on render
+    #
+    # if taskID is passed look up jobID and create render to associate dailies
+    #
+    # submit is optional to mark uploaded dailies for review - value is either: 0  or 1 
+
     params = {}
 
     params["q"] = "uploadMovie"
