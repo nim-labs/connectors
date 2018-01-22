@@ -564,10 +564,12 @@ def verUp( nim=None, padding=2, selected=False, win_launch=False, pub=False, sym
             import nim_c4d as C
             C.set_vars( nim=nim, ID=nim_plugin_ID )
             doc=c4d.documents.GetActiveDocument()
-            doc.SetDocumentName( new_filePath )
+            doc.SetDocumentName( new_fileName )
+            doc.SetDocumentPath( fileDir )
             c4d.documents.SaveDocument( doc, str(new_filePath),
                 c4d.SAVEDOCUMENTFLAGS_DIALOGSALLOWED,
                 c4d.FORMAT_C4DEXPORT )
+            P.info( 'Saving File Complete')
         #  Save Selected :
         else :
             P.info( 'Saving selected items as %s \n' % new_filePath )
