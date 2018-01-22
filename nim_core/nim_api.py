@@ -2714,7 +2714,7 @@ def upload_edit( showID=None, path=None, nimURL=None, apiKey=None ) :
     result = upload(params=params, nimURL=nimURL, apiKey=apiKey)
     return result
 
-def upload_dailies( taskID=None, renderID=None, renderKey='', path=None, nimURL=None, apiKey=None ) :
+def upload_dailies( taskID=None, renderID=None, renderKey='', path=None, submit=None, nimURL=None, apiKey=None ) :
     'Upload Dailies - 2 required fields: (taskID, renderID, or renderKey) and path to movie'
     # nimURL and apiKey are optional for Render API Key overrride
     params = {}
@@ -2728,6 +2728,7 @@ def upload_dailies( taskID=None, renderID=None, renderKey='', path=None, nimURL=
         params["file"] = open(path,'rb')
     else :
         params["file"] = ''
+    if submit is not None : params['submit'] = submit
 
     result = upload(params=params, nimURL=nimURL, apiKey=apiKey)
     return result
