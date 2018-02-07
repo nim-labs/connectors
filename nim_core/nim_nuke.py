@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: nim_nuke.py
-# Version:  v2.8.36.180122
+# Version:  v2.8.41.180206
 #
 # Copyright (c) 2017 NIM Labs LLC
 # All rights reserved.

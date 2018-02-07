@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: nim_api.py
-# Version:  v2.8.37.180122
+# Version:  v2.8.41.180206
 #
 # Copyright (c) 2017 NIM Labs LLC
 # All rights reserved.
@@ -56,7 +56,7 @@ import nim_tools
 import nim_win as Win
 
 #  Variables :
-version='v2.8.25'
+version='v2.8.41'
 winTitle='NIM_'+version
 
 '''
@@ -1137,7 +1137,7 @@ def update_show( showID=None, name=None, trt=None) :
 
 def delete_show( showID=None ) :
     '''
-    Delets an existing show based on the showID.
+    Deletes an existing show based on the showID.
 
         Parameters      Type
 
@@ -1620,9 +1620,9 @@ def to_fileName( nim=None, padding=2, pub=False ) :
     #  Get next Version Number :
     baseInfo=''
     if nim.tab()=='SHOT' :
-        baseInfo=get_baseInfo( shotID=nim.ID( 'shot' ), basename=basename )
+        baseInfo=get_baseVer( shotID=nim.ID( 'shot' ), basename=basename )
     elif nim.tab()=='ASSET' :
-        baseInfo=get_baseInfo( assetID=nim.ID( 'asset' ), basename=basename )
+        baseInfo=get_baseVer( assetID=nim.ID( 'asset' ), basename=basename )
     if baseInfo and 'version' in baseInfo[0].keys() :
         verNum=int(baseInfo[0]['version'])+1
     else :
@@ -1729,7 +1729,7 @@ def get_bases( shotID=None, assetID=None, showID=None, task='', taskID=None, pub
 
 def get_basesPub( shotID=None, assetID=None, basename='', username=None ) :
     '''
-    Retrieves the dictionary of available basenames from the API
+    Retrieves the dictionary of the published file for a given basename.
     The optional username is used to return the date information in the users seleted timezone.
 
         Parameters              Type
@@ -1762,7 +1762,7 @@ def get_basesPub( shotID=None, assetID=None, basename='', username=None ) :
 
 def get_basesAllPub( shotID=None, assetID=None, task=None, taskID=None, username=None ) :
     '''
-    Retrieves the dictionary of all available published basenames from the API.
+    Retrieves the dictionary of all available published basenames for a given asset or shot.
     The optional username is used to return the date information in the users seleted timezone.
 
         Parameters              Type
@@ -1799,32 +1799,36 @@ def get_basesAllPub( shotID=None, assetID=None, task=None, taskID=None, username
     result = connect( method='get', params=params )
     return result
 
-def get_baseInfo( shotID=None, assetID=None, basename=None ) :
+def get_baseInfo( shotID=None, assetID=None, showID=None, taskTypeID=None ) :
     '''
-    Retrieves information for a given basename
-    The optional username is used to return the date information in the users seleted timezone.
-
+    Retrieves all basenames and their max version for given asset, shot, or show based on ID
+    
         Parameters              Type
 
     Required:
-        shotID OR assetID
+        shotID, assetID, or showID
             shotID              integer
             assetID             integer
+            showID              integer
 
-        basename                string
+        taskTypeID              integer
     '''
 
-    params = {'q': 'getBasenameVersion'}
+    params = {'q': 'getBasenamesInfo'}
 
     if shotID is not None : 
-        params['itemID'] = shotID
+        params['ID'] = shotID
         params['class'] = 'SHOT'
 
     if assetID is not None : 
-        params['itemID'] = assetID
+        params['ID'] = assetID
         params['class'] = 'ASSET'
 
-    if basename is not None : params['basename'] = basename
+    if showID is not None : 
+        params['ID'] = showID
+        params['class'] = 'SHOW'
+
+    if taskTypeID is not None : params['task_type_ID'] = taskTypeID
 
     result = connect( method='get', params=params )
     return result
@@ -1848,15 +1852,15 @@ def get_baseVer( shotID=None, assetID=None, showID=None, basename='' ) :
     else :
         ID=showID
         _type='SHOW'
-    basenameDict=get( {'q': 'getBasenameVersion', 'class': _type, 'itemID': ID, \
-        'basename': basename} )
+
+    basenameDict=get( {'q': 'getBasenameVersion', 'class': _type, 'itemID': ID, 'basename': basename} )
     return basenameDict
 
 
 def get_vers( shotID=None, assetID=None, showID=None, basename=None, pub=False, username=None ) :
     '''
     Retrieves the dictionary of available versions from the API.
-    The optional username is used to return the date information in the users seleted timezone.
+    The optional username is used to return the date information in the users selected timezone.
 
         Parameters              Type            Value       Default
 
@@ -1902,7 +1906,7 @@ def get_vers( shotID=None, assetID=None, showID=None, basename=None, pub=False, 
 def get_verInfo( verID=None, username=None ) :
     '''
     Retrieves the information for a given version ID.
-    The optional username is used to return the date information in the users seleted timezone.
+    The optional username is used to return the date information in the users selected timezone.
 
         Parameters              Type
 
@@ -1923,7 +1927,7 @@ def get_verInfo( verID=None, username=None ) :
     return result
 
 def versionUp( nim=None, padding=2, selected=False, win_launch=False, pub=False, symLink=True ) :
-    'Function used to save/publish/version up files'
+    'NIM Connector Function used to save/publish/version up files'
     user, job, asset, show, shot, basename, task='', '', '', '', '', '', ''
     userID, jobID, assetID, showID, shotID='', '', '', '', ''
     shotCheck, assetCheck=False, False
@@ -2381,7 +2385,30 @@ def add_file( nim=None, filePath='', comment='', pub=False ) :
     return True
 
 def save_file( parent='SHOW', parentID=0, task_type_ID=0, task_folder='', userID=0, basename='', filename='', path='', ext='', version='', comment='', serverID=0, pub=False, forceLink=1, work=True, metadata='', customKeys=None ):
-    '''General Purpose Save File Function that Adds a File to the NIM Database with brute force data'''
+    '''General Purpose Save File Function that Adds a File to the NIM Database with brute force data.
+
+       Required Parameters:
+           parent ('asset', 'shot', 'show')
+           parentID (assetID, shotID, showID)
+           task_type_ID
+           task_folder
+           userID
+           basename
+           filename
+           path
+           serverID
+       Optional Parameters:
+           ext
+           version
+           comment
+           pub True/False
+           work True/False
+           customKeys
+           metadata
+           forceLink
+    '''
+
+
     parent = parent.upper()
 
     if not pub :
@@ -2598,7 +2625,7 @@ def add_element( parent='shot', parentID=None, userID=None, typeID='', path='', 
 
 def update_element(ID=None, userID=None, jobID=None, assetID=None, shotID=None, taskID=None, renderID=None, elementTypeID=None, name=None, path=None, startFrame=None, endFrame=None, handles=None, isPublished=None, nimURL=None, apiKey=None ):
     'Updates an existing element by element ID'
-    # nimURL and apiKey are optional for Render API Key overrride
+    # nimURL and apiKey are optional for Render API Key override
     params = {'q': 'updateElement'}
 
     if ID is not None : params['ID'] = ID
@@ -2621,7 +2648,7 @@ def update_element(ID=None, userID=None, jobID=None, assetID=None, shotID=None, 
 
 def delete_element(ID=None, nimURL=None, apiKey=None):
     'Deletes an existing element by element ID'
-    # nimURL and apiKey are optional for Render API Key overrride
+    # nimURL and apiKey are optional for Render API Key override
 
     params = {'q': 'deleteElement'}
     if ID is not None : params['ID'] = ID

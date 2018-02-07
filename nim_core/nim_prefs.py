@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: nim_prefs.py
-# Version:  v2.8.36.180122
+# Version:  v2.8.41.180206
 #
 # Copyright (c) 2017 NIM Labs LLC
 # All rights reserved.
@@ -46,7 +46,7 @@ except :
 #  Variables :
 prefs_dirName='.nim'
 prefs_fileName='prefs.nim'
-version='v2.6.0'
+version='v2.8.41'
 winTitle='NIM_'+version
 nim_URL='http://hostname/nimAPI.php'
 nim_useSLL='False'
