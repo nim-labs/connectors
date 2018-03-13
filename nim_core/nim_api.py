@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: nim_api.py
-# Version:  v2.8.41.180206
+# Version:  v2.8.61.180313
 #
 # Copyright (c) 2017 NIM Labs LLC
 # All rights reserved.
