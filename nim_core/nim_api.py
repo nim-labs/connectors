@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: nim_api.py
-# Version:  v2.8.41.180206
+# Version:  v2.8.61.180313
 #
 # Copyright (c) 2017 NIM Labs LLC
 # All rights reserved.
@@ -1358,10 +1358,84 @@ def get_shotIcon( shotID=None ) :
 
 #  Tasks  #
 
-def get_tasks( app='all', userType='artist', assetID=None, shotID=None ) :
-    'Retrieves the dictionary of available tasks from the API optionally including all in-use tasks on an asset or shot'
-    tasks=get( {'q': 'getTaskTypes', 'app': app, 'type': userType, 'assetID': assetID, 'shotID': shotID} )
-    return tasks
+#  get_tasks() DEPRECATED in 2.9 in favor of get_taskTypes() to match REST API
+def get_tasks( app='all', userType='artist', assetID=None, shotID=None, onlyWithFiles=None ) :
+    '''
+    Retrieves the dictionary of available tasks types.
+
+    Default app value returns tasks for all application types. Pass a valid application type to filter the task types returned.
+
+    userType will filter tasks by their associated userType
+
+    If an asset or shot ID is passed, these will include in-use tasks on the asset or shot.
+
+    The onlyWithFiles flag works in conjunction with an asset or shot ID to return only task types that have files associated.
+
+        Parameters          Type            Values
+    Optional:
+        app                 string          MAYA / C4D / AE / PHOTOSHOP / NUKE / HIERO / 3DSMAX / HOUDINI / FLAME 
+
+        userType            string          artist / producer / edit / management
+
+        assetID or shotID
+            assetID         integer
+            shotID          integer
+
+        onlyWithFiles       boolean         0 / 1
+
+    '''
+    params = {'q': 'getTaskTypes'}
+
+    if app is not None : params['app'] = app
+    if userType is not None : params['type'] = userType
+    if assetID is not None : params['assetID'] = assetID
+    if shotID is not None : params['shotID'] = shotID
+    if onlyWithFiles is not None : 
+        if onlyWithFiles == True : onlyWithFiles = 1
+        else : onlyWithFiles = 0
+        params['onlyWithFiles'] = onlyWithFiles
+
+    result = connect( method='get', params=params )
+    return result
+
+def get_taskTypes( app='all', userType='artist', assetID=None, shotID=None, onlyWithFiles=None ) :
+    '''
+    Retrieves the dictionary of available tasks types.
+
+    Default app value returns tasks for all application types. Pass a valid application type to filter the task types returned.
+
+    userType will filter tasks by their associated userType
+
+    If an asset or shot ID is passed, these will include in-use tasks on the asset or shot.
+
+    The onlyWithFiles flag works in conjunction with an asset or shot ID to return only task types that have files associated.
+
+        Parameters          Type            Values
+    Optional:
+        app                 string          MAYA / C4D / AE / PHOTOSHOP / NUKE / HIERO / 3DSMAX / HOUDINI / FLAME 
+
+        userType            string          artist / producer / edit / management
+
+        assetID or shotID
+            assetID         integer
+            shotID          integer
+
+        onlyWithFiles       boolean         0 / 1
+
+    '''
+    params = {'q': 'getTaskTypes'}
+
+    if app is not None : params['app'] = app
+    if userType is not None : params['type'] = userType
+    if assetID is not None : params['assetID'] = assetID
+    if shotID is not None : params['shotID'] = shotID
+    if onlyWithFiles is not None : 
+        if onlyWithFiles == True : onlyWithFiles = 1
+        else : onlyWithFiles = 0
+        params['onlyWithFiles'] = onlyWithFiles
+
+    result = connect( method='get', params=params )
+    return result
 
 def add_task( assetID=None, shotID=None, taskTypeID=None, taskTypeName=None, userID=None, username=None, \
     taskStatusID=None, taskStatus=None, description=None, estimatedHours=None, startDate=None, endDate=None, customKeys=None ) :
