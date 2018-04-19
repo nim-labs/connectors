@@ -461,13 +461,17 @@ def upload( params=None, nimURL=None, apiKey=None ) :
         else:
             P.error("Unanticipated error occurred uploading image: %s" % (e))
             return False
+
+    '''
+    # Removing after showing false error.. 
+    # Now passing result json to calling function
     else:
         if params["file"] is not None:
             if not str(result).startswith("1"):
                 P.error("Could not upload file successfully, but not sure why.\nUrl: %s\nError: %s" % (_actionURL, str(result)))
                 return False
-    
-    return True
+    '''
+    return result
 
 
 class FormPostHandler(urllib2.BaseHandler):
@@ -875,6 +879,19 @@ def delete_job( jobID=None) :
     if jobID is not None : params['jobID'] = jobID
 
     result = connect( method='get', params=params )
+    return result
+
+def upload_jobIcon( jobID=None, img=None, nimURL=None, apiKey=None ) :
+    'Upload job icon'
+    params = {}
+    action = "uploadJobIcon"
+    job_str = str(jobID)
+
+    params["q"] = action.encode('ascii')
+    params["jobID"] = job_str.encode('ascii')
+    params["file"] = open(img,'rb')
+
+    result = upload(params=params, nimURL=nimURL, apiKey=apiKey)
     return result
 
 def get_jobInfo( jobID=None ) :
@@ -2799,6 +2816,7 @@ def get_taskDailies( taskID=None ) :
     dailies=get( {'q': 'getTaskDailies', 'taskID': taskID} )
     return dailies
 
+# DEPRECATED - upload_edit() #
 def upload_edit( showID=None, path=None, nimURL=None, apiKey=None ) :
     'Upload Edit - 2 required fields: showID and path to movie'
     # nimURL and apiKey are optional for Render API Key overrride
@@ -2815,11 +2833,19 @@ def upload_edit( showID=None, path=None, nimURL=None, apiKey=None ) :
     result = upload(params=params, nimURL=nimURL, apiKey=apiKey)
     return result
 
-def upload_dailies( taskID=None, renderID=None, renderKey='', path=None, submit=None, nimURL=None, apiKey=None ) :
+# DEPRECATED - upload_dailies() #
+def upload_dailies( taskID=None, renderID=None, renderKey=None, itemID=None, itemType=None, path=None, submit=None, nimURL=None, apiKey=None ) :
     'Upload Dailies - 2 required fields: (taskID, renderID, or renderKey) and path to movie'
     # nimURL and apiKey are optional for Render API Key overrride
     #
-    # 2 required fields:
+    #   Required Fields:
+    #      itemID
+    #      itemType - options user, job, asset, show, shot, task, render
+    #               - after consolidation group, object
+    #      $_FILE[]
+    #
+    #
+    # 2 option fields for backwards compatibility:
     #      renderID or renderKey or taskID
     #      $_FILE[]
     #
@@ -2834,18 +2860,24 @@ def upload_dailies( taskID=None, renderID=None, renderKey='', path=None, submit=
     params = {}
 
     params["q"] = "uploadMovie"
-    params["taskID"] = taskID
-    params["renderID"] = renderID
-    params["renderKey"] = renderKey
+ 
+    if taskID is not None : params['taskID'] = taskID
+    if renderID is not None : params['renderID'] = renderID
+    if renderKey is not None : params['renderKey'] = renderKey
+
     if path is not None:
         path = os.path.normpath( path )
         params["file"] = open(path,'rb')
     else :
         params["file"] = ''
+
     if submit is not None : params['submit'] = submit
+    if itemID is not None : params['itemID'] = itemID
+    if itemType is not None : params['itemType'] = itemType
 
     result = upload(params=params, nimURL=nimURL, apiKey=apiKey)
     return result
+
 
 def upload_dailiesNote( dailiesID=None, name='', img=None, note='', frame=0, time=-1, userID=None, nimURL=None, apiKey=None ) :
     'Upload dailiesNote'
@@ -2869,6 +2901,51 @@ def upload_dailiesNote( dailiesID=None, name='', img=None, note='', frame=0, tim
     result = upload(params=params, nimURL=nimURL, apiKey=apiKey)
     return result
 
+
+# Review Items #
+def upload_reviewItem( taskID=None, renderID=None, renderKey=None, itemID=None, itemType=None, path=None, submit=None, nimURL=None, apiKey=None ) :
+    'Upload Review Item - 2 required fields: (taskID, renderID, or renderKey) and path to movie'
+    # nimURL and apiKey are optional for Render API Key overrride
+    #
+    #   Required Fields:
+    #      itemID
+    #      itemType - options user, job, asset, show, shot, task, render
+    #               - after consolidation group, object
+    #      $_FILE[]
+    #
+    #
+    # 2 option fields for backwards compatibility:
+    #      renderID or renderKey or taskID
+    #      $_FILE[]
+    #
+    # renderKey is passed for association from render manager (deadlineID)
+    # free association is made with render based on renderKey 
+    #      should look up jobID and taskID from renderKey and set based on render
+    #
+    # if taskID is passed look up jobID and create render to associate dailies
+    #
+    # submit is optional to mark uploaded dailies for review - value is either: 0  or 1 
+
+    params = {}
+
+    params["q"] = "uploadReviewItem"
+ 
+    if taskID is not None : params['taskID'] = taskID
+    if renderID is not None : params['renderID'] = renderID
+    if renderKey is not None : params['renderKey'] = renderKey
+
+    if path is not None:
+        path = os.path.normpath( path )
+        params["file"] = open(path,'rb')
+    else :
+        params["file"] = ''
+
+    if submit is not None : params['submit'] = submit
+    if itemID is not None : params['itemID'] = itemID
+    if itemType is not None : params['itemType'] = itemType
+
+    result = upload(params=params, nimURL=nimURL, apiKey=apiKey)
+    return result
 
 #  Timecards  #
 def get_timecards( startDate=None, endDate=None, jobID=None, userID=None, username=None, taskTypeID=None, taskType=None, taskID=None, locationID=None, location=None ):
