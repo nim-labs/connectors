@@ -633,7 +633,7 @@ def add_job( name=None, number=None, numberTemplate=None, description=None, clie
     prod_shoot_date=None, prod_location=None, prod_supervised=None, editorial=None, editor=None, grading=None, colorist=None, \
     music=None, mix=None, sound=None, creative_lead=None, projectStatus=None, folder=None, projectStructureID=None, projectStructure=None, \
     jobStatusID=None, jobStatus=None, biddingLocationID=None, biddingLocation=None, \
-    assignedLocationID=None, assignedLocation=None, startDate=None, endDate=None, currency=None, customKeys=None) :
+    assignedLocationID=None, assignedLocation=None, startDate=None, endDate=None, currency=None, customKeys=None, keywords=None) :
     '''
     Creates a new job. 
 
@@ -697,6 +697,7 @@ def add_job( name=None, number=None, numberTemplate=None, description=None, clie
         end_date                date            YYYY-mm-dd
         currency                string          3 digit currency code
         customKeys              dictionary      {"Custom Key Name" : "Value"}
+        keywords                list            ["keyword1", "keyword2"]
         
     '''
     params = {'q': 'addJob'}
@@ -741,6 +742,7 @@ def add_job( name=None, number=None, numberTemplate=None, description=None, clie
     if endDate is not None : params['end_date'] = endDate
     if currency is not None : params['currency'] = currency
     if customKeys is not None : params['customKeys'] = json.dumps(customKeys)
+    if keywords is not None : params['keywords'] = json.dumps(keywords)
 
     result = connect( method='get', params=params )
     return result
@@ -750,7 +752,7 @@ def update_job( jobID=None, name=None, number=None, description=None, client=Non
     prod_shoot_date=None, prod_location=None, prod_supervised=None, editorial=None, editor=None, grading=None, colorist=None, \
     music=None, mix=None, sound=None, creative_lead=None, projectStatus=None, folder=None, projectStructureID=None, projectStructure=None, \
     jobStatusID=None, jobStatus=None, biddingLocationID=None, biddingLocation=None, \
-    assignedLocationID=None, assignedLocation=None, startDate=None, endDate=None, currency=None, customKeys=None) :
+    assignedLocationID=None, assignedLocation=None, startDate=None, endDate=None, currency=None, customKeys=None, keywords=None) :
     '''
     Updates an existing job based on the jobID.
 
@@ -817,6 +819,7 @@ def update_job( jobID=None, name=None, number=None, description=None, client=Non
         end_date                date            YYYY-mm-dd
         currency                string          3 digit currency code
         customKeys              dictionary      {"Custom Key Name" : "Value"}
+        keywords                list            ["keyword1", "keyword2"]
     '''
     params = {'q': 'updateJob'}
 
@@ -860,6 +863,7 @@ def update_job( jobID=None, name=None, number=None, description=None, client=Non
     if endDate is not None : params['end_date'] = endDate
     if currency is not None : params['currency'] = currency
     if customKeys is not None : params['customKeys'] = json.dumps(customKeys)
+    if keywords is not None : params['keywords'] = json.dumps(keywords)
 
     result = connect( method='get', params=params )
     return result
