@@ -2,9 +2,9 @@
 #******************************************************************************
 #
 # Filename: nim_api.py
-# Version:  v2.8.61.180313
+# Version:  v2.9.06.180508
 #
-# Copyright (c) 2017 NIM Labs LLC
+# Copyright (c) 2018 NIM Labs LLC
 # All rights reserved.
 #
 # Use of this software is subject to the terms of the NIM Labs license
