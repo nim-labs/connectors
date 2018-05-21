@@ -3081,7 +3081,7 @@ def nimExportFile(nim_shotID=None, info=None, taskTypeID='', taskFolder='', serv
 		nim_versions = {}
 		nim_versionID = 0
 		nim_versions = nimAPI.get_vers(shotID=nim_shotID, basename=basename)
-		print "Versions Returned: %s" % nim_versions
+		# print "Versions Returned: %s" % nim_versions
 
 		# If file matching class / basename / filename / version
 		try:
@@ -3181,7 +3181,7 @@ def nimAddBatchExport(info=None, comment='') :
 	# Resolve shot by assocaited openClipResolvedPath
 	elements = nimAPI.find_elements(name=clipName, path=clipPath)
 	print "Matching Clip Element Found: "
-	print elements 
+	# print elements 
 
 	if len(elements) > 1 :
 		print "Found more than one result..."
