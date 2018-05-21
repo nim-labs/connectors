@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: Flame/python/nimFlameExport.py
-# Version:  v2.7.26.171011
+# Version:  v2.8.73.180521
 #
 # Copyright (c) 2017 NIM Labs LLC
 # All rights reserved.
@@ -3283,7 +3283,6 @@ def nimScanForVersions(nim_showID=None, nim_shotID=None) :
 	# find_elements in show with metadata flameAssetType : batchOpenClip
 	# get element type
 	# find all elements of type in shot
-	#print("nimScanForVersions")
 	clipCount = 0
 	clipFail = 0
 
@@ -3303,7 +3302,7 @@ def nimScanForVersions(nim_showID=None, nim_shotID=None) :
 			# Get Elements By extension
 			# openClipElements = nimAPI.find_elements(showID=nim_showID, ext='.clip')
 			openClipElements = nimAPI.find_elements(shotID=nim_shotID, ext='.clip')
-			print openClipElements
+			# print openClipElements
 
 			for openClipElement in openClipElements :
 				clipID = openClipElement['ID']
@@ -3314,8 +3313,8 @@ def nimScanForVersions(nim_showID=None, nim_shotID=None) :
 
 				elementTypeID = openClipElement['elementTypeID']
 				elements = nimAPI.find_elements(shotID=shotID, elementTypeID=elementTypeID)
-				print "matching elements found"
-				print elements
+				# print "Elements found"
+				# print elements
 
 				for element in elements :
 					if element['ID'] != clipID :
@@ -3324,20 +3323,20 @@ def nimScanForVersions(nim_showID=None, nim_shotID=None) :
 						elementName = element['name'].encode('utf-8')
 						
 						# Update elementPath using server os resolution
-						print "Raw Element Path: %s" % elementPath
+						# print "Raw Element Path: %s" % elementPath
 						elementPath = resolveServerOsPath(path=elementPath)
 
-						print "OS Element Path: %s" % elementPath
+						# print "OS Element Path: %s" % elementPath
 						
 						fullPath = os.path.join(elementPath,elementName)
-						print "Full Path: %s" % fullPath
+						# print "Full Path: %s" % fullPath
 
 						# If sequence with name.frame.ext format, replace frame with *
 						# This will limit dl_get_media_info failure when finding subfolders
 						elementExt = os.path.splitext(elementName)[1]
 						elementBasename = elementName.rpartition('.')[0].rpartition('.')[0]
 						elementWildcard = elementBasename+".*"+elementExt
-						print "elementWildcard: %s" % elementWildcard
+						# print "elementWildcard: %s" % elementWildcard
 
 						clipUpdated = updateOpenClip( masterFile=clipFile, elementPath=elementPath, \
 														elementName=elementName, elementWildcard=elementWildcard, recursive=False )
@@ -3397,7 +3396,7 @@ def nimBuildOpenClipFromElements(nim_showID=None, nim_shotID=None, nim_serverID=
 					# Create new openClip from comp path and elementTypeName
 					nim_comp_path = os.path.join(serverOSPath,"<nim_shot_comp>")
 					nim_comp_path = nimResolvePath(nim_shotID=nim_shotID, keyword_string=nim_comp_path)
-					print "nim_comp_path: %s" % nim_comp_path
+					# print "nim_comp_path: %s" % nim_comp_path
 
 					clipPath = nim_comp_path.encode('utf-8')
 					clipName = nim_shotName +"_nimElement_"+ elementTypeName +".clip"
@@ -3417,19 +3416,19 @@ def nimBuildOpenClipFromElements(nim_showID=None, nim_shotID=None, nim_serverID=
 							elementName = element['name'].encode('utf-8')
 							
 							# Update elementPath using server os resolution
-							print "Raw ElementPath: %s" % elementPath
+							# print "Raw ElementPath: %s" % elementPath
 							elementPath = resolveServerOsPath(elementPath)
-							print "OS ElementPath: %s" % elementPath
+							# print "OS ElementPath: %s" % elementPath
 
 							fullPath = os.path.join(elementPath,elementName)
-							print "Full Path: %s" % fullPath
+							# print "Full Path: %s" % fullPath
 
 							# If sequence with name.frame.ext format, replace frame with *
 							# This will limit dl_get_media_info failure when finding subfolders
 							elementExt = os.path.splitext(elementName)[1]
 							elementBasename = elementName.rpartition('.')[0].rpartition('.')[0]
 							elementWildcard = elementBasename+".*"+elementExt
-							print "elementWildcard: %s" % elementWildcard
+							# print "elementWildcard: %s" % elementWildcard
 
 							clipUpdated = updateOpenClip( masterFile=clipFile, elementPath=elementPath, \
 														elementName=elementName, elementWildcard=elementWildcard, recursive=False )
@@ -3454,9 +3453,6 @@ def nimBuildOpenClipFromFolders(nim_showID=None, nim_shotID=None, nim_serverID=N
 	# Find all root folders for given show (comp, render, plates)
 	# Update existing openClips with contents of folders
 	# Create newClip if no matching type
-	# TODO: Update to only create element Clips... ignore duplicate clips
-	# 		This could be just assuming that the clip doesn't exist
-	print("------nimBuildOpenClipFromFolders------------------------------------------------------------->")
 	clipCount = 0
 	clipFail = 0
 
@@ -3491,7 +3487,7 @@ def nimBuildOpenClipFromFolders(nim_showID=None, nim_shotID=None, nim_serverID=N
 
 					nim_folder_path = os.path.join(serverOSPath,folder)
 					nim_folder_path = nimResolvePath(nim_shotID=nim_shotID, keyword_string=nim_folder_path)
-					print "nim_folder_path: %s" % nim_folder_path
+					# print "nim_folder_path: %s" % nim_folder_path
 
 					clipPath = nim_folder_path.encode('utf-8')
 					clipName = nim_shotName+"_nimProject_"+folderName+".clip"
@@ -3511,11 +3507,11 @@ def nimBuildOpenClipFromFolders(nim_showID=None, nim_shotID=None, nim_serverID=N
 						elementName = subfolder.rpartition('/')[2].encode('utf-8')
 						
 						# Update elementPath using server os resolution
-						print "Raw Element Path: %s" % elementPath
+						# print "Raw Element Path: %s" % elementPath
 						elementPath = resolveServerOsPath(elementPath)
-						print "OS ElementPath: %s" % elementPath
+						# print "OS ElementPath: %s" % elementPath
 						
-						print "clipFile: %s" % clipFile
+						# print "clipFile: %s" % clipFile
 
 						clipUpdated = updateOpenClip( masterFile=clipFile, elementPath=elementPath, \
 														elementName=elementName, recursive=False )
@@ -3773,11 +3769,10 @@ def getNimPrefs() :
 
 
 def updateOpenClip( masterFile='', elementPath='', elementName='', elementWildcard='', recursive=False ) :
-	#print("------updateOpenClip------------------------------------------------------------->")
-	print "MasterFile: 	%s" % masterFile
-	print "ElementPath: %s" % elementPath
-	print "ElementName: %s" % elementName
-	print "elementWildcard: %s" % elementWildcard
+	# print "MasterFile: 	%s" % masterFile
+	# print "ElementPath: %s" % elementPath
+	# print "ElementName: %s" % elementName
+	# print "elementWildcard: %s" % elementWildcard
 
 	clipUpdated = False
 
@@ -3793,7 +3788,7 @@ def updateOpenClip( masterFile='', elementPath='', elementName='', elementWildca
 	
 	# if no extension (folder) carry on and catch later:
 	if elementExt :
-		print "Ext: %s" % elementExt
+		# print "Ext: %s" % elementExt
 		# Test file type to see if element is .clip
 		# If file is type not in ext_whitelist then skip
 		if elementExt in ext_whitelist :
@@ -3802,7 +3797,7 @@ def updateOpenClip( masterFile='', elementPath='', elementName='', elementWildca
 			print "Media of type %s not supported. skipping update" % elementExt
 			return False 
 	else :
-		print "Reading Folder"
+		print "Reading Folder..."
 
 	elementBasename = elementName.rpartition('.')[0].rpartition('.')[0]
 	if elementBasename == '' :
@@ -3902,7 +3897,7 @@ def updateOpenClip( masterFile='', elementPath='', elementName='', elementWildca
 
 		# Only splice XML when masterFile does not exist
 		if not createNewClip :
-			print "Updating openClip"
+			print "Updating openClip..."
 			
 			try :
 				vuid = ''
@@ -3917,14 +3912,14 @@ def updateOpenClip( masterFile='', elementPath='', elementName='', elementWildca
 					newFeed = newTrack.find('feeds/feed')
 					newPathObject = newTrack.find("feeds/feed/spans/span/path")
 					newPath = newPathObject.text
-					print "uid: %s" % uid
-					print "newFeed: %s" % ET.tostring(newFeed)
-					print "newPath: %s" % newPath
+					# print "uid: %s" % uid
+					# print "newFeed: %s" % ET.tostring(newFeed)
+					# print "newPath: %s" % newPath
 					
 					# Check for path in sourceFile 
 					# If Path exists ... skip append
 					for srcPath in sourceXML.iter('path') :
-						print "srcPath: %s" % srcPath.text
+						# print "srcPath: %s" % srcPath.text
 						if newPath == srcPath.text :
 							print "Element exists in clip... skipping append"
 							elementExists = True
@@ -3942,7 +3937,7 @@ def updateOpenClip( masterFile='', elementPath='', elementName='', elementWildca
 					newVersion.insert(0, newVersionElement)
 					xmlRoot = sourceXML.getroot()
 
-					# Clean tmpfile - brute force remove errant <handler> till we find cause
+					# Clean tmpfile - brute force remove errant <root/handler>
 					print "Removing Handler"
 					for handler in xmlRoot.findall("./handler") :
 						print "Handler found"
@@ -4005,7 +4000,7 @@ def updateOpenClip( masterFile='', elementPath='', elementName='', elementWildca
 				
 				xmlRoot = newXML.getroot()
 
-				# Clean tmpfile - brute force remove errant <handler> till we find cause
+				# Clean tmpfile - brute force remove errant <root/handler>
 				print "Removing Handler"
 				for handler in xmlRoot.findall("./handler") :
 					print "Handler found"
