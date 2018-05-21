@@ -180,7 +180,6 @@ def popup( title='', msg='', type='ok', defaultInput='', pyside=False, _list=[],
     #  Houdini :
     elif app=='Houdini' :
         import hou
-
         if type=='ok' :
             dialog=QtGui.QMessageBox.information( None, title, msg, \
                 QtGui.QMessageBox.Ok)
@@ -203,7 +202,6 @@ def popup( title='', msg='', type='ok', defaultInput='', pyside=False, _list=[],
 
     #  Flame :
     elif app=='Flame' :
-
         if type=='ok' :
             dialog=QtGui.QMessageBox.information( None, title, msg, \
                 QtGui.QMessageBox.Ok)
