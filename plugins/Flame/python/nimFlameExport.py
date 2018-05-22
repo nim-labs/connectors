@@ -3840,12 +3840,20 @@ def updateOpenClip( masterFile='', elementPath='', elementName='', elementWildca
 		if elementWildcard :
 			apath = apath+"/"+elementWildcard
 
+		# Test if item is directory and if empty
+		if os.path.isdir(apath) :
+			if not os.listdir(apath):
+				print "Skipping empty directory"
+				return False
+
 		try :
 			# Write output of getMediaScript to file
 			cmd_args = getMediaScript+" "+apath
 			if recursive :
 				print "dl_get_media_info recursive enabled"
 				cmd_args = getMediaScript+" -r "+apath
+
+			print "cmd: %s" % cmd_args
 
 			pipes = subprocess.Popen(cmd_args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
 			std_out, std_err = pipes.communicate()
@@ -3873,7 +3881,14 @@ def updateOpenClip( masterFile='', elementPath='', elementName='', elementWildca
 
 
 			# Check media type for valid extension
-			tmpXML = ET.parse(tmpfile)
+			try :
+				tmpXML = ET.parse(tmpfile)
+			except :
+				print "Failed to parse XML. XML could be empty."
+				if os.path.isfile(tmpfile):
+					os.remove(tmpfile)
+				return False
+
 			for newTrack in tmpXML.iter('track') :
 				newPathObject = newTrack.find("feeds/feed/spans/span/path")
 				newPath = newPathObject.text
@@ -3900,16 +3915,53 @@ def updateOpenClip( masterFile='', elementPath='', elementName='', elementWildca
 			print "Updating openClip..."
 			
 			try :
-				vuid = ''
 				sourceXML 	= ET.parse(masterFile)
+			except :
+				print "Failed to parse XML. XML could be empty."
+				# print'%s' % traceback.print_exc()
+				if os.path.isfile(tmpfile):
+					os.remove(tmpfile)
+				return False
+
+			try :
 				newXML 		= ET.parse(tmpfile)
-			
+			except :
+				print "Failed to parse XML. XML could be empty."
+				# print'%s' % traceback.print_exc()
+				if os.path.isfile(tmpfile):
+					os.remove(tmpfile)
+				return False
+
+			try :
+				vuid = ''
 				elementExists = False
+
+
+				# Get first item in feed and use as the nbTicks reference
+				src_nbTicks = None
+				for srcTrack in sourceXML.iter('track') :
+					for srcFeed in srcTrack.iter('feed') :
+						src_nbTicksObj = srcFeed.find('startTimecode/nbTicks')
+						src_nbTicks = src_nbTicksObj.text
+						break
+					else :
+						continue
+					break
+				# print "Source nbTicks: %s" % src_nbTicks
+
 
 				# Get new feed from file
 				for newTrack in newXML.iter('track') :
 					uid = newTrack.get('uid')
 					newFeed = newTrack.find('feeds/feed')
+
+					feedHandler = newFeed.find("./handler")
+					newFeed.remove(feedHandler)
+					
+					if src_nbTicks :
+						new_nbTicksObject = newTrack.find("feeds/feed/startTimecode/nbTicks")
+						new_nbTicksObject.text = src_nbTicks
+
 					newPathObject = newTrack.find("feeds/feed/spans/span/path")
 					newPath = newPathObject.text
 					# print "uid: %s" % uid
@@ -3945,7 +3997,6 @@ def updateOpenClip( masterFile='', elementPath='', elementName='', elementWildca
 
 					resultXML	= ET.tostring(xmlRoot)
 
-
 					# Create a backup of the original file
 					bakfile = "%s.bak" % masterFile
 					if not os.path.isfile(bakfile):
@@ -3975,9 +4026,11 @@ def updateOpenClip( masterFile='', elementPath='', elementName='', elementWildca
 					os.remove(tmpfile)
 
 			except :
-				print "Failed reading XML: %s" % masterFile
+				print "Failed reading XML"
+				print'%s' % traceback.print_exc()
 				if os.path.isfile(tmpfile):
 					os.remove(tmpfile)
+				return False
 
 		else :
 			# New openClip
@@ -3985,12 +4038,23 @@ def updateOpenClip( masterFile='', elementPath='', elementName='', elementWildca
 
 			# Update uid name with elementName
 			try :
-				vuid = ''
 				newXML = ET.parse(tmpfile)
+			except :
+				print "Failed reading XML"
+				print'%s' % traceback.print_exc()
+				if os.path.isfile(tmpfile):
+					os.remove(tmpfile)
+				return False
+			
+			try :
+				vuid = ''	
 				
 				for newFeed in newXML.iter('feeds') :
 					feed = newFeed.find('feed')
 					feed.set('vuid', elementBasename)
+
+					feedHandler = feed.find("./handler")
+					feed.remove(feedHandler)
 
 				for newVersion in newXML.iter('versions') :
 					newVersion.set('currentVersion', elementBasename)
