@@ -498,7 +498,7 @@ class NimBuildOpenClipsFromElementDialog(QDialog):
 		self.nim_showDict = {}
 		self.nim_showID = None
 		
-		self.setWindowTitle("NIM: Build OpenClips from Elements")
+		self.setWindowTitle("NIM: Build Open Clips from Elements")
 		self.setStyleSheet("QLabel {font: 14pt}")
 		self.setSizeGripEnabled(True)
 
@@ -624,7 +624,7 @@ class NimBuildOpenClipsFromElementDialog(QDialog):
 
 		# Add the standard ok/cancel buttons, default to ok.
 		self._buttonbox = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
-		self._buttonbox.button(QDialogButtonBox.StandardButton.Ok).setText(" Scan for Versions ")
+		self._buttonbox.button(QDialogButtonBox.StandardButton.Ok).setText(" Build Open Clips ")
 		self._buttonbox.button(QDialogButtonBox.StandardButton.Ok).setDefault(True)
 		self._buttonbox.button(QDialogButtonBox.StandardButton.Ok).setToolTip("Scans the selected show for element types that match the batchOpenClip and adds them to the batchOpenClip.")
 		self._buttonbox.accepted.connect(self.acceptTest)
@@ -882,7 +882,7 @@ class NimBuildOpenClipsFromProjectDialog(QDialog):
 		self.nim_showDict = {}
 		self.nim_showID = None
 		
-		self.setWindowTitle("NIM: Build OpenClips from Project Structure")
+		self.setWindowTitle("NIM: Build Open Clips from Project Structure")
 		self.setStyleSheet("QLabel {font: 14pt}")
 		self.setSizeGripEnabled(True)
 
@@ -1028,7 +1028,7 @@ class NimBuildOpenClipsFromProjectDialog(QDialog):
 
 		# Add the standard ok/cancel buttons, default to ok.
 		self._buttonbox = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
-		self._buttonbox.button(QDialogButtonBox.StandardButton.Ok).setText(" Scan for Versions ")
+		self._buttonbox.button(QDialogButtonBox.StandardButton.Ok).setText(" Build Open Clips ")
 		self._buttonbox.button(QDialogButtonBox.StandardButton.Ok).setDefault(True)
 		self._buttonbox.button(QDialogButtonBox.StandardButton.Ok).setToolTip("Scans the selected show for element types that match the batchOpenClip and adds them to the batchOpenClip.")
 		self._buttonbox.accepted.connect(self.acceptTest)
