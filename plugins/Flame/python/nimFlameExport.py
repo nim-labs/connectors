@@ -283,7 +283,7 @@ class NimScanForVersionsDialog(QDialog):
 		self._buttonbox = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
 		self._buttonbox.button(QDialogButtonBox.StandardButton.Ok).setText(" Scan for Versions ")
 		self._buttonbox.button(QDialogButtonBox.StandardButton.Ok).setDefault(True)
-		self._buttonbox.button(QDialogButtonBox.StandardButton.Ok).setToolTip("Scans the selected show for element types that match the batchOpenClip and adds them to the batchOpenClip.")
+		self._buttonbox.button(QDialogButtonBox.StandardButton.Ok).setToolTip("Scans the show for elements that match the\nOpen Clip element types selected during publish\nand updates the corresponding clips.")
 		self._buttonbox.accepted.connect(self.acceptTest)
 		self._buttonbox.rejected.connect(self.reject)
 		horizontalLayout_OkCancel = QHBoxLayout()
@@ -498,7 +498,7 @@ class NimBuildOpenClipsFromElementDialog(QDialog):
 		self.nim_showDict = {}
 		self.nim_showID = None
 		
-		self.setWindowTitle("NIM: Build OpenClips from Elements")
+		self.setWindowTitle("NIM: Build Open Clips from Elements")
 		self.setStyleSheet("QLabel {font: 14pt}")
 		self.setSizeGripEnabled(True)
 
@@ -624,7 +624,7 @@ class NimBuildOpenClipsFromElementDialog(QDialog):
 
 		# Add the standard ok/cancel buttons, default to ok.
 		self._buttonbox = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
-		self._buttonbox.button(QDialogButtonBox.StandardButton.Ok).setText(" Scan for Versions ")
+		self._buttonbox.button(QDialogButtonBox.StandardButton.Ok).setText(" Build Open Clips ")
 		self._buttonbox.button(QDialogButtonBox.StandardButton.Ok).setDefault(True)
 		self._buttonbox.button(QDialogButtonBox.StandardButton.Ok).setToolTip("Scans the selected show for element types that match the batchOpenClip and adds them to the batchOpenClip.")
 		self._buttonbox.accepted.connect(self.acceptTest)
@@ -882,7 +882,7 @@ class NimBuildOpenClipsFromProjectDialog(QDialog):
 		self.nim_showDict = {}
 		self.nim_showID = None
 		
-		self.setWindowTitle("NIM: Build OpenClips from Project Structure")
+		self.setWindowTitle("NIM: Build Open Clips from Project Structure")
 		self.setStyleSheet("QLabel {font: 14pt}")
 		self.setSizeGripEnabled(True)
 
@@ -1028,7 +1028,7 @@ class NimBuildOpenClipsFromProjectDialog(QDialog):
 
 		# Add the standard ok/cancel buttons, default to ok.
 		self._buttonbox = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
-		self._buttonbox.button(QDialogButtonBox.StandardButton.Ok).setText(" Scan for Versions ")
+		self._buttonbox.button(QDialogButtonBox.StandardButton.Ok).setText(" Build Open Clips ")
 		self._buttonbox.button(QDialogButtonBox.StandardButton.Ok).setDefault(True)
 		self._buttonbox.button(QDialogButtonBox.StandardButton.Ok).setToolTip("Scans the selected show for element types that match the batchOpenClip and adds them to the batchOpenClip.")
 		self._buttonbox.accepted.connect(self.acceptTest)
@@ -1548,7 +1548,7 @@ class NimExportSequenceDialog(QDialog):
 		horizontalLayout_elementDesc.setSizeConstraint(QLayout.SetDefaultConstraint)
 		horizontalLayout_elementDesc.setObjectName("horizontalLayout_elementDesc")
 		self.nimElementSectionLabel = QLabel()
-		self.nimElementSectionLabel.setText("Select NIM element type to assign to export media:")
+		self.nimElementSectionLabel.setText("Select the NIM element type to assign exported media:")
 		horizontalLayout_elementDesc.addWidget(self.nimElementSectionLabel)
 		horizontalLayout_elementDesc.setStretch(1, 40)
 
@@ -1561,10 +1561,10 @@ class NimExportSequenceDialog(QDialog):
 		horizontalLayout_video.setObjectName("horizontalLayout_video")
 		self.nimVideoLabel = QLabel()
 		self.nimVideoLabel.setFixedWidth(120)
-		self.nimVideoLabel.setText("Video:")
+		self.nimVideoLabel.setText("Video Out:")
 		horizontalLayout_video.addWidget(self.nimVideoLabel)
 		self.nim_videoChooser = QComboBox()
-		self.nim_videoChooser.setToolTip("Choose the NIM element type for video media.")
+		self.nim_videoChooser.setToolTip("Choose the NIM element type to associate with exported video media.")
 		self.nim_videoChooser.setMinimumHeight(28)
 		self.nim_videoChooser.setIconSize(QSize(1, 24))
 		horizontalLayout_video.addWidget(self.nim_videoChooser)
@@ -1593,10 +1593,10 @@ class NimExportSequenceDialog(QDialog):
 		horizontalLayout_audio.setObjectName("horizontalLayout_audio")
 		self.nimAudioLabel = QLabel()
 		self.nimAudioLabel.setFixedWidth(120)
-		self.nimAudioLabel.setText("Audio:")
+		self.nimAudioLabel.setText("Audio Out:")
 		horizontalLayout_audio.addWidget(self.nimAudioLabel)
 		self.nim_audioChooser = QComboBox()
-		self.nim_audioChooser.setToolTip("Choose the NIM element type for audio media.")
+		self.nim_audioChooser.setToolTip("Choose the NIM element type to associate with exported audio media.")
 		self.nim_audioChooser.setMinimumHeight(28)
 		self.nim_audioChooser.setIconSize(QSize(1, 24))
 		horizontalLayout_audio.addWidget(self.nim_audioChooser)
@@ -1624,10 +1624,10 @@ class NimExportSequenceDialog(QDialog):
 		horizontalLayout_openClip.setObjectName("horizontalLayout_openClip")
 		self.nimOpenClipLabel = QLabel()
 		self.nimOpenClipLabel.setFixedWidth(120)
-		self.nimOpenClipLabel.setText("Source:")
+		self.nimOpenClipLabel.setText("BatchFX In:")
 		horizontalLayout_openClip.addWidget(self.nimOpenClipLabel)
 		self.nim_openClipChooser = QComboBox()
-		self.nim_openClipChooser.setToolTip("Choose the NIM element type for openClip media.")
+		self.nim_openClipChooser.setToolTip("Choose the NIM element type to associate new elements with the BatchFX Open Clip.\nThe source open clip is the read node used when promoting a timeline clip to BatchFX.\nNew elements added to the Open Clip will appear as versions on the BatchFX read node.")
 		self.nim_openClipChooser.setMinimumHeight(28)
 		self.nim_openClipChooser.setIconSize(QSize(1, 24))
 		horizontalLayout_openClip.addWidget(self.nim_openClipChooser)
@@ -1655,10 +1655,10 @@ class NimExportSequenceDialog(QDialog):
 		horizontalLayout_batchOpenClip.setObjectName("horizontalLayout_batchOpenClip")
 		self.nimBatchOpenClipLabel = QLabel()
 		self.nimBatchOpenClipLabel.setFixedWidth(120)
-		self.nimBatchOpenClipLabel.setText("Batch:")
+		self.nimBatchOpenClipLabel.setText("Timeline In:")
 		horizontalLayout_batchOpenClip.addWidget(self.nimBatchOpenClipLabel)
 		self.nim_batchOpenClipChooser = QComboBox()
-		self.nim_batchOpenClipChooser.setToolTip("Choose the NIM element type for batchOpenClip media.")
+		self.nim_batchOpenClipChooser.setToolTip("Choose the NIM element type to associate new elements with the Timeline Open Clip.\nThe Timeline Open Clip is used directly on a published Timeline.\nNew elements added to the Open Clip will appear as clip versions on the Timeline.")
 		self.nim_batchOpenClipChooser.setMinimumHeight(28)
 		self.nim_batchOpenClipChooser.setIconSize(QSize(1, 24))
 		horizontalLayout_batchOpenClip.addWidget(self.nim_batchOpenClipChooser)
@@ -1698,7 +1698,7 @@ class NimExportSequenceDialog(QDialog):
 		horizontalLayout_taskDesc.setSizeConstraint(QLayout.SetDefaultConstraint)
 		horizontalLayout_taskDesc.setObjectName("horizontalLayout_taskDesc")
 		self.nimElementSectionLabel = QLabel()
-		self.nimElementSectionLabel.setText("Select NIM task type to assign to batch files:")
+		self.nimElementSectionLabel.setText("Select the NIM task type to assign exported batch files:")
 		horizontalLayout_taskDesc.addWidget(self.nimElementSectionLabel)
 		horizontalLayout_taskDesc.setStretch(1, 40)
 
@@ -1710,10 +1710,10 @@ class NimExportSequenceDialog(QDialog):
 		horizontalLayout_batch.setObjectName("horizontalLayout_batch")
 		self.nimBatchLabel = QLabel()
 		self.nimBatchLabel.setFixedWidth(120)
-		self.nimBatchLabel.setText("Batch:")
+		self.nimBatchLabel.setText("Batch Files:")
 		horizontalLayout_batch.addWidget(self.nimBatchLabel)
 		self.nim_batchChooser = QComboBox()
-		self.nim_batchChooser.setToolTip("Choose the NIM task type to assign to batch files.")
+		self.nim_batchChooser.setToolTip("Select the NIM task type to assign exported batch files.")
 		self.nim_batchChooser.setMinimumHeight(28)
 		self.nim_batchChooser.setIconSize(QSize(1, 24))
 		horizontalLayout_batch.addWidget(self.nim_batchChooser)
@@ -3178,7 +3178,7 @@ def nimAddBatchExport(info=None, comment='') :
 	print "ClipPath: %s" % clipPath
 	print "ClipName: %s" % clipName
 
-	# Resolve shot by assocaited openClipResolvedPath
+	# Resolve shot by associated openClipResolvedPath
 	elements = nimAPI.find_elements(name=clipName, path=clipPath)
 	print "Matching Clip Element Found: "
 	# print elements 
@@ -3840,12 +3840,20 @@ def updateOpenClip( masterFile='', elementPath='', elementName='', elementWildca
 		if elementWildcard :
 			apath = apath+"/"+elementWildcard
 
+		# Test if item is directory and if empty
+		if os.path.isdir(apath) :
+			if not os.listdir(apath):
+				print "Skipping empty directory"
+				return False
+
 		try :
 			# Write output of getMediaScript to file
 			cmd_args = getMediaScript+" "+apath
 			if recursive :
 				print "dl_get_media_info recursive enabled"
 				cmd_args = getMediaScript+" -r "+apath
+
+			print "cmd: %s" % cmd_args
 
 			pipes = subprocess.Popen(cmd_args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
 			std_out, std_err = pipes.communicate()
@@ -3873,7 +3881,14 @@ def updateOpenClip( masterFile='', elementPath='', elementName='', elementWildca
 
 
 			# Check media type for valid extension
-			tmpXML = ET.parse(tmpfile)
+			try :
+				tmpXML = ET.parse(tmpfile)
+			except :
+				print "Failed to parse XML. XML could be empty."
+				if os.path.isfile(tmpfile):
+					os.remove(tmpfile)
+				return False
+
 			for newTrack in tmpXML.iter('track') :
 				newPathObject = newTrack.find("feeds/feed/spans/span/path")
 				newPath = newPathObject.text
@@ -3900,16 +3915,53 @@ def updateOpenClip( masterFile='', elementPath='', elementName='', elementWildca
 			print "Updating openClip..."
 			
 			try :
-				vuid = ''
 				sourceXML 	= ET.parse(masterFile)
+			except :
+				print "Failed to parse XML. XML could be empty."
+				# print'%s' % traceback.print_exc()
+				if os.path.isfile(tmpfile):
+					os.remove(tmpfile)
+				return False
+
+			try :
 				newXML 		= ET.parse(tmpfile)
-			
+			except :
+				print "Failed to parse XML. XML could be empty."
+				# print'%s' % traceback.print_exc()
+				if os.path.isfile(tmpfile):
+					os.remove(tmpfile)
+				return False
+
+			try :
+				vuid = ''
 				elementExists = False
+
+
+				# Get first item in feed and use as the nbTicks reference
+				src_nbTicks = None
+				for srcTrack in sourceXML.iter('track') :
+					for srcFeed in srcTrack.iter('feed') :
+						src_nbTicksObj = srcFeed.find('startTimecode/nbTicks')
+						src_nbTicks = src_nbTicksObj.text
+						break
+					else :
+						continue
+					break
+				# print "Source nbTicks: %s" % src_nbTicks
+
 
 				# Get new feed from file
 				for newTrack in newXML.iter('track') :
 					uid = newTrack.get('uid')
 					newFeed = newTrack.find('feeds/feed')
+
+					feedHandler = newFeed.find("./handler")
+					newFeed.remove(feedHandler)
+					
+					if src_nbTicks :
+						new_nbTicksObject = newTrack.find("feeds/feed/startTimecode/nbTicks")
+						new_nbTicksObject.text = src_nbTicks
+
 					newPathObject = newTrack.find("feeds/feed/spans/span/path")
 					newPath = newPathObject.text
 					# print "uid: %s" % uid
@@ -3945,7 +3997,6 @@ def updateOpenClip( masterFile='', elementPath='', elementName='', elementWildca
 
 					resultXML	= ET.tostring(xmlRoot)
 
-
 					# Create a backup of the original file
 					bakfile = "%s.bak" % masterFile
 					if not os.path.isfile(bakfile):
@@ -3975,9 +4026,11 @@ def updateOpenClip( masterFile='', elementPath='', elementName='', elementWildca
 					os.remove(tmpfile)
 
 			except :
-				print "Failed reading XML: %s" % masterFile
+				print "Failed reading XML"
+				print'%s' % traceback.print_exc()
 				if os.path.isfile(tmpfile):
 					os.remove(tmpfile)
+				return False
 
 		else :
 			# New openClip
@@ -3985,12 +4038,23 @@ def updateOpenClip( masterFile='', elementPath='', elementName='', elementWildca
 
 			# Update uid name with elementName
 			try :
-				vuid = ''
 				newXML = ET.parse(tmpfile)
+			except :
+				print "Failed reading XML"
+				print'%s' % traceback.print_exc()
+				if os.path.isfile(tmpfile):
+					os.remove(tmpfile)
+				return False
+			
+			try :
+				vuid = ''	
 				
 				for newFeed in newXML.iter('feeds') :
 					feed = newFeed.find('feed')
 					feed.set('vuid', elementBasename)
+
+					feedHandler = feed.find("./handler")
+					feed.remove(feedHandler)
 
 				for newVersion in newXML.iter('versions') :
 					newVersion.set('currentVersion', elementBasename)
