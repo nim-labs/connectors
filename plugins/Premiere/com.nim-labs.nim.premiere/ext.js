@@ -1,5 +1,7 @@
 
 function onLoaded() {
+	console.log("ext.js local");
+	
 	var csInterface = new CSInterface();
 	var appName = csInterface.hostEnvironment.appName;
 	var appVersion = csInterface.hostEnvironment.appVersion;

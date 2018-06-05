@@ -120,7 +120,6 @@ $._PPP_={
 		var success = app.bind("onSourceClipSelectedInProjectPanel", $._PPP_.projectPanelSelectionChanged);
 	},
 
-
 	getProjectPanelMeta : function() {
 		$._PPP_.updateEventPanel(app.project.getProjectPanelMetadata());
 	},
@@ -1153,7 +1152,6 @@ $._PPP_={
 		} else {
 			$._PPP_.updateEventPanel("No active sequence found.");
 		}
-		
 	},
 
 	// Define a couple of callback functions, for AME to use during render.
@@ -1677,4 +1675,5 @@ $._PPP_={
 			$._PPP_.updateEventPanel("Note: PProPanel relies on features added in 12.1, but is currently running in " + version + ".");
 		}
 	},
+
 };

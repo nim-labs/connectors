@@ -8,23 +8,22 @@
 		<meta charset="utf-8">
 		<script src="./ext.js"></script>
 		<script src="./lib/CSInterface.js"></script>
-		<!--<script src="./lib/jquery-1.9.1.js"></script>-->
 		<script src="./lib/Vulcan.js"></script>
 		<link href="css/style.css" rel="stylesheet" type="text/css">
 		
 
-		<script src="http://10.100.8.38:8888/_js/kendoui/js/jquery.min.js"></script>
+		<script src="http://10.100.8.34:8888/_js/kendoui/js/jquery.min.js"></script>
 
 		<script type="text/javascript">
 			
-			var nimURL = 'http://10.100.8.38:8888'
+			var nimURL = 'http://10.100.8.34:8888'
 			
 			$( document ).ready(function() {
 
 				// For functions which require interaction at the JavaScript level, we provide these JQuery-based
 				// handlers, instead of directly invoking ExtendScript .This givs the JavaScript layer a chance
 				// to pass data into the ExtendScript layer, and process the results.
-
+				/*
 				$("#copypresets").on("click", function(e){
 					e.preventDefault(); 
 
@@ -262,7 +261,7 @@
 						csInterface.evalScript(whole_megillah);
 					}
 				});
-
+				*/
 				$.ajax({
 					type: "GET",
 					url: nimURL+"/index.php?con=ppro&err=time&targetUrl=%2Fcon%2Fc_premiere.php",
@@ -272,8 +271,6 @@
 					},
 					error: function(data){
 						console.log("ERROR: Failed Requesting Connector");
-						//console.log(data);
-						//window.location.href = 'http://10.100.8.32:8888?err=time&targetUrl=%2Fcon%2Fc_premiere.php';
 					}
 				});
 				
@@ -283,14 +280,15 @@
 
 	<body onLoad="onLoaded()">
 		<div id="nim_panel"></div>
-		
+		<!---->
 		<div style="display:none">
-		<a href="javascript:history.go(0)">Refresh panel</a>
-		<p id="username">[uninitialized]</p>
-		<p id="version_string">[uninitialized]</p>
-		<p id="active_seq">[uninitialized]</p>
-		<p id="proxies_on">Proxies enabled for sequence: </p>
+			<a href="javascript:history.go(0)">Refresh panel</a>
+			<p id="username">[uninitialized]</p>
+			<p id="version_string">[uninitialized]</p>
+			<p id="active_seq">[uninitialized]</p>
+			<p id="proxies_on">Proxies enabled for sequence: </p>
 		</div>
+	
 		<!--		
 		<div><h2>System</h2></div>
 		<div id="section1" class="sectionID">
@@ -397,6 +395,7 @@
 	-->
 	</body>
 	<script>
+		/**/
 		document.body.onbeforeunload = function() {
 			var csInterface		= new CSInterface();
 		    var OSVersion		= csInterface.getOSInformation();
@@ -429,6 +428,6 @@
 				6 // 2nd argument
 		  );
 		};
-
+		
 	</script>
 </html>
