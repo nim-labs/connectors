@@ -2907,7 +2907,8 @@ def upload_dailiesNote( dailiesID=None, name='', img=None, note='', frame=0, tim
 
 
 # Review Items #
-def upload_reviewItem( taskID=None, renderID=None, renderKey=None, itemID=None, itemType=None, path=None, submit=None, nimURL=None, apiKey=None ) :
+def upload_reviewItem( taskID=None, renderID=None, renderKey=None, itemID=None, itemType=None, path=None, submit=None, \
+                        name=None, description=None, reviewItemTypeID=0, reviewItemStatusID=0, keywords=None, nimURL=None, apiKey=None ) :
     'Upload Review Item - 2 required fields: (taskID, renderID, or renderKey) and path to movie'
     # nimURL and apiKey are optional for Render API Key overrride
     #
@@ -2928,7 +2929,15 @@ def upload_reviewItem( taskID=None, renderID=None, renderKey=None, itemID=None, 
     #
     # if taskID is passed look up jobID and create render to associate dailies
     #
+    # # Optional
+    #
     # submit is optional to mark uploaded dailies for review - value is either: 0  or 1 
+    # name                string      The NIM name for the review item - if empty will use filename
+    # description         string      Description for the review item
+    # reviewItemTypeID    integer     The review item type ID
+    # reviewItemStatusID  integer     The review status ID
+    # keywords            list        ["keyword1", "keyword2"]
+
 
     params = {}
 
@@ -2947,6 +2956,11 @@ def upload_reviewItem( taskID=None, renderID=None, renderKey=None, itemID=None, 
     if submit is not None : params['submit'] = submit
     if itemID is not None : params['itemID'] = itemID
     if itemType is not None : params['itemType'] = itemType
+    if name is not None : params['name'] = name
+    if description is not None : params['description'] = description
+    if reviewItemTypeID is not None : params['reviewItemTypeID'] = reviewItemTypeID
+    if reviewItemStatusID is not None : params['reviewItemStatusID'] = reviewItemStatusID
+    if keywords is not None : params['keywords'] = json.dumps(keywords)
 
     result = upload(params=params, nimURL=nimURL, apiKey=apiKey)
     return result
