@@ -11,14 +11,18 @@
 		<script src="./lib/Vulcan.js"></script>
 		<link href="css/style.css" rel="stylesheet" type="text/css">
 		
-
-		<script src="http://10.100.8.34:8888/_js/kendoui/js/jquery.min.js"></script>
+		<script src="http://10.100.8.32:8888/_js/kendoui/js/jquery.min.js"></script>
 
 		<script type="text/javascript">
 			
-			var nimURL = 'http://10.100.8.34:8888'
+			var nimURL = 'http://10.100.8.32:8888'
 			
 			$( document ).ready(function() {
+
+				//app.encoder.bind('onEncoderJobComplete', function(){ alert("THIS is a bind"); });
+
+				//var csInterface = new CSInterface();
+				//csInterface.evalScript('$._nim_PPP_.nimAPI("q=testAPI")', myCallback);
 
 				// For functions which require interaction at the JavaScript level, we provide these JQuery-based
 				// handlers, instead of directly invoking ExtendScript .This givs the JavaScript layer a chance
