@@ -51,6 +51,8 @@ $._nim_PPP_={
 		app.encoder.bind('onEncoderJobQueued', 		$._nim_PPP_.onEncoderJobQueued);
 		app.encoder.bind('onEncoderJobCanceled',	$._nim_PPP_.onEncoderJobCanceled);
 
+		
+		
 		var activeSequence = app.project.activeSequence;
 		var outputPath = 'D:\\PRJ\\myTempRender.mov';
 		var presetPath = 'C:\\Program Files (x86)\\Common Files\\Adobe\\CEP\\extensions\\com.nim-labs.nim.premiere\\presets\\High Quality 1080p HD.epr';
@@ -60,11 +62,8 @@ $._nim_PPP_={
 		// var workArea = 2;	// 2 ENCODE_WORK_AREA
 		var removeOnComplete = 1;
 		var encodeJobID = app.encoder.encodeSequence(activeSequence, outputPath, presetPath, workArea, removeOnComplete);
-		
-		app.encoder.startBatch();
 
 		$._nim_PPP_.exportJobs[encodeJobID] = { context : context, itemID : itemID, name : name, desc : desc, typeID : typeID, statusID : statusID, keywords : keywords };
-	
 	},
 
 	message : function (msg) {
@@ -73,7 +72,6 @@ $._nim_PPP_={
 
 	onEncoderJobComplete : function (jobID, outputFilePath) {
 		var eoName;
-
 		if (Folder.fs == 'Macintosh') {
 			eoName = "PlugPlugExternalObject";							
 		} else {
@@ -81,15 +79,12 @@ $._nim_PPP_={
 		}
 		var mylib = new ExternalObject('lib:' + eoName);
 				
-		$._PPP_.updateEventPanel("");
-
+		//$._PPP_.updateEventPanel("");
 				
 		var jobData = $._nim_PPP_.exportJobs[jobID];
 		jobData['outputFilePath'] = outputFilePath;
 		delete $._nim_PPP_.exportJobs[jobID];
 
-		//alert("Job complete: "+jobData['name']+"\nOutput: "+outputFilePath);
-		
 		var nimEvent = new CSXSEvent();
 		nimEvent.type = "com.nim-labs.events.PProExportEditComplete";
 		nimEvent.data = JSON.stringify(jobData);
@@ -115,10 +110,41 @@ $._nim_PPP_={
 	},
 	
 	onEncoderJobProgress : function (jobID, progress) {
-		$._nim_PPP_.message('onEncoderJobProgress called. jobID = ' + jobID + '. progress = ' + progress + '.');
+		//$._nim_PPP_.message('onEncoderJobProgress called. jobID = ' + jobID + '. progress = ' + progress + '.');
+
+		var eoName;
+		if (Folder.fs == 'Macintosh') {
+			eoName = "PlugPlugExternalObject";							
+		} else {
+			eoName = "PlugPlugExternalObject.dll";
+		}
+		var mylib = new ExternalObject('lib:' + eoName);
+		
+		var jobData = { jobID: jobID, progress: progress };
+		var nimEvent = new CSXSEvent();
+		nimEvent.type = "com.nim-labs.events.PProExportEditProgress";
+		nimEvent.data = JSON.stringify(jobData);
+		nimEvent.dispatch();
 	},
 
 	onEncoderJobQueued : function (jobID) {
+
+		var eoName;
+		if (Folder.fs == 'Macintosh') {
+			eoName = "PlugPlugExternalObject";							
+		} else {
+			eoName = "PlugPlugExternalObject.dll";
+		}
+		var mylib = new ExternalObject('lib:' + eoName);
+		
+		$._nim_PPP_.exportJobs[jobID]['jobID'] = jobID;
+		var jobData = $._nim_PPP_.exportJobs[jobID];
+
+		var nimEvent = new CSXSEvent();
+		nimEvent.type = "com.nim-labs.events.PProExportEditQueued";
+		nimEvent.data = JSON.stringify(jobData);
+		nimEvent.dispatch();
+
 		app.encoder.startBatch();
 	},
 
