@@ -30,7 +30,7 @@
 	<DoEmulation>false</DoEmulation>
 	<DoVideo>true</DoVideo>
 	<DoAudio>true</DoAudio>
-	<PresetID>e3550670-6d8c-417e-8b5c-fe654df424d6</PresetID>
+	<PresetID>9f34ac89-ae25-44ef-9774-5b11156cfdb3</PresetID>
 	<ExportParamContainer ObjectRef="1"/>
 	<ExporterFileType>1211250228</ExporterFileType>
 	<ExporterClassID>1313424203</ExporterClassID>
@@ -38,8 +38,8 @@
 	<PresetCreatorPostProc></PresetCreatorPostProc>
 	<PresetCreatorApp>Adobe Media Encoder</PresetCreatorApp>
 	<PresetUserComments></PresetUserComments>
-	<PresetComments>($$$/AME/EncoderHost/Presets/ec1f8725-618c-4cda-a4c6-1828b197d0fa/PresetComments=High Quality 1080p HD output - Frame rate and TV standard matched to source)</PresetComments>
-	<PresetName>($$$/AME/EncoderHost/Presets/ec1f8725-618c-4cda-a4c6-1828b197d0fa/PresetName=High Quality 1080p HD)</PresetName>
+	<PresetComments>($$$/AME/EncoderHost/Presets/174683ae-28a0-4a69-80b1-b08d2bf12d8c/PresetComments=High Quality 720p HD output - Frame rate and TV standard matched to source)</PresetComments>
+	<PresetName>($$$/AME/EncoderHost/Presets/c174683ae-28a0-4a69-80b1-b08d2bf12d8c/PresetName=High Quality 720p HD)</PresetName>
 	<ExporterParamContainer ObjectID="1" ClassID="5c20a4a5-5e7c-4032-85b8-26ad4531fe7b" Version="1">
 		<ContainedParamsVersion>1</ContainedParamsVersion>
 		<ParamContainerItems Version="1">
@@ -1527,7 +1527,7 @@
 		<ParamDontSerializeValue>false</ParamDontSerializeValue>
 		<ParamOrdinalValue>2</ParamOrdinalValue>
 		<ParamType>2</ParamType>
-		<ParamValue>1920</ParamValue>
+		<ParamValue>1280</ParamValue>
 	</ExporterParam>
 	<ExporterParam ObjectID="84" ClassID="9f049ab7-d48f-43e9-a8ca-4d7f21233625" Version="1">
 		<ParamAuxType></ParamAuxType>
@@ -1547,7 +1547,7 @@
 		<ParamDontSerializeValue>false</ParamDontSerializeValue>
 		<ParamOrdinalValue>3</ParamOrdinalValue>
 		<ParamType>2</ParamType>
-		<ParamValue>1080</ParamValue>
+		<ParamValue>720</ParamValue>
 	</ExporterParam>
 	<ExporterParam ObjectID="85" ClassID="8def7863-204e-4206-8791-54a78f15c66b" Version="1">
 		<ParamAuxType></ParamAuxType>
@@ -1595,7 +1595,7 @@
 		<ParamIdentifier>ADBEVideoAspect</ParamIdentifier>
 		<ParamConstrainedListIsOptional>false</ParamConstrainedListIsOptional>
 		<IsFilePathString>false</IsFilePathString>
-		<IsOptionalParamEnabled>true</IsOptionalParamEnabled>
+		<IsOptionalParamEnabled>false</IsOptionalParamEnabled>
 		<IsOptionalParam>false</IsOptionalParam>
 		<IsParamPairGroup>false</IsParamPairGroup>
 		<ParamIsPassword>false</ParamIsPassword>
@@ -1838,7 +1838,7 @@
 		<ParamDontSerializeValue>false</ParamDontSerializeValue>
 		<ParamOrdinalValue>3</ParamOrdinalValue>
 		<ParamType>3</ParamType>
-		<ParamValue>20.</ParamValue>
+		<ParamValue>10.</ParamValue>
 	</ExporterParam>
 	<ExporterParam ObjectID="100" ClassID="018cf63d-c58d-4d39-97df-36b6b2d6ef88" Version="1">
 		<ParamAuxType></ParamAuxType>
@@ -1858,7 +1858,7 @@
 		<ParamDontSerializeValue>false</ParamDontSerializeValue>
 		<ParamOrdinalValue>4</ParamOrdinalValue>
 		<ParamType>3</ParamType>
-		<ParamValue>24.</ParamValue>
+		<ParamValue>12.</ParamValue>
 	</ExporterParam>
 	<ExporterParam ObjectID="101" ClassID="9f049ab7-d48f-43e9-a8ca-4d7f21233625" Version="1">
 		<ParamAuxType></ParamAuxType>
