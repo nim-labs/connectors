@@ -7,6 +7,89 @@ $._nim_PPP_={
 	exportJobs : {
 	},
 	
+	getActiveSequenceName : function(){
+		return app.project.activeSequence.name;
+	},
+
+	getProjectMetadata : function(data){
+		if (app.isDocumentOpen()) {
+			var projectItem = app.project.activeSequence.projectItem;
+			if (projectItem) {
+				if (ExternalObject.AdobeXMPScript === undefined) {
+					ExternalObject.AdobeXMPScript	= new ExternalObject('lib:AdobeXMPScript');
+				}
+				if (ExternalObject.AdobeXMPScript !== undefined) {	// safety-conscious!
+					var kPProPrivateProjectMetadataURI	= "http://ns.adobe.com/premierePrivateProjectMetaData/1.0/";
+					var projectMetadata	= projectItem.getProjectMetadata();
+					var xmp	= new XMPMeta(projectMetadata);
+
+					for (var key in data) {
+						if(xmp.doesPropertyExist(kPProPrivateProjectMetadataURI, key)){
+							var property = xmp.getProperty(kPProPrivateProjectMetadataURI, key);
+							data[key] = property.value;
+						}
+					}
+
+					return JSON.stringify(data);
+				}
+			}
+		}
+		return false;
+	},
+
+	setProjectMetadata : function(data) {
+
+		data = JSON.parse(data);
+
+		if (app.isDocumentOpen()) {
+			var projectItem = app.project.activeSequence.projectItem;
+			if (projectItem) {
+				if (ExternalObject.AdobeXMPScript === undefined) {
+					ExternalObject.AdobeXMPScript	= new ExternalObject('lib:AdobeXMPScript');
+				}
+				if (ExternalObject.AdobeXMPScript !== undefined) {	// safety-conscious!
+					var kPProPrivateProjectMetadataURI	= "http://ns.adobe.com/premierePrivateProjectMetaData/1.0/";
+					var projectMetadata	= projectItem.getProjectMetadata();
+					var xmp	= new XMPMeta(projectMetadata);
+
+					var fieldArray	= [];
+					var arrayIndex = 0;
+
+					// Define Project Properties
+					for( var key in data){
+						if( data[key] !== undefined ){
+							if (xmp.doesPropertyExist(kPProPrivateProjectMetadataURI, key)){
+								$._nim_PPP_.message('Property Found: '+key);
+								xmp.setProperty(kPProPrivateProjectMetadataURI, key, data[key]);
+								$._nim_PPP_.message('Property Set: '+key);
+							}
+							else{
+								var successfullyAdded = app.project.addPropertyToProjectMetadataSchema(key, key, 2);
+								$._nim_PPP_.message('Adding Property: '+key);
+								if(successfullyAdded){
+									projectMetadata	= projectItem.getProjectMetadata();
+									xmp	= new XMPMeta(projectMetadata);
+									xmp.setProperty(kPProPrivateProjectMetadataURI, key, data[key]);
+									$._nim_PPP_.message('Property Set: '+key+ ' : '+data[key]);
+								}
+								else {
+									$._nim_PPP_.message('Failed to Add Property: '+key);
+								}
+							}
+							fieldArray[arrayIndex++] = key;
+						}
+					}
+
+					var str = xmp.serialize();
+					projectItem.setProjectMetadata(str, fieldArray);
+					return str;
+					//return true;
+				}
+			}
+		}
+		return false;
+	},
+
 	projectOpen : function(projToOpen) {
 		if (projToOpen) {
 			app.openDocument(	projToOpen,
@@ -54,7 +137,8 @@ $._nim_PPP_={
 		
 		
 		var activeSequence = app.project.activeSequence;
-		var outputPath = 'D:\\PRJ\\myTempRender.mov';
+		var sequenceName = activeSequence.name;
+		var outputPath = 'D:\\PRJ\\'+sequenceName+'.mov';
 		var presetPath = 'C:\\Program Files (x86)\\Common Files\\Adobe\\CEP\\extensions\\com.nim-labs.nim.premiere\\presets\\High Quality 1080p HD.epr';
 		//var presetPath = 'Web - 1920x1080, 24fps, 7500kbps.epr';
 		var workArea = 0;		// 0 ENCODE_ENTIRE
