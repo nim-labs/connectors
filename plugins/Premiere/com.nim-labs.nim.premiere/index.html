@@ -9,11 +9,11 @@
 		<script src="./lib/Vulcan.js"></script>
 		<link href="css/style.css" rel="stylesheet" type="text/css">
 		
-		<script src="http://10.100.8.39:8888/_js/kendoui/js/jquery.min.js"></script>
+		<script src="http://127.0.0.1:8888/_js/kendoui/js/jquery.min.js"></script>
 
 		<script type="text/javascript">
 			
-			var nimURL = 'http://10.100.8.39:8888'
+			var nimURL = 'http://127.0.0.1:8888';
 			
 			$( document ).ready(function() {
 
@@ -404,16 +404,19 @@
 		    var appVersion		= csInterface.hostEnvironment.appVersion;
 		    var versionAsFloat	= parseFloat(appVersion);
 
+		    /*
 		    if (versionAsFloat < 10.3){
-			    var path = "file:///Library/Application Support/Adobe/CEP/extensions/PProPanel/payloads/onbeforeunload.html";
+			    var path = "file:///Library/Application Support/Adobe/CEP/extensions/com.nim-labs.nim.premiere/payloads/onbeforeunload.html";
 			    
 			    if (OSVersion.indexOf("Windows") >=0){
-					path = "file:///C:/Program%20Files%20(x86)/Common%20Files/Adobe/CEP/extensions/PProPanel/payloads/onbeforeunload.html"
+					path = "file:///C:/Program%20Files%20(x86)/Common%20Files/Adobe/CEP/extensions/com.nim-labs.nim.premiere/payloads/onbeforeunload.html"
 			    }
 			    csInterface.openURLInDefaultBrowser(path);		
 		    }
+		    */
 	  	};
 
+	  	/*
 		var createFolders = function() {
 		  var csInterface = new CSInterface();
 		  csInterface.callScript(
@@ -430,6 +433,7 @@
 				6 // 2nd argument
 		  );
 		};
+		*/
 		
 	</script>
 </html>
