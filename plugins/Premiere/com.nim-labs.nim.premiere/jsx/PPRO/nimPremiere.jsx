@@ -4,9 +4,13 @@ if(typeof JSON!=='object'){JSON={};}(function(){'use strict';function f(n){retur
 
 $._nim_PPP_={
 	
-	exportJobs : {
-	},
+	debug : false,
+	exportJobs : {},
 	
+	getProjectPath: function(){
+		return app.project.path;
+	},
+
 	getActiveSequenceName : function(){
 		return app.project.activeSequence.name;
 	},
@@ -14,25 +18,28 @@ $._nim_PPP_={
 	getProjectMetadata : function(data){
 		data = JSON.parse(data);
 		if (app.isDocumentOpen()) {
-			var projectItem = app.project.activeSequence.projectItem;
+			//var projectItem = app.project.activeSequence.projectItem;
+			var projectItem	= app.project.rootItem.children[0]; // just grabs first projectItem.
 			if (projectItem) {
 				if (ExternalObject.AdobeXMPScript === undefined) {
 					ExternalObject.AdobeXMPScript = new ExternalObject('lib:AdobeXMPScript');
 				}
-				if (ExternalObject.AdobeXMPScript !== undefined) {	// safety-conscious!
+				if (ExternalObject.AdobeXMPScript !== undefined) {
 					var kPProPrivateProjectMetadataURI	= "http://ns.adobe.com/premierePrivateProjectMetaData/1.0/";
 					var projectMetadata	= projectItem.getProjectMetadata();
 					var xmp	= new XMPMeta(projectMetadata);
 
 					for (var key in data) {
-						$._nim_PPP_.message('Reading Property: '+key);
+						$._nim_PPP_.debugLog('Reading Property: '+key);
 						if(xmp.doesPropertyExist(kPProPrivateProjectMetadataURI, key)){
 							var property = xmp.getProperty(kPProPrivateProjectMetadataURI, key);
-							$._nim_PPP_.message('Property Found: '+property.value);
+							$._nim_PPP_.debugLog('Property Found: '+property.value);
 							data[key] = property.value;
 						}
-						$._nim_PPP_.message('--------------------------------------');
+						$._nim_PPP_.debugLog('--------------------------------------');
 					}
+
+					data["nim_pproProjectPath"] = app.project.path;
 					return JSON.stringify(data);
 				}
 			}
@@ -43,12 +50,13 @@ $._nim_PPP_={
 	setProjectMetadata : function(data) {
 		data = JSON.parse(data);
 		if (app.isDocumentOpen()) {
-			var projectItem = app.project.activeSequence.projectItem;
+			//var projectItem = app.project.activeSequence.projectItem;
+			var projectItem	= app.project.rootItem.children[0]; // just grabs first projectItem.
 			if (projectItem) {
 				if (ExternalObject.AdobeXMPScript === undefined) {
 					ExternalObject.AdobeXMPScript = new ExternalObject('lib:AdobeXMPScript');
 				}
-				if (ExternalObject.AdobeXMPScript !== undefined) {	// safety-conscious!
+				if (ExternalObject.AdobeXMPScript !== undefined) {
 					var kPProPrivateProjectMetadataURI	= "http://ns.adobe.com/premierePrivateProjectMetaData/1.0/";
 					var projectMetadata	= projectItem.getProjectMetadata();
 					var xmp	= new XMPMeta(projectMetadata);
@@ -59,33 +67,32 @@ $._nim_PPP_={
 					for( var key in data){
 						if( data[key] !== undefined ){
 							if (xmp.doesPropertyExist(kPProPrivateProjectMetadataURI, key)){
-								$._nim_PPP_.message('Property Found: '+key);
+								$._nim_PPP_.debugLog('Property Found: '+key);
 								xmp.setProperty(kPProPrivateProjectMetadataURI, key, data[key]);
-								$._nim_PPP_.message('Property Set: '+key);
+								$._nim_PPP_.debugLog('Property Set: '+key);
 							}
 							else{
 								var successfullyAdded = app.project.addPropertyToProjectMetadataSchema(key, key, 2);
-								$._nim_PPP_.message('Adding Property: '+key);
+								$._nim_PPP_.debugLog('Adding Property: '+key);
 								if(successfullyAdded){
-									$._nim_PPP_.message('Property Added');
-									projectMetadata	= projectItem.getProjectMetadata();
-									xmp	= new XMPMeta(projectMetadata);
+									$._nim_PPP_.debugLog('Property Added');
 									xmp.setProperty(kPProPrivateProjectMetadataURI, key, data[key]);
-									$._nim_PPP_.message('Property Set: '+key+ ' : '+data[key]);
+									$._nim_PPP_.debugLog('Property Set: '+key+ ' : '+data[key]);
 								}
 								else {
-									$._nim_PPP_.message('Failed to Add Property: '+key);
+									$._nim_PPP_.debugLog('Failed to Add Property: '+key);
 								}
 							}
-							$._nim_PPP_.message('--------------------------------------');
+							$._nim_PPP_.debugLog('--------------------------------------');
 							fieldArray.push(key);
 						}
 					}
 					
+					$._nim_PPP_.debugLog('FieldArray: '+JSON.stringify(fieldArray));
+
 					var str = xmp.serialize();
 					projectItem.setProjectMetadata(str, fieldArray);
-					return str;
-					//return true;
+					return true;
 				}
 			}
 		}
@@ -128,7 +135,7 @@ $._nim_PPP_={
 		}
 	},
 
-	exportEdit : function(context, itemID, name, desc, typeID, statusID, keywords) {
+	exportEdit : function(context, itemID, name, desc, typeID, statusID, keywords, preset, presetPath, range, diskID, disk, keep, markers) {
 
 		app.encoder.bind('onEncoderJobComplete',	$._nim_PPP_.onEncoderJobComplete);
 		app.encoder.bind('onEncoderJobError', 		$._nim_PPP_.onEncoderJobError);
@@ -136,24 +143,48 @@ $._nim_PPP_={
 		app.encoder.bind('onEncoderJobQueued', 		$._nim_PPP_.onEncoderJobQueued);
 		app.encoder.bind('onEncoderJobCanceled',	$._nim_PPP_.onEncoderJobCanceled);
 
-		
-		
 		var activeSequence = app.project.activeSequence;
 		var sequenceName = activeSequence.name;
-		var outputPath = 'D:\\PRJ\\'+sequenceName+'.mov';
-		var presetPath = 'C:\\Program Files (x86)\\Common Files\\Adobe\\CEP\\extensions\\com.nim-labs.nim.premiere\\presets\\High Quality 1080p HD.epr';
-		//var presetPath = 'Web - 1920x1080, 24fps, 7500kbps.epr';
-		var workArea = 0;		// 0 ENCODE_ENTIRE
-		// var workArea = 1;	// 1 ENCODE_IN_TO_OUT
-		// var workArea = 2;	// 2 ENCODE_WORK_AREA
+		var outputPath = sequenceName+'.mov';
+		
+		var projectPath = app.project.path;
+		var pathArray = projectPath.split(/[\\\/]/);
+		var basename = pathArray.pop();
+		projectPath = projectPath.substring(0,projectPath.indexOf(basename));
+
+		if(diskID == 0){
+			outputPath = projectPath+outputPath;
+		}
+		if(diskID == 1){
+			outputPath = disk+outputPath;
+		}
+		if(diskID == 2){
+			outputPath = disk+outputPath;
+		}
+
+		$._nim_PPP_.debugLog('outputPath:' + outputPath);
+		$._nim_PPP_.debugLog('presetPath:' + presetPath);
+		$._nim_PPP_.debugLog('range:' + range);
+
+		var workArea = parseInt(range);
 		var removeOnComplete = 1;
+
 		var encodeJobID = app.encoder.encodeSequence(activeSequence, outputPath, presetPath, workArea, removeOnComplete);
 
-		$._nim_PPP_.exportJobs[encodeJobID] = { context : context, itemID : itemID, name : name, desc : desc, typeID : typeID, statusID : statusID, keywords : keywords };
+		$._nim_PPP_.exportJobs[encodeJobID] = { context : context, itemID : itemID, name : name, 
+												desc : desc, typeID : typeID, statusID : statusID, 
+												keywords : keywords, preset : preset, presetPath : presetPath,
+												range : range, diskID : diskID, disk : disk, keep : keep, markers : markers };
 	},
 
 	message : function (msg) {
 		$.writeln(msg);	 // Using '$' object will invoke ExtendScript Toolkit, if installed.
+	},
+
+	debugLog : function (msg) {
+		if($._nim_PPP_.debug){
+			$.writeln(msg);	 // Using '$' object will invoke ExtendScript Toolkit, if installed.
+		}
 	},
 
 	onEncoderJobComplete : function (jobID, outputFilePath) {
@@ -165,8 +196,6 @@ $._nim_PPP_={
 		}
 		var mylib = new ExternalObject('lib:' + eoName);
 				
-		//$._PPP_.updateEventPanel("");
-				
 		var jobData = $._nim_PPP_.exportJobs[jobID];
 		jobData['outputFilePath'] = outputFilePath;
 		delete $._nim_PPP_.exportJobs[jobID];
@@ -175,7 +204,6 @@ $._nim_PPP_={
 		nimEvent.type = "com.nim-labs.events.PProExportEditComplete";
 		nimEvent.data = JSON.stringify(jobData);
 		nimEvent.dispatch();
-
 	},
 
 	onEncoderJobError : function (jobID, errorMessage) {
@@ -196,7 +224,7 @@ $._nim_PPP_={
 	},
 	
 	onEncoderJobProgress : function (jobID, progress) {
-		//$._nim_PPP_.message('onEncoderJobProgress called. jobID = ' + jobID + '. progress = ' + progress + '.');
+		$._nim_PPP_.debugLog('onEncoderJobProgress called. jobID = ' + jobID + '. progress = ' + progress + '.');
 
 		var eoName;
 		if (Folder.fs == 'Macintosh') {
@@ -235,7 +263,7 @@ $._nim_PPP_={
 	},
 
 	onEncoderJobCanceled : function (jobID) {
-		$._nim_PPP_.message('OnEncoderJobCanceled called. jobID = ' + jobID +  '.');
+		$._nim_PPP_.debugLog('OnEncoderJobCanceled called. jobID = ' + jobID +  '.');
 	},
 
 };
