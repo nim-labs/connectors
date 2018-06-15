@@ -15,6 +15,28 @@ $._nim_PPP_={
 		return app.project.activeSequence.name;
 	},
 
+	selectFileDialog : function(dlgTitle,filterString){
+		filter = 0;
+		if(filterString){
+			filter = filterString;
+		}
+		var selectedFile = File.openDialog (dlgTitle, filter, false);
+		var fsName = '';
+		if(selectedFile){
+			fsName = selectedFile.fsName;
+		}
+		return fsName;
+	},
+
+	selectFolderDialog : function(){
+		var outFolder = Folder.selectDialog();
+		var fsName = '';
+		if(outFolder){
+			fsName = outFolder.fsName;
+		}
+		return fsName;
+	},
+
 	getProjectMetadata : function(data){
 		data = JSON.parse(data);
 		if (app.isDocumentOpen()) {
@@ -48,7 +70,9 @@ $._nim_PPP_={
 	},
 
 	setProjectMetadata : function(data) {
+		$._nim_PPP_.debugLog('setProjectMetadata: '+data);
 		data = JSON.parse(data);
+
 		if (app.isDocumentOpen()) {
 			//var projectItem = app.project.activeSequence.projectItem;
 			var projectItem	= app.project.rootItem.children[0]; // just grabs first projectItem.
@@ -162,19 +186,21 @@ $._nim_PPP_={
 			outputPath = disk+outputPath;
 		}
 
-		$._nim_PPP_.debugLog('outputPath:' + outputPath);
-		$._nim_PPP_.debugLog('presetPath:' + presetPath);
-		$._nim_PPP_.debugLog('range:' + range);
+		$._nim_PPP_.debugLog('exportEdit - outputPath:' + outputPath);
+		$._nim_PPP_.debugLog('exportEdit - presetPath:' + presetPath);
+		$._nim_PPP_.debugLog('exportEdit - range:' + range);
 
 		var workArea = parseInt(range);
 		var removeOnComplete = 1;
 
 		var encodeJobID = app.encoder.encodeSequence(activeSequence, outputPath, presetPath, workArea, removeOnComplete);
 
-		$._nim_PPP_.exportJobs[encodeJobID] = { context : context, itemID : itemID, name : name, 
+		$._nim_PPP_.exportJobs[encodeJobID] = { jobID : encodeJobID, context : context, itemID : itemID, name : name, 
 												desc : desc, typeID : typeID, statusID : statusID, 
-												keywords : keywords, preset : preset, presetPath : presetPath,
+												keywords : keywords, preset : preset, presetPath : presetPath, 
 												range : range, diskID : diskID, disk : disk, keep : keep, markers : markers };
+
+		return JSON.stringify($._nim_PPP_.exportJobs[encodeJobID]);
 	},
 
 	message : function (msg) {
@@ -251,7 +277,7 @@ $._nim_PPP_={
 		}
 		var mylib = new ExternalObject('lib:' + eoName);
 		
-		$._nim_PPP_.exportJobs[jobID]['jobID'] = jobID;
+		//$._nim_PPP_.exportJobs[jobID]['jobID'] = jobID;
 		var jobData = $._nim_PPP_.exportJobs[jobID];
 
 		var nimEvent = new CSXSEvent();
