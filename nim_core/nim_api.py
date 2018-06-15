@@ -2882,7 +2882,7 @@ def upload_dailies( taskID=None, renderID=None, renderKey=None, itemID=None, ite
     result = upload(params=params, nimURL=nimURL, apiKey=apiKey)
     return result
 
-
+# DEPRECATED - upload_dailies() #
 def upload_dailiesNote( dailiesID=None, name='', img=None, note='', frame=0, time=-1, userID=None, nimURL=None, apiKey=None ) :
     'Upload dailiesNote'
     params = {}
@@ -2908,15 +2908,14 @@ def upload_dailiesNote( dailiesID=None, name='', img=None, note='', frame=0, tim
 
 # Review Items #
 def upload_reviewItem( taskID=None, renderID=None, renderKey=None, itemID=None, itemType=None, path=None, submit=None, \
-                        name=None, description=None, reviewItemTypeID=0, reviewItemStatusID=0, keywords=None, nimURL=None, apiKey=None ) :
+    name=None, description=None, reviewItemTypeID=0, reviewItemStatusID=0, keywords=None, nimURL=None, apiKey=None ) :
     'Upload Review Item - 2 required fields: (taskID, renderID, or renderKey) and path to movie'
     # nimURL and apiKey are optional for Render API Key overrride
     #
     #   Required Fields:
-    #      itemID
-    #      itemType - options user, job, asset, show, shot, task, render
-    #               - after consolidation group, object
-    #      $_FILE[]
+    #      itemID       iteger          the ID of the parent to attach the review item
+    #      itemType     string          options user, job, asset, show, shot, task, render
+    #      path         string          the path of the item to upload
     #
     #
     # 2 option fields for backwards compatibility:
@@ -2961,6 +2960,41 @@ def upload_reviewItem( taskID=None, renderID=None, renderKey=None, itemID=None, 
     if reviewItemTypeID is not None : params['reviewItemTypeID'] = reviewItemTypeID
     if reviewItemStatusID is not None : params['reviewItemStatusID'] = reviewItemStatusID
     if keywords is not None : params['keywords'] = json.dumps(keywords)
+
+    result = upload(params=params, nimURL=nimURL, apiKey=apiKey)
+    return result
+
+def upload_reviewNote( ID=None, name='', img=None, note='', frame=0, time=-1, userID=None, nimURL=None, apiKey=None ) :
+    'Upload reviewNote'
+    # 
+    #
+    #   Required Fields:
+    #       ID                  integer     The ID of the review item to attach the note
+    #
+    #   Optional Fields: 
+    #       name                string      Image name
+    #       note                string      The body of the note
+    #       img                 string      Path to the image to use
+    #       frame               integer     The frame number of the note
+    #       time                float       The time of the note 
+    #       userID              integer     The userID to associate with the note
+    #       nimURL              string      optional for Render API Key overrride
+    #       apiKey              string      optional for Render API Key overrride
+
+    params = {}
+    action = "uploadReviewNote"
+
+    params["q"] = action.encode('ascii')
+    params["ID"] = str(ID).encode('ascii')
+    params["name"] = str(name).encode('ascii')
+    if img is not None:
+        params["file"] = open(img,'rb')
+    else :
+        params["file"] = ''
+    params["note"] = str(note).encode('ascii')
+    params["frame"] = str(frame).encode('ascii')
+    params["time"] = str(time).encode('ascii')
+    params["userID"] = str(userID).encode('ascii')
 
     result = upload(params=params, nimURL=nimURL, apiKey=apiKey)
     return result

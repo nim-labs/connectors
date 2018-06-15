@@ -168,6 +168,7 @@ $._nim_PPP_={
 		app.encoder.bind('onEncoderJobCanceled',	$._nim_PPP_.onEncoderJobCanceled);
 
 		var activeSequence = app.project.activeSequence;
+		var sequenceID = activeSequence.sequenceID;
 		var sequenceName = activeSequence.name;
 		var outputPath = sequenceName+'.mov';
 		
@@ -193,12 +194,38 @@ $._nim_PPP_={
 		var workArea = parseInt(range);
 		var removeOnComplete = 1;
 
+		// Attach marker info
+		var markerData = [];
+		if(markers == 1){
+			markerData = activeSequence.markers;
+
+			var numMarkers	= markerData.numMarkers;
+			if (numMarkers > 0) {
+			    var m = 0;
+			    for(var current_marker	=	markerData.getFirstMarker();
+			            current_marker	!==	undefined; 
+			            current_marker 	=	markerData.getNextMarker(current_marker)){
+
+			        $._nim_PPP_.debugLog('exportEdit - marker.name:' + current_marker.name);
+			        $._nim_PPP_.debugLog('exportEdit - marker.comments:' + current_marker.comments);
+			        
+			        var markerItem = { name : current_marker.name,
+			        				   comments: current_marker.comments,
+			        				   type : current_marker.type,
+			        				   start : current_marker.start,
+			        				   end : current_marker.end };
+			        markerData[m] = (markerItem);
+			        m = m + 1;
+			    }    
+			}
+		}
+
 		var encodeJobID = app.encoder.encodeSequence(activeSequence, outputPath, presetPath, workArea, removeOnComplete);
 
-		$._nim_PPP_.exportJobs[encodeJobID] = { jobID : encodeJobID, context : context, itemID : itemID, name : name, 
+		$._nim_PPP_.exportJobs[encodeJobID] = { jobID : encodeJobID, sequenceID : sequenceID, context : context, itemID : itemID, name : name, 
 												desc : desc, typeID : typeID, statusID : statusID, 
 												keywords : keywords, preset : preset, presetPath : presetPath, 
-												range : range, diskID : diskID, disk : disk, keep : keep, markers : markers };
+												range : range, diskID : diskID, disk : disk, keep : keep, markers : markers, markerData: markerData };
 
 		return JSON.stringify($._nim_PPP_.exportJobs[encodeJobID]);
 	},

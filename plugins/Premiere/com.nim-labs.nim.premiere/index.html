@@ -9,11 +9,11 @@
 		<script src="./lib/Vulcan.js"></script>
 		<link href="css/style.css" rel="stylesheet" type="text/css">
 		
-		<script src="http://10.100.8.38:8888/_js/kendoui/js/jquery.min.js"></script>
+		<script src="http://localhost:8888/_js/kendoui/js/jquery.min.js"></script>
 
 		<script type="text/javascript">
 			
-			var nimURL = 'http://10.100.8.38:8888';
+			var nimURL = 'http://localhost:8888';
 			
 			$( document ).ready(function() {
 
@@ -266,7 +266,7 @@
 				*/
 				$.ajax({
 					type: "GET",
-					url: nimURL+"/index.php?con=ppro&err=time&targetUrl=%2Fcon%2Fc_premiere.php",
+					url: nimURL+"/index.php?con=ppro&err=time&targetUrl=%2Fconn%2Fc_premiere.php",
 					success: function(data) {
 						var data = data.replace(/(['"])(\/.*?['"])/g,'$1'+nimURL+'$2');
 						$("#nim_panel").html(data);
