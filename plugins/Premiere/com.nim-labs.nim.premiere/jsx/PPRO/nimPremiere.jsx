@@ -124,11 +124,13 @@ $._nim_PPP_={
 	},
 
 	projectOpen : function(projToOpen) {
+		$._nim_PPP_.debugLog('projectOpen - projToOpen: ' + projToOpen);
 		if (projToOpen) {
-			app.openDocument(	projToOpen,
-								1,					// suppress 'Convert Project' dialogs
-								1,					// suppress 'Locate Files' dialogs
-								1);					// suppress warning dialogs
+			var result = app.openDocument(	projToOpen,
+											1,					// suppress 'Convert Project' dialogs
+											1,					// suppress 'Locate Files' dialogs
+											1);					// suppress warning dialogs
+			$._nim_PPP_.debugLog('projectOpen - result: ' + JSON.stringify(result));
 		}	
 		else {
 			alert("Project Not Found");
@@ -136,8 +138,10 @@ $._nim_PPP_={
 	},
 
 	projectSaveAs : function(projToSave) {
+		$._nim_PPP_.debugLog('projectSaveAs - projToSave: ' + projToSave);
 		if (projToSave) {
-			app.project.saveAs(	projToSave );
+			var result = app.project.saveAs( projToSave );
+			$._nim_PPP_.debugLog('projectSaveAs - result: ' + JSON.stringify(result));
 		}	
 		else {
 			alert("Project Not Found");
