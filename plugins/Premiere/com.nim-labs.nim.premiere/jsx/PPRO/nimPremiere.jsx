@@ -87,7 +87,7 @@ $._nim_PPP_={
 
 					var fieldArray	= [];
 
-					// Define Project Properties					
+					// Define Project Properties
 					for( var key in data){
 						if( data[key] !== undefined ){
 							if (xmp.doesPropertyExist(kPProPrivateProjectMetadataURI, key)){
@@ -111,7 +111,6 @@ $._nim_PPP_={
 							fieldArray.push(key);
 						}
 					}
-					
 					$._nim_PPP_.debugLog('FieldArray: '+JSON.stringify(fieldArray));
 
 					var str = xmp.serialize();
@@ -232,6 +231,95 @@ $._nim_PPP_={
 												range : range, diskID : diskID, disk : disk, keep : keep, markers : markers, markerData: markerData };
 
 		return JSON.stringify($._nim_PPP_.exportJobs[encodeJobID]);
+	},
+
+	getSequenceItems : function (){
+		$._nim_PPP_.debugLog('getSequenceItems');
+
+		var sequenceObj = {};
+
+		var activeSequence = app.project.activeSequence;
+		sequenceObj['sequenceID'] = activeSequence.sequenceID;
+		sequenceObj['sequenceName'] = activeSequence.name;
+
+		var videoTracks = activeSequence.videoTracks;
+		$._nim_PPP_.debugLog('videoTracks: '+JSON.stringify(videoTracks));
+
+		var tracks = [];
+		for(var i=0; i<videoTracks.numTracks; i++){
+			var trackInfo = {};
+			trackInfo['name'] = videoTracks[i].name;
+			trackInfo['ID'] = videoTracks[i].id;
+			trackInfo['mediaType'] = videoTracks[i].mediaType;
+
+			var trackClips = videoTracks[i].clips;
+			$._nim_PPP_.debugLog('trackClips: '+JSON.stringify(trackClips));
+
+			var clips = [];
+			for(var j=0; j<trackClips.numItems; j++){
+				var clipInfo = {};
+				clipInfo['name'] = trackClips[j].name;
+				clipInfo['duration'] = trackClips[j].duration;
+				clipInfo['start'] = trackClips[j].start;
+				clipInfo['end'] = trackClips[j].end;
+				clipInfo['inPoint'] = trackClips[j].inPoint;
+				clipInfo['outPoint'] = trackClips[j].outPoint;
+				clipInfo['mediaType'] = trackClips[j].mediaType;
+				clipInfo['projectItem'] = trackClips[j].projectItem;
+
+				clips.push(clipInfo);
+			}
+			trackInfo['clips'] = clips;
+			tracks.push(trackInfo);
+		}
+		sequenceObj['tracks'] = tracks;
+
+		return JSON.stringify(sequenceObj);
+	},
+
+	exportClipIcon : function(clip) {
+		$._nim_PPP_.message('clip: '+clip);
+		clip = JSON.parse(clip);
+
+		$._nim_PPP_.setPlayerPosition(clip.start.ticks);
+		var outputFileName = $._nim_PPP_.exportCurrentFrameAsPNG();
+
+		clip["outputFileName"] = outputFileName;
+
+		return JSON.stringify(clip);
+	},
+
+	setPlayerPosition : function(ticks) {
+		var activeSequence = app.project.activeSequence;
+		activeSequence.setPlayerPosition(ticks);
+	},
+
+	exportCurrentFrameAsPNG : function() {
+		app.enableQE();
+		var activeSequence	= qe.project.getActiveSequence(); 	// note: make sure a sequence is active in PPro UI
+		if (activeSequence) {
+			// Create a file name based on timecode of frame.
+			var time			= activeSequence.CTI.timecode; 	// CTI = Current Time Indicator.
+			var removeThese 	= /:|;/ig;    // Why? Because Windows chokes on colons.
+			time = time.replace(removeThese, '_');
+			var outputPath		= new File("~/Desktop/Frames");
+			var outputFileName	= outputPath.fsName + $._nim_PPP_.getSep() + time + '___' + activeSequence.name;
+			activeSequence.exportFramePNG(time, outputFileName);
+			outputFileName += ".png";
+			return outputFileName;
+		} else {
+			$._nim_PPP_.message("No active sequence.");
+		}
+		return false;
+	},
+
+	// Callbacks
+	getSep : function() {
+		if (Folder.fs == 'Macintosh') {
+			return '/';
+		} else {
+			return '\\';
+		}
 	},
 
 	message : function (msg) {
