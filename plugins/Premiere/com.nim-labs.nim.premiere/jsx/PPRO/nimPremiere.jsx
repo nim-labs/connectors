@@ -204,22 +204,22 @@ $._nim_PPP_={
 
 			var numMarkers	= markerData.numMarkers;
 			if (numMarkers > 0) {
-			    var m = 0;
-			    for(var current_marker	=	markerData.getFirstMarker();
-			            current_marker	!==	undefined; 
-			            current_marker 	=	markerData.getNextMarker(current_marker)){
+				var m = 0;
+				for(var current_marker	=	markerData.getFirstMarker();
+						current_marker	!==	undefined; 
+						current_marker 	=	markerData.getNextMarker(current_marker)){
 
-			        $._nim_PPP_.debugLog('exportEdit - marker.name:' + current_marker.name);
-			        $._nim_PPP_.debugLog('exportEdit - marker.comments:' + current_marker.comments);
-			        
-			        var markerItem = { name : current_marker.name,
-			        				   comments: current_marker.comments,
-			        				   type : current_marker.type,
-			        				   start : current_marker.start,
-			        				   end : current_marker.end };
-			        markerData[m] = (markerItem);
-			        m = m + 1;
-			    }    
+					$._nim_PPP_.debugLog('exportEdit - marker.name:' + current_marker.name);
+					$._nim_PPP_.debugLog('exportEdit - marker.comments:' + current_marker.comments);
+					
+					var markerItem = { name : current_marker.name,
+									   comments: current_marker.comments,
+									   type : current_marker.type,
+									   start : current_marker.start,
+									   end : current_marker.end };
+					markerData[m] = (markerItem);
+					m = m + 1;
+				}    
 			}
 		}
 
@@ -233,9 +233,9 @@ $._nim_PPP_={
 		return JSON.stringify($._nim_PPP_.exportJobs[encodeJobID]);
 	},
 
-	getSequenceItems : function (){
+	getSequenceItems : function (rename, nameTemplate, layerOption){
 		$._nim_PPP_.debugLog('getSequenceItems');
-
+		$._nim_PPP_.message('rename: '+rename);
 		var sequenceObj = {};
 
 		var activeSequence = app.project.activeSequence;
@@ -246,6 +246,7 @@ $._nim_PPP_={
 		$._nim_PPP_.debugLog('videoTracks: '+JSON.stringify(videoTracks));
 
 		var tracks = [];
+		var firstTrack = true;
 		for(var i=0; i<videoTracks.numTracks; i++){
 			var trackInfo = {};
 			trackInfo['name'] = videoTracks[i].name;
@@ -258,6 +259,12 @@ $._nim_PPP_={
 			var clips = [];
 			for(var j=0; j<trackClips.numItems; j++){
 				var clipInfo = {};
+
+				// Use first track as basis for rename (should be first track with clips if track 0 is empty)
+				if(rename == "1" && firstTrack==true){
+					trackClips[j].name = $._nim_PPP_.renameClip(nameTemplate,j);
+					$._nim_PPP_.message('new clip name: '+trackClips[j].name);
+				}
 				clipInfo['name'] = trackClips[j].name;
 				clipInfo['duration'] = trackClips[j].duration;
 				clipInfo['start'] = trackClips[j].start;
@@ -266,15 +273,34 @@ $._nim_PPP_={
 				clipInfo['outPoint'] = trackClips[j].outPoint;
 				clipInfo['mediaType'] = trackClips[j].mediaType;
 				clipInfo['projectItem'] = trackClips[j].projectItem;
-
-				clips.push(clipInfo);
+				clips.push(clipInfo);	
+			}
+			if(trackClips.numItems >  0){
+				firstTrack = false;
 			}
 			trackInfo['clips'] = clips;
 			tracks.push(trackInfo);
+			
 		}
 		sequenceObj['tracks'] = tracks;
 
 		return JSON.stringify(sequenceObj);
+	},
+
+	renameClip : function(nameTemplate, clipIndex){
+		var frameReg = /^([^\<\>]*)<(#*)(?:x(\d*))?(?:@(\d*))?>(.*)$/g;
+		var frameItems = frameReg.exec(nameTemplate);
+		var prefix = frameItems[1] !== undefined ? frameItems[1] : "";
+		var padding = frameItems[2] !== undefined ? (frameItems[2].match(/#/g) || []).length : 0;
+		var skip = frameItems[3] !== undefined ? parseInt(frameItems[3]) : 1;
+		skip = skip <= 0 ? 1 : skip;	// Skip must be at least 1
+		var start = frameItems[4] !== undefined ? parseInt(frameItems[4]) : 0;
+		var suffix = frameItems[5] !== undefined ? frameItems[5] : "";
+		var number = ((clipIndex*skip)+start).toString();
+        
+        number = $._nim_PPP_.padNumber(number, padding);
+        var shotName = prefix+number+suffix;
+		return shotName;
 	},
 
 	exportClipIcon : function(clip) {
@@ -314,6 +340,16 @@ $._nim_PPP_={
 	},
 
 	// Callbacks
+	padNumber : function( number, padding) {
+		var width = padding - number.length;
+		if(width > 0){
+			for(var i=0;i<width;i++){
+				number = "0"+number;
+			}
+		}
+		return number;
+	},
+
 	getSep : function() {
 		if (Folder.fs == 'Macintosh') {
 			return '/';
