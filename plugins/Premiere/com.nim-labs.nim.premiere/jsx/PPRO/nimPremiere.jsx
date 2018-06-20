@@ -235,7 +235,7 @@ $._nim_PPP_={
 
 	getSequenceItems : function (rename, nameTemplate, layerOption){
 		$._nim_PPP_.debugLog('getSequenceItems');
-		$._nim_PPP_.message('rename: '+rename);
+
 		var sequenceObj = {};
 
 		var activeSequence = app.project.activeSequence;
@@ -261,9 +261,15 @@ $._nim_PPP_={
 				var clipInfo = {};
 
 				// Use first track as basis for rename (should be first track with clips if track 0 is empty)
-				if(rename == "1" && firstTrack==true){
-					trackClips[j].name = $._nim_PPP_.renameClip(nameTemplate,j);
-					$._nim_PPP_.message('new clip name: '+trackClips[j].name);
+				if(rename == "1"){
+					if(firstTrack==true){
+						trackClips[j].name = $._nim_PPP_.renameClip(nameTemplate,j);
+						$._nim_PPP_.message("renameClip: "+trackClips[j].name);
+					}
+					else{
+						trackClips[j].name = $._nim_PPP_.getVerticalTrackName(trackClips[j], i, layerOption);
+						$._nim_PPP_.message("getVerticalTrackName: "+trackClips[j].name);
+					}
 				}
 				clipInfo['name'] = trackClips[j].name;
 				clipInfo['duration'] = trackClips[j].duration;
@@ -313,6 +319,54 @@ $._nim_PPP_={
 		clip["outputFileName"] = outputFileName;
 
 		return JSON.stringify(clip);
+	},
+
+	getVerticalTrackName : function(clip, trackNumber, layerOption){
+		var inClipStartTicks = parseInt(clip.start.ticks);
+		var inClipEndTicks = parseInt(clip.end.ticks);
+		$._nim_PPP_.message("inClipStartTicks: "+inClipStartTicks);
+		$._nim_PPP_.message("inClipEndTicks: "+inClipEndTicks);
+
+		var activeSequence = app.project.activeSequence;
+		var videoTracks = activeSequence.videoTracks;
+		var clipName = "";
+		
+		trackLoop:
+		for(var i=0; i<trackNumber; i++){
+			var trackClips = videoTracks[i].clips;
+			
+			for(var j=0; j<trackClips.numItems; j++){
+				$._nim_PPP_.message("trackClip name: "+trackClips[j].name);
+				var clipStartTicks = parseInt(trackClips[j].start.ticks);
+				var clipEndTicks =parseInt( trackClips[j].end.ticks);
+
+				$._nim_PPP_.message("clipStartTicks: "+clipStartTicks);
+				$._nim_PPP_.message("clipEndTicks: "+clipEndTicks);
+
+				if(layerOption == 0){	// Match First Frame
+					if(clipStartTicks <= inClipStartTicks && clipEndTicks > inClipStartTicks){
+						$._nim_PPP_.message("Match Found: "+trackClips[j].name);
+						clipName = trackClips[j].name;
+						break trackLoop;
+					}
+				}
+				else {	// Match End Frame
+					if(clipStartTicks < inClipEndTicks && clipEndTicks >= inClipEndTicks){
+						$._nim_PPP_.message("Match Found: "+trackClips[j].name);
+						clipName = trackClips[j].name;
+						break trackLoop;
+					}
+				}
+			}
+		}
+
+		$._nim_PPP_.message("clipName: "+clipName);
+
+		if(clipName == ""){
+			clipName = clip.name;
+		}
+
+		return clipName;
 	},
 
 	setPlayerPosition : function(ticks) {
