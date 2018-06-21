@@ -57,6 +57,7 @@ $._nim_PPP_={
 							var property = xmp.getProperty(kPProPrivateProjectMetadataURI, key);
 							$._nim_PPP_.debugLog('Property Found: '+property.value);
 							data[key] = property.value;
+							data[key] = data[key] == " " ? "" : data[key];
 						}
 						$._nim_PPP_.debugLog('--------------------------------------');
 					}
@@ -92,6 +93,9 @@ $._nim_PPP_={
 						if( data[key] !== undefined ){
 							if (xmp.doesPropertyExist(kPProPrivateProjectMetadataURI, key)){
 								$._nim_PPP_.debugLog('Property Found: '+key);
+								$._nim_PPP_.debugLog('Property Data: '+data[key]);
+								$._nim_PPP_.debugLog('Property Type: '+typeof data[key]);
+								data[key] = data[key] == "" ? " " : data[key];
 								xmp.setProperty(kPProPrivateProjectMetadataURI, key, data[key]);
 								$._nim_PPP_.debugLog('Property Set: '+key);
 							}
@@ -100,6 +104,7 @@ $._nim_PPP_={
 								$._nim_PPP_.debugLog('Adding Property: '+key);
 								if(successfullyAdded){
 									$._nim_PPP_.debugLog('Property Added');
+									data[key] = data[key] == "" ? " " : data[key];
 									xmp.setProperty(kPProPrivateProjectMetadataURI, key, data[key]);
 									$._nim_PPP_.debugLog('Property Set: '+key+ ' : '+data[key]);
 								}
@@ -225,15 +230,87 @@ $._nim_PPP_={
 
 		var encodeJobID = app.encoder.encodeSequence(activeSequence, outputPath, presetPath, workArea, removeOnComplete);
 
-		$._nim_PPP_.exportJobs[encodeJobID] = { jobID : encodeJobID, sequenceID : sequenceID, context : context, itemID : itemID, name : name, 
-												desc : desc, typeID : typeID, statusID : statusID, 
-												keywords : keywords, preset : preset, presetPath : presetPath, 
-												range : range, diskID : diskID, disk : disk, keep : keep, markers : markers, markerData: markerData };
+		$._nim_PPP_.exportJobs[encodeJobID] = { encode : "sequence", jobID : encodeJobID, sequenceID : sequenceID, context : context, 
+												itemID : itemID, name : name, desc : desc, typeID : typeID, statusID : statusID, 
+												keywords : keywords, preset : preset, presetPath : presetPath, range : range, 
+												diskID : diskID, disk : disk, keep : keep, markers : markers, markerData: markerData };
 
 		return JSON.stringify($._nim_PPP_.exportJobs[encodeJobID]);
 	},
 
+	exportClip : function(trackID, clipID, itemID, name, typeID, preset, presetPath, outputPath, length, handles) {
+
+		app.encoder.bind('onEncoderJobComplete',	$._nim_PPP_.onEncoderJobComplete);
+		app.encoder.bind('onEncoderJobError', 		$._nim_PPP_.onEncoderJobError);
+		app.encoder.bind('onEncoderJobProgress', 	$._nim_PPP_.onEncoderJobProgress);
+		app.encoder.bind('onEncoderJobQueued', 		$._nim_PPP_.onEncoderJobQueued);
+		app.encoder.bind('onEncoderJobCanceled',	$._nim_PPP_.onEncoderJobCanceled);
+
+		$._nim_PPP_.debugLog('exportEdit - trackID:' + trackID);
+		$._nim_PPP_.debugLog('exportEdit - clipID:' + clipID);
+		$._nim_PPP_.debugLog('exportEdit - itemID:' + itemID);
+		$._nim_PPP_.debugLog('exportEdit - name:' + name);
+		$._nim_PPP_.debugLog('exportEdit - typeID:' + typeID);
+		$._nim_PPP_.debugLog('exportEdit - preset:' + preset);
+		$._nim_PPP_.debugLog('exportEdit - presetPath:' + presetPath);
+		$._nim_PPP_.debugLog('exportEdit - outputPath:' + outputPath);
+		$._nim_PPP_.debugLog('exportEdit - length:' + length);
+		$._nim_PPP_.debugLog('exportEdit - handles:' + handles);
+
+		
+
+		var clip = app.project.activeSequence.videoTracks[trackID].clips[clipID];
+		var projectItem = clip.projectItem;
+
+		var workArea = 0;
+		var removeOnComplete = 1;
+		
+		
+
+		if(length == "0"){	// CUT + HANDLES
+
+			// May need to test for projectItem type
+			//$._nim_PPP_.message("projectItem.type: "+projectItem.type);
+
+			var ticksPerSecond = 254016000000; 							// Ticks per second
+			var ticksPerFrame = app.project.activeSequence.timebase; 	// Ticks per frame
+			//var framerate = ticksPerSecond/ticksPerFrame;
+			
+			var inPoint = clip.inPoint.seconds - ((parseInt(handles) * ticksPerFrame)/ticksPerSecond);		// Convert handles from frames to seconds
+			inPoint = inPoint < 0 ? 0 : inPoint; // Keep from going negative
+
+			var outPoint = clip.outPoint.seconds + ((parseInt(handles) * ticksPerFrame)/ticksPerSecond);	// Convert handles from frames to seconds
+			
+			var mediaFile = projectItem.getMediaPath();
+
+			if(mediaFile !== undefined){
+				var encodeJobID = app.encoder.encodeFile(mediaFile, outputPath, presetPath, removeOnComplete, inPoint, outPoint);
+
+				$._nim_PPP_.exportJobs[encodeJobID] = { encode : "clip", jobID : encodeJobID, trackID : trackID, clipID : clipID, itemID : itemID, 
+														name : name, typeID : typeID, preset : preset, presetPath : presetPath, outputPath : outputPath,
+														length : length, handles : handles };
+
+				return JSON.stringify($._nim_PPP_.exportJobs[encodeJobID]);
+			}
+		}
+		else if(length == "1"){ // SOURCE CLIP
+			var encodeJobID = app.encoder.encodeProjectItem(projectItem, outputPath, presetPath, workArea, removeOnComplete);
+
+			$._nim_PPP_.exportJobs[encodeJobID] = { encode : "clip", jobID : encodeJobID, trackID : trackID, clipID : clipID, itemID : itemID, 
+													name : name, typeID : typeID, preset : preset, presetPath : presetPath, outputPath : outputPath,
+													length : length, handles : handles };
+
+			return JSON.stringify($._nim_PPP_.exportJobs[encodeJobID]);
+		}
+		
+		return "false";
+
+	},
+
 	getSequenceItems : function (rename, nameTemplate, layerOption){
+		// Retrives all video trackItems in a sequence
+		// optionally renames clips based on nameTemplate
+
 		$._nim_PPP_.debugLog('getSequenceItems');
 
 		var sequenceObj = {};
@@ -264,11 +341,11 @@ $._nim_PPP_={
 				if(rename == "1"){
 					if(firstTrack==true){
 						trackClips[j].name = $._nim_PPP_.renameClip(nameTemplate,j);
-						$._nim_PPP_.message("renameClip: "+trackClips[j].name);
+						$._nim_PPP_.debugLog("renameClip: "+trackClips[j].name);
 					}
 					else{
 						trackClips[j].name = $._nim_PPP_.getVerticalTrackName(trackClips[j], i, layerOption);
-						$._nim_PPP_.message("getVerticalTrackName: "+trackClips[j].name);
+						$._nim_PPP_.debugLog("getVerticalTrackName: "+trackClips[j].name);
 					}
 				}
 				clipInfo['name'] = trackClips[j].name;
@@ -324,35 +401,36 @@ $._nim_PPP_={
 	getVerticalTrackName : function(clip, trackNumber, layerOption){
 		var inClipStartTicks = parseInt(clip.start.ticks);
 		var inClipEndTicks = parseInt(clip.end.ticks);
-		$._nim_PPP_.message("inClipStartTicks: "+inClipStartTicks);
-		$._nim_PPP_.message("inClipEndTicks: "+inClipEndTicks);
+		$._nim_PPP_.debugLog("inClipStartTicks: "+inClipStartTicks);
+		$._nim_PPP_.debugLog("inClipEndTicks: "+inClipEndTicks);
 
 		var activeSequence = app.project.activeSequence;
 		var videoTracks = activeSequence.videoTracks;
 		var clipName = "";
 		
+		// TODO:  Build array and count number of lower items, optionally append suffix based on track (ie SH001A)
 		trackLoop:
 		for(var i=0; i<trackNumber; i++){
 			var trackClips = videoTracks[i].clips;
 			
 			for(var j=0; j<trackClips.numItems; j++){
-				$._nim_PPP_.message("trackClip name: "+trackClips[j].name);
+				$._nim_PPP_.debugLog("trackClip name: "+trackClips[j].name);
 				var clipStartTicks = parseInt(trackClips[j].start.ticks);
 				var clipEndTicks =parseInt( trackClips[j].end.ticks);
 
-				$._nim_PPP_.message("clipStartTicks: "+clipStartTicks);
-				$._nim_PPP_.message("clipEndTicks: "+clipEndTicks);
+				$._nim_PPP_.debugLog("clipStartTicks: "+clipStartTicks);
+				$._nim_PPP_.debugLog("clipEndTicks: "+clipEndTicks);
 
 				if(layerOption == 0){	// Match First Frame
 					if(clipStartTicks <= inClipStartTicks && clipEndTicks > inClipStartTicks){
-						$._nim_PPP_.message("Match Found: "+trackClips[j].name);
+						$._nim_PPP_.debugLog("Match Found: "+trackClips[j].name);
 						clipName = trackClips[j].name;
 						break trackLoop;
 					}
 				}
 				else {	// Match End Frame
 					if(clipStartTicks < inClipEndTicks && clipEndTicks >= inClipEndTicks){
-						$._nim_PPP_.message("Match Found: "+trackClips[j].name);
+						$._nim_PPP_.debugLog("Match Found: "+trackClips[j].name);
 						clipName = trackClips[j].name;
 						break trackLoop;
 					}
@@ -360,7 +438,7 @@ $._nim_PPP_={
 			}
 		}
 
-		$._nim_PPP_.message("clipName: "+clipName);
+		$._nim_PPP_.debugLog("clipName: "+clipName);
 
 		if(clipName == ""){
 			clipName = clip.name;
@@ -469,10 +547,12 @@ $._nim_PPP_={
 		}
 		var mylib = new ExternalObject('lib:' + eoName);
 		
-		var jobData = { jobID: jobID, progress: progress };
+		var jobData = $._nim_PPP_.exportJobs[jobID];
+
+		var jobProgress = { jobID: jobID, progress: progress, encode: jobData["encode"], itemID: jobData["itemID"] };
 		var nimEvent = new CSXSEvent();
 		nimEvent.type = "com.nim-labs.events.PProExportEditProgress";
-		nimEvent.data = JSON.stringify(jobData);
+		nimEvent.data = JSON.stringify(jobProgress);
 		nimEvent.dispatch();
 	},
 
