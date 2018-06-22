@@ -304,7 +304,6 @@ $._nim_PPP_={
 		}
 		
 		return "false";
-
 	},
 
 	getSequenceItems : function (rename, nameTemplate, layerOption){
@@ -461,7 +460,7 @@ $._nim_PPP_={
 			var removeThese 	= /:|;/ig;    // Why? Because Windows chokes on colons.
 			time = time.replace(removeThese, '_');
 			var outputPath		= new File("~/Desktop/Frames");
-			var outputFileName	= outputPath.fsName + $._nim_PPP_.getSep() + time + '___' + activeSequence.name;
+			var outputFileName	= outputPath.fsName + $._nim_PPP_.getSep() + time + '___' + $._nim_PPP_.guid() + activeSequence.name;
 			activeSequence.exportFramePNG(time, outputFileName);
 			outputFileName += ".png";
 			return outputFileName;
@@ -472,6 +471,15 @@ $._nim_PPP_={
 	},
 
 	// Callbacks
+	guid : function() {
+		function s4() {
+			return Math.floor((1 + Math.random()) * 0x10000)
+			.toString(16)
+			.substring(1);
+		}
+		return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
+	},
+
 	padNumber : function( number, padding) {
 		var width = padding - number.length;
 		if(width > 0){
