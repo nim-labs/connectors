@@ -459,8 +459,12 @@ $._nim_PPP_={
 			var time			= activeSequence.CTI.timecode; 	// CTI = Current Time Indicator.
 			var removeThese 	= /:|;/ig;    // Why? Because Windows chokes on colons.
 			time = time.replace(removeThese, '_');
-			var outputPath		= new File("~/Desktop/Frames");
-			var outputFileName	= outputPath.fsName + $._nim_PPP_.getSep() + time + '___' + $._nim_PPP_.guid() + activeSequence.name;
+			var outputPath		= new File("~/.nim/tmp");
+			//var outputPath		= new File("~/Desktop/Frames");
+			var outputName 		= activeSequence.name+"_"+time;
+			outputName = outputName.replace(/\ /g,'_');
+
+			var outputFileName	= outputPath.fsName + $._nim_PPP_.getSep() + outputName;
 			activeSequence.exportFramePNG(time, outputFileName);
 			outputFileName += ".png";
 			return outputFileName;
