@@ -391,7 +391,6 @@ $._nim_PPP_={
 
 		$._nim_PPP_.setPlayerPosition(clip.start.ticks);
 		var outputFileName = $._nim_PPP_.exportCurrentFrameAsPNG();
-
 		clip["outputFileName"] = outputFileName;
 
 		return JSON.stringify(clip);
@@ -458,10 +457,9 @@ $._nim_PPP_={
 			// Create a file name based on timecode of frame.
 			var time			= activeSequence.CTI.timecode; 	// CTI = Current Time Indicator.
 			var removeThese 	= /:|;/ig;    // Why? Because Windows chokes on colons.
-			time = time.replace(removeThese, '_');
+			var timeName = time.replace(removeThese, '_');
 			var outputPath		= new File("~/.nim/tmp");
-			//var outputPath		= new File("~/Desktop/Frames");
-			var outputName 		= activeSequence.name+"_"+time;
+			var outputName 		= activeSequence.name+"_"+timeName+"_"+$._nim_PPP_.guid();
 			outputName = outputName.replace(/\ /g,'_');
 
 			var outputFileName	= outputPath.fsName + $._nim_PPP_.getSep() + outputName;
@@ -481,7 +479,8 @@ $._nim_PPP_={
 			.toString(16)
 			.substring(1);
 		}
-		return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
+		//return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
+		return s4() + s4() + s4() + s4() + s4() + s4() + s4() + s4();
 	},
 
 	padNumber : function( number, padding) {
