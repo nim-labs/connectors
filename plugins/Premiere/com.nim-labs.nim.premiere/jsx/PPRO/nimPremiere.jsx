@@ -472,6 +472,132 @@ $._nim_PPP_={
 		return false;
 	},
 
+	importElements : function(shotTree) {
+		$._nim_PPP_.debugLog("importElements");
+		var result = false;
+
+		if (app.project) {
+
+			// Create NIM Root Bin
+			var binMade = false;
+			var nimBinName = "NIM Elements";
+			var projectRootItem = app.project.rootItem;
+			var nimBin = $._nim_PPP_.findBin(projectRootItem, nimBinName);
+			
+			if(nimBin === false){
+				var projectRootItem = app.project.rootItem;
+				binMade = projectRootItem.createBin("NIM Elements");
+				nimBin = $._nim_PPP_.findBin(projectRootItem, nimBinName);
+			}
+
+			shotTree = JSON.parse(shotTree);
+			if (shotTree) 
+			{
+				for(var i=0; i<shotTree.length; i++){
+					var shotData = shotTree[i];
+					var shotName = shotData['shotName'];
+
+					var shotBin = $._nim_PPP_.findBin(nimBin, shotName);
+					if(shotBin === false){
+						binMade = nimBin.createBin(shotName);
+						shotBin = $._nim_PPP_.findBin(nimBin, shotName);
+					}
+					
+					if(shotBin !== false){
+						var elementFiles = [];
+						for(var j=0;j<shotData['elements'].length; j++){
+							var element = shotData['elements'][j];
+							var elementPath = element['full_path'];
+							var elementName = element['name'];
+
+							// Check for existing element in project and skip if found
+							var fileFound = $._nim_PPP_.findFile(nimBin, elementName);
+							if(fileFound === false){
+								elementFiles.push(elementPath);
+							}
+						}
+						if(elementFiles){
+							result = app.project.importFiles(elementFiles, 
+													0,								// suppress warnings 
+													shotBin, 						// app.project.getInsertionBin(),  // - projectItem
+													1);								// import as numbered stills	
+						}
+					}
+					
+				}
+			} 
+			else {
+				$._nim_PPP_.message("No files to import.");
+				result = false;
+			} 
+		}
+		return JSON.stringify(result);
+	},
+
+	findBin : function(rootBin, binName) {
+		var binFound = false;
+		var bin = null;
+		if (app.project) {
+			var projectChildren = rootBin.children;
+			for(var i=0; i<projectChildren.numItems; i++){
+				var projectChild = projectChildren[i];
+				if(projectChild.type == 2){				// 'BIN'
+					if(projectChild.name == binName){
+						binFound = true;
+						bin = projectChild;
+						break;
+					}
+					else {
+						var childFound = $._nim_PPP_.findBin(projectChild, binName);
+						if( childFound !== false ){
+							binFound = true;
+							bin = projectChild;
+							break;
+						}
+					}
+				}
+			}
+		}
+		if(binFound){
+			return bin;
+		}
+		else {
+			return false;
+		}
+	},
+
+	findFile : function(rootBin, fileName) {
+		var fileFound = false;
+		var fileItem = null;
+		if (app.project) {
+			var projectChildren = rootBin.children;
+			for(var i=0; i<projectChildren.numItems; i++){
+				var projectChild = projectChildren[i];
+				if(projectChild.type == 1 || projectChild.type == 4){				// 'CLIP' or 'FILE'
+					if(projectChild.name == fileName){
+						fileFound = true;
+						fileItem = projectChild;
+						break;
+					}
+				}
+				else if(projectChild.type == 2) {		// 'BIN'
+					var childFound = $._nim_PPP_.findFile(projectChild, fileName);
+					if( childFound !== false ){
+						fileFound = true;
+						fileItem = projectChild;
+						break;
+					}
+				}
+			}
+		}
+		if(fileFound){
+			return fileItem;
+		}
+		else {
+			return false;
+		}
+	},
+
 	// Callbacks
 	guid : function() {
 		function s4() {
