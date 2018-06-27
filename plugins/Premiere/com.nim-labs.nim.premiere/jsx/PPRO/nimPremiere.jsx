@@ -386,7 +386,7 @@ $._nim_PPP_={
 	},
 
 	exportClipIcon : function(clip) {
-		$._nim_PPP_.message('clip: '+clip);
+		$._nim_PPP_.debugLog('clip: '+clip);
 		clip = JSON.parse(clip);
 
 		$._nim_PPP_.setPlayerPosition(clip.start.ticks);
@@ -472,22 +472,24 @@ $._nim_PPP_={
 		return false;
 	},
 
-	importElements : function(shotTree) {
+	importElements : function(shotTree, destination, binName) {
 		$._nim_PPP_.debugLog("importElements");
 		var result = false;
 
 		if (app.project) {
-
-			// Create NIM Root Bin
 			var binMade = false;
-			var nimBinName = "NIM Elements";
 			var projectRootItem = app.project.rootItem;
-			var nimBin = $._nim_PPP_.findBin(projectRootItem, nimBinName);
-			
-			if(nimBin === false){
-				var projectRootItem = app.project.rootItem;
-				binMade = projectRootItem.createBin("NIM Elements");
-				nimBin = $._nim_PPP_.findBin(projectRootItem, nimBinName);
+			var nimBin = projectRootItem;
+			if(destination == "1"){
+				nimBin = app.project.getInsertionBin();
+			}
+			if(destination == "2"){
+				// Create NIM Root Bin
+				nimBin = $._nim_PPP_.findBin(projectRootItem, binName);
+				if(nimBin === false){
+					binMade = projectRootItem.createBin("NIM Elements");
+					nimBin = $._nim_PPP_.findBin(projectRootItem, binName);
+				}
 			}
 
 			shotTree = JSON.parse(shotTree);
@@ -628,7 +630,8 @@ $._nim_PPP_={
 	},
 
 	message : function (msg) {
-		$.writeln(msg);	 // Using '$' object will invoke ExtendScript Toolkit, if installed.
+		// Using '$' object will invoke ExtendScript Toolkit, if installed.
+		$.writeln(msg);	 
 	},
 
 	debugLog : function (msg) {
