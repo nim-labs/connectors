@@ -12,7 +12,7 @@ function onLoaded() {
 	
 	loadJSX();
 	
-	updateThemeWithAppSkinInfo(csInterface.hostEnvironment.appSkinInfo);
+	//updateThemeWithAppSkinInfo(csInterface.hostEnvironment.appSkinInfo);
 
 	// Update the color of the panel when the theme color of the product changed.
 	csInterface.addEventListener(CSInterface.THEME_COLOR_CHANGED_EVENT, onAppThemeColorChanged);
@@ -33,19 +33,21 @@ function onLoaded() {
 	        // You just received the text of every Text layer in the current AE comp.
 	    }
 	);
-	csInterface.evalScript('$._PPP_.getVersionInfo()', myVersionInfoFunction);	
-	csInterface.evalScript('$._PPP_.getActiveSequenceName()', myCallBackFunction);		
-	csInterface.evalScript('$._PPP_.getUserName()', myUserNameFunction);  
-	csInterface.evalScript('$._PPP_.getSequenceProxySetting()', myGetProxyFunction);
-	csInterface.evalScript('$._PPP_.keepPanelLoaded()');
-	csInterface.evalScript('$._PPP_.disableImportWorkspaceWithProjects()');
 	
-	csInterface.evalScript('$._PPP_.registerProjectPanelChangedFxn()');
-	csInterface.evalScript('$._PPP_.registerItemAddedFxn()');
-	csInterface.evalScript('$._PPP_.registerProjectChangedFxn()');
-	csInterface.evalScript('$._PPP_.confirmPProHostVersion()');
+	//csInterface.evalScript('$._PPP_.getVersionInfo()', myVersionInfoFunction);	
+	//csInterface.evalScript('$._PPP_.getActiveSequenceName()', myCallBackFunction);		
+	//csInterface.evalScript('$._PPP_.getUserName()', myUserNameFunction);  
+	//csInterface.evalScript('$._PPP_.getSequenceProxySetting()', myGetProxyFunction);
+	//csInterface.evalScript('$._PPP_.keepPanelLoaded()');
+	//csInterface.evalScript('$._PPP_.disableImportWorkspaceWithProjects()');
+	//
+	//csInterface.evalScript('$._PPP_.registerProjectPanelChangedFxn()');
+	//csInterface.evalScript('$._PPP_.registerItemAddedFxn()');
+	//csInterface.evalScript('$._PPP_.registerProjectChangedFxn()');
+	//csInterface.evalScript('$._PPP_.confirmPProHostVersion()');
 }
 
+/*
 function dragHandler(event){
 	var csInterface = new CSInterface();
 	var extPath 	= csInterface.getSystemPath(SystemPath.EXTENSION);
@@ -61,6 +63,7 @@ function dragHandler(event){
 	//	event.dataTransfer.setData("com.adobe.cep.dnd.file.N", path);  N = (items to import - 1)
 	}
 }
+*/
 
 function myCallBackFunction (data) {
 	// Updates seq_display with whatever ExtendScript function returns.
@@ -100,6 +103,7 @@ function myVersionInfoFunction (data) {
  * Update the theme with the AppSkinInfo retrieved from the host product.
  */
 
+/*
 function updateThemeWithAppSkinInfo(appSkinInfo) {
 
 	//Update the background color of the panel
@@ -152,7 +156,8 @@ function updateThemeWithAppSkinInfo(appSkinInfo) {
 		addRule(styleId, "input[type=text]:focus", "background-color: #ffffff;");
 		addRule(styleId, "input[type=text]:focus", "color: #000000;");
 }
-
+*/
+/*
 function addRule(stylesheetId, selector, rule) {
 	var stylesheet = document.getElementById(stylesheetId);
 	
@@ -165,6 +170,7 @@ function addRule(stylesheetId, selector, rule) {
 		}
 	}
 }
+*/
 
 function reverseColor(color, delta) {
 	return toHex({red:Math.abs(255-color.red), green:Math.abs(255-color.green), blue:Math.abs(255-color.blue)}, delta);
@@ -199,7 +205,7 @@ function onAppThemeColorChanged(event) {
 	var skinInfo = JSON.parse(window.__adobe_cep__.getHostEnvironment()).appSkinInfo;
 	// Gets the style information such as color info from the skinInfo, 
 	// and redraw all UI controls of your extension according to the style info.
-	updateThemeWithAppSkinInfo(skinInfo);
+	//updateThemeWithAppSkinInfo(skinInfo);
 } 
 
 /**

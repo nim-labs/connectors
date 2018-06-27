@@ -1,5 +1,5 @@
 #include "PPro_API_Constants.jsx"
-
+/*
 $._PPP_={
 
 	createDeepFolderStructure : function(foldersArray, maxDepth) {
@@ -549,22 +549,22 @@ $._PPP_={
 						app.encoder.setSidecarXMPEnabled(0);
 						app.encoder.setEmbeddedXMPEnabled(0);
 
-						/* 
+						 
 
-						For reference, here's how to export from within PPro (blocking further user interaction).
+						//For reference, here's how to export from within PPro (blocking further user interaction).
+						//
+						//var seq = app.project.activeSequence; 
+						//
+						//if (seq) {
+						//	seq.exportAsMediaDirect(fullPathToFile,  
+						//							outPreset.fsName, 
+						//							app.encoder.ENCODE_WORKAREA);
+						//
+						//	Bonus: Here's how to compute a sequence's duration, in ticks. 254016000000 ticks/second.
+						//	var sequenceDuration = app.project.activeSequence.end - app.project.activeSequence.zeroPoint;						
+						//}
 						
-						var seq = app.project.activeSequence; 
 						
-						if (seq) {
-							seq.exportAsMediaDirect(fullPathToFile,  
-													outPreset.fsName, 
-													app.encoder.ENCODE_WORKAREA);
-
-							Bonus: Here's how to compute a sequence's duration, in ticks. 254016000000 ticks/second.
-							var sequenceDuration = app.project.activeSequence.end - app.project.activeSequence.zeroPoint;						
-						}
-						
-						*/
 						
 						var jobID = app.encoder.encodeSequence(	app.project.activeSequence,
 																fullPathToFile,
@@ -1009,8 +1009,9 @@ $._PPP_={
 										0,									// embed audio? 
 										0,									// audio file format? 0 = aiff, 1 = wav
 										0,									// trim sources? 
-										0/*,								// number of 'handle' frames
-										optionalPathToOutputPreset*/);		// optional; .epr file to use
+										0,									// number of 'handle' frames
+										//optionalPathToOutputPreset		// optional; .epr file to use
+										);		
 			} else {
 				$._PPP_.updateEventPanel("Couldn't create AAF output.");
 			 }
@@ -1677,3 +1678,4 @@ $._PPP_={
 	},
 
 };
+*/
