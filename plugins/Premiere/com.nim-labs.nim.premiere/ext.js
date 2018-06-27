@@ -1,29 +1,30 @@
 
 function onLoaded() {
 	
-	var csInterface = new CSInterface();
-	var appName = csInterface.hostEnvironment.appName;
-	var appVersion = csInterface.hostEnvironment.appVersion;
+	//var csInterface = new CSInterface();
+	//var appName = csInterface.hostEnvironment.appName;
+	//var appVersion = csInterface.hostEnvironment.appVersion;
 
-	var APIVersion = csInterface.getCurrentApiVersion();
+	//var APIVersion = csInterface.getCurrentApiVersion();
 	
 	// document.getElementById("dragthing").style.backgroundColor = "lightblue";
-	var caps = csInterface.getHostCapabilities();
+	//var caps = csInterface.getHostCapabilities();
 	
 	loadJSX();
 	
 	//updateThemeWithAppSkinInfo(csInterface.hostEnvironment.appSkinInfo);
 
 	// Update the color of the panel when the theme color of the product changed.
-	csInterface.addEventListener(CSInterface.THEME_COLOR_CHANGED_EVENT, onAppThemeColorChanged);
+	//csInterface.addEventListener(CSInterface.THEME_COLOR_CHANGED_EVENT, onAppThemeColorChanged);
+	
 	// Listen for event sent in response to rendering a sequence.
-	csInterface.addEventListener("com.adobe.csxs.events.PProPanelRenderEvent", function(event){
-		alert(event.data);
-	});
+	//csInterface.addEventListener("com.adobe.csxs.events.PProPanelRenderEvent", function(event){
+	//	alert(event.data);
+	//});
 
-	csInterface.addEventListener("com.adobe.csxs.events.WorkspaceChanged", function(event){
-		alert("New workspace selected: " + event.data);
-	});
+	//csInterface.addEventListener("com.adobe.csxs.events.WorkspaceChanged", function(event){
+	//	alert("New workspace selected: " + event.data);
+	//});
 
 	// register for messages
 	VulcanInterface.addMessageListener(
@@ -65,19 +66,24 @@ function dragHandler(event){
 }
 */
 
+/*
 function myCallBackFunction (data) {
 	// Updates seq_display with whatever ExtendScript function returns.
 	var boilerPlate		= "Active Sequence: ";
 	var seq_display		= document.getElementById("active_seq");
 	seq_display.innerHTML	= boilerPlate + data;
 }
+*/
 
+/*
 function myUserNameFunction (data) {
 	// Updates username with whatever ExtendScript function returns.
 	var user_name		= document.getElementById("username");
 	user_name.innerHTML	= data;
 }
+*/
 
+/*
 function myGetProxyFunction (data) {
 	// Updates proxy_display based on current sequence's value.
 	var boilerPlate		   = "Proxies enabled for sequence: ";
@@ -87,17 +93,22 @@ function myGetProxyFunction (data) {
 		proxy_display.innerHTML = boilerPlate + data;
 	}
 }
+*/
 
+/*
 function mySetProxyFunction (data) {
 	var csInterface = new CSInterface();
 	csInterface.evalScript('$._PPP_.getActiveSequenceName()', myCallBackFunction);
 	csInterface.evalScript('$._PPP_.getSequenceProxySetting()', myGetProxyFunction);
 }
-	 
+*/
+
+/*	 
 function myVersionInfoFunction (data) {
 	var v_string		= document.getElementById("version_string");
 	v_string.innerHTML	= data;
 }
+*/
 
 /**
  * Update the theme with the AppSkinInfo retrieved from the host product.
@@ -200,6 +211,7 @@ function toHex(color, delta) {
 	return "#" + hex;
 }
 
+/*
 function onAppThemeColorChanged(event) {
 	// Should get a latest HostEnvironment object from application.
 	var skinInfo = JSON.parse(window.__adobe_cep__.getHostEnvironment()).appSkinInfo;
@@ -207,6 +219,7 @@ function onAppThemeColorChanged(event) {
 	// and redraw all UI controls of your extension according to the style info.
 	//updateThemeWithAppSkinInfo(skinInfo);
 } 
+*/
 
 /**
 * Load JSX file into the scripting context of the product. All the jsx files in 
@@ -232,7 +245,9 @@ function evalScript(script, callback) {
 	new CSInterface().evalScript(script, callback);
 }
 
+/*
 function onClickButton(ppid) {
 	var extScript = "$._ext_" + ppid + ".run()";
 	evalScript(extScript);
 }
+*/

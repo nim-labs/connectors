@@ -690,8 +690,16 @@ $._nim_PPP_={
 		var jobData = $._nim_PPP_.exportJobs[jobID];
 
 		var jobProgress = { jobID: jobID, progress: progress, encode: jobData["encode"], itemID: jobData["itemID"] };
+
 		var nimEvent = new CSXSEvent();
-		nimEvent.type = "com.nim-labs.events.PProExportEditProgress";
+
+		nimEvent.type = "com.nim-labs.events";
+		if( jobData["encode"] == "sequence"){
+			nimEvent.type = "com.nim-labs.events.PProExportEditProgress";
+		}
+		else if( jobData["encode"] == "clip"){
+			nimEvent.type = "com.nim-labs.events.PProExportShotProgress";
+		}
 		nimEvent.data = JSON.stringify(jobProgress);
 		nimEvent.dispatch();
 	},
