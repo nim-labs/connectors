@@ -238,7 +238,8 @@ $._nim_PPP_={
 		return JSON.stringify($._nim_PPP_.exportJobs[encodeJobID]);
 	},
 
-	exportClip : function(trackID, clipID, itemID, name, typeID, preset, presetPath, outputPath, length, handles) {
+	exportClip : function(trackID, clipID, itemID, name, typeID, preset, presetPath, outputPath, 
+							length, handles, exportAE, exportAeSource, task_type_ID, serverID) {
 
 		app.encoder.bind('onEncoderJobComplete',	$._nim_PPP_.onEncoderJobComplete);
 		app.encoder.bind('onEncoderJobError', 		$._nim_PPP_.onEncoderJobError);
@@ -256,6 +257,10 @@ $._nim_PPP_={
 		$._nim_PPP_.debugLog('exportEdit - outputPath:' + outputPath);
 		$._nim_PPP_.debugLog('exportEdit - length:' + length);
 		$._nim_PPP_.debugLog('exportEdit - handles:' + handles);
+		$._nim_PPP_.debugLog('exportEdit - exportAE:' + exportAE);
+		$._nim_PPP_.debugLog('exportEdit - exportAeSource:' + exportAeSource);
+		$._nim_PPP_.debugLog('exportEdit - task_type_ID:' + task_type_ID);
+		$._nim_PPP_.debugLog('exportEdit - serverID:' + serverID);
 
 		
 
@@ -288,7 +293,8 @@ $._nim_PPP_={
 
 				$._nim_PPP_.exportJobs[encodeJobID] = { encode : "clip", jobID : encodeJobID, trackID : trackID, clipID : clipID, itemID : itemID, 
 														name : name, typeID : typeID, preset : preset, presetPath : presetPath, outputPath : outputPath,
-														length : length, handles : handles };
+														length : length, handles : handles, exportAE : exportAE, exportAeSource : exportAeSource, 
+														task_type_ID : task_type_ID, serverID : serverID };
 
 				return JSON.stringify($._nim_PPP_.exportJobs[encodeJobID]);
 			}
@@ -298,7 +304,8 @@ $._nim_PPP_={
 
 			$._nim_PPP_.exportJobs[encodeJobID] = { encode : "clip", jobID : encodeJobID, trackID : trackID, clipID : clipID, itemID : itemID, 
 													name : name, typeID : typeID, preset : preset, presetPath : presetPath, outputPath : outputPath,
-													length : length, handles : handles };
+													length : length, handles : handles, exportAE : exportAE, exportAeSource : exportAeSource, 
+													task_type_ID : task_type_ID, serverID : serverID };
 
 			return JSON.stringify($._nim_PPP_.exportJobs[encodeJobID]);
 		}
@@ -355,6 +362,7 @@ $._nim_PPP_={
 				clipInfo['outPoint'] = trackClips[j].outPoint;
 				clipInfo['mediaType'] = trackClips[j].mediaType;
 				clipInfo['projectItem'] = trackClips[j].projectItem;
+				clipInfo['mediaPath'] = clipInfo['projectItem'].getMediaPath();
 				clips.push(clipInfo);	
 			}
 			if(trackClips.numItems >  0){
