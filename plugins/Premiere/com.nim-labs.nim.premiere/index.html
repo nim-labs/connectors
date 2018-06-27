@@ -10,7 +10,18 @@
 		<link href="css/style.css" rel="stylesheet" type="text/css">
 		
 		<script src="http://localhost:8888/_js/kendoui/js/jquery.min.js"></script>
-
+		<!-- NIM ROOT jQuery plugins
+		<script src="http://localhost:8888/_js/kendoui/js/kendo.all.min.js"></script>
+		<script src="http://localhost:8888/_js/kendoui/js/kendo.timezones.min.js"></script>
+		<script src="http://localhost:8888/_js/kendoui/js/pako_deflate.min.js"></script>
+		<script src="http://localhost:8888/_js/kendoui/js/jszip.min.js"></script>
+		<script src="http://localhost:8888/_plugins/jQuery-fileDownload/jquery-filedownload.js"></script>
+		<script src="http://localhost:8888/_plugins/perfect-scrollbar-0.4.8/src/perfect-scrollbar.js"></script>
+		<script src="http://localhost:8888/_plugins/jQuery-mousewheel/jquery.mousewheel.min.js"></script>
+		<script src="http://localhost:8888/_plugins/TinyColor/tinycolor.js"></script>
+		<script src="http://localhost:8888/_nodejs/node_modules/socket.io/node_modules/socket.io-client/dist/socket.io.js"></script>
+		<script type="text/javascript" src="http://localhost:8888/_js/nim/nim_functions.js?v=<?php echo nim_version; ?>"></script>
+		 -->
 		<script type="text/javascript">
 			
 			var nimURL = 'http://localhost:8888';
@@ -20,6 +31,7 @@
 				$.ajax({
 					type: "GET",
 					url: nimURL+"/index.php?con=ppro&err=time&targetUrl=%2Fconn%2Fc_premiere.php",
+					//url: nimURL+"/index.php",
 					success: function(data) {
 						var data = data.replace(/(['"])(\/.*?['"])/g,'$1'+nimURL+'$2');
 						$("#nim_panel").html(data);
