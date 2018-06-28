@@ -238,8 +238,8 @@ $._nim_PPP_={
 		return JSON.stringify($._nim_PPP_.exportJobs[encodeJobID]);
 	},
 
-	exportClip : function(trackID, clipID, itemID, name, typeID, preset, presetPath, outputPath, 
-							length, handles, exportAE, exportAeSource, task_type_ID, serverID) {
+	exportClip : function(sequenceID, trackID, clipID, itemID, name, typeID, preset, presetPath, 
+		outputPath, length, handles, exportAE, exportAeSource, task_type_ID, serverID, framerate) {
 
 		app.encoder.bind('onEncoderJobComplete',	$._nim_PPP_.onEncoderJobComplete);
 		app.encoder.bind('onEncoderJobError', 		$._nim_PPP_.onEncoderJobError);
@@ -263,8 +263,17 @@ $._nim_PPP_={
 		$._nim_PPP_.debugLog('exportEdit - serverID:' + serverID);
 
 		
+		var sequences = app.project.sequences;
+		var targetSequence = app.project.activeSequence;	// Set to active sequence by default
+		// Find sequence by ID targeted for export at time export button was pressed
+		for(var i=0; i<sequences.numItems; i++){
+			if(sequences[i].sequenceID == sequenceID){
+				targetSequence = sequences[i];
+			}
+		}
 
-		var clip = app.project.activeSequence.videoTracks[trackID].clips[clipID];
+		//var clip = app.project.activeSequence.videoTracks[trackID].clips[clipID];
+		var clip = targetSequence.videoTracks[trackID].clips[clipID];
 		var projectItem = clip.projectItem;
 
 		var workArea = 0;
@@ -278,8 +287,9 @@ $._nim_PPP_={
 			//$._nim_PPP_.message("projectItem.type: "+projectItem.type);
 
 			var ticksPerSecond = 254016000000; 							// Ticks per second
-			var ticksPerFrame = app.project.activeSequence.timebase; 	// Ticks per frame
-			//var framerate = ticksPerSecond/ticksPerFrame;
+			var ticksPerFrame = targetSequence.timebase; 	// Ticks per frame
+			//var ticksPerFrame = app.project.activeSequence.timebase; 	// Ticks per frame
+			//var framerate = ticksPerSecond/ticksPerFrame;				// Passed From getSequenceItems
 			
 			var inPoint = clip.inPoint.seconds - ((parseInt(handles) * ticksPerFrame)/ticksPerSecond);		// Convert handles from frames to seconds
 			inPoint = inPoint < 0 ? 0 : inPoint; // Keep from going negative
@@ -294,7 +304,7 @@ $._nim_PPP_={
 				$._nim_PPP_.exportJobs[encodeJobID] = { encode : "clip", jobID : encodeJobID, trackID : trackID, clipID : clipID, itemID : itemID, 
 														name : name, typeID : typeID, preset : preset, presetPath : presetPath, outputPath : outputPath,
 														length : length, handles : handles, exportAE : exportAE, exportAeSource : exportAeSource, 
-														task_type_ID : task_type_ID, serverID : serverID };
+														task_type_ID : task_type_ID, serverID : serverID, framerate : framerate };
 
 				return JSON.stringify($._nim_PPP_.exportJobs[encodeJobID]);
 			}
@@ -305,7 +315,7 @@ $._nim_PPP_={
 			$._nim_PPP_.exportJobs[encodeJobID] = { encode : "clip", jobID : encodeJobID, trackID : trackID, clipID : clipID, itemID : itemID, 
 													name : name, typeID : typeID, preset : preset, presetPath : presetPath, outputPath : outputPath,
 													length : length, handles : handles, exportAE : exportAE, exportAeSource : exportAeSource, 
-													task_type_ID : task_type_ID, serverID : serverID };
+													task_type_ID : task_type_ID, serverID : serverID, framerate : framerate };
 
 			return JSON.stringify($._nim_PPP_.exportJobs[encodeJobID]);
 		}
@@ -324,6 +334,7 @@ $._nim_PPP_={
 		var activeSequence = app.project.activeSequence;
 		sequenceObj['sequenceID'] = activeSequence.sequenceID;
 		sequenceObj['sequenceName'] = activeSequence.name;
+		sequenceObj['framerate'] = $._nim_PPP_.getActiveSequenceFramerate();
 
 		var videoTracks = activeSequence.videoTracks;
 		$._nim_PPP_.debugLog('videoTracks: '+JSON.stringify(videoTracks));
@@ -397,6 +408,7 @@ $._nim_PPP_={
 		$._nim_PPP_.debugLog('clip: '+clip);
 		clip = JSON.parse(clip);
 
+		app.project.openSequence(clip['sequenceID']);	// Sequence Must be active to export PNG
 		$._nim_PPP_.setPlayerPosition(clip.start.ticks);
 		var outputFileName = $._nim_PPP_.exportCurrentFrameAsPNG();
 		clip["outputFileName"] = outputFileName;
@@ -608,7 +620,16 @@ $._nim_PPP_={
 		}
 	},
 
-	// Callbacks
+	getActiveSequenceFramerate : function() {
+		var ticksPerSecond = 254016000000; 							// Ticks per second
+		var ticksPerFrame = app.project.activeSequence.timebase; 	// Ticks per frame
+		var framerate = 0;
+		if(ticksPerFrame !== undefined && ticksPerFrame > 0){
+			framerate = ticksPerSecond/ticksPerFrame;
+		}
+		return framerate;
+	},
+
 	guid : function() {
 		function s4() {
 			return Math.floor((1 + Math.random()) * 0x10000)
@@ -648,6 +669,7 @@ $._nim_PPP_={
 		}
 	},
 
+	// Callbacks
 	onEncoderJobComplete : function (jobID, outputFilePath) {
 		var eoName;
 		if (Folder.fs == 'Macintosh') {
