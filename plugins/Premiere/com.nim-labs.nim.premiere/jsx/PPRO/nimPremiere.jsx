@@ -239,7 +239,7 @@ $._nim_PPP_={
 	},
 
 	exportClip : function(sequenceID, trackID, clipID, itemID, name, typeID, preset, presetPath, 
-		outputPath, length, handles, exportAE, exportAeSource, task_type_ID, serverID, framerate) {
+		outputPath, length, handles, exportAE, exportAeSource, exportAeServer, task_type_ID, serverID, framerate) {
 
 		app.encoder.bind('onEncoderJobComplete',	$._nim_PPP_.onEncoderJobComplete);
 		app.encoder.bind('onEncoderJobError', 		$._nim_PPP_.onEncoderJobError);
@@ -259,6 +259,7 @@ $._nim_PPP_={
 		$._nim_PPP_.debugLog('exportEdit - handles:' + handles);
 		$._nim_PPP_.debugLog('exportEdit - exportAE:' + exportAE);
 		$._nim_PPP_.debugLog('exportEdit - exportAeSource:' + exportAeSource);
+		$._nim_PPP_.debugLog('exportEdit - exportAeServer:' + exportAeServer);
 		$._nim_PPP_.debugLog('exportEdit - task_type_ID:' + task_type_ID);
 		$._nim_PPP_.debugLog('exportEdit - serverID:' + serverID);
 
@@ -304,7 +305,7 @@ $._nim_PPP_={
 				$._nim_PPP_.exportJobs[encodeJobID] = { encode : "clip", jobID : encodeJobID, trackID : trackID, clipID : clipID, itemID : itemID, 
 														name : name, typeID : typeID, preset : preset, presetPath : presetPath, outputPath : outputPath,
 														length : length, handles : handles, exportAE : exportAE, exportAeSource : exportAeSource, 
-														task_type_ID : task_type_ID, serverID : serverID, framerate : framerate };
+														exportAeServer : exportAeServer, task_type_ID : task_type_ID, serverID : serverID, framerate : framerate };
 
 				return JSON.stringify($._nim_PPP_.exportJobs[encodeJobID]);
 			}
@@ -315,7 +316,7 @@ $._nim_PPP_={
 			$._nim_PPP_.exportJobs[encodeJobID] = { encode : "clip", jobID : encodeJobID, trackID : trackID, clipID : clipID, itemID : itemID, 
 													name : name, typeID : typeID, preset : preset, presetPath : presetPath, outputPath : outputPath,
 													length : length, handles : handles, exportAE : exportAE, exportAeSource : exportAeSource, 
-													task_type_ID : task_type_ID, serverID : serverID, framerate : framerate };
+													exportAeServer : exportAeServer, task_type_ID : task_type_ID, serverID : serverID, framerate : framerate };
 
 			return JSON.stringify($._nim_PPP_.exportJobs[encodeJobID]);
 		}
@@ -334,7 +335,20 @@ $._nim_PPP_={
 		var activeSequence = app.project.activeSequence;
 		sequenceObj['sequenceID'] = activeSequence.sequenceID;
 		sequenceObj['sequenceName'] = activeSequence.name;
-		sequenceObj['framerate'] = $._nim_PPP_.getActiveSequenceFramerate();
+
+		
+		sequenceObj['framerate'] = 0;
+		var pxmp = new XMPMeta(activeSequence.projectItem.getProjectMetadata());
+		var kPProPrivateProjectMetadataURI	= "http://ns.adobe.com/premierePrivateProjectMetaData/1.0/";
+		// Pull framerate from sequence metadata
+        if (pxmp.doesPropertyExist(kPProPrivateProjectMetadataURI, 'Column.Intrinsic.MediaTimebase') == true) {  
+          sequenceObj['framerate'] = pxmp.getProperty(kPProPrivateProjectMetadataURI, 'Column.Intrinsic.MediaTimebase');
+          sequenceObj['framerate'] = parseFloat(sequenceObj['framerate']);
+        }
+        // Calculate framerate
+        else{
+        	sequenceObj['framerate'] = $._nim_PPP_.getActiveSequenceFramerate();
+        }
 
 		var videoTracks = activeSequence.videoTracks;
 		$._nim_PPP_.debugLog('videoTracks: '+JSON.stringify(videoTracks));
