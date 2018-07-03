@@ -20,7 +20,7 @@
 			<DispatchInfo >
 				<Resources>
 					<MainPath>./index.html</MainPath>
-					<ScriptPath>./PProPanel.jsx</ScriptPath>
+					<ScriptPath>./nimPProPanel.jsx</ScriptPath>
 				</Resources>
 				<Lifecycle>
 					<AutoVisible>true</AutoVisible>

@@ -7,13 +7,15 @@
 		<script src="./ext.js"></script>
 		<script src="./lib/CSInterface.js"></script>
 		<script src="./lib/Vulcan.js"></script>
+
 		<!--<link href="css/style.css" rel="stylesheet" type="text/css">-->
 
+		<script src="http://localhost:8888/_js/kendoui/js/jquery.min.js"></script>
 		<link href="http://localhost:8888/_fonts/Raleway_WebKit/nim_raleway.css" rel="stylesheet" type="text/css"/>
 		<link rel="stylesheet" href="http://localhost:8888/_css/nim_ui.css" type="text/css" />
 		<link rel="stylesheet" href="http://localhost:8888/_css/nim_kendoui.css" type="text/css" />
 		
-		<script src="http://localhost:8888/_js/kendoui/js/jquery.min.js"></script>
+		
 		<!-- NIM ROOT jQuery plugins
 		<script src="http://localhost:8888/_js/kendoui/js/kendo.all.min.js"></script>
 		<script src="http://localhost:8888/_js/kendoui/js/kendo.timezones.min.js"></script>
@@ -47,29 +49,14 @@
 				
 			});
 		</script>
+		<style>
+			body{
+				background-color: #333;
+			}
+		</style>
 	</head>
 
 	<body onLoad="onLoaded()">
 		<div id="nim_panel"></div>
-		<!--
-		<div style="display:none">
-			<a href="javascript:history.go(0)">Refresh panel</a>
-			<p id="username">[uninitialized]</p>
-			<p id="version_string">[uninitialized]</p>
-			<p id="active_seq">[uninitialized]</p>
-			<p id="proxies_on">Proxies enabled for sequence: </p>
-		</div>
-		-->
 	</body>
-	<script>
-		/*
-		document.body.onbeforeunload = function() {
-			var csInterface		= new CSInterface();
-		    var OSVersion		= csInterface.getOSInformation();
-		    var appVersion		= csInterface.hostEnvironment.appVersion;
-		    var versionAsFloat	= parseFloat(appVersion);
-	  	};
-	  	*/
-		
-	</script>
 </html>
