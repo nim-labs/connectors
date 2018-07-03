@@ -35,8 +35,8 @@
 					<Menu>NIM</Menu>
 					<Geometry>
 						<Size>
-							<Height>300</Height>
-							<Width>180</Width>
+							<Height>600</Height>
+							<Width>800</Width>
 						</Size>
 					</Geometry>
 				</UI>
