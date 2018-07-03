@@ -2814,6 +2814,11 @@ def get_lastShotRender( shotID=None ):
 
 #  Dailies  #
 
+def get_reviewItemTypes():
+    'Retrieves a dictionary of global review item types'
+    reviewItemTypes=get( {'q': 'getReviewItemTypes'} )
+    return reviewItemTypes
+
 def get_taskDailies( taskID=None ) :
     'Retrieves the dictionary of dailies for the specified taskID from the API'
     #tasks=get( {'q': 'getTaskTypes', 'type': 'artist'} )
