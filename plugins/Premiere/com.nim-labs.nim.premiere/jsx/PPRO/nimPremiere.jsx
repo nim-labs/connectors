@@ -506,6 +506,38 @@ $._nim_PPP_={
 		return false;
 	},
 
+	importReviewItem : function(reviewPath){
+		$._nim_PPP_.debugLog("importReviewItem");
+		var result = false;
+
+		if(reviewPath){
+			if (app.project) {	
+				var importBin = app.project.getInsertionBin();	
+				result = app.project.importFiles([reviewPath], 
+													0,								// suppress warnings 
+													importBin, 	// - projectItem
+													0);								// import as numbered stills
+				
+				if(result){
+					matchingMediaItems = importBin.findItemsMatchingMediaPath(reviewPath, 1);
+					$._nim_PPP_.debugLog("matchingMediaItems: "+JSON.stringify(matchingMediaItems));
+
+					if(matchingMediaItems.length > 0){
+						$._nim_PPP_.debugLog("matchingMediaItems[0]: "+JSON.stringify(matchingMediaItems[0]));
+						var nodeId = matchingMediaItems[0]['nodeId'];
+						$._nim_PPP_.debugLog("nodeId: "+JSON.stringify(nodeId));
+						result = nodeId;
+					}
+					else{
+						result = false;
+					}
+				}
+				return JSON.stringify(result);
+			}
+		}
+		return "false";
+	},
+
 	importElements : function(shotTree, destination, binName) {
 		$._nim_PPP_.debugLog("importElements");
 		var result = false;
@@ -634,6 +666,14 @@ $._nim_PPP_={
 		}
 	},
 
+	getProjectPath : function() {
+		var projectPath = app.project.path;
+		var pathArray = projectPath.split(/[\\\/]/);
+		var basename = pathArray.pop();
+		projectPath = projectPath.substring(0,projectPath.indexOf(basename));
+		return projectPath;
+	},
+
 	getActiveSequenceFramerate : function() {
 		var ticksPerSecond = 254016000000; 							// Ticks per second
 		var ticksPerFrame = app.project.activeSequence.timebase; 	// Ticks per frame
@@ -642,6 +682,60 @@ $._nim_PPP_={
 			framerate = ticksPerSecond/ticksPerFrame;
 		}
 		return framerate;
+	},
+
+	createSequenceMarker : function(nodeID, startTime, endTime, name, comment) {
+		$._nim_PPP_.debugLog("createSequenceMarker: ");
+		$._nim_PPP_.debugLog("nodeID: "+nodeID);
+
+		var projectItem = '';
+		if(nodeID == 0){
+			projectItem = app.project.activeSequence;
+		}
+		else{
+			// Find projectItem with nodeID
+			if (app.project) {
+				var projectChildren = app.project.rootItem.children;
+				$._nim_PPP_.debugLog("projectChildren: "+JSON.stringify(projectChildren));
+
+				for(var i=0; i<projectChildren['numItems']; i++){
+					$._nim_PPP_.debugLog("projectChildren[i].nodeId: "+projectChildren[i].nodeId);
+					$._nim_PPP_.debugLog("looking for nodeID: "+nodeID);
+
+					if(projectChildren[i].nodeId == nodeID){
+						$._nim_PPP_.debugLog("target projectItem found: "+nodeID);
+						projectItem = projectChildren[i];
+						break;
+					}
+				}
+
+			}
+		}
+		
+		if(projectItem){
+			$._nim_PPP_.debugLog("projectItem: "+JSON.stringify(projectItem));
+			if(nodeID == 0){
+				var markers = projectItem.markers;
+			}
+			else {
+				var markers = projectItem.getMarkers();
+			}
+			if(markers){
+				var  newCommentMarker = markers.createMarker(parseFloat(startTime));
+				newCommentMarker.name = name;
+				newCommentMarker.comments = comment;
+				newCommentMarker.end = parseFloat(endTime);
+				return "true";
+			}
+			else{
+				$._nim_PPP_.debugLog("Failed to get markers for project item");
+				return "false";
+			}
+		}
+		else{
+			$._nim_PPP_.debugLog("createSequenceMarker: No Item Found");
+			return "false";
+		}
 	},
 
 	guid : function() {

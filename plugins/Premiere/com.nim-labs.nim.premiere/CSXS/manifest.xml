@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ExtensionManifest Version="4.0" ExtensionBundleId="com.nim-labs.nim.premiere" ExtensionBundleVersion="11.1" ExtensionBundleName="NIM" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<ExtensionManifest Version="6.0" ExtensionBundleId="com.nim-labs.nim.premiere" ExtensionBundleVersion="11.1" ExtensionBundleName="NIM" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<ExtensionList>
 		<Extension Id="com.nim-labs.nim.premiere" Version="10.3.0" />
 	</ExtensionList>
 	<ExecutionEnvironment>
 		<HostList>
-			<Host Name="PPRO" Version="9.0" />
+			<Host Name="PPRO" Version="12.0" />
 		</HostList>
 		<LocaleList>
 			<Locale Code="All" />
@@ -21,15 +21,16 @@
 				<Resources>
 					<MainPath>./index.html</MainPath>
 					<ScriptPath>./nimPProPanel.jsx</ScriptPath>
+					<CEFCommandLine>
+						<Parameter>--allow-file-access</Parameter>
+						<Parameter>--allow-file-access-from-files</Parameter>
+						<Parameter>--enable-nodejs</Parameter>
+						<Parameter>--mixed-context</Parameter>
+					</CEFCommandLine>
 				</Resources>
 				<Lifecycle>
 					<AutoVisible>true</AutoVisible>
 				</Lifecycle>
-				<CEFCommandLine>
-					<Parameter>--allow-file-access</Parameter>
-					<Parameter>--allow-file-access-from-files</Parameter>
-					<Parameter>--enable-nodejs</Parameter>
-				</CEFCommandLine>
 				<UI>
 					<Type>Panel</Type>
 					<Menu>NIM</Menu>

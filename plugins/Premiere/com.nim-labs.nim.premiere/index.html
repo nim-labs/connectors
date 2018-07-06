@@ -7,6 +7,15 @@
 		<script src="./lib/CSInterface.js"></script>
 		<script src="./lib/Vulcan.js"></script>
 
+		
+		<script type="text/javascript">
+			window.nodeRequire = window.require || function () {};
+			window.nodeModule = window.module;
+			delete window.module;
+			//window.nodeGlobal = window.global;
+			//delete window.global;
+		</script>
+		
 		<!--<link href="css/style.css" rel="stylesheet" type="text/css">-->
 
 		<script src="http://localhost:8888/_js/kendoui/js/jquery.min.js"></script>
@@ -35,7 +44,8 @@
 
 				$.ajax({
 					type: "GET",
-					url: nimURL+"/index.php?con=ppro&err=time&targetUrl=%2Fconn%2Fc_premiere.php",
+					//url: nimURL+"/index.php?con=ppro&err=time&targetUrl=%2Fconn%2Fc_premiere.php",
+					url: nimURL+"/index.php?con=ppro&targetUrl=%2Fconn%2Fc_premiere.php",
 					//url: nimURL+"/index.php",
 					success: function(data) {
 						var data = data.replace(/(['"])(\/.*?['"])/g,'$1'+nimURL+'$2');
