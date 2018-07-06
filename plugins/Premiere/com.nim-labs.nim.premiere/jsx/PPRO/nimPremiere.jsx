@@ -515,7 +515,7 @@ $._nim_PPP_={
 				var importBin = app.project.getInsertionBin();	
 				result = app.project.importFiles([reviewPath], 
 													0,								// suppress warnings 
-													importBin, 	// - projectItem
+													importBin, 						// - projectItem
 													0);								// import as numbered stills
 				
 				if(result){
