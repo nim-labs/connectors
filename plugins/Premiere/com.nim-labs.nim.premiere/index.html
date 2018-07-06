@@ -1,13 +1,11 @@
 <!doctype html>
 <html>
 	<head>
-
 		<meta charset="utf-8">
 		<script src="./ext.js"></script>
 		<script src="./lib/CSInterface.js"></script>
 		<script src="./lib/Vulcan.js"></script>
 
-		
 		<script type="text/javascript">
 			window.nodeRequire = window.require || function () {};
 			window.nodeModule = window.module;
@@ -15,57 +13,181 @@
 			//window.nodeGlobal = window.global;
 			//delete window.global;
 		</script>
-		
-		<!--<link href="css/style.css" rel="stylesheet" type="text/css">-->
 
-		<script src="http://localhost:8888/_js/kendoui/js/jquery.min.js"></script>
-		<link href="http://localhost:8888/_fonts/Raleway_WebKit/nim_raleway.css" rel="stylesheet" type="text/css"/>
-		<link rel="stylesheet" href="http://localhost:8888/_css/nim_ui.css" type="text/css" />
-		<link rel="stylesheet" href="http://localhost:8888/_css/nim_kendoui.css" type="text/css" />
-		
-		
-		<!-- NIM ROOT jQuery plugins
-		<script src="http://localhost:8888/_js/kendoui/js/kendo.all.min.js"></script>
-		<script src="http://localhost:8888/_js/kendoui/js/kendo.timezones.min.js"></script>
-		<script src="http://localhost:8888/_js/kendoui/js/pako_deflate.min.js"></script>
-		<script src="http://localhost:8888/_js/kendoui/js/jszip.min.js"></script>
-		<script src="http://localhost:8888/_plugins/jQuery-fileDownload/jquery-filedownload.js"></script>
-		<script src="http://localhost:8888/_plugins/perfect-scrollbar-0.4.8/src/perfect-scrollbar.js"></script>
-		<script src="http://localhost:8888/_plugins/jQuery-mousewheel/jquery.mousewheel.min.js"></script>
-		<script src="http://localhost:8888/_plugins/TinyColor/tinycolor.js"></script>
-		<script src="http://localhost:8888/_nodejs/node_modules/socket.io/node_modules/socket.io-client/dist/socket.io.js"></script>
-		<script type="text/javascript" src="http://localhost:8888/_js/nim/nim_functions.js?v=<?php echo nim_version; ?>"></script>
-		 -->
+		<script src="./lib/jquery.min.js"></script>
+
 		<script type="text/javascript">
+
+			// Read NIM Prefs
+			var appOS = "win";
+			var separator = "\\";
+			if((navigator.platform == "MacIntel") || (navigator.platform == "Macintosh")){
+				appOS = "osx";
+				separator = "/";
+			}
+
+			var csInterface = new CSInterface();
+			var documentsFolder = csInterface.getSystemPath("myDocuments");
+			documentsFolder = documentsFolder.slice(0, -10);
+
+			var nimPrefsDir = documentsFolder+separator+".nim"
+			var nimPrefsPath = nimPrefsDir+separator+"prefs.nim";
+			console.log("nimPrefsPath: ",nimPrefsPath);
+
+			var nimURL = '';
+			var urlInput = false;
+
+			// Read Prefs File
+			var nimPrefsRead = window.cep.fs.readFile(nimPrefsPath);
+			console.log("prefs read: ",nimPrefsRead);
 			
-			var nimURL = 'http://localhost:8888';
+			if( nimPrefsRead['err'] != 0 ){
+				// Failed To Read File
+				var urlInput = true;
+			}
+			else {
+				var nimPrefs = nimPrefsRead['data'].split(/\r?\n/);
+				
+				// Search for nimURL in Prefs
+				for(var i=0; i<nimPrefs.length; i++){
+					var prefsPair = nimPrefs[i].split('=',2);
+					//console.log(prefsPair);
+					if(prefsPair){
+						if(prefsPair[0] == 'NIM_URL'){
+							nimURL = prefsPair[1];
+							break;
+						}
+					}
+				}
+			}
+			
+			// Check if URL found in Prefs
+			if(nimURL == ''){
+				// URL not found..  add input for URL and write prefs
+				console.log("nimURL not found");
+				urlInput = true;
+			}
+			else {
+				// Strip nimAPI from end of prefs url
+				nimURL = nimURL.replace(/\/nimAPI.php\??$/, "");
+				console.log("nimURL: "+nimURL);
+			}
+	
+		</script>
+
+		<script type="text/javascript">
 			
 			$( document ).ready(function() {
 
+				$(".nim_url_button").click(function(){
+					nimURL = $(".nim_url_input").val().trim();
+					console.log("nimURL input: "+nimURL);
+
+					// Make sure output directory exists
+					window.cep.fs.makedir(nimPrefsDir);
+
+					// Write URL to nimPrefs
+					var nimPrefsInfo = "NIM_URL="+nimURL;
+					var nimPrefsWrite = window.cep.fs.writeFile( nimPrefsPath, nimPrefsInfo);
+					console.log("prefs write: ",nimPrefsWrite);
+
+					// Load NIM
+					loadConnector(nimURL);
+				});
+
+				loadConnector(nimURL);
+			});
+
+			function loadConnector(nimURL){
 				$.ajax({
 					type: "GET",
-					//url: nimURL+"/index.php?con=ppro&err=time&targetUrl=%2Fconn%2Fc_premiere.php",
 					url: nimURL+"/index.php?con=ppro&targetUrl=%2Fconn%2Fc_premiere.php",
-					//url: nimURL+"/index.php",
 					success: function(data) {
 						var data = data.replace(/(['"])(\/.*?['"])/g,'$1'+nimURL+'$2');
 						$("#nim_panel").html(data);
 					},
 					error: function(data){
 						console.log("ERROR: Failed Requesting Connector");
+						$("#nim_url_input_container").css("display","block");
 					}
 				});
-
-			});
+			}
 		</script>
 	</head>
 
 	<body onLoad="onLoaded()">
 		<style>
 			body{
+				color: #CCC;
 				background-color: #333;
+				font-family: Arial, Helvetica, sans-serif;
+			}
+			#nim_url_input_container{
+				width: 100%;
+				height: 100%;
+				display:none;
+			}
+			#nim_url_input_block{
+				width: 420px;
+				margin: 100px auto;
+			}
+			.nim_url_label{
+				margin: 0 0 24px 0;
+				font-size: 24px;
+			}
+			.nim_url_subtitle{
+				font-size: 16px;
+			}
+			.nim_url_input {
+				width: 298px;
+				font-size: 18px;
+				margin: 0 4px 0 0;
+			}
+			.k-button{
+				background-image: none;
+				background-position: 50% 50%;
+				background-color: #354656;
+				color: #c4c4c4;
+				-moz-border-radius: 4px;
+				-webkit-border-radius: 4px;
+				border-radius: 4px;
+				-webkit-box-shadow: none;
+				box-shadow: none;
+				border: none;
+				font-size: 18px;
+				width: 82px;
+				height: 32px;
+			}
+			.k-button:hover {
+				color: #dfe5e6;
+				border-color: #2b2b2b;
+				background-color: #576878;
+			}
+			.k-button:active {
+				color: #ffffff;
+				background-color: #576878;
+				border-color: #354656;
+			}
+			.k-button:focus {
+				-webkit-box-shadow: #2b2b2b 0px 0px 3px 1px inset;
+				box-shadow: #2b2b2b 0px 0px 3px 1px inset;
+			}
+			.k-button:active {
+				background-image: none;
+				background-position: 50% 50%;
 			}
 		</style>
-		<div id="nim_panel"></div>
+		<div id="nim_panel">
+			<div id="nim_url_input_container">
+				<div id="nim_url_input_block">
+					<div class="nim_url_label">
+						Please enter the NIM URL:<br/>
+						<span class="nim_url_subtitle">example: http://192.168.1.1 or https://nim.company.com</span>
+					</div>
+					<input class="nim_url_input" type="text" />
+					<button class="nim_url_button k-button">Go!</button>
+				</div>
+			</div>
+		</div>
 	</body>
 </html>
