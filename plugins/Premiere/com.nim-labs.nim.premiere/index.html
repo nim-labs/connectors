@@ -28,21 +28,19 @@
 
 			var csInterface = new CSInterface();
 			var documentsFolder = csInterface.getSystemPath("myDocuments");
-			documentsFolder = documentsFolder.slice(0, -10);
+			documentsFolder = documentsFolder.slice(0, -10);	// Removing "/Documents" to get user root
 
 			var nimPrefsDir = documentsFolder+separator+".nim"
 			var nimPrefsPath = nimPrefsDir+separator+"prefs.nim";
-			console.log("nimPrefsPath: ",nimPrefsPath);
 
 			var nimURL = '';
 			var urlInput = false;
 
 			// Read Prefs File
-			var nimPrefsRead = window.cep.fs.readFile(nimPrefsPath);
-			console.log("prefs read: ",nimPrefsRead);
-			
+			var nimPrefsRead = window.cep.fs.readFile(nimPrefsPath);			
 			if( nimPrefsRead['err'] != 0 ){
 				// Failed To Read File
+				console.log("Prefs Read Error: "+nimPrefsRead['err']);
 				var urlInput = true;
 			}
 			else {
@@ -51,7 +49,6 @@
 				// Search for nimURL in Prefs
 				for(var i=0; i<nimPrefs.length; i++){
 					var prefsPair = nimPrefs[i].split('=',2);
-					//console.log(prefsPair);
 					if(prefsPair){
 						if(prefsPair[0] == 'NIM_URL'){
 							nimURL = prefsPair[1];
@@ -64,13 +61,13 @@
 			// Check if URL found in Prefs
 			if(nimURL == ''){
 				// URL not found..  add input for URL and write prefs
-				console.log("nimURL not found");
+				console.log("NIM URL not found");
 				urlInput = true;
 			}
 			else {
 				// Strip nimAPI from end of prefs url
 				nimURL = nimURL.replace(/\/nimAPI.php\??$/, "");
-				console.log("nimURL: "+nimURL);
+				console.log("NIM URL: "+nimURL);
 			}
 	
 		</script>
@@ -81,7 +78,6 @@
 
 				$(".nim_url_button").click(function(){
 					nimURL = $(".nim_url_input").val().trim();
-					console.log("nimURL input: "+nimURL);
 
 					// Make sure output directory exists
 					window.cep.fs.makedir(nimPrefsDir);
@@ -89,7 +85,7 @@
 					// Write URL to nimPrefs
 					var nimPrefsInfo = "NIM_URL="+nimURL;
 					var nimPrefsWrite = window.cep.fs.writeFile( nimPrefsPath, nimPrefsInfo);
-					console.log("prefs write: ",nimPrefsWrite);
+					console.log("NIM Prefs write: ",nimPrefsWrite);
 
 					// Load NIM
 					loadConnector(nimURL);
