@@ -85,13 +85,20 @@
 					// Write URL to nimPrefs
 					var nimPrefsInfo = "NIM_URL="+nimURL;
 					var nimPrefsWrite = window.cep.fs.writeFile( nimPrefsPath, nimPrefsInfo);
-					console.log("NIM Prefs write: ",nimPrefsWrite);
-
+					if(nimPrefsWrite['err'] != 0){
+						console.log("NIM Prefs Write ERROR: ",nimPrefsWrite['err']);
+					}
+					
 					// Load NIM
 					loadConnector(nimURL);
 				});
 
-				loadConnector(nimURL);
+				if(urlInput){
+					$("#nim_url_input_container").css("display","block");
+				}
+				else{
+					loadConnector(nimURL);
+				}
 			});
 
 			function loadConnector(nimURL){
@@ -104,6 +111,7 @@
 					},
 					error: function(data){
 						console.log("ERROR: Failed Requesting Connector");
+						$("#nim_url_error").css("display","block");
 						$("#nim_url_input_container").css("display","block");
 					}
 				});
@@ -138,6 +146,12 @@
 				width: 298px;
 				font-size: 18px;
 				margin: 0 4px 0 0;
+			}
+			#nim_url_error{
+				display: none;
+				font-size: 14px;
+				margin: 12px 0 0 0;
+				color: #d7a333;
 			}
 			.k-button{
 				background-image: none;
@@ -182,6 +196,9 @@
 					</div>
 					<input class="nim_url_input" type="text" />
 					<button class="nim_url_button k-button">Go!</button>
+					<div id="nim_url_error">
+						The NIM URL is incorrect... please check the URL and try again.
+					</div>
 				</div>
 			</div>
 		</div>
