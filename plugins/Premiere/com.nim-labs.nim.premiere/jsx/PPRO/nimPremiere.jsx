@@ -39,31 +39,35 @@ $._nim_PPP_={
 
 	getProjectMetadata : function(data){
 		data = JSON.parse(data);
+
 		if (app.isDocumentOpen()) {
 			//var projectItem = app.project.activeSequence.projectItem;
-			var projectItem	= app.project.rootItem.children[0]; // just grabs first projectItem.
-			if (projectItem) {
-				if (ExternalObject.AdobeXMPScript === undefined) {
-					ExternalObject.AdobeXMPScript = new ExternalObject('lib:AdobeXMPScript');
-				}
-				if (ExternalObject.AdobeXMPScript !== undefined) {
-					var kPProPrivateProjectMetadataURI	= "http://ns.adobe.com/premierePrivateProjectMetaData/1.0/";
-					var projectMetadata	= projectItem.getProjectMetadata();
-					var xmp	= new XMPMeta(projectMetadata);
-
-					for (var key in data) {
-						$._nim_PPP_.debugLog('Reading Property: '+key);
-						if(xmp.doesPropertyExist(kPProPrivateProjectMetadataURI, key)){
-							var property = xmp.getProperty(kPProPrivateProjectMetadataURI, key);
-							$._nim_PPP_.debugLog('Property Found: '+property.value);
-							data[key] = property.value;
-							data[key] = data[key] == " " ? "" : data[key];
-						}
-						$._nim_PPP_.debugLog('--------------------------------------');
+			var projectChildren = app.project.rootItem.children;
+			if(projectChildren.numItems > 0){
+				var projectItem	= app.project.rootItem.children[0]; 	// just grabs first projectItem.
+				if (projectItem) {
+					if (ExternalObject.AdobeXMPScript === undefined) {
+						ExternalObject.AdobeXMPScript = new ExternalObject('lib:AdobeXMPScript');
 					}
+					if (ExternalObject.AdobeXMPScript !== undefined) {
+						var kPProPrivateProjectMetadataURI	= "http://ns.adobe.com/premierePrivateProjectMetaData/1.0/";
+						var projectMetadata	= projectItem.getProjectMetadata();
+						var xmp	= new XMPMeta(projectMetadata);
 
-					data["nim_pproProjectPath"] = app.project.path;
-					return JSON.stringify(data);
+						for (var key in data) {
+							$._nim_PPP_.debugLog('Reading Property: '+key);
+							if(xmp.doesPropertyExist(kPProPrivateProjectMetadataURI, key)){
+								var property = xmp.getProperty(kPProPrivateProjectMetadataURI, key);
+								$._nim_PPP_.debugLog('Property Found: '+property.value);
+								data[key] = property.value;
+								data[key] = data[key] == " " ? "" : data[key];
+							}
+							$._nim_PPP_.debugLog('--------------------------------------');
+						}
+
+						data["nim_pproProjectPath"] = app.project.path;
+						return JSON.stringify(data);
+					}
 				}
 			}
 		}
@@ -76,51 +80,54 @@ $._nim_PPP_={
 
 		if (app.isDocumentOpen()) {
 			//var projectItem = app.project.activeSequence.projectItem;
-			var projectItem	= app.project.rootItem.children[0]; // just grabs first projectItem.
-			if (projectItem) {
-				if (ExternalObject.AdobeXMPScript === undefined) {
-					ExternalObject.AdobeXMPScript = new ExternalObject('lib:AdobeXMPScript');
-				}
-				if (ExternalObject.AdobeXMPScript !== undefined) {
-					var kPProPrivateProjectMetadataURI	= "http://ns.adobe.com/premierePrivateProjectMetaData/1.0/";
-					var projectMetadata	= projectItem.getProjectMetadata();
-					var xmp	= new XMPMeta(projectMetadata);
+			var projectChildren = app.project.rootItem.children;
+			if(projectChildren.numItems > 0){
+				var projectItem	= app.project.rootItem.children[0]; // just grabs first projectItem.
+				if (projectItem) {
+					if (ExternalObject.AdobeXMPScript === undefined) {
+						ExternalObject.AdobeXMPScript = new ExternalObject('lib:AdobeXMPScript');
+					}
+					if (ExternalObject.AdobeXMPScript !== undefined) {
+						var kPProPrivateProjectMetadataURI	= "http://ns.adobe.com/premierePrivateProjectMetaData/1.0/";
+						var projectMetadata	= projectItem.getProjectMetadata();
+						var xmp	= new XMPMeta(projectMetadata);
 
-					var fieldArray	= [];
+						var fieldArray	= [];
 
-					// Define Project Properties
-					for( var key in data){
-						if( data[key] !== undefined ){
-							if (xmp.doesPropertyExist(kPProPrivateProjectMetadataURI, key)){
-								$._nim_PPP_.debugLog('Property Found: '+key);
-								$._nim_PPP_.debugLog('Property Data: '+data[key]);
-								$._nim_PPP_.debugLog('Property Type: '+typeof data[key]);
-								data[key] = data[key] == "" ? " " : data[key];
-								xmp.setProperty(kPProPrivateProjectMetadataURI, key, data[key]);
-								$._nim_PPP_.debugLog('Property Set: '+key);
-							}
-							else{
-								var successfullyAdded = app.project.addPropertyToProjectMetadataSchema(key, key, 2);
-								$._nim_PPP_.debugLog('Adding Property: '+key);
-								if(successfullyAdded){
-									$._nim_PPP_.debugLog('Property Added');
+						// Define Project Properties
+						for( var key in data){
+							if( data[key] !== undefined ){
+								if (xmp.doesPropertyExist(kPProPrivateProjectMetadataURI, key)){
+									$._nim_PPP_.debugLog('Property Found: '+key);
+									$._nim_PPP_.debugLog('Property Data: '+data[key]);
+									$._nim_PPP_.debugLog('Property Type: '+typeof data[key]);
 									data[key] = data[key] == "" ? " " : data[key];
 									xmp.setProperty(kPProPrivateProjectMetadataURI, key, data[key]);
-									$._nim_PPP_.debugLog('Property Set: '+key+ ' : '+data[key]);
+									$._nim_PPP_.debugLog('Property Set: '+key);
 								}
-								else {
-									$._nim_PPP_.debugLog('Failed to Add Property: '+key);
+								else{
+									var successfullyAdded = app.project.addPropertyToProjectMetadataSchema(key, key, 2);
+									$._nim_PPP_.debugLog('Adding Property: '+key);
+									if(successfullyAdded){
+										$._nim_PPP_.debugLog('Property Added');
+										data[key] = data[key] == "" ? " " : data[key];
+										xmp.setProperty(kPProPrivateProjectMetadataURI, key, data[key]);
+										$._nim_PPP_.debugLog('Property Set: '+key+ ' : '+data[key]);
+									}
+									else {
+										$._nim_PPP_.debugLog('Failed to Add Property: '+key);
+									}
 								}
+								$._nim_PPP_.debugLog('--------------------------------------');
+								fieldArray.push(key);
 							}
-							$._nim_PPP_.debugLog('--------------------------------------');
-							fieldArray.push(key);
 						}
-					}
-					$._nim_PPP_.debugLog('FieldArray: '+JSON.stringify(fieldArray));
+						$._nim_PPP_.debugLog('FieldArray: '+JSON.stringify(fieldArray));
 
-					var str = xmp.serialize();
-					projectItem.setProjectMetadata(str, fieldArray);
-					return true;
+						var str = xmp.serialize();
+						projectItem.setProjectMetadata(str, fieldArray);
+						return true;
+					}
 				}
 			}
 		}
