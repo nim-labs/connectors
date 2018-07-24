@@ -1,3 +1,16 @@
+//******************************************************************************
+//
+// Filename: nimPProPanel.jsx
+// Version:  v3.0.05.180724
+//
+// Copyright (c) 2015-2018 NIM Labs LLC
+// All rights reserved.
+//
+// Use of this software is subject to the terms of the NIM Labs license
+// agreement provided at the time of installation or download, or which
+// otherwise accompanies this software in either electronic or hard copy form.
+// *****************************************************************************
+
 if(typeof($)=='undefined'){
 	$={};
 }

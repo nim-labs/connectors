@@ -2,9 +2,9 @@
 #******************************************************************************
 #
 # Filename: nim_maya.py
-# Version:  v2.8.41.180206
+# Version:  v3.0.05.180724
 #
-# Copyright (c) 2017 NIM Labs LLC
+# Copyright (c) 2015-2018 NIM Labs LLC
 # All rights reserved.
 #
 # Use of this software is subject to the terms of the NIM Labs license
