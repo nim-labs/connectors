@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: nim_houdini.py
-# Version:  v3.0.05.180724
+# Version:  v3.0.10.180924
 #
 # Copyright (c) 2015-2018 NIM Labs LLC
 # All rights reserved.
