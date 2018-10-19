@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: nim_maya.py
-# Version:  v3.0.10.180924
+# Version:  v3.0.12.181019
 #
 # Copyright (c) 2015-2018 NIM Labs LLC
 # All rights reserved.
@@ -35,7 +35,7 @@ except ImportError :
             print "NIM: Failed to load UI Modules - Maya"
 
 #  Variables :
-version='v2.8.41'
+version='v3.0.12'
 winTitle='NIM_'+version
 
 def get_mainWin() :
@@ -935,6 +935,31 @@ class Pub_Chex( QtGui.QWidget ) :
 
 
 #  End of Class
+
+
+#  Fix for Maya Shift loosing focus
+class MainWindow(QtGui.QMainWindow):
+    def keyPressEvent(self, event):
+        """Override keyPressEvent to keep focus on QWidget in Maya."""
+        if (event.modifiers() & QtCore.Qt.ShiftModifier):
+            self.shift = True
+            pass # make silent
+
+from maya.app.general.mayaMixin import MayaQWidgetBaseMixin
+class UIUtils(MayaQWidgetBaseMixin, QtGui.QWidget):
+    """Base class for UI constructors."""
+
+    def window(self):
+        """Defines basic window parameters."""
+        parent = self.get_maya_window()
+        window = MainWindow(parent)
+
+        return window
+
+    def get_maya_window(self):
+        """Grabs the Maya window."""
+        pointer = mui.MQtUtil.mainWindow()
+        return shiboken.wrapInstance(long(pointer), QtGui.QWidget)
 
 
 #  End
