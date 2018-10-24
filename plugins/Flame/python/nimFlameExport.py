@@ -3251,13 +3251,14 @@ def uploadEdit(nim_showID=None, mov_path='') :
 
 	if nim_showID :
 		if mov_path :
-			result = nimAPI.upload_edit(showID=nim_showID, path=mov_path)
+			#result = nimAPI.upload_edit(showID=nim_showID, path=mov_path)
+			result = nimAPI.upload_reviewItem( itemID=nim_showID, itemType='show', path=mov_path )
 			print result
 			success = True
 		else :
-			status_msg = "NIM - uploadEdit missing movie path"
+			status_msg = "NIM - upload_reviewItem missing movie path"
 	else :
-		status_msg = "NIM - uploadEdit missing showID"
+		status_msg = "NIM - upload_reviewItem missing showID"
 
 	return success
 
@@ -3268,13 +3269,14 @@ def uploadDaily(nim_taskID=None, mov_path='') :
 
 	if nim_taskID :
 		if mov_path :
-			result = nimAPI.upload_dailies(taskID=nim_taskID, path=mov_path)
+			#result = nimAPI.upload_dailies(taskID=nim_taskID, path=mov_path)
+			result = nimAPI.upload_reviewItem( itemID=nim_taskID, itemType='task', path=mov_path )
 			print result
 			success = True
 		else :
-			status_msg = "NIM - uploadDaily missing movie path"
+			status_msg = "NIM - upload_reviewItem missing movie path"
 	else :
-		status_msg = "NIM - uploadDaily missing taskID"
+		status_msg = "NIM - upload_reviewItem missing taskID"
 
 	return success
 

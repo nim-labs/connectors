@@ -34,7 +34,7 @@ sys.path.append(nimScriptPath)
 
 import nimFlameExport
 
-debug = False
+debug = True
 
 # Hooks in this files are called in the following order:
 #

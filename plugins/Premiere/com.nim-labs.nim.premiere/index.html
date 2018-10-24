@@ -1,0 +1,208 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<script src="./ext.js"></script>
+		<script src="./lib/CSInterface.js"></script>
+		<script src="./lib/Vulcan.js"></script>
+
+		<script type="text/javascript">
+			window.nodeRequire = window.require || function () {};
+			window.nodeModule = window.module;
+			delete window.module;
+			//window.nodeGlobal = window.global;
+			//delete window.global;
+		</script>
+
+		<script src="./lib/jquery.min.js"></script>
+
+		<script type="text/javascript">
+
+			// Read NIM Prefs
+			var appOS = "win";
+			var separator = "\\";
+			if((navigator.platform == "MacIntel") || (navigator.platform == "Macintosh")){
+				appOS = "osx";
+				separator = "/";
+			}
+
+			var csInterface = new CSInterface();
+			var documentsFolder = csInterface.getSystemPath("myDocuments");
+			documentsFolder = documentsFolder.slice(0, -10);	// Removing "/Documents" to get user root
+
+			var nimPrefsDir = documentsFolder+separator+".nim"
+			var nimPrefsPath = nimPrefsDir+separator+"prefs.nim";
+
+			var nimURL = '';
+			var urlInput = false;
+
+			// Read Prefs File
+			var nimPrefsRead = window.cep.fs.readFile(nimPrefsPath);			
+			if( nimPrefsRead['err'] != 0 ){
+				// Failed To Read File
+				console.log("Prefs Read Error: "+nimPrefsRead['err']);
+				var urlInput = true;
+			}
+			else {
+				var nimPrefs = nimPrefsRead['data'].split(/\r?\n/);
+				
+				// Search for nimURL in Prefs
+				for(var i=0; i<nimPrefs.length; i++){
+					var prefsPair = nimPrefs[i].split('=',2);
+					if(prefsPair){
+						if(prefsPair[0] == 'NIM_URL'){
+							nimURL = prefsPair[1];
+							break;
+						}
+					}
+				}
+			}
+			
+			// Check if URL found in Prefs
+			if(nimURL == ''){
+				// URL not found..  add input for URL and write prefs
+				console.log("NIM URL not found");
+				urlInput = true;
+			}
+			else {
+				// Strip nimAPI from end of prefs url
+				nimURL = nimURL.replace(/\/nimAPI.php\??$/, "");
+				console.log("NIM URL: "+nimURL);
+			}
+	
+		</script>
+
+		<script type="text/javascript">
+			
+			$( document ).ready(function() {
+
+				$(".nim_url_button").click(function(){
+					nimURL = $(".nim_url_input").val().trim();
+
+					// Make sure output directory exists
+					window.cep.fs.makedir(nimPrefsDir);
+
+					// Write URL to nimPrefs
+					var nimPrefsInfo = "NIM_URL="+nimURL;
+					var nimPrefsWrite = window.cep.fs.writeFile( nimPrefsPath, nimPrefsInfo);
+					if(nimPrefsWrite['err'] != 0){
+						console.log("NIM Prefs Write ERROR: ",nimPrefsWrite['err']);
+					}
+					
+					// Load NIM
+					loadConnector(nimURL);
+				});
+
+				if(urlInput){
+					$("#nim_url_input_container").css("display","block");
+				}
+				else{
+					loadConnector(nimURL);
+				}
+			});
+
+			function loadConnector(nimURL){
+				$.ajax({
+					type: "GET",
+					url: nimURL+"/index.php?con=ppro&targetUrl=%2Fconn%2Fc_premiere.php",
+					success: function(data) {
+						var data = data.replace(/(['"])(\/.*?['"])/g,'$1'+nimURL+'$2');
+						$("#nim_panel").html(data);
+					},
+					error: function(data){
+						console.log("ERROR: Failed Requesting Connector");
+						$("#nim_url_error").css("display","block");
+						$("#nim_url_input_container").css("display","block");
+					}
+				});
+			}
+		</script>
+	</head>
+
+	<body onLoad="onLoaded()">
+		<style>
+			body{
+				color: #CCC;
+				background-color: #2e2e2e;
+				font-family: Arial, Helvetica, sans-serif;
+			}
+			#nim_url_input_container{
+				width: 100%;
+				height: 100%;
+				display:none;
+			}
+			#nim_url_input_block{
+				width: 420px;
+				margin: 100px auto;
+			}
+			.nim_url_label{
+				margin: 0 0 24px 0;
+				font-size: 24px;
+			}
+			.nim_url_subtitle{
+				font-size: 16px;
+			}
+			.nim_url_input {
+				width: 298px;
+				font-size: 18px;
+				margin: 0 4px 0 0;
+				outline: none;
+			}
+			#nim_url_error{
+				display: none;
+				font-size: 14px;
+				margin: 12px 0 0 0;
+				color: #d7a333;
+			}
+			.k-button{
+				background-image: none;
+				background-position: 50% 50%;
+				background-color: #354656;
+				color: #c4c4c4;
+				-moz-border-radius: 4px;
+				-webkit-border-radius: 4px;
+				border-radius: 4px;
+				-webkit-box-shadow: none;
+				box-shadow: none;
+				border: none;
+				font-size: 18px;
+				width: 82px;
+				height: 32px;
+				outline: none;
+			}
+			.k-button:hover {
+				color: #dfe5e6;
+				border-color: #2b2b2b;
+				background-color: #576878;
+			}
+			.k-button:active {
+				color: #ffffff;
+				background-color: #576878;
+				border-color: #354656;
+			}
+			.k-button:focus {
+				-webkit-box-shadow: #2b2b2b 0px 0px 3px 1px inset;
+				box-shadow: #2b2b2b 0px 0px 3px 1px inset;
+			}
+			.k-button:active {
+				background-image: none;
+				background-position: 50% 50%;
+			}
+		</style>
+		<div id="nim_panel">
+			<div id="nim_url_input_container">
+				<div id="nim_url_input_block">
+					<div class="nim_url_label">
+						Please enter the NIM URL:<br/>
+						<span class="nim_url_subtitle">example: http://192.168.1.1 or https://nim.company.com</span>
+					</div>
+					<input class="nim_url_input" type="text" />
+					<button class="nim_url_button k-button">Go!</button>
+					<div id="nim_url_error">
+						The NIM URL is incorrect... please check the URL and try again.
+					</div>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>

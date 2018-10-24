@@ -2,9 +2,9 @@
 #******************************************************************************
 #
 # Filename: nim_api.py
-# Version:  v2.8.61.180313
+# Version:  v3.0.12.181024
 #
-# Copyright (c) 2017 NIM Labs LLC
+# Copyright (c) 2015-2018 NIM Labs LLC
 # All rights reserved.
 #
 # Use of this software is subject to the terms of the NIM Labs license
@@ -461,13 +461,17 @@ def upload( params=None, nimURL=None, apiKey=None ) :
         else:
             P.error("Unanticipated error occurred uploading image: %s" % (e))
             return False
+
+    '''
+    # Removing after showing false error.. 
+    # Now passing result json to calling function
     else:
         if params["file"] is not None:
             if not str(result).startswith("1"):
                 P.error("Could not upload file successfully, but not sure why.\nUrl: %s\nError: %s" % (_actionURL, str(result)))
                 return False
-    
-    return True
+    '''
+    return result
 
 
 class FormPostHandler(urllib2.BaseHandler):
@@ -629,7 +633,7 @@ def add_job( name=None, number=None, numberTemplate=None, description=None, clie
     prod_shoot_date=None, prod_location=None, prod_supervised=None, editorial=None, editor=None, grading=None, colorist=None, \
     music=None, mix=None, sound=None, creative_lead=None, projectStatus=None, folder=None, projectStructureID=None, projectStructure=None, \
     jobStatusID=None, jobStatus=None, biddingLocationID=None, biddingLocation=None, \
-    assignedLocationID=None, assignedLocation=None, startDate=None, endDate=None, currency=None, customKeys=None) :
+    assignedLocationID=None, assignedLocation=None, startDate=None, endDate=None, currency=None, customKeys=None, keywords=None) :
     '''
     Creates a new job. 
 
@@ -693,6 +697,7 @@ def add_job( name=None, number=None, numberTemplate=None, description=None, clie
         end_date                date            YYYY-mm-dd
         currency                string          3 digit currency code
         customKeys              dictionary      {"Custom Key Name" : "Value"}
+        keywords                list            ["keyword1", "keyword2"]
         
     '''
     params = {'q': 'addJob'}
@@ -737,6 +742,7 @@ def add_job( name=None, number=None, numberTemplate=None, description=None, clie
     if endDate is not None : params['end_date'] = endDate
     if currency is not None : params['currency'] = currency
     if customKeys is not None : params['customKeys'] = json.dumps(customKeys)
+    if keywords is not None : params['keywords'] = json.dumps(keywords)
 
     result = connect( method='get', params=params )
     return result
@@ -746,7 +752,7 @@ def update_job( jobID=None, name=None, number=None, description=None, client=Non
     prod_shoot_date=None, prod_location=None, prod_supervised=None, editorial=None, editor=None, grading=None, colorist=None, \
     music=None, mix=None, sound=None, creative_lead=None, projectStatus=None, folder=None, projectStructureID=None, projectStructure=None, \
     jobStatusID=None, jobStatus=None, biddingLocationID=None, biddingLocation=None, \
-    assignedLocationID=None, assignedLocation=None, startDate=None, endDate=None, currency=None, customKeys=None) :
+    assignedLocationID=None, assignedLocation=None, startDate=None, endDate=None, currency=None, customKeys=None, keywords=None) :
     '''
     Updates an existing job based on the jobID.
 
@@ -813,6 +819,7 @@ def update_job( jobID=None, name=None, number=None, description=None, client=Non
         end_date                date            YYYY-mm-dd
         currency                string          3 digit currency code
         customKeys              dictionary      {"Custom Key Name" : "Value"}
+        keywords                list            ["keyword1", "keyword2"]
     '''
     params = {'q': 'updateJob'}
 
@@ -856,6 +863,7 @@ def update_job( jobID=None, name=None, number=None, description=None, client=Non
     if endDate is not None : params['end_date'] = endDate
     if currency is not None : params['currency'] = currency
     if customKeys is not None : params['customKeys'] = json.dumps(customKeys)
+    if keywords is not None : params['keywords'] = json.dumps(keywords)
 
     result = connect( method='get', params=params )
     return result
@@ -875,6 +883,19 @@ def delete_job( jobID=None) :
     if jobID is not None : params['jobID'] = jobID
 
     result = connect( method='get', params=params )
+    return result
+
+def upload_jobIcon( jobID=None, img=None, nimURL=None, apiKey=None ) :
+    'Upload job icon'
+    params = {}
+    action = "uploadJobIcon"
+    job_str = str(jobID)
+
+    params["q"] = action.encode('ascii')
+    params["jobID"] = job_str.encode('ascii')
+    params["file"] = open(img,'rb')
+
+    result = upload(params=params, nimURL=nimURL, apiKey=apiKey)
     return result
 
 def get_jobInfo( jobID=None ) :
@@ -2791,7 +2812,12 @@ def get_lastShotRender( shotID=None ):
     return lastRender
 
 
-#  Dailies  #
+#  Review  #
+
+def get_reviewItemTypes():
+    'Retrieves a dictionary of global review item types'
+    reviewItemTypes=get( {'q': 'getReviewItemTypes'} )
+    return reviewItemTypes
 
 def get_taskDailies( taskID=None ) :
     'Retrieves the dictionary of dailies for the specified taskID from the API'
@@ -2799,6 +2825,7 @@ def get_taskDailies( taskID=None ) :
     dailies=get( {'q': 'getTaskDailies', 'taskID': taskID} )
     return dailies
 
+# DEPRECATED - upload_edit() #
 def upload_edit( showID=None, path=None, nimURL=None, apiKey=None ) :
     'Upload Edit - 2 required fields: showID and path to movie'
     # nimURL and apiKey are optional for Render API Key overrride
@@ -2815,11 +2842,19 @@ def upload_edit( showID=None, path=None, nimURL=None, apiKey=None ) :
     result = upload(params=params, nimURL=nimURL, apiKey=apiKey)
     return result
 
-def upload_dailies( taskID=None, renderID=None, renderKey='', path=None, submit=None, nimURL=None, apiKey=None ) :
+# DEPRECATED - upload_dailies() #
+def upload_dailies( taskID=None, renderID=None, renderKey=None, itemID=None, itemType=None, path=None, submit=None, nimURL=None, apiKey=None ) :
     'Upload Dailies - 2 required fields: (taskID, renderID, or renderKey) and path to movie'
     # nimURL and apiKey are optional for Render API Key overrride
     #
-    # 2 required fields:
+    #   Required Fields:
+    #      itemID
+    #      itemType - options user, job, asset, show, shot, task, render
+    #               - after consolidation group, object
+    #      $_FILE[]
+    #
+    #
+    # 2 option fields for backwards compatibility:
     #      renderID or renderKey or taskID
     #      $_FILE[]
     #
@@ -2834,19 +2869,25 @@ def upload_dailies( taskID=None, renderID=None, renderKey='', path=None, submit=
     params = {}
 
     params["q"] = "uploadMovie"
-    params["taskID"] = taskID
-    params["renderID"] = renderID
-    params["renderKey"] = renderKey
+ 
+    if taskID is not None : params['taskID'] = taskID
+    if renderID is not None : params['renderID'] = renderID
+    if renderKey is not None : params['renderKey'] = renderKey
+
     if path is not None:
         path = os.path.normpath( path )
         params["file"] = open(path,'rb')
     else :
         params["file"] = ''
+
     if submit is not None : params['submit'] = submit
+    if itemID is not None : params['itemID'] = itemID
+    if itemType is not None : params['itemType'] = itemType
 
     result = upload(params=params, nimURL=nimURL, apiKey=apiKey)
     return result
 
+# DEPRECATED - upload_dailies() #
 def upload_dailiesNote( dailiesID=None, name='', img=None, note='', frame=0, time=-1, userID=None, nimURL=None, apiKey=None ) :
     'Upload dailiesNote'
     params = {}
@@ -2870,7 +2911,112 @@ def upload_dailiesNote( dailiesID=None, name='', img=None, note='', frame=0, tim
     return result
 
 
+# Review Items #
+def get_reviewItem( ID=None ) :
+    'Retrieves the dictionary of details for the specified review item ID from the API'
+    reviewItem=get( {'q': 'getReviewItem', 'ID': ID} )
+    return reviewItem
+
+def get_reviewItemNotes( ID=None ) :
+    'Retrieves the dictionary of notes for the specified review item ID from the API'
+    reviewNotes=get( {'q': 'getReviewNotes', 'ID': ID} )
+    return reviewNotes
+
+def upload_reviewItem( taskID=None, renderID=None, renderKey=None, itemID=None, itemType=None, path=None, submit=None, \
+    name=None, description=None, reviewItemTypeID=0, reviewItemStatusID=0, keywords=None, nimURL=None, apiKey=None ) :
+    'Upload Review Item - 2 required fields: (taskID, renderID, or renderKey) and path to movie'
+    # nimURL and apiKey are optional for Render API Key overrride
+    #
+    #   Required Fields:
+    #      itemID       iteger          the ID of the parent to attach the review item
+    #      itemType     string          options user, job, asset, show, shot, task, render
+    #      path         string          the path of the item to upload
+    #
+    #
+    # 2 option fields for backwards compatibility:
+    #      renderID or renderKey or taskID
+    #      $_FILE[]
+    #
+    # renderKey is passed for association from render manager (deadlineID)
+    # free association is made with render based on renderKey 
+    #      should look up jobID and taskID from renderKey and set based on render
+    #
+    # if taskID is passed look up jobID and create render to associate dailies
+    #
+    # # Optional
+    #
+    # submit is optional to mark uploaded dailies for review - value is either: 0  or 1 
+    # name                string      The NIM name for the review item - if empty will use filename
+    # description         string      Description for the review item
+    # reviewItemTypeID    integer     The review item type ID
+    # reviewItemStatusID  integer     The review status ID
+    # keywords            list        ["keyword1", "keyword2"]
+
+
+    params = {}
+
+    params["q"] = "uploadReviewItem"
+ 
+    if taskID is not None : params['taskID'] = taskID
+    if renderID is not None : params['renderID'] = renderID
+    if renderKey is not None : params['renderKey'] = renderKey
+
+    if path is not None:
+        path = os.path.normpath( path )
+        params["file"] = open(path,'rb')
+    else :
+        params["file"] = ''
+
+    if submit is not None : params['submit'] = submit
+    if itemID is not None : params['itemID'] = itemID
+    if itemType is not None : params['itemType'] = itemType
+    if name is not None : params['name'] = name
+    if description is not None : params['description'] = description
+    if reviewItemTypeID is not None : params['reviewItemTypeID'] = reviewItemTypeID
+    if reviewItemStatusID is not None : params['reviewItemStatusID'] = reviewItemStatusID
+    if keywords is not None : params['keywords'] = json.dumps(keywords)
+
+    result = upload(params=params, nimURL=nimURL, apiKey=apiKey)
+    return result
+
+def upload_reviewNote( ID=None, name='', img=None, note='', frame=0, time=-1, userID=None, nimURL=None, apiKey=None ) :
+    'Upload reviewNote'
+    # 
+    #
+    #   Required Fields:
+    #       ID                  integer     The ID of the review item to attach the note
+    #
+    #   Optional Fields: 
+    #       name                string      Image name
+    #       note                string      The body of the note
+    #       img                 string      Path to the image to use
+    #       frame               integer     The frame number of the note
+    #       time                float       The time of the note 
+    #       userID              integer     The userID to associate with the note
+    #       nimURL              string      optional for Render API Key overrride
+    #       apiKey              string      optional for Render API Key overrride
+
+    params = {}
+    action = "uploadReviewNote"
+
+    params["q"] = action.encode('ascii')
+    params["ID"] = str(ID).encode('ascii')
+    params["name"] = str(name).encode('ascii')
+    if img is not None:
+        params["file"] = open(img,'rb')
+    else :
+        params["file"] = ''
+    params["note"] = str(note).encode('ascii')
+    params["frame"] = str(frame).encode('ascii')
+    params["time"] = str(time).encode('ascii')
+    params["userID"] = str(userID).encode('ascii')
+
+    result = upload(params=params, nimURL=nimURL, apiKey=apiKey)
+    return result
+
+
 #  Timecards  #
+
 def get_timecards( startDate=None, endDate=None, jobID=None, userID=None, username=None, taskTypeID=None, taskType=None, taskID=None, locationID=None, location=None ):
     '''
     Retrieves a timecard, or array of timecards based on search criteria
