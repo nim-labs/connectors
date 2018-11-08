@@ -2,9 +2,9 @@
 #******************************************************************************
 #
 # Filename: Flame/python/nimFlameExport.py
-# Version:  v2.8.73.180521
+# Version:  3.0.17.181108
 #
-# Copyright (c) 2017 NIM Labs LLC
+# Copyright (c) 2014-2018 NIM Labs LLC
 # All rights reserved.
 #
 # Use of this software is subject to the terms of the NIM Labs license
@@ -58,9 +58,20 @@ try:
 except:
 	print "NIM - Failed to load modules"
 
-from PySide.QtGui import *
-from PySide.QtCore import *
 
+#  Import Python GUI packages :
+try : 
+	from PySide2.QtWidgets import *
+	from PySide2.QtGui import *
+	from PySide2.QtCore import *
+except ImportError :
+	try :
+		from PySide.QtGui import *
+		from PySide.QtCore import *
+	except ImportError : 
+		print "NIM: Failed to load UI Modules"
+
+			
 print "NIM - Loading nimFlameExport"
 
 

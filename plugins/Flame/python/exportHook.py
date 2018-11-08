@@ -2,12 +2,27 @@
 #******************************************************************************
 #
 # Filename: exportHook.py
+# Version:  3.0.17.181108
 #
+# Copyright (c) 2014-2018 NIM Labs LLC
+# All rights reserved.
+#
+# Use of this software is subject to the terms of the NIM Labs license
+# agreement provided at the time of installation or download, or which
+# otherwise accompanies this software in either electronic or hard copy form.
 # *****************************************************************************
 
-
-from PySide.QtGui import *
-from PySide.QtCore import *
+#  Import Python GUI packages :
+try : 
+   from PySide2.QtWidgets import *
+   from PySide2.QtGui import *
+   from PySide2.QtCore import *
+except ImportError :
+   try : 
+      from PySide.QtGui import *
+      from PySide.QtCore import *
+   except ImportError : 
+      print "NIM: Failed to load UI Modules"
 
 import os,sys,re
 
@@ -422,71 +437,6 @@ def preExportSequence( info, userData ):
    # Check if Custom NIM export or Standard Export
    # If standard export then ask for NIM association
    nimShowDialog = False
-
-   '''
-   #TODO: On multiple exports Flame is displaying popup for each export...
-   #      Set flag for first time dlg is answered for all exports.
-   #      Display NIM export dialog without option to choose preset.
-
-   if 'nim_export_type' in userData :
-      if userData['nim_export_type'] != 'NimExportSequence' \
-         and userData['nim_export_type'] != 'NimExportDaily' \
-         and userData['nim_export_type'] != 'NimExportEdit' :
-         nimShowDialog = True
-   else :
-      nimShowDialog = True
-   
-
-   if nimShowDialog :
-      try :
-         msgBox = QMessageBox()
-         msgBox.setTextFormat(Qt.RichText)
-         result = msgBox.information(None, "Export Sequence to NIM?", "Export Sequence to NIM?", QMessageBox.Ok | QMessageBox.Cancel)
-         if result == QMessageBox.Ok:
-            print "NIM - Exporting to NIM"
-            userData['nim_export_sequence'] = True
-
-            exportDlg = nimFlameExport.NimExportSequenceDialog()
-            exportDlg.show()
-            if exportDlg.exec_() :
-               userData['shotData'] = {}
-               
-               print "NIM - nim_userID: %s" % exportDlg.nim_userID
-               userData['nim_userID'] = exportDlg.nim_userID
-
-               # TODO:  SERVER NEEDS TO MATCH SELECTED PATH 
-               #        OR NEED TO ATTEMPT TO DERIVE FROM info['destinationPath']
-               print "NIM - serverID: %s" % exportDlg.nim_serverID
-               userData['nim_serverID'] = exportDlg.nim_serverID
-
-               print "NIM - showID: %s" % exportDlg.nim_showID
-               userData['nim_showID'] = exportDlg.nim_showID
-
-               print "NIM - showID: %s" % exportDlg.nim_showID
-               userData['nim_showID'] = exportDlg.nim_showID
-               
-               print "NIM - videoElementID: %s" % exportDlg.videoElementID
-               userData['videoElementID'] = exportDlg.videoElementID
-
-               print "NIM - audioElementID: %s" % exportDlg.audioElementID
-               userData['audioElementID'] = exportDlg.audioElementID
-
-               print "NIM - openClipElementID: %s" % exportDlg.openClipElementID
-               userData['openClipElementID'] = exportDlg.openClipElementID
-
-               print "NIM - batchOpenClipElementID: %s" % exportDlg.batchOpenClipElementID
-               userData['batchOpenClipElementID'] = exportDlg.batchOpenClipElementID
-
-               print "NIM - batchTaskTypeID: %s" % exportDlg.batchTaskTypeID
-               userData['batchTaskTypeID'] = exportDlg.batchTaskTypeID
-               userData['batchTaskTypeFolder'] = exportDlg.batchTaskTypeFolder
-
-         else:
-            print "NIM - Skipping Export to NIM"
-            userData['nim_export_sequence'] = False
-      except :
-         pass
-   '''
 
    print "preExportSequence - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
    pass
@@ -928,9 +878,6 @@ def useBackburnerPostExportAsset():
 #
 def getCustomExportProfiles( profiles ):
    print "getCustomExportProfiles - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
-   #profiles['NIM Publish Sequence'] = {'nim_export_type':'NimExportSequence'} #Adds an entry to the 'userData' dictionary
-   #profiles['NIM Export Clip to Edits']      = {'nim_export_type':'NimExportEdit'}     #Adds an entry to the 'userData' dictionary
-   #profiles['NIM Export Clip to Dailies']     = {'nim_export_type':'NimExportDaily'}    #Adds an entry to the 'userData' dictionary
    profiles['NIM Publish Sequence']        = {'nim_export_type':'NimExportSequence'} #Adds an entry to the 'userData' dictionary
    profiles['NIM Export Clip to Daily']        = {'nim_export_type':'NimExportDaily'}    #Adds an entry to the 'userData' dictionary
    profiles['NIM Export Clip to Edit']        = {'nim_export_type':'NimExportEdit'}     #Adds an entry to the 'userData' dictionary

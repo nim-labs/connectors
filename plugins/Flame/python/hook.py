@@ -2,16 +2,25 @@
 #******************************************************************************
 #
 # Filename: hook.py
+# Version:  3.0.17.181108
 #
-# Copyright (c) 2008 Autodesk Canada Co.
+# Copyright (c) 2014-2018 NIM Labs LLC
 # All rights reserved.
 #
-# Use of this software is subject to the terms of the Autodesk license
+# Use of this software is subject to the terms of the NIM Labs license
 # agreement provided at the time of installation or download, or which
 # otherwise accompanies this software in either electronic or hard copy form.
 # *****************************************************************************
 
-from PySide import QtGui, QtCore
+#  Import Python GUI packages :
+try : 
+   from PySide2 import QtWidgets as QtGui
+   from PySide2 import QtCore
+except ImportError :
+   try : 
+      from PySide import QtCore, QtGui
+   except ImportError : 
+      print "NIM: Failed to load UI Modules"
 
 import os,sys,re
 
