@@ -2,9 +2,9 @@
 #******************************************************************************
 #
 # Filename: nim_file.py
-# Version:  v3.0.12.181024
+# Version:  v3.0.17.181108
 #
-# Copyright (c) 2015-2018 NIM Labs LLC
+# Copyright (c) 2014-2018 NIM Labs LLC
 # All rights reserved.
 #
 # Use of this software is subject to the terms of the NIM Labs license
@@ -23,7 +23,7 @@ import nim as Nim
 
 
 #  Variables :
-version='v2.8.41'
+version='v3.0.17'
 winTitle='NIM_'+version
 _os=platform.system().lower()
 #  Compiled REGEX Searches :
