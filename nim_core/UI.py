@@ -377,7 +377,7 @@ class GUI(QtGui.QMainWindow) :
         
         #  Button box :
         self.btnBox=QtGui.QGroupBox()
-        self.btnBox.setMaximumHeight(55)
+        #self.btnBox.setMaximumHeight(55)           #Commented out due to 4k displays and houdini not displaying the btnBox
         self.mainLayout.addWidget( self.btnBox )
         #  Button Layout :
         self.btnLayout=QtGui.QHBoxLayout( self.btnBox )
