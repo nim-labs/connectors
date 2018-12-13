@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: UI.py
-# Version:  v3.0.18.181212
+# Version:  v3.0.19.181213
 #
 # Copyright (c) 2014-2018 NIM Labs LLC
 # All rights reserved.
@@ -43,7 +43,7 @@ except ImportError :
 #  Variables :
 WIN=''
 startTime=''
-version='v3.0.18'
+version='v3.0.19'
 winTitle='NIM_'+version
 _os=platform.system().lower()
 _osCap=platform.system()
@@ -593,7 +593,12 @@ class GUI(QtGui.QMainWindow) :
         userMenu=QtGui.QMenu( 'User', self )
         self.changeUserAction=QtGui.QAction( 'Change User', self )
         self.changeUser=userMenu.addAction( self.changeUserAction )
-        self.menuBar().addMenu( userMenu )
+
+        #Remove from shared menu in Houdini
+        #TODO: Verify if needed for any apps
+        if self.app !='Houdini' :
+            self.menuBar().addMenu( userMenu )
+
         #  Make Connections :
         self.changeUserAction.triggered.connect( self.update_user )
         
@@ -620,7 +625,11 @@ class GUI(QtGui.QMainWindow) :
         modeMenu.addAction( self.saveWin )
         modeMenu.addAction( self.verWin )
         modeMenu.addAction( self.pubWin )
-        self.menuBar().addMenu( modeMenu )
+        
+        #Remove from shared menu in Houdini
+        #TODO: Verify if needed for any apps
+        if self.app !='Houdini' :
+            self.menuBar().addMenu( modeMenu )
         
         #  Make Connections :
         self.openWin.triggered.connect( self.win_open )
@@ -2191,7 +2200,14 @@ class GUI(QtGui.QMainWindow) :
             import MaxPlus
             MaxPlus.CUI.EnableAccelerators()
         '''
-    
+
+        #TODO: Houdini is only hiding panel in OSX.. not closing
+        '''
+        if self.app=='Houdini' :
+            P.info('Closing Houdini Panel')
+        '''
+            
+
     
     #  File Operations :
     def set_fromFilePath(self) :
@@ -2974,7 +2990,7 @@ class GUI(QtGui.QMainWindow) :
                 #self.pref_styleSheetDir = self.pref_styleSheetDir.rstrip('/')
                 nimScriptPath = os.path.dirname(os.path.realpath(__file__))
                 nimScriptPath = nimScriptPath.replace('\\','/')
-                nimScriptPath = nimScriptPath.rstrip('/nim_core')
+                nimScriptPath = nimScriptPath.replace('/nim_core','')
                 darkStyleSheetPath = nimScriptPath+'/css/nim_darkStyleSheet.css'
                 with open(darkStyleSheetPath, 'r') as styleSheetFile:
                     darkStyleSheet=styleSheetFile.read().replace('\n', '')
