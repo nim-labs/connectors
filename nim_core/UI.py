@@ -2974,7 +2974,7 @@ class GUI(QtGui.QMainWindow) :
                 #self.pref_styleSheetDir = self.pref_styleSheetDir.rstrip('/')
                 nimScriptPath = os.path.dirname(os.path.realpath(__file__))
                 nimScriptPath = nimScriptPath.replace('\\','/')
-                nimScriptPath = nimScriptPath.rstrip('/nim_core')
+                nimScriptPath = nimScriptPath.replace('/nim_core','')
                 darkStyleSheetPath = nimScriptPath+'/css/nim_darkStyleSheet.css'
                 with open(darkStyleSheetPath, 'r') as styleSheetFile:
                     darkStyleSheet=styleSheetFile.read().replace('\n', '')
