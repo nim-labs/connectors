@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: UI.py
-# Version:  v3.0.17.181108
+# Version:  v3.0.18.181212
 #
 # Copyright (c) 2014-2018 NIM Labs LLC
 # All rights reserved.
@@ -43,7 +43,7 @@ except ImportError :
 #  Variables :
 WIN=''
 startTime=''
-version='v3.0.17'
+version='v3.0.18'
 winTitle='NIM_'+version
 _os=platform.system().lower()
 _osCap=platform.system()
@@ -377,7 +377,7 @@ class GUI(QtGui.QMainWindow) :
         
         #  Button box :
         self.btnBox=QtGui.QGroupBox()
-        self.btnBox.setMaximumHeight(55)
+        #self.btnBox.setMaximumHeight(55)           #Commented out due to 4k displays and houdini not displaying the btnBox
         self.mainLayout.addWidget( self.btnBox )
         #  Button Layout :
         self.btnLayout=QtGui.QHBoxLayout( self.btnBox )
