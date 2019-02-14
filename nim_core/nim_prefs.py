@@ -2,9 +2,9 @@
 #******************************************************************************
 #
 # Filename: nim_prefs.py
-# Version:  v3.0.19.181213
+# Version:  v3.0.20.190118
 #
-# Copyright (c) 2014-2018 NIM Labs LLC
+# Copyright (c) 2014-2019 NIM Labs LLC
 # All rights reserved.
 #
 # Use of this software is subject to the terms of the NIM Labs license
@@ -46,7 +46,7 @@ except :
 #  Variables :
 prefs_dirName='.nim'
 prefs_fileName='prefs.nim'
-version='v3.0.19'
+version='v3.0.20'
 winTitle='NIM_'+version
 nim_URL='http://hostname/nimAPI.php'
 nim_useSLL='False'
