@@ -3,7 +3,7 @@
 # Filename: Hiero/nim_hiero_connector/nimHieroConnector.py
 # Version:  v0.7.3.150625
 #
-# Copyright (c) 2015 NIM Labs LLC
+# Copyright (c) 2014-2019 NIM Labs LLC
 # All rights reserved.
 #
 # Use of this software is subject to the terms of the NIM Labs license

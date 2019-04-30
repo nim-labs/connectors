@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ExtensionManifest Version="6.0" ExtensionBundleId="com.nim-labs.nim.premiere" ExtensionBundleVersion="3.0.5" ExtensionBundleName="NIM" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<ExtensionList>
-		<Extension Id="com.nim-labs.nim.premiere" Version="3.0.5" />
+		<Extension Id="com.nim-labs.nim.premiere" Version="4.0.0" />
 	</ExtensionList>
 	<ExecutionEnvironment>
 		<HostList>
