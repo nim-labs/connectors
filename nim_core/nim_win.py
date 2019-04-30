@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: nim_win.py
-# Version:  v3.0.20.190118
+# Version:  v4.0.27.190418
 #
 # Copyright (c) 2014-2019 NIM Labs LLC
 # All rights reserved.
