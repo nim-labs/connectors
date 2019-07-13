@@ -25,9 +25,9 @@ Function HTTPPost(sMethod, sUrl, sRequest, tempFilePath, username, apiKey)
     oHTTP.SetOption 2, oHTTP.GetOption(2) - SXH_SERVER_CERT_IGNORE_UNKNOWN_CA
 
     If sMethod = "POST" Then
-        oHTTP.open "POST", sUrl,false
+        oHTTP.open "POST", sUrl, False
     ElseIf sMethod = "GET" Then
-        oHTTP.open "GET", sUrl & "?" & sRequest,false
+        oHTTP.open "GET", sUrl & "?" & sRequest, False
     End If
 
     oHTTP.setRequestHeader "Content-Type", "text/plain"

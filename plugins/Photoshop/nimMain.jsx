@@ -17,18 +17,14 @@
 //	loadingLabel = loadingPanel.add('statictext', undefined, 'Loading NIM Connector...'),
 var loadingPanel = null,
 	loadingLabel = null,
-	os = getOperatingSystem(),
 	userID,
 	username,
-	ranGetUserID = false,
-	winUserPath = '';
+	ranGetUserID = false;
 
 if (os == 'win') {
 	loadingPanel = new Window('palette', 'Loading...', undefined);
 	loadingLabel = loadingPanel.add('statictext', undefined, 'Loading NIM Connector...');
 	loadingPanel.show();
-	try { winUserPath = $.getenv('userprofile'); }
-	catch (e) { winUserPath = ''; }
 }
 
 
@@ -56,7 +52,7 @@ function webRequest(method, endpoint, query) {
 	var response = null,
 		tempFolderPath = '~/.nim/tmp/',
 		winTempFolderPath = winUserPath + '\\.nim\\tmp\\',
-		wincurl = nimScriptsPath + '\\nim_core\\curl.vbs',  // The path to the .vbs file
+		wincurl = nimPrefs.scriptsPath + '\\nim_core\\curl.vbs',  // The path to the .vbs file
 		curlCmd = '',
 		userHeader,
 		keyHeader;
@@ -220,7 +216,11 @@ function nimAPI(query) {
 		queryString = queryArray.join('&');
 	else return false;
 
-	var reply = webRequest('GET', nimAPIURL, queryString);
+	// Remove question mark(s) from end of API URL
+	while (nimPrefs.API.slice(-1) == '?')
+		nimPrefs.API = nimPrefs.API.slice(0, -1);
+
+	var reply = webRequest('GET', nimPrefs.API, queryString);
 	if (!reply) return false;
 
 	reply = reply.split('\n\n');
@@ -265,22 +265,12 @@ function nimAPI(query) {
 			return jsonObject;
  		}
 		catch (e) {
-			alert('Error: GET request to ' + nimAPIURL + '?' + queryString + ' returned the following:\n\n' + jsonData + '\n\nIf this looks correct, your script may not be recognizing how to convert JSON into a JavaScript object. This may be caused by an older version of After Effects. NIM has been tested with After Effects CS6 and above.');
+			alert('Error: GET request to ' + nimPrefs.API + '?' + queryString + ' returned the following:\n\n' + jsonData + '\n\nIf this looks correct, your script may not be recognizing how to convert JSON into a JavaScript object. This may be caused by an older version of After Effects. NIM has been tested with After Effects CS6 and above.');
  			return false;
 		}
  	}
 	else
 		return false;
-}
-
-
-// Self-explanatory
-function getOperatingSystem() {
-	var opSys = $.os;
-	if (opSys.indexOf('Windows') == 0)
-		return 'win';
-	else if (opSys.indexOf('Macintosh') == 0)
-		return 'mac';
 }
 
 
@@ -316,7 +306,7 @@ function keyDialog(messageTitle, message) {
 		nimKey = keyInput.text;
 		saveKeyToPrefs();
 		createKeyDialog.close();
-		var remoteScripts = getRemoteScripts(nimScriptsPath, thisObj);
+		var remoteScripts = getRemoteScripts(nimPrefs.scriptsPath, thisObj);
 		if (remoteScripts !== false)
 			remoteScripts(thisObj);
 	}
