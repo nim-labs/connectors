@@ -2,9 +2,9 @@
 #******************************************************************************
 #
 # Filename: nim_tools.py
-# Version:  v3.0.05.180724
+# Version:  v4.0.27.190418
 #
-# Copyright (c) 2015-2018 NIM Labs LLC
+# Copyright (c) 2014-2019 NIM Labs LLC
 # All rights reserved.
 #
 # Use of this software is subject to the terms of the NIM Labs license

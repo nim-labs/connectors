@@ -2,11 +2,27 @@
 #******************************************************************************
 #
 # Filename: batchHook.py
+# Version:  v4.0.27.190418
 #
+# Copyright (c) 2014-2019 NIM Labs LLC
+# All rights reserved.
+#
+# Use of this software is subject to the terms of the NIM Labs license
+# agreement provided at the time of installation or download, or which
+# otherwise accompanies this software in either electronic or hard copy form.
 # *****************************************************************************
 
-from PySide.QtGui import *
-from PySide.QtCore import *
+#  Import Python GUI packages :
+try : 
+   from PySide2.QtWidgets import *
+   from PySide2.QtGui import *
+   from PySide2.QtCore import *
+except ImportError :
+   try : 
+      from PySide.QtGui import *
+      from PySide.QtCore import *
+   except ImportError : 
+      print "NIM: Failed to load UI Modules"
 
 import os,sys,re
 
@@ -144,29 +160,11 @@ def batchExportBegin( info, userData ):
    # If standard export then ask for NIM association
    nimShowDialog = True
 
-   # TODO: Check either local file/variable for Flame Project association with NIM
-   #       OR look in NIM for matching files to find link
-   '''
-   if 'nim_export_type' in userData :
-      nimShowDialog = True
-   else :
-      nimShowDialog = True
-   '''
-
    batchExportDlg = nimFlameExport.NimBatchExportDialog()
    batchExportDlg.show()
    if batchExportDlg.exec_() :
       nim_comment = batchExportDlg.nim_comment
       nimFlameExport.nimAddBatchExport(info=info, comment=nim_comment)
-
-   '''
-   if nimShowDialog :
-      msgBox = QMessageBox()
-      msgBox.setTextFormat(Qt.RichText)
-      result = msgBox.information(None, "Export results to NIM?", "Export results to NIM?", QMessageBox.Ok | QMessageBox.Cancel)
-      if result == QMessageBox.Ok:
-         nimFlameExport.nimAddBatchExport(info=info)
-   '''
 
    print "batchExportBegin - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
    pass

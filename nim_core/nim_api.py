@@ -2,9 +2,9 @@
 #******************************************************************************
 #
 # Filename: nim_api.py
-# Version:  v3.0.05.180724
+# Version:  v4.0.27.190418
 #
-# Copyright (c) 2015-2018 NIM Labs LLC
+# Copyright (c) 2014-2019 NIM Labs LLC
 # All rights reserved.
 #
 # Use of this software is subject to the terms of the NIM Labs license
@@ -56,7 +56,7 @@ import nim_tools
 import nim_win as Win
 
 #  Variables :
-version='v2.8.41'
+version='v4.0.27'
 winTitle='NIM_'+version
 
 '''
@@ -2812,7 +2812,7 @@ def get_lastShotRender( shotID=None ):
     return lastRender
 
 
-#  Dailies  #
+#  Review  #
 
 def get_reviewItemTypes():
     'Retrieves a dictionary of global review item types'
@@ -2912,6 +2912,16 @@ def upload_dailiesNote( dailiesID=None, name='', img=None, note='', frame=0, tim
 
 
 # Review Items #
+def get_reviewItem( ID=None ) :
+    'Retrieves the dictionary of details for the specified review item ID from the API'
+    reviewItem=get( {'q': 'getReviewItem', 'ID': ID} )
+    return reviewItem
+
+def get_reviewItemNotes( ID=None ) :
+    'Retrieves the dictionary of notes for the specified review item ID from the API'
+    reviewNotes=get( {'q': 'getReviewNotes', 'ID': ID} )
+    return reviewNotes
+
 def upload_reviewItem( taskID=None, renderID=None, renderKey=None, itemID=None, itemType=None, path=None, submit=None, \
     name=None, description=None, reviewItemTypeID=0, reviewItemStatusID=0, keywords=None, nimURL=None, apiKey=None ) :
     'Upload Review Item - 2 required fields: (taskID, renderID, or renderKey) and path to movie'
@@ -3004,7 +3014,9 @@ def upload_reviewNote( ID=None, name='', img=None, note='', frame=0, time=-1, us
     result = upload(params=params, nimURL=nimURL, apiKey=apiKey)
     return result
 
+
 #  Timecards  #
+
 def get_timecards( startDate=None, endDate=None, jobID=None, userID=None, username=None, taskTypeID=None, taskType=None, taskID=None, locationID=None, location=None ):
     '''
     Retrieves a timecard, or array of timecards based on search criteria

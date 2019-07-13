@@ -2,9 +2,9 @@
 #******************************************************************************
 #
 # Filename: nim_win.py
-# Version:  v3.0.05.180724
+# Version:  v4.0.27.190418
 #
-# Copyright (c) 2015-2018 NIM Labs LLC
+# Copyright (c) 2014-2019 NIM Labs LLC
 # All rights reserved.
 #
 # Use of this software is subject to the terms of the NIM Labs license
@@ -193,12 +193,20 @@ def popup( title='', msg='', type='ok', defaultInput='', pyside=False, _list=[],
             elif dialog==QtGui.QMessageBox.Cancel :
                 userInput='Cancel'
         elif type=='input' :
-            dialog=QtGui.QInputDialog.getText( QtGui.QInputDialog(), title, msg, \
-                QtGui.QLineEdit.Normal )
-            if dialog[1] :
-                userInput=dialog[0]
+            inputFont = QtGui2.QFont()
+            inputFont.setFamily("Ariel")
+            inputFont.setPointSize(20)
+            inputDialog = QtGui.QInputDialog(None)
+            inputDialog.setStyleSheet( "* {background-color: #333333; color: white;}" );
+            inputDialog.setInputMode(QtGui.QInputDialog.TextInput)
+            inputDialog.setWindowTitle(title)
+            inputDialog.setLabelText(msg)
+            inputDialog.setFont(inputFont)
+            ok = inputDialog.exec_()
+            if(ok):
+                userInput = inputDialog.textValue()
             else :
-                userInput=None
+                userInput = None
 
     #  Flame :
     elif app=='Flame' :

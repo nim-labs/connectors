@@ -20,6 +20,14 @@ else:
 		print "Loading NIM for Nuke 10.5vX"
 		nuke.pluginAddPath(nim_root+'/plugins/Nuke/v10.5')
 		nuke.pluginAddPath(nim_root+'/plugins/Nuke/v10.5/gizmos')
+	elif NukeVersionMajor == 11 and NukeVersionMinor < 3:
+		print "Loading NIM for Nuke 11.0vX"
+		nuke.pluginAddPath(nim_root+'/plugins/Nuke/v11')
+		nuke.pluginAddPath(nim_root+'/plugins/Nuke/v11/gizmos')
+	elif NukeVersionMajor == 11 and NukeVersionMinor == 3:
+		print "Loading NIM for Nuke 11.3vX"
+		nuke.pluginAddPath(nim_root+'/plugins/Nuke/v11.3')
+		nuke.pluginAddPath(nim_root+'/plugins/Nuke/v11.3/gizmos')
 	else:
 		print "Loading NIM for Nuke 11.0vX"
 		nuke.pluginAddPath(nim_root+'/plugins/Nuke/v11')
