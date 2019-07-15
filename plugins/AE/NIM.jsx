@@ -11,6 +11,17 @@
 # otherwise accompanies this software in either electronic or hard copy form.
 # *************************************************************************** */
 
+
+// Self-explanatory
+function getOperatingSystem() {
+	var opSys = $.os;
+	if (opSys.indexOf('Windows') == 0)
+		return 'win';
+	else if (opSys.indexOf('Macintosh') == 0)
+		return 'mac';
+}
+
+
 // Reads a file, returns its contents or false if it doesn't exist
 function readFile(path) {
 	var file = new File(path),
@@ -49,7 +60,6 @@ function prefsDialog(nimPrefs, thisObj) {
 	confirmButton.onClick = function() {
 		nimPrefs.scriptsPath = scriptsPathInput.text;
 		nimPrefs.API = APIPathInput.text;
-		nimAPIURL = nimPrefs.API;
 		saveScriptsPathAndAPIToPrefs();
 
 		var remoteScripts = getRemoteScripts(scriptsPathInput.text, thisObj),
@@ -289,26 +299,31 @@ catch (e) {
 }
 
 if (testSocket) {
-	var nimPrefsFolderPath = '~/.nim/',
-		nimPrefsPath = nimPrefsFolderPath + 'prefs.nim',
+
+	var os = getOperatingSystem(),
+		nimPrefsFolderPath = '~/.nim/',
+		winUserPath = '';
+
+	if (os == 'win') {
+		try {
+			winUserPath = $.getenv('userprofile');
+			nimPrefsFolderPath = winUserPath + '\\.nim\\';
+		}
+		catch (e) {
+			winUserPath = '';
+		}
+	}
+
+	var nimPrefsPath = nimPrefsFolderPath + 'prefs.nim',
 		nimKeyPath = nimPrefsFolderPath + 'nim.key',
 		nimPrefs = getScriptsPathAndAPIFromPrefs(),
 		nimKey = getKeyFromPrefs(),
 		remoteScripts,
-		nimScriptsPath,
-		nimAPIURL,
 		thisObj = this;
 
 	if (nimPrefs.error)
 		prefsDialog(nimPrefs, this);
 	else {
-		nimScriptsPath = nimPrefs.scriptsPath;
-		nimAPIURL = nimPrefs.API;
-
-		// Remove question mark(s) from end of API URL
-		while (nimAPIURL.slice(-1) == '?')
-			nimAPIURL = nimAPIURL.slice(0, -1);
-
 		remoteScripts = getRemoteScripts(nimPrefs.scriptsPath, this);
 
 		if (remoteScripts !== false)
