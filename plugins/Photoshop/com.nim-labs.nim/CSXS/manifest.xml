@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<ExtensionManifest ExtensionBundleId="com.nim-labs.nim" ExtensionBundleName="NIM" ExtensionBundleVersion="1.0" Version="6.0">
+<ExtensionManifest ExtensionBundleId="com.nim-labs.nim" ExtensionBundleName="NIM" ExtensionBundleVersion="4.0.3" Version="6.0">
   <ExtensionList>
-    <Extension Id="com.nim-labs.nim.photoshop" Version="1.0"/>
+    <Extension Id="com.nim-labs.nim.photoshop" Version="4.0.32"/>
   </ExtensionList>
   <ExecutionEnvironment>
     <HostList>
