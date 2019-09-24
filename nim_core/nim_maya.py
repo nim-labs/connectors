@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: nim_maya.py
-# Version:  v4.0.32.190716
+# Version:  v4.0.39.190924
 #
 # Copyright (c) 2014-2019 NIM Labs LLC
 # All rights reserved.
@@ -35,7 +35,7 @@ except ImportError :
             print "NIM: Failed to load UI Modules - Maya"
 
 #  Variables :
-version='v4.0.32'
+version='v4.0.39'
 winTitle='NIM_'+version
 
 def get_mainWin() :
