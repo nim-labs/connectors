@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: nim_3dsmax.py
-# Version:  v4.0.39.190924
+# Version:  v4.0.45.191209
 #
 # Copyright (c) 2014-2019 NIM Labs LLC
 # All rights reserved.
@@ -27,7 +27,7 @@ except :
     except : pass
 
 #  Variables :
-version='v4.0.39'
+version='v4.0.45'
 winTitle='NIM_'+version
 
 def get_mainWin() :
