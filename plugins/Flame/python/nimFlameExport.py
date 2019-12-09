@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: Flame/python/nimFlameExport.py
-# Version:  v4.0.32.190716
+# Version:  v4.0.45.191209
 #
 # Copyright (c) 2014-2019 NIM Labs LLC
 # All rights reserved.
@@ -3690,48 +3690,62 @@ def resolveServerOsPath(path='') :
 			if server['osxPath'] :
 				osxPath 	= server['osxPath'].replace('\\', '/')
 
-			#print "Linux Path: %s" % linuxPath
-			#print "Windows Path: %s" % winPath
-			#print "OSX Path: %s" % osxPath
+			# print "--------------------------"
+			# print "Server: %s" % server
+			# print "Path: %s" % path
+			# print "Linux Path: %s" % linuxPath
+			# print "Windows Path: %s" % winPath
+			# print "OSX Path: %s" % osxPath
 
 			if _os.lower() in ['darwin', 'mac'] :
 				print "OS: OSX"
 				# Compare against windows and linux & set to osx
-				if winPath and path.startswith(winPath) :
-					print "Translating Windows Path"
-					pathTail = path[path.startswith(winPath) and len(winPath):]
+
+				#case in-sensitive
+				if winPath and path.lower().startswith(winPath.lower()) :
+					print "Translating Windows Path" 
+					pathTail = path[path.lower().startswith(winPath.lower()) and len(winPath):]
 					if pathTail.startswith('/') :
 						pathTail = pathTail[1:]
 					resolvedPath = os.path.join(osxPath,pathTail)
 					break
 
+				#case sensitive
 				elif linuxPath and path.startswith(linuxPath) :
-					print "Translating Linux Path"
+					print "Translating Linux Path" 
 					pathTail = path[path.startswith(linuxPath) and len(linuxPath):]
 					if pathTail.startswith('/') :
 						pathTail = pathTail[1:]
 					resolvedPath = os.path.join(osxPath,pathTail)
 					break
 
+				else :
+					print "Path match not found"
 
 			elif _os.lower() in ['linux', 'linux2'] :
 				print "OS: Linux"
 				# Compare against windows and osx & set to linux
-				if winPath and path.startswith(winPath) :
+
+				#case in-sensitive
+				if winPath and path.lower().startswith(winPath.lower()) :
 					print "Translating Windows Path"
-					pathTail = path[path.startswith(winPath) and len(winPath):]
+					pathTail = path[path.lower().startswith(winPath.lower()) and len(winPath):]
 					if pathTail.startswith('/') :
 						pathTail = pathTail[1:]
 					resolvedPath = os.path.join(linuxPath,pathTail)
 					break
 
-				elif osxPath and path.startswith(osxPath) :
+				#case in-sensitive
+				elif osxPath and path.lower().startswith(osxPath.lower()) :
 					print "Translating OSX Path"
-					pathTail = path[path.startswith(osxPath) and len(osxPath):]
+					pathTail = path[path.lower().startswith(osxPath.lower()) and len(osxPath):]
 					if pathTail.startswith('/') :
 						pathTail = pathTail[1:]
 					resolvedPath = os.path.join(linuxPath,pathTail)
 					break
+
+				else :
+					print "Path match not found"
 
 	return resolvedPath
 
