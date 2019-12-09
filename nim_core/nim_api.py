@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: nim_api.py
-# Version:  v4.0.32.190716
+# Version:  v4.0.39.190924
 #
 # Copyright (c) 2014-2019 NIM Labs LLC
 # All rights reserved.
@@ -56,7 +56,7 @@ import nim_tools
 import nim_win as Win
 
 #  Variables :
-version='v4.0.32'
+version='v4.0.39'
 winTitle='NIM_'+version
 
 '''
@@ -2917,6 +2917,50 @@ def get_reviewItem( ID=None ) :
     reviewItem=get( {'q': 'getReviewItem', 'ID': ID} )
     return reviewItem
 
+def get_reviewItems( parentType=None, parentID=None, allChildren=None, name=None, description=None, date=None, type=None, typeID=None,
+                     status=None, statusID=None, keyword=None, keywordID=None, nimURL=None, apiKey=None ) :
+    'Retrives a dictionary of review items matching the search criteria - 2 required fields: parentType, parentID'
+    #       Parameters          Type            Values                  Note
+    # Required Parameters:
+    #   parentType              string                                  user, job, dev, asset, show, shot, task, render
+    #   parentID                integer                                 ID of the parent; jobID if "dev"
+    # Optional Parameters:                              
+    #   allChildren             integer         0 or 1                  Determines if we return review items associated with child items or not;
+    #                                                                    for example, if parent is show, would return review items on the show as well as
+    #                                                                    children shots, tasks, and renders
+    #   name                    string                                  Filters the returned review items by the given name
+    #   description             string                                  Filters the returned review items to items that contain the given string
+    #   date                    date            format: yyyy-mm-dd      Filters the returned review items by the given date
+    #   type                    string                                  Filters the returned review items by the given type name
+    #   typeID                  integer                                 Filters the returned review items by the given typeID
+    #   status                  string                                  Filters the returned review items by the given status name
+    #   statusID                integer                                 Filters the returned review items by the given statusID
+    #   keyword                 string                                  Filters the returned review items by the given keyword name
+    #   keywordID               integer                                 Filters the returned review items by the given keywordID
+    #
+    # Example:
+    #   .../nimAPI.php?q=getReviewItems&parentType=asset&parentID=1
+
+    params = {}
+
+    params["q"] = "getReviewItems"
+ 
+    if parentType is not None : params['parentType'] = parentType
+    if parentID is not None : params['parentID'] = parentID
+    if allChildren is not None : params['allChildren'] = allChildren
+    if name is not None : params['name'] = name
+    if description is not None : params['description'] = description
+    if date is not None : params['date'] = date
+    if type is not None : params['type'] = type
+    if typeID is not None : params['typeID'] = typeID
+    if status is not None : params['status'] = status
+    if statusID is not None : params['statusID'] = statusID
+    if keyword is not None : params['keyword'] = keyword
+    if keywordID is not None : params['keywordID'] = keywordID
+
+    result = connect(method='get', params=params, nimURL=nimURL, apiKey=apiKey)
+    return result
+
 def get_reviewItemNotes( ID=None ) :
     'Retrieves the dictionary of notes for the specified review item ID from the API'
     reviewNotes=get( {'q': 'getReviewNotes', 'ID': ID} )
@@ -2928,7 +2972,7 @@ def upload_reviewItem( taskID=None, renderID=None, renderKey=None, itemID=None, 
     # nimURL and apiKey are optional for Render API Key overrride
     #
     #   Required Fields:
-    #      itemID       iteger          the ID of the parent to attach the review item
+    #      itemID       integer          the ID of the parent to attach the review item
     #      itemType     string          options user, job, asset, show, shot, task, render
     #      path         string          the path of the item to upload
     #
