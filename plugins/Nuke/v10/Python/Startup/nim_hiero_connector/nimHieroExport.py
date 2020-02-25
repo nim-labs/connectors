@@ -4,7 +4,7 @@
 # Filename: Nuke/Python/Startup/nim_hiero_connector/nimHieroExport.py
 # Version:  v2.0.0.160510
 #
-# Copyright (c) 2016 NIM Labs LLC
+# Copyright (c) 2014-2020 NIM Labs LLC
 # All rights reserved.
 #
 # Use of this software is subject to the terms of the NIM Labs license

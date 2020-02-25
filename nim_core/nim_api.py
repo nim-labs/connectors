@@ -2,9 +2,9 @@
 #******************************************************************************
 #
 # Filename: nim_api.py
-# Version:  v4.0.45.191209
+# Version:  v4.0.47.200224
 #
-# Copyright (c) 2014-2019 NIM Labs LLC
+# Copyright (c) 2014-2020 NIM Labs LLC
 # All rights reserved.
 #
 # Use of this software is subject to the terms of the NIM Labs license
@@ -2968,11 +2968,10 @@ def get_reviewItemNotes( ID=None ) :
 
 def upload_reviewItem( taskID=None, renderID=None, renderKey=None, itemID=None, itemType=None, path=None, submit=None, \
     name=None, description=None, reviewItemTypeID=0, reviewItemStatusID=0, keywords=None, nimURL=None, apiKey=None ) :
-    'Upload Review Item - 2 required fields: (taskID, renderID, or renderKey) and path to movie'
     # nimURL and apiKey are optional for Render API Key overrride
     #
     #   Required Fields:
-    #      itemID       integer          the ID of the parent to attach the review item
+    #      itemID       integer         the ID of the parent to attach the review item
     #      itemType     string          options user, job, asset, show, shot, task, render
     #      path         string          the path of the item to upload
     #
@@ -2985,11 +2984,11 @@ def upload_reviewItem( taskID=None, renderID=None, renderKey=None, itemID=None, 
     # free association is made with render based on renderKey 
     #      should look up jobID and taskID from renderKey and set based on render
     #
-    # if taskID is passed look up jobID and create render to associate dailies
+    # If taskID is passed, NIM will create a new render to associate with the review item
     #
     # # Optional
     #
-    # submit is optional to mark uploaded dailies for review - value is either: 0  or 1 
+    # submit is optional to mark uploaded dailies for review - value is either: 0  or 1 (DEPRICATED)
     # name                string      The NIM name for the review item - if empty will use filename
     # description         string      Description for the review item
     # reviewItemTypeID    integer     The review item type ID
