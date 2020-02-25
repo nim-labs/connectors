@@ -4,7 +4,7 @@
 # Filename: Nuke/Python/Startup/nim_hiero_connector/nim_nukeStudioUI.py
 # Version:  v0.8.1.150721
 #
-# Copyright (c) 2015 NIM Labs LLC
+# Copyright (c) 2014-2020 NIM Labs LLC
 # All rights reserved.
 #
 # Use of this software is subject to the terms of the NIM Labs license

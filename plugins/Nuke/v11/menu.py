@@ -4,7 +4,7 @@
 # Filename: Nuke/menu.py
 # Version:  v2.6.80.170724
 #
-# Copyright (c) 2015 NIM Labs LLC
+# Copyright (c) 2014-2020 NIM Labs LLC
 # All rights reserved.
 #
 # Use of this software is subject to the terms of the NIM Labs license
