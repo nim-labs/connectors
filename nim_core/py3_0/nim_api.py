@@ -35,16 +35,21 @@
 #  General Imports :
 import json, os, re, sys, traceback
 import urllib.request, urllib.parse, urllib.error, urllib.request, urllib.error, urllib.parse
+
 try :
     import ssl
 except :
     print("NIM API: Failed to load SSL")
     pass
 
-import mimetools, mimetypes
+import mimetypes
 import email.generator as email_gen
+from email.generator import _make_boundary as choose_boundary
 import io
 import stat
+
+from os import SEEK_END
+
 
 #  NIM Imports :
 from . import nim as Nim
@@ -375,7 +380,8 @@ def upload( params=None, nimURL=None, apiKey=None ) :
     if apiKey :
         nim_apiKey = apiKey
 
-    _actionURL = nimURL.encode('ascii')
+    #_actionURL = nimURL.encode('ascii')
+    _actionURL = nimURL
 
     P.info("API URL: %s" % _actionURL)
     
@@ -412,10 +418,10 @@ def upload( params=None, nimURL=None, apiKey=None ) :
             ssl_ctx = ssl.create_default_context()
             ssl_ctx.check_hostname=False
             ssl_ctx.verify_mode=ssl.CERT_NONE
-            opener = urllib.request.build_opener(urllib.request.HTTPSHandler(context=ssl_ctx), FormPostHandler)
+            opener = urllib.request.build_opener(urllib.request.HTTPSHandler(context=ssl_ctx), MultipartPostHandler)
         except :
             P.info( "Opening Connection on HTTP" )
-            opener = urllib.request.build_opener(FormPostHandler)
+            opener = urllib.request.build_opener(MultipartPostHandler)
 
         opener.addheaders = [('X-NIM-API-USER', nim_apiUser),('X-NIM-API-KEY', nim_apiKey)]
     except:
@@ -473,59 +479,96 @@ def upload( params=None, nimURL=None, apiKey=None ) :
     '''
     return result
 
+class MultipartPostHandler(urllib.request.BaseHandler):
+    # needs to run first
+    handler_order = urllib.request.HTTPHandler.handler_order - 10
 
-class FormPostHandler(urllib.request.BaseHandler):
-    """
-    Handler for multipart form data
-    """
-    handler_order = urllib.request.HTTPHandler.handler_order - 10 # needs to run first
-    
     def http_request(self, request):
-        data = request.get_data()
-        if data is not None and not isinstance(data, str):
-            files = []
-            params = []
-            for key, value in list(data.items()):
-                if isinstance(value, file):
-                    files.append((key, value))
-                else:
-                    params.append((key, value))
-            if not files:
-                data = urllib.parse.urlencode(params, True) # sequencing on
+        try:
+            data = request.get_data()
+        except AttributeError:
+            data = request.data
+        if data is not None and type(data) != str:
+            v_files = []
+            v_vars = []
+            try:
+                for(key, value) in list(data.items()):
+                    if hasattr(value, 'read'):
+                        v_files.append((key, value))
+                    else:
+                        v_vars.append((key, value))
+            except TypeError:
+                raise TypeError
+            if len(v_files) == 0:
+                data = urllib.parse.urlencode(v_vars, doseq)
             else:
-                boundary, data = self.encode(params, files)
-                content_type = 'multipart/form-data; boundary=%s' % boundary
-                request.add_unredirected_header('Content-Type', content_type)
-                
-            request.add_data(data)
+                boundary, data = self.multipart_encode(v_vars, v_files)
+                contenttype = 'multipart/form-data; boundary=%s' % boundary
+                #if (
+                #    request.has_header('Content-Type') and
+                #    request.get_header('Content-Type').find(
+                #        'multipart/form-data') != 0
+                #):
+                #    six.print_(
+                #        "Replacing %s with %s" % (
+                #            request.get_header('content-type'),
+                #            'multipart/form-data'
+                #        )
+                #    )
+                request.add_unredirected_header('Content-Type', contenttype)
+            try:
+                request.add_data(data)
+            except AttributeError:
+                request.data = data
+
         return request
-    
-    def encode(self, params, files, boundary=None, buffer=None):
+
+    def multipart_encode(self, v_vars, files, boundary=None, buf=None):
+
         if boundary is None:
-            #boundary = mimetools.choose_boundary()
-            boundary = email_gen._make_boundary()
-        if buffer is None:
-            buffer = io.StringIO()
-        for (key, value) in params:
-            buffer.write('--%s\r\n' % boundary)
-            buffer.write('Content-Disposition: form-data; name="%s"' % key)
-            buffer.write('\r\n\r\n%s\r\n' % value)
-        for (key, fd) in files:
-            filename = fd.name.split('/')[-1]
-            content_type = mimetypes.guess_type(filename)[0] or 'application/octet-stream'
-            file_size = os.fstat(fd.fileno())[stat.ST_SIZE]
-            buffer.write('--%s\r\n' % boundary)
-            buffer.write('Content-Disposition: form-data; name="%s"; filename="%s"\r\n' % (key, filename))
-            buffer.write('Content-Type: %s\r\n' % content_type)
-            buffer.write('Content-Length: %s\r\n' % file_size)
+            boundary = choose_boundary()
+        if buf is None:
+            buf = io.BytesIO()
+        for(key, value) in v_vars:
+            buf.write(b'--' + boundary.encode("utf-8") + b'\r\n')
+            buf.write(
+                b'Content-Disposition: form-data; name="' +
+                key.encode("utf-8") +
+                b'"'
+            )
+            buf.write(b'\r\n\r\n' + str(value).encode("utf-8") + b'\r\n')
+        for(key, fd) in files:
+            try:
+                filename = fd.name.split('/')[-1]
+            except AttributeError:
+                # Spoof a file name if the object doesn't have one.
+                # This is designed to catch when the user submits
+                # a StringIO object
+                filename = 'temp.pdf'
+            contenttype = mimetypes.guess_type(filename)[0] or \
+                b'application/octet-stream'
+            buf.write(b'--' + boundary.encode("utf-8") + b'\r\n')
+            buf.write(
+                b'Content-Disposition: form-data; ' +
+                b'name="' + key.encode("utf-8") + b'"; ' +
+                b'filename="' + filename.encode("utf-8") + b'"\r\n'
+            )
+            buf.write(
+                b'Content-Type: ' +
+                contenttype.encode("utf-8") +
+                b'\r\n'
+            )
             fd.seek(0)
-            buffer.write('\r\n%s\r\n' % fd.read())
-        buffer.write('--%s--\r\n\r\n' % boundary)
-        buffer = buffer.getvalue()
-        return boundary, buffer
-    
-    def https_request(self, request):
-        return self.http_request(request)
+            buf.write(
+                b'\r\n' + fd.read() + b'\r\n'
+            )
+        buf.write(b'--')
+        buf.write(boundary.encode("utf-8"))
+        buf.write(b'--\r\n\r\n')
+        buf = buf.getvalue()
+        return boundary, buf
+
+    https_request = http_request
 
 
 #  API Functions  #
@@ -888,12 +931,12 @@ def delete_job( jobID=None) :
 def upload_jobIcon( jobID=None, img=None, nimURL=None, apiKey=None ) :
     'Upload job icon'
     params = {}
-    action = "uploadJobIcon"
-    job_str = str(jobID)
-
-    params["q"] = action.encode('ascii')
-    params["jobID"] = job_str.encode('ascii')
-    params["file"] = open(img,'rb')
+    params["q"] = "uploadJobIcon"
+    params["jobID"] = jobID
+    if img is not None:
+        params["file"] = open(img,'rb')
+    else :
+        params["file"] = ''
 
     result = upload(params=params, nimURL=nimURL, apiKey=apiKey)
     return result
@@ -1079,12 +1122,12 @@ def delete_asset( assetID=None) :
 def upload_assetIcon( assetID=None, img=None, nimURL=None, apiKey=None ) :
     'Upload asset icon'
     params = {}
-    action = "uploadAssetIcon"
-    asset_str = str(assetID)
-
-    params["q"] = action.encode('ascii')
-    params["assetID"] = asset_str.encode('ascii')
-    params["file"] = open(img,'rb')
+    params["q"] = "uploadAssetIcon"
+    params["assetID"] = assetID
+    if img is not None:
+        params["file"] = open(img,'rb')
+    else :
+        params["file"] = ''
 
     result = upload(params=params, nimURL=nimURL, apiKey=apiKey)
     return result
@@ -1356,12 +1399,12 @@ def delete_shot( shotID=None) :
 def upload_shotIcon( shotID=None, img=None, nimURL=None, apiKey=None ) :
     'Upload shot icon'
     params = {}
-    action = "uploadShotIcon"
-    shot_str = str(shotID)
-
-    params["q"] = action.encode('ascii')
-    params["shotID"] = shot_str.encode('ascii')
-    params["file"] = open(img,'rb')
+    params["q"] = "uploadShotIcon"
+    params["shotID"] = shotID
+    if img is not None:
+        params["file"] = open(img,'rb')
+    else :
+        params["file"] = ''
 
     result = upload(params=params, nimURL=nimURL, apiKey=apiKey)
     return result
@@ -2895,14 +2938,14 @@ def upload_dailiesNote( dailiesID=None, name='', img=None, note='', frame=0, tim
     shot_str = str(dailiesID)
     name = str(name)
 
-    params["q"] = action.encode('ascii')
-    params["dailiesID"] = shot_str.encode('ascii')
-    params["name"] = name.encode('ascii')
+    params["q"] = action
+    params["dailiesID"] = shot_str
+    params["name"] = name
     if img is not None:
         params["file"] = open(img,'rb')
     else :
         params["file"] = ''
-    params["note"] = note.encode('ascii')
+    params["note"] = note
     params["frame"] = frame
     params["time"] = time
     params["userID"] = userID
@@ -3040,22 +3083,22 @@ def upload_reviewNote( ID=None, name='', img=None, note='', frame=0, time=-1, us
     #       apiKey              string      optional for Render API Key overrride
 
     params = {}
-    action = "uploadReviewNote"
 
-    params["q"] = action.encode('ascii')
-    params["ID"] = str(ID).encode('ascii')
-    params["name"] = str(name).encode('ascii')
+    params["q"] = "uploadReviewNote"
+    params["ID"] = ID
+    params["name"] = name
     if img is not None:
         params["file"] = open(img,'rb')
     else :
         params["file"] = ''
-    params["note"] = str(note).encode('ascii')
-    params["frame"] = str(frame).encode('ascii')
-    params["time"] = str(time).encode('ascii')
-    params["userID"] = str(userID).encode('ascii')
+    params["note"] = note
+    params["frame"] = frame
+    params["time"] = time
+    params["userID"] = userID
 
     result = upload(params=params, nimURL=nimURL, apiKey=apiKey)
     return result
+
 
 
 #  Timecards  #

@@ -399,7 +399,7 @@ def mk_default( recreatePrefs=False, notify_success=True ) :
                         msg='Preferences already exist.\nWould you like to re-create your preferences?', \
                         type='okCancel' )
                 else :
-                    recreate=raw_input("Preferences already exist. Would you like to re-create your preferences? (Y\N) ")
+                    recreate=raw_input("Preferences already exist. Would you like to re-create your preferences? (Y/N) ")
                     if recreate == 'Y' or recreate == 'y':
                         recreate='OK'
 
