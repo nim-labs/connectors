@@ -380,7 +380,6 @@ def upload( params=None, nimURL=None, apiKey=None ) :
     if apiKey :
         nim_apiKey = apiKey
 
-    #_actionURL = nimURL.encode('ascii')
     _actionURL = nimURL
 
     P.info("API URL: %s" % _actionURL)
@@ -418,10 +417,10 @@ def upload( params=None, nimURL=None, apiKey=None ) :
             ssl_ctx = ssl.create_default_context()
             ssl_ctx.check_hostname=False
             ssl_ctx.verify_mode=ssl.CERT_NONE
-            opener = urllib.request.build_opener(urllib.request.HTTPSHandler(context=ssl_ctx), MultipartPostHandler)
+            opener = urllib.request.build_opener(urllib.request.HTTPSHandler(context=ssl_ctx), FormPostHandler)
         except :
             P.info( "Opening Connection on HTTP" )
-            opener = urllib.request.build_opener(MultipartPostHandler)
+            opener = urllib.request.build_opener(FormPostHandler)
 
         opener.addheaders = [('X-NIM-API-USER', nim_apiUser),('X-NIM-API-KEY', nim_apiKey)]
     except:
@@ -479,7 +478,7 @@ def upload( params=None, nimURL=None, apiKey=None ) :
     '''
     return result
 
-class MultipartPostHandler(urllib.request.BaseHandler):
+class FormPostHandler(urllib.request.BaseHandler):
     # needs to run first
     handler_order = urllib.request.HTTPHandler.handler_order - 10
 
