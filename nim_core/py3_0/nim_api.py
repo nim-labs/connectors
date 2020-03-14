@@ -270,6 +270,7 @@ def connect( method='get', params=None, nimURL=None, apiKey=None ) :
                 _file = urllib.request.urlopen(request,context=ssl_ctx)
             except :
                 _file = urllib.request.urlopen(request)
+
             fr=_file.read()
             try : result=json.loads( fr )
             except Exception as e :
@@ -430,7 +431,10 @@ def upload( params=None, nimURL=None, apiKey=None ) :
 
 
     try:
-        result = opener.open(_actionURL, params).read()
+        resource = opener.open(_actionURL, params)
+        result =  resource.read().decode(resource.headers.get_content_charset())
+        result = json.loads(result)
+
         P.info( "Result: %s" % result )
 
         # Test for failed API Validation
@@ -467,15 +471,6 @@ def upload( params=None, nimURL=None, apiKey=None ) :
             P.error("Unanticipated error occurred uploading image: %s" % (e))
             return False
 
-    '''
-    # Removing after showing false error.. 
-    # Now passing result json to calling function
-    else:
-        if params["file"] is not None:
-            if not str(result).startswith("1"):
-                P.error("Could not upload file successfully, but not sure why.\nUrl: %s\nError: %s" % (_actionURL, str(result)))
-                return False
-    '''
     return result
 
 class FormPostHandler(urllib.request.BaseHandler):
@@ -499,7 +494,7 @@ class FormPostHandler(urllib.request.BaseHandler):
             except TypeError:
                 raise TypeError
             if len(v_files) == 0:
-                data = urllib.parse.urlencode(v_vars, doseq)
+                data = urllib.parse.urlencode(v_vars, True)
             else:
                 boundary, data = self.multipart_encode(v_vars, v_files)
                 contenttype = 'multipart/form-data; boundary=%s' % boundary
@@ -932,12 +927,27 @@ def upload_jobIcon( jobID=None, img=None, nimURL=None, apiKey=None ) :
     params = {}
     params["q"] = "uploadJobIcon"
     params["jobID"] = jobID
-    if img is not None:
-        params["file"] = open(img,'rb')
+    
+    if img is not None :
+        img = os.path.normpath( img )
+        if os.path.isfile(img) :
+            params["file"] = open(img,'rb')
+        else :
+            result = {}
+            result['success'] = False
+            result['error'] = "File does not exist"
+            return result
     else :
-        params["file"] = ''
+        result = {}
+        result['success'] = False
+        result['error'] = "Image file not defined"
+        return result
 
-    result = upload(params=params, nimURL=nimURL, apiKey=apiKey)
+    if img is not None :
+        result = upload(params=params, nimURL=nimURL, apiKey=apiKey)
+    else :
+        result = connect( method='get', params=params, nimURL=nimURL, apiKey=apiKey )
+
     return result
 
 def get_jobInfo( jobID=None ) :
@@ -1005,13 +1015,13 @@ def can_bringOnline( item='shot', jobID=0, assetID=0, showID=0, shotID=0 ) :
     params = {}
     params["q"] = 'canBringOnline'
     params["type"] = str(item)
-    if jobID > 0 :
+    if int(jobID) > 0 :
         params["jobID"] = str(jobID)
-    if assetID > 0 :
+    if int(assetID) > 0 :
         params["assetID"] = str(assetID)
-    if showID > 0 :
+    if int(showID) > 0 :
         params["showID"] = str(showID)
-    if shotID > 0 :
+    if int(shotID) > 0 :
         params["shotID"] = str(shotID)
     result = connect( method='get', params=params )
     return result
@@ -1025,9 +1035,9 @@ def bring_online( item='shot', assetID=0, shotID=0 ) :
     params = {}
     params["q"] = 'bringOnline'
     params["type"] = str(item)
-    if assetID > 0 :
+    if int(assetID) > 0 :
         params["assetID"] = str(assetID)
-    if shotID > 0 :
+    if int(shotID) > 0 :
         params["shotID"] = str(shotID)
     result = connect( method='get', params=params )
     return result
@@ -1123,12 +1133,28 @@ def upload_assetIcon( assetID=None, img=None, nimURL=None, apiKey=None ) :
     params = {}
     params["q"] = "uploadAssetIcon"
     params["assetID"] = assetID
-    if img is not None:
-        params["file"] = open(img,'rb')
-    else :
-        params["file"] = ''
 
-    result = upload(params=params, nimURL=nimURL, apiKey=apiKey)
+    if img is not None :
+        img = os.path.normpath( img )
+        if os.path.isfile(img) :
+            params["file"] = open(img,'rb')
+        else :
+            result = {}
+            result['success'] = False
+            result['error'] = "File does not exist"
+            return result
+    else :
+        result = {}
+        result['success'] = False
+        result['error'] = "Image file not defined"
+        return result
+
+
+    if img is not None :
+        result = upload(params=params, nimURL=nimURL, apiKey=apiKey)
+    else :
+        result = connect( method='get', params=params, nimURL=nimURL, apiKey=apiKey )
+
     return result
 
 def get_assetInfo( assetID=None ) :
@@ -1400,12 +1426,27 @@ def upload_shotIcon( shotID=None, img=None, nimURL=None, apiKey=None ) :
     params = {}
     params["q"] = "uploadShotIcon"
     params["shotID"] = shotID
-    if img is not None:
-        params["file"] = open(img,'rb')
+    
+    if img is not None :
+        img = os.path.normpath( img )
+        if os.path.isfile(img) :
+            params["file"] = open(img,'rb')
+        else :
+            result = {}
+            result['success'] = False
+            result['error'] = "File does not exist"
+            return result
     else :
-        params["file"] = ''
+        result = {}
+        result['success'] = False
+        result['error'] = "Image file not defined"
+        return result
 
-    result = upload(params=params, nimURL=nimURL, apiKey=apiKey)
+    if img is not None :
+        result = upload(params=params, nimURL=nimURL, apiKey=apiKey)
+    else :
+        result = connect( method='get', params=params, nimURL=nimURL, apiKey=apiKey )
+
     return result
 
 def get_shotInfo( shotID=None ) :
@@ -2840,12 +2881,27 @@ def upload_renderIcon( renderID=None, renderKey='', img=None, nimURL=None, apiKe
     params["q"] = "uploadRenderIcon"
     params["renderID"] = renderID
     params["renderKey"] = renderKey
-    if img is not None:
-        params["file"] = open(img,'rb')
+    
+    if img is not None :
+        img = os.path.normpath( img )
+        if os.path.isfile(img) :
+            params["file"] = open(img,'rb')
+        else :
+            result = {}
+            result['success'] = False
+            result['error'] = "File does not exist"
+            return result
     else :
-        params["file"] = ''
+        result = {}
+        result['success'] = False
+        result['error'] = "Image file not defined"
+        return result
 
-    result = upload(params=params, nimURL=nimURL, apiKey=apiKey)
+    if img is not None :
+        result = upload(params=params, nimURL=nimURL, apiKey=apiKey)
+    else :
+        result = connect( method='get', params=params, nimURL=nimURL, apiKey=apiKey )
+
     return result
 
 def get_lastShotRender( shotID=None ):
@@ -2875,13 +2931,26 @@ def upload_edit( showID=None, path=None, nimURL=None, apiKey=None ) :
 
     params["q"] = "uploadEdit"
     params["showID"] = showID
-    if path is not None:
-        path = os.path.normpath( path )
-        params["file"] = open(path,'rb')
-    else :
-        params["file"] = ''
 
-    result = upload(params=params, nimURL=nimURL, apiKey=apiKey)
+    if path is not None :
+        path = os.path.normpath( path )
+        if os.path.isfile(path) :
+            params["file"] = open(path,'rb')
+        else :
+            result = {}
+            result['success'] = False
+            result['error'] = "File does not exist"
+            return result
+    else :
+        result = {}
+        result['success'] = False
+        result['error'] = "Path not defined"
+        return result
+
+    if path is not None :
+        result = upload(params=params, nimURL=nimURL, apiKey=apiKey)
+    else :
+        result = connect( method='get', params=params, nimURL=nimURL, apiKey=apiKey )
     return result
 
 # DEPRECATED - upload_dailies() #
@@ -2916,17 +2985,29 @@ def upload_dailies( taskID=None, renderID=None, renderKey=None, itemID=None, ite
     if renderID is not None : params['renderID'] = renderID
     if renderKey is not None : params['renderKey'] = renderKey
 
-    if path is not None:
+    if path is not None :
         path = os.path.normpath( path )
-        params["file"] = open(path,'rb')
+        if os.path.isfile(path) :
+            params["file"] = open(path,'rb')
+        else :
+            result = {}
+            result['success'] = False
+            result['error'] = "File does not exist"
+            return result
     else :
-        params["file"] = ''
+        result = {}
+        result['success'] = False
+        result['error'] = "Path not defined"
+        return result
 
     if submit is not None : params['submit'] = submit
     if itemID is not None : params['itemID'] = itemID
     if itemType is not None : params['itemType'] = itemType
 
-    result = upload(params=params, nimURL=nimURL, apiKey=apiKey)
+    if path is not None :
+        result = upload(params=params, nimURL=nimURL, apiKey=apiKey)
+    else :
+        result = connect( method='get', params=params, nimURL=nimURL, apiKey=apiKey )
     return result
 
 # DEPRECATED - upload_dailies() #
@@ -2940,16 +3021,33 @@ def upload_dailiesNote( dailiesID=None, name='', img=None, note='', frame=0, tim
     params["q"] = action
     params["dailiesID"] = shot_str
     params["name"] = name
-    if img is not None:
-        params["file"] = open(img,'rb')
+
+
+    if img is not None :
+        img = os.path.normpath( img )
+        if os.path.isfile(img) :
+            params["file"] = open(img,'rb')
+        else :
+            result = {}
+            result['success'] = False
+            result['error'] = "File does not exist"
+            return result
     else :
-        params["file"] = ''
+        result = {}
+        result['success'] = False
+        result['error'] = "Image file not defined"
+        return result
+
+
     params["note"] = note
     params["frame"] = frame
     params["time"] = time
     params["userID"] = userID
 
-    result = upload(params=params, nimURL=nimURL, apiKey=apiKey)
+    if img is not None :
+        result = upload(params=params, nimURL=nimURL, apiKey=apiKey)
+    else :
+        result = connect( method='get', params=params, nimURL=nimURL, apiKey=apiKey )
     return result
 
 
@@ -3046,11 +3144,23 @@ def upload_reviewItem( taskID=None, renderID=None, renderKey=None, itemID=None, 
     if renderID is not None : params['renderID'] = renderID
     if renderKey is not None : params['renderKey'] = renderKey
 
-    if path is not None:
+
+    if path is not None :
         path = os.path.normpath( path )
-        params["file"] = open(path,'rb')
+        if os.path.isfile(path) :
+            path = os.path.normpath( path )
+            params["file"] = open(path,'rb')
+        else :
+            result = {}
+            result['success'] = False
+            result['error'] = "File does not exist"
+            return result
     else :
-        params["file"] = ''
+        result = {}
+        result['success'] = False
+        result['error'] = "Path not defined"
+        return result
+
 
     if submit is not None : params['submit'] = submit
     if itemID is not None : params['itemID'] = itemID
@@ -3061,7 +3171,10 @@ def upload_reviewItem( taskID=None, renderID=None, renderKey=None, itemID=None, 
     if reviewItemStatusID is not None : params['reviewItemStatusID'] = reviewItemStatusID
     if keywords is not None : params['keywords'] = json.dumps(keywords)
 
-    result = upload(params=params, nimURL=nimURL, apiKey=apiKey)
+    if path is not None :
+        result = upload(params=params, nimURL=nimURL, apiKey=apiKey)
+    else :
+        result = connect( method='get', params=params, nimURL=nimURL, apiKey=apiKey )
     return result
 
 def upload_reviewNote( ID=None, name='', img=None, note='', frame=0, time=-1, userID=None, nimURL=None, apiKey=None ) :
@@ -3086,18 +3199,35 @@ def upload_reviewNote( ID=None, name='', img=None, note='', frame=0, time=-1, us
     params["q"] = "uploadReviewNote"
     params["ID"] = ID
     params["name"] = name
-    if img is not None:
-        params["file"] = open(img,'rb')
+
+
+    if img is not None :
+        img = os.path.normpath( img )
+        if os.path.isfile(img) :
+            params["file"] = open(img,'rb')
+        else :
+            result = {}
+            result['success'] = False
+            result['error'] = "File does not exist"
+            return result
     else :
-        params["file"] = ''
+        result = {}
+        result['success'] = False
+        result['error'] = "Image file not defined"
+        return result
+
+
     params["note"] = note
     params["frame"] = frame
     params["time"] = time
     params["userID"] = userID
 
-    result = upload(params=params, nimURL=nimURL, apiKey=apiKey)
-    return result
+    if img is not None :
+        result = upload(params=params, nimURL=nimURL, apiKey=apiKey)
+    else :
+        result = connect( method='get', params=params, nimURL=nimURL, apiKey=apiKey )
 
+    return result
 
 
 #  Timecards  #
