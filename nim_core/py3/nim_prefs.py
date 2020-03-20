@@ -196,7 +196,7 @@ def _inputURL() :
     if isGUI :
         url=Win.popup( title=winTitle+' - Get URL', msg=msg, type='input', defaultInput=nim_URL )
     else :
-        url=eval(input(msg))
+        url=input(msg)
     #P.info( 'NIM URL Set to: %s' % url ) 
     if url : 
         # Check for '/nimAPI.php?' at end of URL
@@ -399,7 +399,7 @@ def mk_default( recreatePrefs=False, notify_success=True ) :
                         msg='Preferences already exist.\nWould you like to re-create your preferences?', \
                         type='okCancel' )
                 else :
-                    recreate=eval(input("Preferences already exist. Would you like to re-create your preferences? (Y/N) "))
+                    recreate=input("Preferences already exist. Would you like to re-create your preferences? (Y/N) ")
                     if recreate == 'Y' or recreate == 'y':
                         recreate='OK'
 
@@ -433,7 +433,7 @@ def mk_default( recreatePrefs=False, notify_success=True ) :
                 if isGUI :
                     keepGoing=Win.popup( title=winTitle+' - Get URL', msg=msg, type='okCancel' )
                 else :
-                    keepGoing=eval(input('The NIM API URL entered is invalid. Try Again? (Y/N):' ))
+                    keepGoing=input('The NIM API URL entered is invalid. Try Again? (Y/N):' )
                     if keepGoing == 'Y' or keepGoing == 'y' :
                         keepGoing = 'OK'
 

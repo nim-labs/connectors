@@ -250,7 +250,7 @@ def userInfo( url='', apiUser='', newUser=False ) :
     if isGUI :
         user=popup( title='Enter NIM Login', msg='Please enter your NIM username:', type='input', defaultInput=apiUser )
     else :
-        user=eval(input('Please enter your NIM username: '))
+        user=input('Please enter your NIM username: ')
 
     if user is None :
         return False
@@ -283,7 +283,7 @@ def userInfo( url='', apiUser='', newUser=False ) :
             if isGUI :
                 response = popup( title='User Not Found', msg='The username entered is not a valid NIM user.\n\n Would you like to enter a new username?', type='okCancel')
             else :
-                response=eval(input('The username entered is not a valid NIM user. Would you like to enter a new username? (Y/N)'))
+                response=input('The username entered is not a valid NIM user. Would you like to enter a new username? (Y/N)')
                 if response == 'Y' or response == 'y' :
                     response = 'OK'
 
@@ -324,7 +324,7 @@ def setApiKey( url='' ) :
         print('Failed to validate user.\n \
                 NIM Security is set to require the use of API Keys.\n \
                 Please obtain a valid NIM API KEY from your NIM Administrator.')
-        api_key=eval(input('Enter the NIM API Key for your user: '))
+        api_key=input('Enter the NIM API Key for your user: ')
 
     if api_key is None :
         return False
@@ -341,7 +341,7 @@ def setApiKey( url='' ) :
                         response = popup( title='NIM API Invalid', msg='The NIM API Key entered is invalid.\n\nRe-enter API Key?', type='okCancel')
                     else :
                         print('The NIM API Key entered is invalid.')
-                        response=eval(input('Re-enter API Key? (Y/N): '))
+                        response=input('Re-enter API Key? (Y/N): ')
                         if response == 'Y' or response == 'y' :
                             response = 'OK'
 
@@ -387,7 +387,7 @@ def setApiKey( url='' ) :
                             response = popup( title='NIM API Invalid', msg='The NIM API Key entered is invalid.\n\nRe-enter API Key?', type='okCancel')
                         else :
                             print('The NIM API Key entered is invalid.')
-                            response=eval(input('Re-enter API Key? (Y/N): '))
+                            response=input('Re-enter API Key? (Y/N): ')
                             if response == 'Y' or response == 'y' :
                                 response = 'OK'
 
@@ -401,7 +401,7 @@ def setApiKey( url='' ) :
                     response = popup( title='NIM API Invalid', msg='The NIM API Key entered is invalid.\n\nRe-enter API Key?', type='okCancel')
                 else :
                     print('The NIM API Key entered is invalid.')
-                    response=eval(input('Re-enter API Key? (Y/N): '))
+                    response=input('Re-enter API Key? (Y/N): ')
                     if response == 'Y' or response == 'y' :
                         response = 'OK'
 

@@ -139,7 +139,7 @@ def get_connect_info() :
         if isGUI :
             reply=Win.popup( title='NIM Error', msg=err_msg, type='okCancel' )
         else :
-            reply=eval(input( 'Would you like to recreate your preferences? (Y/N): '))
+            reply=input( 'Would you like to recreate your preferences? (Y/N): ')
             if reply == 'Y' or reply == 'y' :
                 reply = 'OK'
                 
@@ -320,7 +320,7 @@ def connect( method='get', params=None, nimURL=None, apiKey=None ) :
             if isGUI :
                 reply=Win.popup( title='NIM Error', msg=err_msg, type='okCancel' )
             else :
-                reply=eval(input( 'Would you like to recreate your preferences? (Y/N): '))
+                reply=input( 'Would you like to recreate your preferences? (Y/N): ')
                 if reply == 'Y' or reply == 'y' :
                     reply = 'OK'
 
