@@ -3351,9 +3351,8 @@ def nimScanForVersions(nim_showID=None, nim_shotID=None, updateAll=False) :
 			nim_shotID = shot['ID']
 
 			# Get Elements By extension
-			# openClipElements = nimAPI.find_elements(showID=nim_showID, ext='.clip')
 			openClipElements = nimAPI.find_elements(shotID=nim_shotID, ext='.clip')
-			# print openClipElements
+			# print json.dumps(openClipElements)
 
 			for openClipElement in openClipElements :
 				clipID = openClipElement['ID']
@@ -3367,23 +3366,33 @@ def nimScanForVersions(nim_showID=None, nim_shotID=None, updateAll=False) :
 					
 
 				# print "Elements found"
-				# print elements
+				# print json.dumps(elements)
 
 				for element in elements :
-					if element['ID'] != clipID :
+					if element['ID'] != clipID and element['name'].endswith('.clip') == False :
 
 						appendElement = True
-						elementMetadata = element['metadata']
+						elementMetadata = json.loads(element['metadata'])
 						
+						updateAll = False
+						usedClipIDs = []
+
 						if updateAll is False :
-							# flameUsedInClip metadata is an array of fileIDs relating to 
-							# the clips that this item has been imported into
-							print "Element Metadata: %s" % elementMetadata
-							if len(elementMetadata)>0 and elementMetadata.has_key('flameUsedInClip') :
-								usedClipIDs = elementMetadata['flameUsedInClip']:
-								for usedClipID in usedClips :
+						# flameUsedInClip metadata is an array of fileIDs relating to 
+						# the clips that this item has been imported into
+						if len(elementMetadata)>0 and elementMetadata.has_key('flameUsedInClip') :
+							#print "flameUsedInClip Found"
+							usedClipIDs = json.loads(elementMetadata['flameUsedInClip'])
+							#print usedClipIDs
+
+							if len(usedClipIDs)>0 and isinstance(usedClipIDs, list) :
+								for usedClipID in usedClipIDs :
 									if usedClipID == clipID :
+										#print "clipID found"
 										appendElement = False
+							else :
+								print "usedClipIDs is not list"
+
 
 						if appendElement :
 							print "Element found for shotID %s" % shotID
@@ -3408,15 +3417,20 @@ def nimScanForVersions(nim_showID=None, nim_shotID=None, updateAll=False) :
 
 							clipUpdated = updateOpenClip( masterFile=clipFile, elementPath=elementPath, \
 															elementName=elementName, elementWildcard=elementWildcard, recursive=False )
+							
 							if clipUpdated :
-								# Update Element Metadata to mark as used in openClip
-								if len(elementMetadata)>0 and elementMetadata.has_key('flameUsedInClip') :
-									elementMetadata['flameUsedInClip'].append(clipID)
-								else :
-									elementMetadata['flameUsedInClip'] = [clipID]
+								usedClipIDs.append(clipID)
 
+								# Update Element Metadata to mark as used in openClip
+								#print "Updating Element with new metadata"
+								elementMetadata['flameUsedInClip'] = json.dumps(usedClipIDs)
+
+								elementMetadata = json.dumps(elementMetadata)
+								#print "Updated elementMetadata: %s" % elementMetadata
+
+								#print "Element ID being updated: %s" % element['ID']
 								elementUpdate = nimAPI.update_element(ID=element['ID'], metadata=elementMetadata)
-								#print elementUpdate
+								#print json.dumps(elementUpdate)
 
 								if clipUpdated == -1 :
 									clipFail += 1
