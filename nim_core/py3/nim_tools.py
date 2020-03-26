@@ -24,8 +24,12 @@ except :
         try : 
             from PyQt4 import QtCore, QtGui
         except :
-            # print "NIM: Failed to load UI Modules - Tools"
-            qt_import=False
+            try :
+                from PyQt5 import QtWidgets as QtGui
+                from PyQt5 import QtCore
+            except :
+                # print "NIM: Failed to load UI Modules - Tools"
+                qt_import=False
 
 from . import nim_print
 from . import nim_win

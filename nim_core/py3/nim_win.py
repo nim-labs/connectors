@@ -53,10 +53,16 @@ except :
     try : 
         from PySide import QtCore, QtGui
     except :
-        try : from PyQt4 import QtCore, QtGui
+        try : 
+            from PyQt4 import QtCore, QtGui
         except : 
-            # print "NIM UI: Failed to UI Modules"
-            qt_import=False
+            try : 
+                from PyQt5 import QtWidgets as QtGui
+                from PyQt5 import QtGui as QtGui2
+                from PyQt5 import QtCore
+            except :
+                # print "NIM UI: Failed to UI Modules"
+                qt_import=False
 
 
 def popup( title='', msg='', type='ok', defaultInput='', pyside=False, _list=[], selNum=0, winPrnt=None ) :

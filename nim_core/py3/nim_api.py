@@ -48,7 +48,7 @@ from email.generator import _make_boundary as choose_boundary
 import io
 import stat
 
-from os import SEEK_END
+#from os import SEEK_END
 
 
 #  NIM Imports :
@@ -250,8 +250,11 @@ def connect( method='get', params=None, nimURL=None, apiKey=None ) :
             cmd=urllib.parse.urlencode(params)
             _actionURL = re.sub('[?]', '', nimURL)
         else :
-            P.error('Connection method not defined in request.')
-            Win.popup( title='NIM Connection Error', msg='NIM Connection Error:\n\n Connection method not defined in request.')
+            if isGUI :
+                Win.popup( title='NIM Connection Error', msg='NIM Connection Error:\n\n Connection method not defined in request.')
+            else :
+                P.error('Connection method not defined in request.')
+            
             return False
 
         try :

@@ -34,11 +34,18 @@ try :
     from PySide2 import QtGui as QtGui2
     from PySide2 import QtCore
 except ImportError :
-    try : from PySide import QtCore, QtGui
+    try : 
+        from PySide import QtCore, QtGui
     except ImportError :
-        try : from PyQt4 import QtCore, QtGui
+        try : 
+            from PyQt4 import QtCore, QtGui
         except ImportError : 
-            print("NIM UI: Failed to UI Modules")
+            try :
+                from PyQt5 import QtWidgets as QtGui
+                from PyQt5 import QtGui as QtGui2
+                from PyQt5 import QtCore
+            except ImportError :
+                print("NIM UI: Failed to UI Modules")
 
 #  Variables :
 WIN=''
