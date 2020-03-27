@@ -21,10 +21,17 @@ import nim_print as P
 #  Houdini Imports :
 import hou
 #  Import Python GUI packages :
-try : from PySide import QtCore, QtGui
+try : 
+    from PySide import QtCore, QtGui
 except :
-    try : from PyQt4 import QtCore, QtGui
-    except : pass
+    try : 
+        from PyQt4 import QtCore, QtGui
+    except : 
+        try :
+            from PyQt5 import QtWidgets as QtGui
+            from PyQt5 import QtCore
+        except : 
+            pass
 
 #  Variables :
 version='v4.0.45'

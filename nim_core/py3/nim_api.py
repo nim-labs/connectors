@@ -82,7 +82,7 @@ try :
 except :
     pass
 
-#print "isGUI: %s" % isGUI
+#print("isGUI: %s" % isGUI)
 
 def testAPI(nimURL=None, nim_apiUser='', nim_apiKey='') :
     sqlCmd={'q': 'testAPI'}

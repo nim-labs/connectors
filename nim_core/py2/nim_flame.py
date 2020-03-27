@@ -30,7 +30,11 @@ except ImportError :
 		try : 
 			from PyQt4 import QtCore, QtGui
 		except ImportError : 
-			print "NIM: Failed to load UI Modules - Flame"
+			try :
+				from PyQt5 import QtWidgets as QtGui
+				from PyQt5 import QtCore
+			except ImportError :
+				print "NIM: Failed to load UI Modules - Flame"
 
 #  Variables :
 version='v4.0.45'
