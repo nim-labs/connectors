@@ -76,6 +76,10 @@ def get_app() :
         import cinesync
         return 'Cinesync'
     except: pass
+    try:
+        import Deadline
+        return 'Deadline'
+    except: pass
     try :
         nim_app = os.environ.get('NIM_APP', '-1')
         if nim_app == 'Flame':
