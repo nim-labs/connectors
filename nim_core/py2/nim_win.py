@@ -238,6 +238,7 @@ def popup( title='', msg='', type='ok', defaultInput='', pyside=False, _list=[],
 
     #  Deadline :
     elif app=='Deadline' :
+        messageApp = QtGui.QApplication(sys.argv)
         if type=='ok' :
             dialog=QtGui.QMessageBox.information( None, title, msg, \
                 QtGui.QMessageBox.Ok)
