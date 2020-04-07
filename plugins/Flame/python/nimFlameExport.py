@@ -3334,6 +3334,7 @@ def nimScanForVersions(nim_showID=None, nim_shotID=None, updateAll=False) :
 	# find_elements in show with metadata flameAssetType : batchOpenClip
 	# get element type
 	# find all elements of type in shot
+	# print "nimScanForVersions"
 	clipCount = 0
 	clipFail = 0
 
@@ -3374,28 +3375,31 @@ def nimScanForVersions(nim_showID=None, nim_shotID=None, updateAll=False) :
 						appendElement = True
 						elementMetadata = json.loads(element['metadata'])
 						
+						clipUsed = False
 						updateAll = False
 						usedClipIDs = []
 
-						if updateAll is False :
 						# flameUsedInClip metadata is an array of fileIDs relating to 
 						# the clips that this item has been imported into
 						if len(elementMetadata)>0 and elementMetadata.has_key('flameUsedInClip') :
-							#print "flameUsedInClip Found"
+							# print "flameUsedInClip Found"
 							usedClipIDs = json.loads(elementMetadata['flameUsedInClip'])
-							#print usedClipIDs
+							# print usedClipIDs
 
 							if len(usedClipIDs)>0 and isinstance(usedClipIDs, list) :
 								for usedClipID in usedClipIDs :
 									if usedClipID == clipID :
-										#print "clipID found"
-										appendElement = False
+										# print "clipID found"
+										clipUsed = True
 							else :
-								print "usedClipIDs is not list"
+								# print "usedClipIDs is not list"
+								pass
 
-
+						if updateAll is False and clipUsed is True :
+							appendElement = False
+						
 						if appendElement :
-							print "Element found for shotID %s" % shotID
+							# print "Element found for shotID %s" % shotID
 							elementPath = element['path'].encode('utf-8')
 							elementName = element['name'].encode('utf-8')
 							
@@ -3418,20 +3422,24 @@ def nimScanForVersions(nim_showID=None, nim_shotID=None, updateAll=False) :
 							clipUpdated = updateOpenClip( masterFile=clipFile, elementPath=elementPath, \
 															elementName=elementName, elementWildcard=elementWildcard, recursive=False )
 							
-							if clipUpdated :
+							# Possible that clip was already part of OpenClip but did not have metadata
+							# If key doesn't exist in metadata then update metadata
+							if clipUsed is False :
 								usedClipIDs.append(clipID)
 
 								# Update Element Metadata to mark as used in openClip
-								#print "Updating Element with new metadata"
+								# print "Updating Element with new metadata"
 								elementMetadata['flameUsedInClip'] = json.dumps(usedClipIDs)
 
 								elementMetadata = json.dumps(elementMetadata)
-								#print "Updated elementMetadata: %s" % elementMetadata
+								# print "Updated elementMetadata: %s" % elementMetadata
 
-								#print "Element ID being updated: %s" % element['ID']
+								# print "Element ID being updated: %s" % element['ID']
 								elementUpdate = nimAPI.update_element(ID=element['ID'], metadata=elementMetadata)
-								#print json.dumps(elementUpdate)
+								# print json.dumps(elementUpdate)
 
+
+							if clipUpdated :
 								if clipUpdated == -1 :
 									clipFail += 1
 								else :
