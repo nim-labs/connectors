@@ -134,6 +134,11 @@ class NimScanForVersionsDialog(QDialog):
 			else :
 				self.pref_serverID= ''
 
+			if self.app+'_UpdateAll' in self.prefs:
+				self.pref_updateAll=self.prefs[self.app+'_UpdateAll']
+			else :
+				self.pref_updateAll= 0
+
 			print "NIM - Prefs successfully read"
 
 		except:
@@ -145,6 +150,7 @@ class NimScanForVersionsDialog(QDialog):
 			self.pref_job=0
 			self.pref_show=0
 			self.pref_server=''
+			self.pref_updateAll=0
 			pass
 
 		self.nim_OS = platform.system()
@@ -172,6 +178,7 @@ class NimScanForVersionsDialog(QDialog):
 		self.nim_servers = {}
 		self.nim_serverID = None
 		self.nim_serverOSPath = ''
+		self.nim_updateAll=0
 
 		#Get NIM Jobs
 		self.nim_jobID = None
@@ -288,6 +295,26 @@ class NimScanForVersionsDialog(QDialog):
 		horizontalLayout_show.addWidget(self.nim_showChooser)
 		horizontalLayout_show.setStretch(1, 40)
 		self.nim_showChooser.currentIndexChanged.connect(self.nim_showChanged)
+
+
+		# UPDATE: List box for update option
+		horizontalLayout_update = QHBoxLayout()
+		horizontalLayout_update.setSpacing(-1)
+		horizontalLayout_update.setSizeConstraint(QLayout.SetDefaultConstraint)
+		horizontalLayout_update.setObjectName("horizontalLayout_update")
+		self.nimUpdateLabel = QLabel()
+		self.nimUpdateLabel.setFixedWidth(120)
+		self.nimUpdateLabel.setText("Scan For:")
+		horizontalLayout_update.addWidget(self.nimUpdateLabel)
+		self.nim_updateChooser = QComboBox()
+		self.nim_updateChooser.setToolTip("Choose to update clips using all elements or only new elements.")
+		self.nim_updateChooser.setMinimumHeight(28)
+		self.nim_updateChooser.setIconSize(QSize(1, 24))
+		horizontalLayout_update.addWidget(self.nim_updateChooser)
+		horizontalLayout_update.setStretch(1, 40)
+		self.nim_updateChooser.addItem(self.clearPix, 'New Elements')
+		self.nim_updateChooser.addItem(self.clearPix, 'All Elements')
+		self.nim_updateChooser.currentIndexChanged.connect(self.nim_updateChanged)
 	
 
 		# Add the standard ok/cancel buttons, default to ok.
@@ -311,7 +338,8 @@ class NimScanForVersionsDialog(QDialog):
 		groupLayout.setLayout(1, QFormLayout.SpanningRole, horizontalLayout_progress)
 		groupLayout.setLayout(2, QFormLayout.SpanningRole, horizontalLayout_job)
 		groupLayout.setLayout(3, QFormLayout.SpanningRole, horizontalLayout_show)
-		groupLayout.setLayout(4, QFormLayout.SpanningRole, horizontalLayout_OkCancel)
+		groupLayout.setLayout(4, QFormLayout.SpanningRole, horizontalLayout_update)
+		groupLayout.setLayout(5, QFormLayout.SpanningRole, horizontalLayout_OkCancel)
 
 		self.setLayout(groupLayout)
 		layout.addWidget(groupBox)
@@ -387,6 +415,15 @@ class NimScanForVersionsDialog(QDialog):
 				print "NIM: No Data Returned"
 	
 
+	def nim_updateChanged(self):
+		'''Action when update option is changed'''
+		updateOption = self.nim_updateChooser.currentText()
+		if updateOption == 'All Elements' :
+			self.nim_updateAll = True
+		else :
+			self.nim_updateAll = False
+
+
 	def acceptTest(self):
 		# Saving Preferences
 		nimPrefs.update( 'Job', 'Flame', self.nim_jobID )
@@ -403,6 +440,7 @@ class NimScanForVersionsDialog(QDialog):
 
 		self.nim_jobChooser.setDisabled(True)
 		self.nim_showChooser.setDisabled(True)
+		self.nim_updateChooser.setDisabled(True)
 		self._buttonbox.setDisabled(True)
 
 		shotCount = 0
@@ -413,7 +451,7 @@ class NimScanForVersionsDialog(QDialog):
 			QApplication.processEvents()
 			
 			clipSucess = {}
-			clipSucess = nimScanForVersions(nim_shotID=shot['ID'])
+			clipSucess = nimScanForVersions(nim_shotID=shot['ID'], updateAll=self.nim_updateAll)
 
 			self.clipCount += clipSucess['clipCount']
 			self.clipFail += clipSucess['clipFail']
@@ -3292,10 +3330,11 @@ def uploadDaily(nim_taskID=None, mov_path='') :
 	return success
 
 
-def nimScanForVersions(nim_showID=None, nim_shotID=None) :
+def nimScanForVersions(nim_showID=None, nim_shotID=None, updateAll=False) :
 	# find_elements in show with metadata flameAssetType : batchOpenClip
 	# get element type
 	# find all elements of type in shot
+	# print "nimScanForVersions"
 	clipCount = 0
 	clipFail = 0
 
@@ -3313,9 +3352,8 @@ def nimScanForVersions(nim_showID=None, nim_shotID=None) :
 			nim_shotID = shot['ID']
 
 			# Get Elements By extension
-			# openClipElements = nimAPI.find_elements(showID=nim_showID, ext='.clip')
 			openClipElements = nimAPI.find_elements(shotID=nim_shotID, ext='.clip')
-			# print openClipElements
+			# print json.dumps(openClipElements)
 
 			for openClipElement in openClipElements :
 				clipID = openClipElement['ID']
@@ -3326,38 +3364,86 @@ def nimScanForVersions(nim_showID=None, nim_shotID=None) :
 
 				elementTypeID = openClipElement['elementTypeID']
 				elements = nimAPI.find_elements(shotID=shotID, elementTypeID=elementTypeID)
+					
+
 				# print "Elements found"
-				# print elements
+				# print json.dumps(elements)
 
 				for element in elements :
-					if element['ID'] != clipID :
-						print "Element found for shotID %s" % shotID
-						elementPath = element['path'].encode('utf-8')
-						elementName = element['name'].encode('utf-8')
+					if element['ID'] != clipID and element['name'].endswith('.clip') == False :
+
+						appendElement = True
+						elementMetadata = json.loads(element['metadata'])
 						
-						# Update elementPath using server os resolution
-						# print "Raw Element Path: %s" % elementPath
-						elementPath = resolveServerOsPath(path=elementPath)
+						clipUsed = False
+						updateAll = False
+						usedClipIDs = []
 
-						# print "OS Element Path: %s" % elementPath
-						
-						fullPath = os.path.join(elementPath,elementName)
-						# print "Full Path: %s" % fullPath
+						# flameUsedInClip metadata is an array of fileIDs relating to 
+						# the clips that this item has been imported into
+						if len(elementMetadata)>0 and elementMetadata.has_key('flameUsedInClip') :
+							# print "flameUsedInClip Found"
+							usedClipIDs = json.loads(elementMetadata['flameUsedInClip'])
+							# print usedClipIDs
 
-						# If sequence with name.frame.ext format, replace frame with *
-						# This will limit dl_get_media_info failure when finding subfolders
-						elementExt = os.path.splitext(elementName)[1]
-						elementBasename = elementName.rpartition('.')[0].rpartition('.')[0]
-						elementWildcard = elementBasename+".*"+elementExt
-						# print "elementWildcard: %s" % elementWildcard
-
-						clipUpdated = updateOpenClip( masterFile=clipFile, elementPath=elementPath, \
-														elementName=elementName, elementWildcard=elementWildcard, recursive=False )
-						if clipUpdated :
-							if clipUpdated == -1 :
-								clipFail += 1
+							if len(usedClipIDs)>0 and isinstance(usedClipIDs, list) :
+								for usedClipID in usedClipIDs :
+									if usedClipID == clipID :
+										# print "clipID found"
+										clipUsed = True
 							else :
-								clipCount += 1
+								# print "usedClipIDs is not list"
+								pass
+
+						if updateAll is False and clipUsed is True :
+							appendElement = False
+						
+						if appendElement :
+							# print "New Element found for shotID %s" % shotID
+							elementPath = element['path'].encode('utf-8')
+							elementName = element['name'].encode('utf-8')
+							
+							# Update elementPath using server os resolution
+							# print "Raw Element Path: %s" % elementPath
+							elementPath = resolveServerOsPath(path=elementPath)
+							# print "OS Element Path: %s" % elementPath
+							
+							fullPath = os.path.join(elementPath,elementName)
+							# print "Full Path: %s" % fullPath
+
+							# If sequence with name.frame.ext format, replace frame with *
+							# This will limit dl_get_media_info failure when finding subfolders
+							elementExt = os.path.splitext(elementName)[1]
+							elementBasename = elementName.rpartition('.')[0].rpartition('.')[0]
+							elementWildcard = elementBasename+".*"+elementExt
+							# print "elementWildcard: %s" % elementWildcard
+						
+
+							clipUpdated = updateOpenClip( masterFile=clipFile, elementPath=elementPath, \
+															elementName=elementName, elementWildcard=elementWildcard, recursive=False )
+							
+							# Possible that clip was already part of OpenClip but did not have metadata
+							# If key doesn't exist in metadata then update metadata
+							if clipUsed is False :
+								usedClipIDs.append(clipID)
+
+								# Update Element Metadata to mark as used in openClip
+								# print "Updating Element with new metadata"
+								elementMetadata['flameUsedInClip'] = json.dumps(usedClipIDs)
+
+								elementMetadata = json.dumps(elementMetadata)
+								# print "Updated elementMetadata: %s" % elementMetadata
+
+								# print "Element ID being updated: %s" % element['ID']
+								elementUpdate = nimAPI.update_element(ID=element['ID'], metadata=elementMetadata)
+								# print json.dumps(elementUpdate)
+
+
+							if clipUpdated :
+								if clipUpdated == -1 :
+									clipFail += 1
+								else :
+									clipCount += 1
 
 	clipSucess = {}
 	clipSucess['clipCount'] = clipCount
@@ -4097,10 +4183,12 @@ def updateOpenClip( masterFile='', elementPath='', elementName='', elementWildca
 					print "Handler found"
 					xmlRoot.remove(handler)
 
-				resultXML	= ET.tostring(xmlRoot)
+				resultXML = ET.tostring(xmlRoot)
 
 				with open(tmpfile,"w") as f:
 					f.write( resultXML )
+
+				clipUpdated = True
 
 			except :
 				print "Failed to update openClip: %s" % tmpfile
