@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: Flame/python/nimFlameExport.py
-# Version:  v4.0.45.191209
+# Version:  v4.0.49.200407
 #
 # Copyright (c) 2014-2020 NIM Labs LLC
 # All rights reserved.
