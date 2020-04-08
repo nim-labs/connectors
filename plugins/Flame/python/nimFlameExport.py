@@ -417,7 +417,7 @@ class NimScanForVersionsDialog(QDialog):
 
 	def nim_updateChanged(self):
 		'''Action when update option is changed'''
-		updateOption = self.nim_UpdateChooser.currentText()
+		updateOption = self.nim_updateChooser.currentText()
 		if updateOption == 'All Elements' :
 			self.nim_updateAll = True
 		else :
@@ -3399,7 +3399,7 @@ def nimScanForVersions(nim_showID=None, nim_shotID=None, updateAll=False) :
 							appendElement = False
 						
 						if appendElement :
-							# print "Element found for shotID %s" % shotID
+							# print "New Element found for shotID %s" % shotID
 							elementPath = element['path'].encode('utf-8')
 							elementName = element['name'].encode('utf-8')
 							
