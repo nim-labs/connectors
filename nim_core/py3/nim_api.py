@@ -1149,7 +1149,6 @@ def upload_assetIcon( assetID=None, img=None, nimURL=None, apiKey=None ) :
         result['error'] = "Image file not defined"
         return result
 
-
     if img is not None :
         result = upload(params=params, nimURL=nimURL, apiKey=apiKey)
     else :
@@ -3032,20 +3031,16 @@ def upload_dailies( taskID=None, renderID=None, renderKey=None, itemID=None, ite
         result = upload(params=params, nimURL=nimURL, apiKey=apiKey)
     else :
         result = connect( method='get', params=params, nimURL=nimURL, apiKey=apiKey )
+
     return result
 
 # DEPRECATED - upload_dailies() #
 def upload_dailiesNote( dailiesID=None, name='', img=None, note='', frame=0, time=-1, userID=None, nimURL=None, apiKey=None ) :
     'Upload dailiesNote'
     params = {}
-    action = "uploadDailiesNote"
-    shot_str = str(dailiesID)
-    name = str(name)
-
-    params["q"] = action
-    params["dailiesID"] = shot_str
+    params["q"] = "uploadDailiesNote"
+    params["dailiesID"] = dailiesID
     params["name"] = name
-
 
     if img is not None :
         img = os.path.normpath( img )
@@ -3061,7 +3056,6 @@ def upload_dailiesNote( dailiesID=None, name='', img=None, note='', frame=0, tim
         result['success'] = False
         result['error'] = "Image file not defined"
         return result
-
 
     params["note"] = note
     params["frame"] = frame

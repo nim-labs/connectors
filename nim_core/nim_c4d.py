@@ -18,7 +18,7 @@ pythonVersion = sys.version_info.major
 
 if pythonVersion == 3 :
     # Import nim_core for Python3
-    from py3.nim_c4d import *
+    from .py3.nim_c4d import *
 
 else :
     # Import nim_core for Python2
