@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: nim_api.py
-# Version:  v4.0.47.200224
+# Version:  v4.0.49.200410
 #
 # Copyright (c) 2014-2020 NIM Labs LLC
 # All rights reserved.
@@ -56,7 +56,7 @@ import nim_tools
 import nim_win as Win
 
 #  Variables :
-version='v4.0.45'
+version='v4.0.49'
 winTitle='NIM_'+version
 
 '''
@@ -1179,8 +1179,8 @@ def get_shots( showID=None ) :
     'Builds a dictionary of all shots for a given show'
     return get( {'q': 'getShots', 'ID': showID} )
 
-def add_shot( showID=None, shotName=None, name=None, shotStatusID=None, shotStatus=None, description=None, vfx=None, fps=None, frames=None, shotDuration=None, \
-    handles=None, heads=None, tails=None, height=None, pan=None, tilt=None, roll=None, lens=None, fstop=None, filter=None, \
+def add_shot( showID=None, shotName=None, name=None, shotStatusID=None, shotStatus=None, description=None, vfx=None, fps=None, frames=None, \
+    shotDuration=None, handles=None, heads=None, tails=None, height=None, pan=None, tilt=None, roll=None, lens=None, fstop=None, filter=None, \
     dts=None, focus=None, ia=None, convergence=None, cam_roll=None, stock=None, format=None, crop=None, protect=None, customKeys=None ) :
     '''
     Adds a shot to a show and returns the new ID.
@@ -2479,7 +2479,8 @@ def add_file( nim=None, filePath='', comment='', pub=False ) :
     
     return True
 
-def save_file( parent='SHOW', parentID=0, task_type_ID=0, task_folder='', userID=0, basename='', filename='', path='', ext='', version='', comment='', serverID=0, pub=False, forceLink=1, work=True, metadata='', customKeys=None ):
+def save_file( parent='SHOW', parentID=0, task_type_ID=0, task_folder='', userID=0, basename='', filename='', \
+    path='', ext='', version='', comment='', serverID=0, pub=False, forceLink=1, work=True, metadata=None, customKeys=None ):
     '''General Purpose Save File Function that Adds a File to the NIM Database with brute force data.
 
        Required Parameters:
@@ -2595,7 +2596,8 @@ def save_file( parent='SHOW', parentID=0, task_type_ID=0, task_folder='', userID
                         Please check to make sure the file exists on disk.')
     return result
 
-def update_file( ID=0, task_type_ID=0, task_folder='', userID=0, basename='', filename='', path='', ext='', version='', comment='', serverID=0, pub=False, forceLink=1, work=True, metadata='', customKeys=None ):
+def update_file( ID=None, task_type_ID=None, task_folder=None, userID=None, basename=None, filename=None, path=None, ext=None, \
+    version=None, comment=None, serverID=None, pub=False, forceLink=None, work=None, metadata=None, customKeys=None ):
     '''General Purpose Update File Function that Updates and existing File in the NIM Database'''
     is_work = 0
     if work:
@@ -2678,10 +2680,29 @@ def update_file( ID=0, task_type_ID=0, task_folder='', userID=0, basename='', fi
                         Please check to make sure the file exists on disk.')
     return result
 
-def find_files( name='', path='', metadata=''):
-    'Retrieves a dictionary of files matching the file path'
-    files=get( {'q': 'findFiles', 'name': name, 'path': path, 'metadata': metadata} )
-    return files
+def find_files( parent='shot', parentID=None, name='', path='', metadata=''):
+    '''
+    Finds files based on the passed parameters
+    Returns an array of files found
+
+        Parameters          Type            Values
+    Optional:
+        parent              string          'asset' OR 'shot'
+        parentID            integer         The ID of the parent item
+        name                string
+        path                string
+        metadata            json            A key/value pair array in JSON format {"keyword01" : "value01", "keyword02" : "value02"}
+    '''
+    params = {'q': 'findFiles'}
+
+    if parent is not None : params['parent'] = parent
+    if parentID is not None : params['parentID'] = parentID
+    if name is not None : params['name'] = name
+    if path is not None : params['path'] = path
+    if metadata is not None : params['metadata'] = metadata
+
+    result = connect( method='get', params=params )
+    return result
 
 
 #  Elements  #
@@ -2696,7 +2717,7 @@ def get_elementType( ID=None):
     elementType=get( {'q': 'getElementType', 'ID': ID} )
     return elementType
 
-def find_elements( name='', path='', jobID='', showID='', shotID='', assetID='', taskID='', renderID='', elementTypeID='', ext='' ,metadata=''):
+def find_elements( name='', path='', jobID='', showID='', shotID='', assetID='', taskID='', renderID='', elementTypeID='', ext='', metadata=''):
     'Retrieves a dictionary of elements matching one of the included IDs plus name, path, elementTypeID, ext, or metadata'
     elements=get( {'q': 'findElements', 'name': name, 'path': path, 'jobID': jobID, 'showID': showID, 'shotID': shotID, 'assetID': assetID, 'taskID': taskID, 'renderID': renderID, 'elementTypeID': elementTypeID, 'ext': ext, 'metadata': metadata} )
     return elements
@@ -2710,7 +2731,8 @@ def get_elements( parent='shot', parentID=None, elementTypeID=None, getLastEleme
     publishedElements=get( {'q': 'getElements', 'parent': parent, 'parentID': parentID, 'elementTypeID': elementTypeID, 'getLastElement': getLastElement, 'isPublished': isPublished} )
     return publishedElements
 
-def add_element( parent='shot', parentID=None, userID=None, typeID='', path='', name='', startFrame=None, endFrame=None, handles=None, isPublished=False, nimURL=None, apiKey=None, metadata='' ):
+def add_element( parent='shot', parentID=None, userID=None, typeID='', path='', name='', startFrame=None, endFrame=None, \
+    handles=None, isPublished=False, metadata='', nimURL=None, apiKey=None ):
     'Adds an element to an asset, shot, task, or render'
     # nimURL and apiKey are optional for Render API Key overrride
     params = {'q': 'addElement', 'parent': parent, 'userID':userID, 'typeID': typeID, 'parentID': parentID, 'path': path, \
@@ -2718,7 +2740,8 @@ def add_element( parent='shot', parentID=None, userID=None, typeID='', path='', 
     result = connect( method='get', params=params, nimURL=nimURL, apiKey=apiKey )
     return result
 
-def update_element(ID=None, userID=None, jobID=None, assetID=None, shotID=None, taskID=None, renderID=None, elementTypeID=None, name=None, path=None, startFrame=None, endFrame=None, handles=None, isPublished=None, nimURL=None, apiKey=None ):
+def update_element(ID=None, userID=None, jobID=None, assetID=None, shotID=None, taskID=None, renderID=None, elementTypeID=None, \
+    name=None, path=None, startFrame=None, endFrame=None, handles=None, isPublished=None, metadata=None, nimURL=None, apiKey=None ):
     'Updates an existing element by element ID'
     # nimURL and apiKey are optional for Render API Key override
     params = {'q': 'updateElement'}
@@ -2737,6 +2760,7 @@ def update_element(ID=None, userID=None, jobID=None, assetID=None, shotID=None, 
     if endFrame is not None : params['endFrame'] = endFrame
     if handles is not None : params['handles'] = handles
     if isPublished is not None : params['isPublished'] = isPublished
+    if metadata is not None : params['metadata'] = metadata
 
     result = connect( method='get', params=params, nimURL=nimURL, apiKey=apiKey )
     return result
