@@ -2480,7 +2480,7 @@ def add_file( nim=None, filePath='', comment='', pub=False ) :
     return True
 
 def save_file( parent='SHOW', parentID=0, task_type_ID=0, task_folder='', userID=0, basename='', filename='', \
-    path='', ext='', version='', comment='', serverID=0, pub=False, forceLink=1, work=True, metadata=None, customKeys=None ):
+    path='', ext='', version='', comment='', serverID=0, pub=False, forceLink=1, work=True, metadata=None, customKeys=None ) :
     '''General Purpose Save File Function that Adds a File to the NIM Database with brute force data.
 
        Required Parameters:
@@ -2597,7 +2597,7 @@ def save_file( parent='SHOW', parentID=0, task_type_ID=0, task_folder='', userID
     return result
 
 def update_file( ID=None, task_type_ID=None, task_folder=None, userID=None, basename=None, filename=None, path=None, ext=None, \
-    version=None, comment=None, serverID=None, pub=False, forceLink=None, work=None, metadata=None, customKeys=None ):
+    version=None, comment=None, serverID=None, pub=False, forceLink=None, work=None, metadata=None, customKeys=None ) :
     '''General Purpose Update File Function that Updates and existing File in the NIM Database'''
     is_work = 0
     if work:
@@ -2717,7 +2717,7 @@ def get_elementType( ID=None):
     elementType=get( {'q': 'getElementType', 'ID': ID} )
     return elementType
 
-def find_elements( name='', path='', jobID='', showID='', shotID='', assetID='', taskID='', renderID='', elementTypeID='', ext='', metadata=''):
+def find_elements( name='', path='', jobID='', showID='', shotID='', assetID='', taskID='', renderID='', elementTypeID='', ext='', metadata='') :
     'Retrieves a dictionary of elements matching one of the included IDs plus name, path, elementTypeID, ext, or metadata'
     elements=get( {'q': 'findElements', 'name': name, 'path': path, 'jobID': jobID, 'showID': showID, 'shotID': shotID, 'assetID': assetID, 'taskID': taskID, 'renderID': renderID, 'elementTypeID': elementTypeID, 'ext': ext, 'metadata': metadata} )
     return elements
@@ -2732,7 +2732,7 @@ def get_elements( parent='shot', parentID=None, elementTypeID=None, getLastEleme
     return publishedElements
 
 def add_element( parent='shot', parentID=None, userID=None, typeID='', path='', name='', startFrame=None, endFrame=None, \
-    handles=None, isPublished=False, metadata='', nimURL=None, apiKey=None ):
+    handles=None, isPublished=False, metadata='', nimURL=None, apiKey=None ) :
     'Adds an element to an asset, shot, task, or render'
     # nimURL and apiKey are optional for Render API Key overrride
     params = {'q': 'addElement', 'parent': parent, 'userID':userID, 'typeID': typeID, 'parentID': parentID, 'path': path, \
@@ -2741,7 +2741,7 @@ def add_element( parent='shot', parentID=None, userID=None, typeID='', path='', 
     return result
 
 def update_element(ID=None, userID=None, jobID=None, assetID=None, shotID=None, taskID=None, renderID=None, elementTypeID=None, \
-    name=None, path=None, startFrame=None, endFrame=None, handles=None, isPublished=None, metadata=None, nimURL=None, apiKey=None ):
+    name=None, path=None, startFrame=None, endFrame=None, handles=None, isPublished=None, metadata=None, nimURL=None, apiKey=None ) :
     'Updates an existing element by element ID'
     # nimURL and apiKey are optional for Render API Key override
     params = {'q': 'updateElement'}
