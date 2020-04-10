@@ -28,7 +28,7 @@ from . import nim_print as P
 from . import nim_win as Win
 
 #  Variables :
-version='v4.0.45'
+version='v4.0.49'
 winTitle='NIM_'+version+' - '
 _os=platform.system().lower()
 nim_plugin_ID=1032427

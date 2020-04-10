@@ -37,7 +37,7 @@ except ImportError :
 				print "NIM: Failed to load UI Modules - Flame"
 
 #  Variables :
-version='v4.0.45'
+version='v4.0.49'
 winTitle='NIM_'+version
 
 

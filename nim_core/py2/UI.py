@@ -50,7 +50,7 @@ except ImportError :
 #  Variables :
 WIN=''
 startTime=''
-version='v4.0.45'
+version='v4.0.49'
 winTitle='NIM_'+version
 _os=platform.system().lower()
 _osCap=platform.system()
