@@ -3338,13 +3338,11 @@ def nimScanForVersions(nim_showID=None, nim_shotID=None, updateAll=False) :
 	clipCount = 0
 	clipFail = 0
 
+	shots = []
 	if nim_showID :
 		shots = nimAPI.get_shots(showID=nim_showID)
 	if nim_shotID :
-		shotInfo = nimAPI.get_shotInfo(shotID=nim_shotID)
-		shots = []
-		if shotInfo :
-			shots.append( {'ID':nim_shotID, 'name':shotInfo[0]['shotName'] } )
+		shots.append( {'ID':nim_shotID} )
 
 	# Iterate through shots in show
 	for shot in shots :
