@@ -17,10 +17,15 @@ if(typeof JSON!=='object'){JSON={};}(function(){'use strict';function f(n){retur
 
 $._nim_PPP_={
 	
+	version : '4.0.51',
 	debug : false,
 	debug_level : 0,
 	exportJobs : {},
 	
+	getExtensionVersion: function(){
+		return $._nim_PPP_.version;
+	},
+
 	getProjectPath: function(){
 		return app.project.path;
 	},
