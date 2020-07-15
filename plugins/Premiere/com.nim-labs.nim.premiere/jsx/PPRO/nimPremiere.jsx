@@ -1,9 +1,9 @@
 //******************************************************************************
 //
 // Filename: nimPremiere.jsx
-// Version:  v4.0.32.190712
+// Version:  v4.0.51.200714
 //
-// Copyright (c) 2014-2019 NIM Labs LLC
+// Copyright (c) 2014-2020 NIM Labs LLC
 // All rights reserved.
 //
 // Use of this software is subject to the terms of the NIM Labs license
@@ -17,9 +17,15 @@ if(typeof JSON!=='object'){JSON={};}(function(){'use strict';function f(n){retur
 
 $._nim_PPP_={
 	
+	version : '4.0.51',
 	debug : false,
+	debug_level : 0,
 	exportJobs : {},
 	
+	getExtensionVersion: function(){
+		return $._nim_PPP_.version;
+	},
+
 	getProjectPath: function(){
 		return app.project.path;
 	},
@@ -51,6 +57,7 @@ $._nim_PPP_={
 	},
 
 	getProjectMetadata : function(data){
+		$._nim_PPP_.updateEventPanel('getProjectMetadata: '+data,2);
 		data = JSON.parse(data);
 
 		if (app.isDocumentOpen()) {
@@ -68,14 +75,14 @@ $._nim_PPP_={
 						var xmp	= new XMPMeta(projectMetadata);
 
 						for (var key in data) {
-							$._nim_PPP_.debugLog('Reading Property: '+key);
+							$._nim_PPP_.updateEventPanel('Reading Property: '+key,2);
 							if(xmp.doesPropertyExist(kPProPrivateProjectMetadataURI, key)){
 								var property = xmp.getProperty(kPProPrivateProjectMetadataURI, key);
-								$._nim_PPP_.debugLog('Property Found: '+property.value);
+								$._nim_PPP_.updateEventPanel('Property Found: '+property.value,2);
 								data[key] = property.value;
 								data[key] = data[key] == " " ? "" : data[key];
 							}
-							$._nim_PPP_.debugLog('--------------------------------------');
+							$._nim_PPP_.updateEventPanel('--------------------------------------',2);
 						}
 
 						data["nim_pproProjectPath"] = app.project.path;
@@ -88,7 +95,7 @@ $._nim_PPP_={
 	},
 
 	setProjectMetadata : function(data) {
-		$._nim_PPP_.debugLog('setProjectMetadata: '+data);
+		$._nim_PPP_.updateEventPanel('setProjectMetadata: '+data,2);
 		data = JSON.parse(data);
 
 		if (app.isDocumentOpen()) {
@@ -111,31 +118,31 @@ $._nim_PPP_={
 						for( var key in data){
 							if( data[key] !== undefined ){
 								if (xmp.doesPropertyExist(kPProPrivateProjectMetadataURI, key)){
-									$._nim_PPP_.debugLog('Property Found: '+key);
-									$._nim_PPP_.debugLog('Property Data: '+data[key]);
-									$._nim_PPP_.debugLog('Property Type: '+typeof data[key]);
+									$._nim_PPP_.updateEventPanel('Property Found: '+key,2);
+									$._nim_PPP_.updateEventPanel('Property Data: '+data[key],2);
+									$._nim_PPP_.updateEventPanel('Property Type: '+typeof data[key],2);
 									data[key] = data[key] == "" ? " " : data[key];
 									xmp.setProperty(kPProPrivateProjectMetadataURI, key, data[key]);
-									$._nim_PPP_.debugLog('Property Set: '+key);
+									$._nim_PPP_.updateEventPanel('Property Set: '+key,2);
 								}
 								else{
 									var successfullyAdded = app.project.addPropertyToProjectMetadataSchema(key, key, 2);
-									$._nim_PPP_.debugLog('Adding Property: '+key);
+									$._nim_PPP_.updateEventPanel('Adding Property: '+key,2);
 									if(successfullyAdded){
-										$._nim_PPP_.debugLog('Property Added');
+										$._nim_PPP_.updateEventPanel('Property Added',2);
 										data[key] = data[key] == "" ? " " : data[key];
 										xmp.setProperty(kPProPrivateProjectMetadataURI, key, data[key]);
-										$._nim_PPP_.debugLog('Property Set: '+key+ ' : '+data[key]);
+										$._nim_PPP_.updateEventPanel('Property Set: '+key+ ' : '+data[key],2);
 									}
 									else {
-										$._nim_PPP_.debugLog('Failed to Add Property: '+key);
+										$._nim_PPP_.updateEventPanel('Failed to Add Property: '+key,2);
 									}
 								}
-								$._nim_PPP_.debugLog('--------------------------------------');
+								$._nim_PPP_.updateEventPanel('--------------------------------------',2);
 								fieldArray.push(key);
 							}
 						}
-						$._nim_PPP_.debugLog('FieldArray: '+JSON.stringify(fieldArray));
+						$._nim_PPP_.updateEventPanel('FieldArray: '+JSON.stringify(fieldArray),2);
 
 						var str = xmp.serialize();
 						projectItem.setProjectMetadata(str, fieldArray);
@@ -148,13 +155,13 @@ $._nim_PPP_={
 	},
 
 	projectOpen : function(projToOpen) {
-		$._nim_PPP_.debugLog('projectOpen - projToOpen: ' + projToOpen);
+		$._nim_PPP_.updateEventPanel('projectOpen - projToOpen: ' + projToOpen,2);
 		if (projToOpen) {
 			var result = app.openDocument(	projToOpen,
 											1,					// suppress 'Convert Project' dialogs
 											1,					// suppress 'Locate Files' dialogs
 											1);					// suppress warning dialogs
-			$._nim_PPP_.debugLog('projectOpen - result: ' + JSON.stringify(result));
+			$._nim_PPP_.updateEventPanel('projectOpen - result: ' + JSON.stringify(result),2);
 		}	
 		else {
 			alert("Project Not Found");
@@ -162,13 +169,13 @@ $._nim_PPP_={
 	},
 
 	projectSaveAs : function(projToSave) {
-		$._nim_PPP_.debugLog('projectSaveAs - projToSave: ' + projToSave);
+		$._nim_PPP_.updateEventPanel('projectSaveAs - projToSave: ' + projToSave,2);
 		if (projToSave) {
 			var result = app.project.saveAs( projToSave );
-			$._nim_PPP_.debugLog('projectSaveAs - result: ' + JSON.stringify(result));
+			$._nim_PPP_.updateEventPanel('projectSaveAs - result: ' + JSON.stringify(result),2);
 		}	
 		else {
-			alert("Project Not Found");
+			$._nim_PPP_.updateEventPanel("Project Not Found",0);
 		}
 	},
 
@@ -189,11 +196,33 @@ $._nim_PPP_={
 
 	exportEdit : function(context, itemID, name, desc, typeID, statusID, keywords, preset, presetPath, range, diskID, disk, keep, markers) {
 
-		app.encoder.bind('onEncoderJobComplete',	$._nim_PPP_.onEncoderJobComplete);
-		app.encoder.bind('onEncoderJobError', 		$._nim_PPP_.onEncoderJobError);
-		app.encoder.bind('onEncoderJobProgress', 	$._nim_PPP_.onEncoderJobProgress);
-		app.encoder.bind('onEncoderJobQueued', 		$._nim_PPP_.onEncoderJobQueued);
-		app.encoder.bind('onEncoderJobCanceled',	$._nim_PPP_.onEncoderJobCanceled);
+		$._nim_PPP_.updateEventPanel("Export Edit",2);
+
+		var ameStatus = BridgeTalk.getStatus("ame");
+		if (ameStatus == "ISNOTINSTALLED"){
+			$._nim_PPP_.updateEventPanel("AME is not installed.",0);
+			return "Adobe Media Encoder is not installed.";
+		}
+		if (ameStatus == "ISNOTRUNNING"){
+			app.encoder.launchEncoder(); // This can take a while; let's get the ball rolling.
+		}
+		
+		try {
+			app.encoder.bind('onEncoderJobComplete',	$._nim_PPP_.onEncoderJobComplete);
+			app.encoder.bind('onEncoderJobError', 		$._nim_PPP_.onEncoderJobError);
+			app.encoder.bind('onEncoderJobProgress', 	$._nim_PPP_.onEncoderJobProgress);
+			app.encoder.bind('onEncoderJobQueued', 		$._nim_PPP_.onEncoderJobQueued);
+			app.encoder.bind('onEncoderJobCanceled',	$._nim_PPP_.onEncoderJobCanceled);
+		}
+		catch (e) {
+			$._nim_PPP_.updateEventPanel("AME Binds Failed",0);
+		}
+		
+		$._nim_PPP_.updateEventPanel("Binds Complete",2);
+
+		app.encoder.launchEncoder(); // This can take a while; let's get the ball rolling.
+		
+		$._nim_PPP_.updateEventPanel("launchEncoder",2);
 
 		var activeSequence = app.project.activeSequence;
 		var sequenceID = activeSequence.sequenceID;
@@ -215,9 +244,9 @@ $._nim_PPP_={
 			outputPath = disk+outputPath;
 		}
 
-		$._nim_PPP_.debugLog('exportEdit - outputPath:' + outputPath);
-		$._nim_PPP_.debugLog('exportEdit - presetPath:' + presetPath);
-		$._nim_PPP_.debugLog('exportEdit - range:' + range);
+		$._nim_PPP_.updateEventPanel('exportEdit - outputPath:' + outputPath,2);
+		$._nim_PPP_.updateEventPanel('exportEdit - presetPath:' + presetPath,2);
+		$._nim_PPP_.updateEventPanel('exportEdit - range:' + range,2);
 
 		var workArea = parseInt(range);
 		var removeOnComplete = 1;
@@ -234,8 +263,8 @@ $._nim_PPP_={
 						current_marker	!==	undefined; 
 						current_marker 	=	markerData.getNextMarker(current_marker)){
 
-					$._nim_PPP_.debugLog('exportEdit - marker.name:' + current_marker.name);
-					$._nim_PPP_.debugLog('exportEdit - marker.comments:' + current_marker.comments);
+					$._nim_PPP_.updateEventPanel('exportEdit - marker.name:' + current_marker.name,2);
+					$._nim_PPP_.updateEventPanel('exportEdit - marker.comments:' + current_marker.comments,2);
 					
 					var markerItem = { name : current_marker.name,
 									   comments: current_marker.comments,
@@ -261,27 +290,43 @@ $._nim_PPP_={
 	exportClip : function(sequenceID, trackID, clipID, itemID, name, typeID, preset, presetPath, 
 		outputPath, length, handles, exportAE, exportAeSource, exportAeServer, task_type_ID, serverID, framerate) {
 
-		app.encoder.bind('onEncoderJobComplete',	$._nim_PPP_.onEncoderJobComplete);
-		app.encoder.bind('onEncoderJobError', 		$._nim_PPP_.onEncoderJobError);
-		app.encoder.bind('onEncoderJobProgress', 	$._nim_PPP_.onEncoderJobProgress);
-		app.encoder.bind('onEncoderJobQueued', 		$._nim_PPP_.onEncoderJobQueued);
-		app.encoder.bind('onEncoderJobCanceled',	$._nim_PPP_.onEncoderJobCanceled);
+		$._nim_PPP_.updateEventPanel("Export Clip",2);
 
-		$._nim_PPP_.debugLog('exportEdit - trackID:' + trackID);
-		$._nim_PPP_.debugLog('exportEdit - clipID:' + clipID);
-		$._nim_PPP_.debugLog('exportEdit - itemID:' + itemID);
-		$._nim_PPP_.debugLog('exportEdit - name:' + name);
-		$._nim_PPP_.debugLog('exportEdit - typeID:' + typeID);
-		$._nim_PPP_.debugLog('exportEdit - preset:' + preset);
-		$._nim_PPP_.debugLog('exportEdit - presetPath:' + presetPath);
-		$._nim_PPP_.debugLog('exportEdit - outputPath:' + outputPath);
-		$._nim_PPP_.debugLog('exportEdit - length:' + length);
-		$._nim_PPP_.debugLog('exportEdit - handles:' + handles);
-		$._nim_PPP_.debugLog('exportEdit - exportAE:' + exportAE);
-		$._nim_PPP_.debugLog('exportEdit - exportAeSource:' + exportAeSource);
-		$._nim_PPP_.debugLog('exportEdit - exportAeServer:' + exportAeServer);
-		$._nim_PPP_.debugLog('exportEdit - task_type_ID:' + task_type_ID);
-		$._nim_PPP_.debugLog('exportEdit - serverID:' + serverID);
+		var ameStatus = BridgeTalk.getStatus("ame");
+		if (ameStatus == "ISNOTINSTALLED"){
+			$._nim_PPP_.updateEventPanel("AME is not installed.",0);
+			return "Adobe Media Encoder is not installed.";
+		}
+		if (ameStatus == "ISNOTRUNNING"){
+			app.encoder.launchEncoder(); // This can take a while; let's get the ball rolling.
+		}
+
+		try {
+			app.encoder.bind('onEncoderJobComplete',	$._nim_PPP_.onEncoderJobComplete);
+			app.encoder.bind('onEncoderJobError', 		$._nim_PPP_.onEncoderJobError);
+			app.encoder.bind('onEncoderJobProgress', 	$._nim_PPP_.onEncoderJobProgress);
+			app.encoder.bind('onEncoderJobQueued', 		$._nim_PPP_.onEncoderJobQueued);
+			app.encoder.bind('onEncoderJobCanceled',	$._nim_PPP_.onEncoderJobCanceled);
+		}
+		catch (e) {
+			$._nim_PPP_.updateEventPanel("AME Binds Failed",0);
+		}
+
+		$._nim_PPP_.updateEventPanel('exportEdit - trackID:' + trackID,2);
+		$._nim_PPP_.updateEventPanel('exportEdit - clipID:' + clipID,2);
+		$._nim_PPP_.updateEventPanel('exportEdit - itemID:' + itemID,2);
+		$._nim_PPP_.updateEventPanel('exportEdit - name:' + name,2);
+		$._nim_PPP_.updateEventPanel('exportEdit - typeID:' + typeID,2);
+		$._nim_PPP_.updateEventPanel('exportEdit - preset:' + preset,2);
+		$._nim_PPP_.updateEventPanel('exportEdit - presetPath:' + presetPath,2);
+		$._nim_PPP_.updateEventPanel('exportEdit - outputPath:' + outputPath,2);
+		$._nim_PPP_.updateEventPanel('exportEdit - length:' + length,2);
+		$._nim_PPP_.updateEventPanel('exportEdit - handles:' + handles,2);
+		$._nim_PPP_.updateEventPanel('exportEdit - exportAE:' + exportAE,2);
+		$._nim_PPP_.updateEventPanel('exportEdit - exportAeSource:' + exportAeSource,2);
+		$._nim_PPP_.updateEventPanel('exportEdit - exportAeServer:' + exportAeServer,2);
+		$._nim_PPP_.updateEventPanel('exportEdit - task_type_ID:' + task_type_ID,2);
+		$._nim_PPP_.updateEventPanel('exportEdit - serverID:' + serverID,2);
 
 		
 		var sequences = app.project.sequences;
@@ -341,14 +386,15 @@ $._nim_PPP_={
 			return JSON.stringify($._nim_PPP_.exportJobs[encodeJobID]);
 		}
 		
-		return "false";
+		$._nim_PPP_.updateEventPanel("An invalid length was defined.",0);
+		return "An invalid length was defined.";
 	},
 
 	getSequenceItems : function (rename, nameTemplate, layerOption){
 		// Retrives all video trackItems in a sequence
 		// optionally renames clips based on nameTemplate
 
-		$._nim_PPP_.debugLog('getSequenceItems');
+		$._nim_PPP_.updateEventPanel('getSequenceItems',2);
 
 		var sequenceObj = {};
 
@@ -371,7 +417,7 @@ $._nim_PPP_={
         }
 
 		var videoTracks = activeSequence.videoTracks;
-		$._nim_PPP_.debugLog('videoTracks: '+JSON.stringify(videoTracks));
+		$._nim_PPP_.updateEventPanel('videoTracks: '+JSON.stringify(videoTracks),2);
 
 		var tracks = [];
 		var firstTrack = true;
@@ -382,7 +428,7 @@ $._nim_PPP_={
 			trackInfo['mediaType'] = videoTracks[i].mediaType;
 
 			var trackClips = videoTracks[i].clips;
-			$._nim_PPP_.debugLog('trackClips: '+JSON.stringify(trackClips));
+			$._nim_PPP_.updateEventPanel('trackClips: '+JSON.stringify(trackClips),2);
 
 			var clips = [];
 			for(var j=0; j<trackClips.numItems; j++){
@@ -392,11 +438,11 @@ $._nim_PPP_={
 				if(rename == "1"){
 					if(firstTrack==true){
 						trackClips[j].name = $._nim_PPP_.renameClip(nameTemplate,j);
-						$._nim_PPP_.debugLog("renameClip: "+trackClips[j].name);
+						$._nim_PPP_.updateEventPanel("renameClip: "+trackClips[j].name,2);
 					}
 					else{
 						trackClips[j].name = $._nim_PPP_.getVerticalTrackName(trackClips[j], i, layerOption);
-						$._nim_PPP_.debugLog("getVerticalTrackName: "+trackClips[j].name);
+						$._nim_PPP_.updateEventPanel("getVerticalTrackName: "+trackClips[j].name,2);
 					}
 				}
 				clipInfo['name'] = trackClips[j].name;
@@ -423,6 +469,8 @@ $._nim_PPP_={
 	},
 
 	renameClip : function(nameTemplate, clipIndex){
+		$._nim_PPP_.updateEventPanel("Renaming Clip Index: "+clipIndex,2);
+
 		var frameReg = /^([^\<\>]*)<(#*)(?:x(\d*))?(?:@(\d*))?>(.*)$/g;
 		var frameItems = frameReg.exec(nameTemplate);
 		var prefix = frameItems[1] !== undefined ? frameItems[1] : "";
@@ -439,7 +487,7 @@ $._nim_PPP_={
 	},
 
 	exportClipIcon : function(clip) {
-		$._nim_PPP_.debugLog('clip: '+clip);
+		$._nim_PPP_.updateEventPanel('clip: '+clip,2);
 		clip = JSON.parse(clip);
 
 		app.project.openSequence(clip['sequenceID']);	// Sequence Must be active to export PNG
@@ -453,8 +501,8 @@ $._nim_PPP_={
 	getVerticalTrackName : function(clip, trackNumber, layerOption){
 		var inClipStartTicks = parseInt(clip.start.ticks);
 		var inClipEndTicks = parseInt(clip.end.ticks);
-		$._nim_PPP_.debugLog("inClipStartTicks: "+inClipStartTicks);
-		$._nim_PPP_.debugLog("inClipEndTicks: "+inClipEndTicks);
+		$._nim_PPP_.updateEventPanel("inClipStartTicks: "+inClipStartTicks,2);
+		$._nim_PPP_.updateEventPanel("inClipEndTicks: "+inClipEndTicks,2);
 
 		var activeSequence = app.project.activeSequence;
 		var videoTracks = activeSequence.videoTracks;
@@ -466,23 +514,23 @@ $._nim_PPP_={
 			var trackClips = videoTracks[i].clips;
 			
 			for(var j=0; j<trackClips.numItems; j++){
-				$._nim_PPP_.debugLog("trackClip name: "+trackClips[j].name);
+				$._nim_PPP_.updateEventPanel("trackClip name: "+trackClips[j].name,2);
 				var clipStartTicks = parseInt(trackClips[j].start.ticks);
 				var clipEndTicks =parseInt( trackClips[j].end.ticks);
 
-				$._nim_PPP_.debugLog("clipStartTicks: "+clipStartTicks);
-				$._nim_PPP_.debugLog("clipEndTicks: "+clipEndTicks);
+				$._nim_PPP_.updateEventPanel("clipStartTicks: "+clipStartTicks,2);
+				$._nim_PPP_.updateEventPanel("clipEndTicks: "+clipEndTicks,2);
 
 				if(layerOption == 0){	// Match First Frame
 					if(clipStartTicks <= inClipStartTicks && clipEndTicks > inClipStartTicks){
-						$._nim_PPP_.debugLog("Match Found: "+trackClips[j].name);
+						$._nim_PPP_.updateEventPanel("Match Found: "+trackClips[j].name,2);
 						clipName = trackClips[j].name;
 						break trackLoop;
 					}
 				}
 				else {	// Match End Frame
 					if(clipStartTicks < inClipEndTicks && clipEndTicks >= inClipEndTicks){
-						$._nim_PPP_.debugLog("Match Found: "+trackClips[j].name);
+						$._nim_PPP_.updateEventPanel("Match Found: "+trackClips[j].name,2);
 						clipName = trackClips[j].name;
 						break trackLoop;
 					}
@@ -490,7 +538,7 @@ $._nim_PPP_={
 			}
 		}
 
-		$._nim_PPP_.debugLog("clipName: "+clipName);
+		$._nim_PPP_.updateEventPanel("clipName: "+clipName,2);
 
 		if(clipName == ""){
 			clipName = clip.name;
@@ -521,13 +569,14 @@ $._nim_PPP_={
 			outputFileName += ".png";
 			return outputFileName;
 		} else {
-			$._nim_PPP_.message("No active sequence.");
+			$._nim_PPP_.updateEventPanel("No active sequence",0);
+			//$._nim_PPP_.message("No active sequence.");
 		}
 		return false;
 	},
 
 	importReviewItem : function(reviewPath){
-		$._nim_PPP_.debugLog("importReviewItem");
+		$._nim_PPP_.updateEventPanel("importReviewItem",2);
 		var result = false;
 
 		if(reviewPath){
@@ -540,12 +589,12 @@ $._nim_PPP_={
 				
 				if(result){
 					matchingMediaItems = importBin.findItemsMatchingMediaPath(reviewPath, 1);
-					$._nim_PPP_.debugLog("matchingMediaItems: "+JSON.stringify(matchingMediaItems));
+					$._nim_PPP_.updateEventPanel("matchingMediaItems: "+JSON.stringify(matchingMediaItems),2);
 
 					if(matchingMediaItems.length > 0){
-						$._nim_PPP_.debugLog("matchingMediaItems[0]: "+JSON.stringify(matchingMediaItems[0]));
+						$._nim_PPP_.updateEventPanel("matchingMediaItems[0]: "+JSON.stringify(matchingMediaItems[0]),2);
 						var nodeId = matchingMediaItems[0]['nodeId'];
-						$._nim_PPP_.debugLog("nodeId: "+JSON.stringify(nodeId));
+						$._nim_PPP_.updateEventPanel("nodeId: "+JSON.stringify(nodeId),2);
 						result = nodeId;
 					}
 					else{
@@ -559,7 +608,7 @@ $._nim_PPP_={
 	},
 
 	importElements : function(shotTree, destination, binName) {
-		$._nim_PPP_.debugLog("importElements");
+		$._nim_PPP_.updateEventPanel("importElements",2);
 		var result = false;
 
 		if (app.project) {
@@ -615,7 +664,7 @@ $._nim_PPP_={
 				}
 			} 
 			else {
-				$._nim_PPP_.message("No files to import.");
+				$._nim_PPP_.updateEventPanel("No files to import.",1);
 				result = false;
 			} 
 		}
@@ -705,8 +754,8 @@ $._nim_PPP_={
 	},
 
 	createSequenceMarker : function(nodeID, startTime, endTime, name, comment) {
-		$._nim_PPP_.debugLog("createSequenceMarker: ");
-		$._nim_PPP_.debugLog("nodeID: "+nodeID);
+		$._nim_PPP_.updateEventPanel("createSequenceMarker: ",2);
+		$._nim_PPP_.updateEventPanel("nodeID: "+nodeID,2);
 
 		var projectItem = '';
 		if(nodeID == 0){
@@ -716,14 +765,14 @@ $._nim_PPP_={
 			// Find projectItem with nodeID
 			if (app.project) {
 				var projectChildren = app.project.rootItem.children;
-				$._nim_PPP_.debugLog("projectChildren: "+JSON.stringify(projectChildren));
+				$._nim_PPP_.updateEventPanel("projectChildren: "+JSON.stringify(projectChildren),2);
 
 				for(var i=0; i<projectChildren['numItems']; i++){
-					$._nim_PPP_.debugLog("projectChildren[i].nodeId: "+projectChildren[i].nodeId);
-					$._nim_PPP_.debugLog("looking for nodeID: "+nodeID);
+					$._nim_PPP_.updateEventPanel("projectChildren[i].nodeId: "+projectChildren[i].nodeId,2);
+					$._nim_PPP_.updateEventPanel("looking for nodeID: "+nodeID,2);
 
 					if(projectChildren[i].nodeId == nodeID){
-						$._nim_PPP_.debugLog("target projectItem found: "+nodeID);
+						$._nim_PPP_.updateEventPanel("target projectItem found: "+nodeID,2);
 						projectItem = projectChildren[i];
 						break;
 					}
@@ -733,7 +782,7 @@ $._nim_PPP_={
 		}
 		
 		if(projectItem){
-			$._nim_PPP_.debugLog("projectItem: "+JSON.stringify(projectItem));
+			$._nim_PPP_.updateEventPanel("projectItem: "+JSON.stringify(projectItem),2);
 			if(nodeID == 0){
 				var markers = projectItem.markers;
 			}
@@ -748,12 +797,12 @@ $._nim_PPP_={
 				return "true";
 			}
 			else{
-				$._nim_PPP_.debugLog("Failed to get markers for project item");
+				$._nim_PPP_.updateEventPanel("Failed to get markers for project item",0);
 				return "false";
 			}
 		}
 		else{
-			$._nim_PPP_.debugLog("createSequenceMarker: No Item Found");
+			$._nim_PPP_.updateEventPanel("createSequenceMarker: No Item Found",1);
 			return "false";
 		}
 	},
@@ -791,10 +840,57 @@ $._nim_PPP_={
 		$.writeln(msg);	 
 	},
 
+	setDebugLevel : function (level) {
+		if(!level){
+			level = 0;
+		}
+		$._nim_PPP_.debug_level = parseInt(level);
+
+		if($._nim_PPP_.debug_level > 0){
+			app.setSDKEventMessage("NIM Debug Level Set: "+$._nim_PPP_.debug_level, 'info');
+		}
+
+		var result = "Debug Level Set: "+$._nim_PPP_.debug_level;
+		return result;
+	},
+
 	debugLog : function (msg) {
 		if($._nim_PPP_.debug){
-			$.writeln(msg);	 // Using '$' object will invoke ExtendScript Toolkit, if installed.
+			//$.writeln(msg);	 // Using '$' object will invoke ExtendScript Toolkit, if installed.
+			app.setSDKEventMessage(message, 'info');
 		}
+	},
+
+	updateEventPanel : function (message, level) {
+		// SET MESSAGE HEADER
+		var level_type = 'ERROR';
+		if(level == 0){
+			level_type = 'ERROR';
+		}
+		if(level == 1){
+			level_type = 'WARNING';
+		}
+		if(level == 2){
+			level_type = 'INFO';
+		}
+
+		// SEND TO EVENT LOG
+		if(level == 0){
+			app.setSDKEventMessage(message, 'error');
+			level_type = 'ERROR';
+		}
+		if(level == 1 && $._nim_PPP_.debug_level >= 1){
+			app.setSDKEventMessage(message, 'warning');
+			level_type = 'WARNING';
+		}
+		if(level == 2 &&  $._nim_PPP_.debug_level >= 2){
+			app.setSDKEventMessage(message, 'info');
+			level_type = 'INFO';
+		}
+
+		// RETURN RESULT FOR console.log
+		result = level_type+": "+message;
+		return result;
 	},
 
 	// Callbacks
@@ -835,7 +931,7 @@ $._nim_PPP_={
 	},
 	
 	onEncoderJobProgress : function (jobID, progress) {
-		$._nim_PPP_.debugLog('onEncoderJobProgress called. jobID = ' + jobID + '. progress = ' + progress + '.');
+		$._nim_PPP_.updateEventPanel('onEncoderJobProgress called. jobID = ' + jobID + '. progress = ' + progress + '.',2);
 
 		var eoName;
 		if (Folder.fs == 'Macintosh') {
@@ -884,7 +980,7 @@ $._nim_PPP_={
 	},
 
 	onEncoderJobCanceled : function (jobID) {
-		$._nim_PPP_.debugLog('OnEncoderJobCanceled called. jobID = ' + jobID +  '.');
+		$._nim_PPP_.updateEventPanel('OnEncoderJobCanceled called. jobID = ' + jobID +  '.',2);
 	},
 
 };
