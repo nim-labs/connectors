@@ -3103,7 +3103,8 @@ def get_reviewItemNotes( ID=None ) :
     return reviewNotes
 
 def upload_reviewItem( taskID=None, renderID=None, renderKey=None, itemID=None, itemType=None, path=None, submit=None, \
-    name=None, description=None, reviewItemTypeID=0, reviewItemStatusID=0, keywords=None, nimURL=None, apiKey=None ) :
+    name=None, description=None, reviewItemTypeID=0, reviewItemStatusID=0, keywords=None, username=None, userID=None, \
+    nimURL=None, apiKey=None ) :
     # nimURL and apiKey are optional for Render API Key overrride
     #
     #   Required Fields:
@@ -3130,7 +3131,9 @@ def upload_reviewItem( taskID=None, renderID=None, renderKey=None, itemID=None, 
     # reviewItemTypeID    integer     The review item type ID
     # reviewItemStatusID  integer     The review status ID
     # keywords            list        ["keyword1", "keyword2"]
-
+    # username            string      The NIM username for the owner of the review item
+    # userID              integer     The userID for the owner of the review item 
+    #                                 * userID takes precedence over username if both are supplied
 
     params = {}
 
@@ -3164,6 +3167,8 @@ def upload_reviewItem( taskID=None, renderID=None, renderKey=None, itemID=None, 
     if reviewItemTypeID is not None : params['reviewItemTypeID'] = reviewItemTypeID
     if reviewItemStatusID is not None : params['reviewItemStatusID'] = reviewItemStatusID
     if keywords is not None : params['keywords'] = json.dumps(keywords)
+    if username is not None : params['username'] = username
+    if userID is not None : params['userID'] = userID
 
     if path is not None :
         result = upload(params=params, nimURL=nimURL, apiKey=apiKey)
