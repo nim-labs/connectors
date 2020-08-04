@@ -874,20 +874,38 @@ $._nim_PPP_={
 			level_type = 'INFO';
 		}
 
-		// SEND TO EVENT LOG
-		if(level == 0){
-			app.setSDKEventMessage(message, 'error');
-			level_type = 'ERROR';
-		}
-		if(level == 1 && $._nim_PPP_.debug_level >= 1){
-			app.setSDKEventMessage(message, 'warning');
-			level_type = 'WARNING';
-		}
-		if(level == 2 &&  $._nim_PPP_.debug_level >= 2){
-			app.setSDKEventMessage(message, 'info');
-			level_type = 'INFO';
-		}
+		try {
+			// SEND TO EVENT LOG
 
+			try {
+				message = String(message);
+			}
+			catch (e) {
+				alert(message);
+				level_type = 'ERROR';
+				message = 'Failed to stringify event panel message.';
+				app.setSDKEventMessage(message, 'error');
+			}
+
+			if(level == 0){
+				app.setSDKEventMessage(message, 'error');
+				level_type = 'ERROR';
+			}
+			if(level == 1 && $._nim_PPP_.debug_level >= 1){
+				app.setSDKEventMessage(message, 'warning');
+				level_type = 'WARNING';
+			}
+			if(level == 2 &&  $._nim_PPP_.debug_level >= 2){
+				app.setSDKEventMessage(message, 'info');
+				level_type = 'INFO';
+			}
+		} 
+		catch (e) {
+			level_type = 'ERROR';
+			message = "Error updating the event panel - Exception: " + e;
+			alert(message);
+		}
+		
 		// RETURN RESULT FOR console.log
 		result = level_type+": "+message;
 		return result;
