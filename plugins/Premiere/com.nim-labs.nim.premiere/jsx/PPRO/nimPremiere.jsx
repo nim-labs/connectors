@@ -21,11 +21,16 @@ $._nim_PPP_={
 	debug : false,
 	debug_level : 0,
 	exportJobs : {},
+	nimTempDirectory : '~/.nim/tmp',
 	
 	getExtensionVersion: function(){
 		$._nim_PPP_.updateEventPanel('FUNCTION: getExtensionVersion ',2);
 
 		return $._nim_PPP_.version;
+	},
+
+	setNimTempDirectory: function(folder){
+		$._nim_PPP_.nimTempDirectory = folder;
 	},
 
 	getProjectPath: function(){
@@ -432,26 +437,47 @@ $._nim_PPP_={
 
 		var sequenceObj = {};
 
-		var activeSequence = app.project.activeSequence;
-		sequenceObj['sequenceID'] = activeSequence.sequenceID;
-		sequenceObj['sequenceName'] = activeSequence.name;
-
+		try {
+			var activeSequence = app.project.activeSequence;
+			sequenceObj['sequenceID'] = activeSequence.sequenceID;
+			sequenceObj['sequenceName'] = activeSequence.name;
+		}
+		catch (e) {
+			message = "Failed to retrieve active sequence.<br />Please load a sequence onto the timeline.";
+			$._nim_PPP_.updateEventPanel(message,0);
+			// alert(message);
+			return message;
+		}
 		
-		sequenceObj['framerate'] = 0;
-		var pxmp = new XMPMeta(activeSequence.projectItem.getProjectMetadata());
-		var kPProPrivateProjectMetadataURI	= "http://ns.adobe.com/premierePrivateProjectMetaData/1.0/";
-		// Pull framerate from sequence metadata
-        if (pxmp.doesPropertyExist(kPProPrivateProjectMetadataURI, 'Column.Intrinsic.MediaTimebase') == true) {  
-          sequenceObj['framerate'] = pxmp.getProperty(kPProPrivateProjectMetadataURI, 'Column.Intrinsic.MediaTimebase');
-          sequenceObj['framerate'] = parseFloat(sequenceObj['framerate']);
-        }
-        // Calculate framerate
-        else{
-        	sequenceObj['framerate'] = $._nim_PPP_.getActiveSequenceFramerate();
-        }
+		try {
+			sequenceObj['framerate'] = 0;
+			var pxmp = new XMPMeta(activeSequence.projectItem.getProjectMetadata());
+			var kPProPrivateProjectMetadataURI	= "http://ns.adobe.com/premierePrivateProjectMetaData/1.0/";
+			// Pull framerate from sequence metadata
+	        if (pxmp.doesPropertyExist(kPProPrivateProjectMetadataURI, 'Column.Intrinsic.MediaTimebase') == true) {  
+	          sequenceObj['framerate'] = pxmp.getProperty(kPProPrivateProjectMetadataURI, 'Column.Intrinsic.MediaTimebase');
+	          sequenceObj['framerate'] = parseFloat(sequenceObj['framerate']);
+	        }
+	        // Calculate framerate
+	        else{
+	        	sequenceObj['framerate'] = $._nim_PPP_.getActiveSequenceFramerate();
+	        }
+	    }
+	    catch (e) {
+			message = "Failed to get project metadata.";
+			// alert(message);
+			return message;
+		}
 
-		var videoTracks = activeSequence.videoTracks;
-		$._nim_PPP_.updateEventPanel('videoTracks: '+JSON.stringify(videoTracks),2);
+		try {
+			var videoTracks = activeSequence.videoTracks;
+			$._nim_PPP_.updateEventPanel('videoTracks: '+JSON.stringify(videoTracks),2);
+		}
+		catch (e) {
+			message = "Failed to update event panel with video tracks.";
+			// alert(message);
+			return message;
+		}
 
 		var tracks = [];
 		var firstTrack = true;
@@ -461,8 +487,15 @@ $._nim_PPP_={
 			trackInfo['ID'] = videoTracks[i].id;
 			trackInfo['mediaType'] = videoTracks[i].mediaType;
 
-			var trackClips = videoTracks[i].clips;
-			$._nim_PPP_.updateEventPanel('trackClips: '+JSON.stringify(trackClips),2);
+			try {
+				var trackClips = videoTracks[i].clips;
+				$._nim_PPP_.updateEventPanel('trackClips: '+JSON.stringify(trackClips),2);
+			}
+			catch (e) {
+				message = "Failed to update event panel with track clips.";
+				// alert(message);
+				return message;
+			}
 
 			var clips = [];
 			for(var j=0; j<trackClips.numItems; j++){
@@ -533,7 +566,7 @@ $._nim_PPP_={
 			clip = JSON.parse(clip);
 		}
 		catch (e) {
-			message = "Failed to parse clip: "+clip;
+			message = "Failed to parse clip data in ExportClipIcon: "+clip;
 			alert(message);
 			return message;
 		}
@@ -657,20 +690,23 @@ $._nim_PPP_={
 			var activeSequence	= qe.project.getActiveSequence(); 	// note: make sure a sequence is active in PPro UI
 		}
 		catch (e) {
-			message = "Failed to get active sequence - getActiveSequence returned: "+activeSequence;
-			alert(message);
+			message = "Failed to retrieve active sequence.<br />Please load a sequence onto the timeline.";
+			$._nim_PPP_.updateEventPanel(message,0);
+			// alert(message);
 			return message;
 		}
 
 		if (activeSequence) {
 			// Create a file name based on timecode of frame.
 			var time			= activeSequence.CTI.timecode; 	// CTI = Current Time Indicator.
-			var removeThese 	= /:|;/ig;    // Why? Because Windows chokes on colons.
+			var removeThese 	= /:|;/ig;    					// Why? Because Windows chokes on colons.
 			var timeName = time.replace(removeThese, '_');
-			var outputPath		= new File("~/.nim/tmp");
+			
+			//var outputPath		= new File("~/.nim/tmp");
+			var outputPath = new File($._nim_PPP_.nimTempDirectory);
+
 			var outputName 		= activeSequence.name+"_"+timeName+"_"+$._nim_PPP_.guid();
 			outputName = outputName.replace(/\ /g,'_');
-
 			var outputFileName	= outputPath.fsName + $._nim_PPP_.getSep() + outputName;
 
 			try {
@@ -1086,7 +1122,16 @@ $._nim_PPP_={
 		delete $._nim_PPP_.exportJobs[jobID];
 
 		var nimEvent = new CSXSEvent();
-		nimEvent.type = "com.nim-labs.events.PProExportEditComplete";
+		//nimEvent.type = "com.nim-labs.events.PProExportEditComplete";
+		
+		nimEvent.type = "com.nim-labs.events";
+		if( jobData["encode"] == "sequence"){
+			nimEvent.type = "com.nim-labs.events.PProExportEditComplete";
+		}
+		else if( jobData["encode"] == "clip"){
+			nimEvent.type = "com.nim-labs.events.PProExportShotComplete";
+		}
+
 		nimEvent.data = JSON.stringify(jobData);
 		nimEvent.dispatch();
 	},
