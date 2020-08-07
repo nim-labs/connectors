@@ -1,7 +1,7 @@
 //******************************************************************************
 //
 // Filename: nimPremiere.jsx
-// Version:  v4.0.55.200804 - TEST
+// Version:  v4.0.56.200804 - TEST
 //
 // Copyright (c) 2014-2020 NIM Labs LLC
 // All rights reserved.
@@ -1106,110 +1106,150 @@ $._nim_PPP_={
 	// Callbacks
 	onEncoderJobComplete : function (jobID, outputFilePath) {
 
-		$._nim_PPP_.updateEventPanel("FUNCTION: onEncoderJobComplete: ",2);
+		try {
+			$._nim_PPP_.updateEventPanel("CALLBACK: onEncoderJobComplete: ",2);
 
-		var eoName;
-		if (Folder.fs == 'Macintosh') {
-			eoName = "PlugPlugExternalObject";							
-		} else {
-			eoName = "PlugPlugExternalObject.dll";
+			if(typeof $._nim_PPP_.exportJobs[jobID] !== "undefined"){
+				var jobData = $._nim_PPP_.exportJobs[jobID];
+				jobData['outputFilePath'] = outputFilePath;
+				delete $._nim_PPP_.exportJobs[jobID];
+
+				var nimEvent = new CSXSEvent();
+				nimEvent.type = "com.nim-labs.events";
+				if( jobData["encode"] == "sequence"){
+					nimEvent.type = "com.nim-labs.events.PProExportEditComplete";
+				}
+				else if( jobData["encode"] == "clip"){
+					nimEvent.type = "com.nim-labs.events.PProExportShotComplete";
+				}
+
+				nimEvent.data = JSON.stringify(jobData);
+				nimEvent.dispatch();
+			}
+			else {
+				$._nim_PPP_.updateEventPanel("onEncoderJobComplete: Job does not exist.",1);
+			}
 		}
-		var mylib = new ExternalObject('lib:' + eoName);
-				
-		var jobData = $._nim_PPP_.exportJobs[jobID];
-
-		jobData['outputFilePath'] = outputFilePath;
-		delete $._nim_PPP_.exportJobs[jobID];
-
-		var nimEvent = new CSXSEvent();
-		//nimEvent.type = "com.nim-labs.events.PProExportEditComplete";
-		
-		nimEvent.type = "com.nim-labs.events";
-		if( jobData["encode"] == "sequence"){
-			nimEvent.type = "com.nim-labs.events.PProExportEditComplete";
+		catch(e){
+			$._nim_PPP_.updateEventPanel("FAILED: onEncoderJobComplete: "+e,0);
 		}
-		else if( jobData["encode"] == "clip"){
-			nimEvent.type = "com.nim-labs.events.PProExportShotComplete";
-		}
-
-		nimEvent.data = JSON.stringify(jobData);
-		nimEvent.dispatch();
 	},
 
 	onEncoderJobError : function (jobID, errorMessage) {
 
-		$._nim_PPP_.updateEventPanel("FUNCTION: onEncoderJobError: ",2);
+		try {
+			$._nim_PPP_.updateEventPanel("CALLBACK: onEncoderJobError: "+errorMessage,0);
 
-		var eoName; 
+			if(typeof $._nim_PPP_.exportJobs[jobID] !== "undefined"){
+				var jobData = $._nim_PPP_.exportJobs[jobID];
 
-		if (Folder.fs === 'Macintosh') {
-			eoName	= "PlugPlugExternalObject";							
-		} else {
-			eoName	= "PlugPlugExternalObject.dll";
+				var nimEvent	= new CSXSEvent();
+				nimEvent.type = "com.nim-labs.events";
+				if( jobData["encode"] == "sequence"){
+					nimEvent.type = "com.nim-labs.events.PProExportEditError";
+				}
+				else if( jobData["encode"] == "clip"){
+					nimEvent.type = "com.nim-labs.events.PProExportShotError";
+				}
+				nimEvent.data	= "Job " + jobID + " failed, due to " + errorMessage + ".";
+				nimEvent.dispatch();
+			}
+			else {
+				$._nim_PPP_.updateEventPanel("onEncoderJobError: Job does not exist.",1);
+			}
 		}
-				
-		var mylib		= new ExternalObject('lib:' + eoName);
-		var eventObj	= new CSXSEvent();
-
-		eventObj.type	= "com.nim-labs.events.PProExportEditError";
-		eventObj.data	= "Job " + jobID + " failed, due to " + errorMessage + ".";
-		eventObj.dispatch();
+		catch (e) {
+			$._nim_PPP_.updateEventPanel("FAILED: onEncoderJobError: "+e,0);
+		}
 	},
 	
 	onEncoderJobProgress : function (jobID, progress) {
 
-		$._nim_PPP_.updateEventPanel('FUNCTION: onEncoderJobProgress called. jobID = ' + jobID + '. progress = ' + progress + '.',2);
+		try {
+			$._nim_PPP_.updateEventPanel('CALLBACK: onEncoderJobProgress called. jobID = ' + jobID + '. progress = ' + progress + '.',2);
 
-		var eoName;
-		if (Folder.fs == 'Macintosh') {
-			eoName = "PlugPlugExternalObject";							
-		} else {
-			eoName = "PlugPlugExternalObject.dll";
+			if(typeof $._nim_PPP_.exportJobs[jobID] !== "undefined"){
+				var jobData = $._nim_PPP_.exportJobs[jobID];
+
+				var jobProgress = { jobID: jobID, progress: progress, encode: jobData["encode"], itemID: jobData["itemID"] };
+
+				var nimEvent = new CSXSEvent();
+				nimEvent.type = "com.nim-labs.events";
+				if( jobData["encode"] == "sequence"){
+					nimEvent.type = "com.nim-labs.events.PProExportEditProgress";
+				}
+				else if( jobData["encode"] == "clip"){
+					nimEvent.type = "com.nim-labs.events.PProExportShotProgress";
+				}
+				nimEvent.data = JSON.stringify(jobProgress);
+				nimEvent.dispatch();
+			}
+			else {
+				$._nim_PPP_.updateEventPanel("onEncoderJobProgress: Job does not exist.",1);
+			}
+			
 		}
-		var mylib = new ExternalObject('lib:' + eoName);
-		
-		var jobData = $._nim_PPP_.exportJobs[jobID];
-
-		var jobProgress = { jobID: jobID, progress: progress, encode: jobData["encode"], itemID: jobData["itemID"] };
-
-		var nimEvent = new CSXSEvent();
-
-		nimEvent.type = "com.nim-labs.events";
-		if( jobData["encode"] == "sequence"){
-			nimEvent.type = "com.nim-labs.events.PProExportEditProgress";
+		catch(e){
+			$._nim_PPP_.updateEventPanel("FAILED: onEncoderJobProgress: "+e,0);
 		}
-		else if( jobData["encode"] == "clip"){
-			nimEvent.type = "com.nim-labs.events.PProExportShotProgress";
-		}
-		nimEvent.data = JSON.stringify(jobProgress);
-		nimEvent.dispatch();
 	},
 
 	onEncoderJobQueued : function (jobID) {
 
-		$._nim_PPP_.updateEventPanel("FUNCTION: onEncoderJobQueued: ",2);
+		try {
+			$._nim_PPP_.updateEventPanel("CALLBACK: onEncoderJobQueued: ",2);
 
-		var eoName;
-		if (Folder.fs == 'Macintosh') {
-			eoName = "PlugPlugExternalObject";							
-		} else {
-			eoName = "PlugPlugExternalObject.dll";
+			if(typeof $._nim_PPP_.exportJobs[jobID] !== "undefined"){
+				var jobData = $._nim_PPP_.exportJobs[jobID];
+
+				var nimEvent = new CSXSEvent();
+				nimEvent.type = "com.nim-labs.events";
+				if( jobData["encode"] == "sequence"){
+					nimEvent.type = "com.nim-labs.events.PProExportEditQueued";
+				}
+				else if( jobData["encode"] == "clip"){
+					nimEvent.type = "com.nim-labs.events.PProExportShotQueued";
+				}
+				nimEvent.data = JSON.stringify(jobData);
+				nimEvent.dispatch();
+
+				app.encoder.startBatch();
+			}
+			else {
+				$._nim_PPP_.updateEventPanel("onEncoderJobQueued: Job does not exist.",1);
+			}
 		}
-		var mylib = new ExternalObject('lib:' + eoName);
-		
-		//$._nim_PPP_.exportJobs[jobID]['jobID'] = jobID;
-		var jobData = $._nim_PPP_.exportJobs[jobID];
-
-		var nimEvent = new CSXSEvent();
-		nimEvent.type = "com.nim-labs.events.PProExportEditQueued";
-		nimEvent.data = JSON.stringify(jobData);
-		nimEvent.dispatch();
-
-		app.encoder.startBatch();
+		catch (e) {
+			$._nim_PPP_.updateEventPanel("FAILED: onEncoderJobQueued: "+e,0);
+		}
 	},
 
 	onEncoderJobCanceled : function (jobID) {
-		$._nim_PPP_.updateEventPanel('FUNCTION: OnEncoderJobCanceled called. jobID = ' + jobID +  '.',2);
+
+		try {
+			$._nim_PPP_.updateEventPanel("CALLBACK: OnEncoderJobCanceled: " + jobID, 2);
+
+			if(typeof $._nim_PPP_.exportJobs[jobID] !== "undefined"){
+				var jobData = $._nim_PPP_.exportJobs[jobID];
+
+				var nimEvent = new CSXSEvent();
+				nimEvent.type = "com.nim-labs.events";
+				if( jobData["encode"] == "sequence"){
+					nimEvent.type = "com.nim-labs.events.PProExportEditCanceled";
+				}
+				else if( jobData["encode"] == "clip"){
+					nimEvent.type = "com.nim-labs.events.PProExportShotCanceled";
+				}
+				nimEvent.data = JSON.stringify(jobData);
+				nimEvent.dispatch();
+			}
+			else {
+				$._nim_PPP_.updateEventPanel("OnEncoderJobCanceled: Job does not exist.",1);
+			}
+		}
+		catch (e) {
+			$._nim_PPP_.updateEventPanel("FAILED: OnEncoderJobCanceled: "+e,0);
+		}
 	},
 
 };
