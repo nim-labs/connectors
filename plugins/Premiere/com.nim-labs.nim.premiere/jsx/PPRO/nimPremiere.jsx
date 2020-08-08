@@ -1109,6 +1109,14 @@ $._nim_PPP_={
 		try {
 			$._nim_PPP_.updateEventPanel("CALLBACK: onEncoderJobComplete: ",2);
 
+			var eoName;
+			if (Folder.fs == 'Macintosh') {
+				eoName = "PlugPlugExternalObject";							
+			} else {
+				eoName = "PlugPlugExternalObject.dll";
+			}
+			var mylib = new ExternalObject('lib:' + eoName);
+
 			if(typeof $._nim_PPP_.exportJobs[jobID] !== "undefined"){
 				var jobData = $._nim_PPP_.exportJobs[jobID];
 				jobData['outputFilePath'] = outputFilePath;
@@ -1140,6 +1148,14 @@ $._nim_PPP_={
 		try {
 			$._nim_PPP_.updateEventPanel("CALLBACK: onEncoderJobError: "+errorMessage,0);
 
+			var eoName;
+			if (Folder.fs == 'Macintosh') {
+				eoName = "PlugPlugExternalObject";							
+			} else {
+				eoName = "PlugPlugExternalObject.dll";
+			}
+			var mylib = new ExternalObject('lib:' + eoName);
+
 			if(typeof $._nim_PPP_.exportJobs[jobID] !== "undefined"){
 				var jobData = $._nim_PPP_.exportJobs[jobID];
 
@@ -1167,6 +1183,14 @@ $._nim_PPP_={
 
 		try {
 			$._nim_PPP_.updateEventPanel('CALLBACK: onEncoderJobProgress called. jobID = ' + jobID + '. progress = ' + progress + '.',2);
+
+			var eoName;
+			if (Folder.fs == 'Macintosh') {
+				eoName = "PlugPlugExternalObject";							
+			} else {
+				eoName = "PlugPlugExternalObject.dll";
+			}
+			var mylib = new ExternalObject('lib:' + eoName);
 
 			if(typeof $._nim_PPP_.exportJobs[jobID] !== "undefined"){
 				var jobData = $._nim_PPP_.exportJobs[jobID];
@@ -1199,6 +1223,14 @@ $._nim_PPP_={
 		try {
 			$._nim_PPP_.updateEventPanel("CALLBACK: onEncoderJobQueued: ",2);
 
+			var eoName;
+			if (Folder.fs == 'Macintosh') {
+				eoName = "PlugPlugExternalObject";							
+			} else {
+				eoName = "PlugPlugExternalObject.dll";
+			}
+			var mylib = new ExternalObject('lib:' + eoName);
+
 			if(typeof $._nim_PPP_.exportJobs[jobID] !== "undefined"){
 				var jobData = $._nim_PPP_.exportJobs[jobID];
 
@@ -1229,6 +1261,14 @@ $._nim_PPP_={
 		try {
 			$._nim_PPP_.updateEventPanel("CALLBACK: OnEncoderJobCanceled: " + jobID, 2);
 
+			var eoName;
+			if (Folder.fs == 'Macintosh') {
+				eoName = "PlugPlugExternalObject";							
+			} else {
+				eoName = "PlugPlugExternalObject.dll";
+			}
+			var mylib = new ExternalObject('lib:' + eoName);
+			
 			if(typeof $._nim_PPP_.exportJobs[jobID] !== "undefined"){
 				var jobData = $._nim_PPP_.exportJobs[jobID];
 
