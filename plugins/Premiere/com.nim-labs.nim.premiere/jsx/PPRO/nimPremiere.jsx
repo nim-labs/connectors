@@ -1,7 +1,7 @@
 //******************************************************************************
 //
 // Filename: nimPremiere.jsx
-// Version:  v4.0.54.200804
+// Version:  v4.0.55.200807
 //
 // Copyright (c) 2014-2020 NIM Labs LLC
 // All rights reserved.
@@ -17,24 +17,37 @@ if(typeof JSON!=='object'){JSON={};}(function(){'use strict';function f(n){retur
 
 $._nim_PPP_={
 	
-	version : '4.0.54',
+	version : '4.0.55',
 	debug : false,
 	debug_level : 0,
 	exportJobs : {},
+	nimTempDirectory : '~/.nim/tmp',
 	
 	getExtensionVersion: function(){
+		$._nim_PPP_.updateEventPanel('FUNCTION: getExtensionVersion ',2);
+
 		return $._nim_PPP_.version;
 	},
 
+	setNimTempDirectory: function(folder){
+		$._nim_PPP_.nimTempDirectory = folder;
+	},
+
 	getProjectPath: function(){
+		$._nim_PPP_.updateEventPanel('FUNCTION: getProjectPath',2);
+
 		return app.project.path;
 	},
 
 	getActiveSequenceName : function(){
+		$._nim_PPP_.updateEventPanel('FUNCTION: getActiveSequenceName',2);
+
 		return app.project.activeSequence.name;
 	},
 
 	selectFileDialog : function(dlgTitle,filterString){
+		$._nim_PPP_.updateEventPanel('FUNCTION: selectFileDialog',2);
+
 		filter = 0;
 		if(filterString){
 			filter = filterString;
@@ -48,6 +61,8 @@ $._nim_PPP_={
 	},
 
 	selectFolderDialog : function(){
+		$._nim_PPP_.updateEventPanel('FUNCTION: selectFolderDialog',2);
+
 		var outFolder = Folder.selectDialog();
 		var fsName = '';
 		if(outFolder){
@@ -57,8 +72,16 @@ $._nim_PPP_={
 	},
 
 	getProjectMetadata : function(data){
-		$._nim_PPP_.updateEventPanel('getProjectMetadata: '+data,2);
-		data = JSON.parse(data);
+		$._nim_PPP_.updateEventPanel('FUNCTION: getProjectMetadata',2);
+		$._nim_PPP_.updateEventPanel(data,2);
+		
+		try {
+			data = JSON.parse(data);
+		}
+		catch(e){
+			$._nim_PPP_.updateEventPanel('Failed to read data in getProjectMetadata.',1);
+			return false;
+		}
 
 		if (app.isDocumentOpen()) {
 			//var projectItem = app.project.activeSequence.projectItem;
@@ -95,8 +118,16 @@ $._nim_PPP_={
 	},
 
 	setProjectMetadata : function(data) {
-		$._nim_PPP_.updateEventPanel('setProjectMetadata: '+data,2);
-		data = JSON.parse(data);
+		$._nim_PPP_.updateEventPanel('FUNCTION: setProjectMetadata:',2);
+		$._nim_PPP_.updateEventPanel(data,2);
+		
+		try {
+			data = JSON.parse(data);
+		}
+		catch(e){
+			$._nim_PPP_.updateEventPanel('Failed to read data in setProjectMetadata.',1);
+			return false;
+		}
 
 		if (app.isDocumentOpen()) {
 			//var projectItem = app.project.activeSequence.projectItem;
@@ -155,7 +186,10 @@ $._nim_PPP_={
 	},
 
 	projectOpen : function(projToOpen) {
+		$._nim_PPP_.updateEventPanel('FUNCTION: projectOpen',2);
+
 		$._nim_PPP_.updateEventPanel('projectOpen - projToOpen: ' + projToOpen,2);
+		
 		if (projToOpen) {
 			var result = app.openDocument(	projToOpen,
 											1,					// suppress 'Convert Project' dialogs
@@ -169,7 +203,10 @@ $._nim_PPP_={
 	},
 
 	projectSaveAs : function(projToSave) {
+		$._nim_PPP_.updateEventPanel('FUNCTION: projectSaveAs',2);
+
 		$._nim_PPP_.updateEventPanel('projectSaveAs - projToSave: ' + projToSave,2);
+
 		if (projToSave) {
 			var result = app.project.saveAs( projToSave );
 			$._nim_PPP_.updateEventPanel('projectSaveAs - result: ' + JSON.stringify(result),2);
@@ -180,6 +217,8 @@ $._nim_PPP_={
 	},
 
 	projectPublish : function() {
+		$._nim_PPP_.updateEventPanel('FUNCTION: projectPublish',2);
+
 		var ogPath = app.project.path;
 		var ogPathWithoutExt = ogPath.substr(0, ogPath.length - 7);
 		var projToPub = ogPathWithoutExt+'_PUB'+'.prproj';
@@ -196,7 +235,7 @@ $._nim_PPP_={
 
 	exportEdit : function(context, itemID, name, desc, typeID, statusID, keywords, preset, presetPath, range, diskID, disk, keep, markers) {
 
-		$._nim_PPP_.updateEventPanel("Export Edit",2);
+		$._nim_PPP_.updateEventPanel("FUNCTION: Export Edit",2);
 
 		var ameStatus = BridgeTalk.getStatus("ame");
 		if (ameStatus == "ISNOTINSTALLED"){
@@ -290,7 +329,7 @@ $._nim_PPP_={
 	exportClip : function(sequenceID, trackID, clipID, itemID, name, typeID, preset, presetPath, 
 		outputPath, length, handles, exportAE, exportAeSource, exportAeServer, task_type_ID, serverID, framerate) {
 
-		$._nim_PPP_.updateEventPanel("Export Clip",2);
+		$._nim_PPP_.updateEventPanel("FUNCTION: Export Clip",2);
 
 		var ameStatus = BridgeTalk.getStatus("ame");
 		if (ameStatus == "ISNOTINSTALLED"){
@@ -331,6 +370,7 @@ $._nim_PPP_={
 		
 		var sequences = app.project.sequences;
 		var targetSequence = app.project.activeSequence;	// Set to active sequence by default
+
 		// Find sequence by ID targeted for export at time export button was pressed
 		for(var i=0; i<sequences.numItems; i++){
 			if(sequences[i].sequenceID == sequenceID){
@@ -338,7 +378,6 @@ $._nim_PPP_={
 			}
 		}
 
-		//var clip = app.project.activeSequence.videoTracks[trackID].clips[clipID];
 		var clip = targetSequence.videoTracks[trackID].clips[clipID];
 		var projectItem = clip.projectItem;
 
@@ -353,7 +392,7 @@ $._nim_PPP_={
 			//$._nim_PPP_.message("projectItem.type: "+projectItem.type);
 
 			var ticksPerSecond = 254016000000; 							// Ticks per second
-			var ticksPerFrame = targetSequence.timebase; 	// Ticks per frame
+			var ticksPerFrame = targetSequence.timebase; 				// Ticks per frame
 			//var ticksPerFrame = app.project.activeSequence.timebase; 	// Ticks per frame
 			//var framerate = ticksPerSecond/ticksPerFrame;				// Passed From getSequenceItems
 			
@@ -394,30 +433,51 @@ $._nim_PPP_={
 		// Retrives all video trackItems in a sequence
 		// optionally renames clips based on nameTemplate
 
-		$._nim_PPP_.updateEventPanel('getSequenceItems',2);
+		$._nim_PPP_.updateEventPanel('FUNCTION: getSequenceItems',2);
 
 		var sequenceObj = {};
 
-		var activeSequence = app.project.activeSequence;
-		sequenceObj['sequenceID'] = activeSequence.sequenceID;
-		sequenceObj['sequenceName'] = activeSequence.name;
-
+		try {
+			var activeSequence = app.project.activeSequence;
+			sequenceObj['sequenceID'] = activeSequence.sequenceID;
+			sequenceObj['sequenceName'] = activeSequence.name;
+		}
+		catch (e) {
+			message = "Failed to retrieve active sequence.<br />Please load a sequence onto the timeline.";
+			$._nim_PPP_.updateEventPanel(message,0);
+			// alert(message);
+			return message;
+		}
 		
-		sequenceObj['framerate'] = 0;
-		var pxmp = new XMPMeta(activeSequence.projectItem.getProjectMetadata());
-		var kPProPrivateProjectMetadataURI	= "http://ns.adobe.com/premierePrivateProjectMetaData/1.0/";
-		// Pull framerate from sequence metadata
-        if (pxmp.doesPropertyExist(kPProPrivateProjectMetadataURI, 'Column.Intrinsic.MediaTimebase') == true) {  
-          sequenceObj['framerate'] = pxmp.getProperty(kPProPrivateProjectMetadataURI, 'Column.Intrinsic.MediaTimebase');
-          sequenceObj['framerate'] = parseFloat(sequenceObj['framerate']);
-        }
-        // Calculate framerate
-        else{
-        	sequenceObj['framerate'] = $._nim_PPP_.getActiveSequenceFramerate();
-        }
+		try {
+			sequenceObj['framerate'] = 0;
+			var pxmp = new XMPMeta(activeSequence.projectItem.getProjectMetadata());
+			var kPProPrivateProjectMetadataURI	= "http://ns.adobe.com/premierePrivateProjectMetaData/1.0/";
+			// Pull framerate from sequence metadata
+	        if (pxmp.doesPropertyExist(kPProPrivateProjectMetadataURI, 'Column.Intrinsic.MediaTimebase') == true) {  
+	          sequenceObj['framerate'] = pxmp.getProperty(kPProPrivateProjectMetadataURI, 'Column.Intrinsic.MediaTimebase');
+	          sequenceObj['framerate'] = parseFloat(sequenceObj['framerate']);
+	        }
+	        // Calculate framerate
+	        else{
+	        	sequenceObj['framerate'] = $._nim_PPP_.getActiveSequenceFramerate();
+	        }
+	    }
+	    catch (e) {
+			message = "Failed to get project metadata.";
+			// alert(message);
+			return message;
+		}
 
-		var videoTracks = activeSequence.videoTracks;
-		$._nim_PPP_.updateEventPanel('videoTracks: '+JSON.stringify(videoTracks),2);
+		try {
+			var videoTracks = activeSequence.videoTracks;
+			$._nim_PPP_.updateEventPanel('videoTracks: '+JSON.stringify(videoTracks),2);
+		}
+		catch (e) {
+			message = "Failed to update event panel with video tracks.";
+			// alert(message);
+			return message;
+		}
 
 		var tracks = [];
 		var firstTrack = true;
@@ -427,8 +487,15 @@ $._nim_PPP_={
 			trackInfo['ID'] = videoTracks[i].id;
 			trackInfo['mediaType'] = videoTracks[i].mediaType;
 
-			var trackClips = videoTracks[i].clips;
-			$._nim_PPP_.updateEventPanel('trackClips: '+JSON.stringify(trackClips),2);
+			try {
+				var trackClips = videoTracks[i].clips;
+				$._nim_PPP_.updateEventPanel('trackClips: '+JSON.stringify(trackClips),2);
+			}
+			catch (e) {
+				message = "Failed to update event panel with track clips.";
+				// alert(message);
+				return message;
+			}
 
 			var clips = [];
 			for(var j=0; j<trackClips.numItems; j++){
@@ -469,6 +536,9 @@ $._nim_PPP_={
 	},
 
 	renameClip : function(nameTemplate, clipIndex){
+
+		$._nim_PPP_.updateEventPanel('FUNCTION: renameClip',2);
+
 		$._nim_PPP_.updateEventPanel("Renaming Clip Index: "+clipIndex,2);
 
 		var frameReg = /^([^\<\>]*)<(#*)(?:x(\d*))?(?:@(\d*))?>(.*)$/g;
@@ -487,18 +557,58 @@ $._nim_PPP_={
 	},
 
 	exportClipIcon : function(clip) {
-		$._nim_PPP_.updateEventPanel('clip: '+clip,2);
-		clip = JSON.parse(clip);
 
-		app.project.openSequence(clip['sequenceID']);	// Sequence Must be active to export PNG
-		$._nim_PPP_.setPlayerPosition(clip.start.ticks);
-		var outputFileName = $._nim_PPP_.exportCurrentFrameAsPNG();
+		$._nim_PPP_.updateEventPanel('FUNCTION: exportClipIcon',2);
+
+		$._nim_PPP_.updateEventPanel('In Clip: '+clip,2);
+
+		try {
+			clip = JSON.parse(clip);
+		}
+		catch (e) {
+			message = "Failed to parse clip data in ExportClipIcon: "+clip;
+			alert(message);
+			return message;
+		}
+
+		try {
+			app.project.openSequence(clip['sequenceID']);	// Sequence Must be active to export PNG
+		}
+		catch (e) {
+			message = "Failed to open sequence: "+clip['sequenceID'];
+			alert(message);
+			return message;
+		}
+
+		try {
+			$._nim_PPP_.setPlayerPosition(clip.start.ticks);
+		}
+		catch (e) {
+			message = "Failed to set player position @: "+clip.start.ticks;
+			alert(message);
+			return message;
+		}
+
+		try {
+			var outputFileName = $._nim_PPP_.exportCurrentFrameAsPNG();
+		}
+		catch (e) {
+			message = "Failed to export current frame as PNG";
+			alert(message);
+			return message;
+		}
+
 		clip["outputFileName"] = outputFileName;
+
+		$._nim_PPP_.updateEventPanel('Out Clip: '+clip,2);
 
 		return JSON.stringify(clip);
 	},
 
 	getVerticalTrackName : function(clip, trackNumber, layerOption){
+
+		$._nim_PPP_.updateEventPanel('FUNCTION: getVerticalTrackName',2);
+
 		var inClipStartTicks = parseInt(clip.start.ticks);
 		var inClipEndTicks = parseInt(clip.end.ticks);
 		$._nim_PPP_.updateEventPanel("inClipStartTicks: "+inClipStartTicks,2);
@@ -548,35 +658,78 @@ $._nim_PPP_={
 	},
 
 	setPlayerPosition : function(ticks) {
+
+		$._nim_PPP_.updateEventPanel('FUNCTION: setPlayerPosition',2);
+
 		var activeSequence = app.project.activeSequence;
-		activeSequence.setPlayerPosition(ticks);
+
+		try {
+			activeSequence.setPlayerPosition(ticks);
+		}
+		catch (e) {
+			message = "Failed to set player position in setPlayerPosition: "+ticks;
+			alert(message);
+			return message;
+		}
 	},
 
 	exportCurrentFrameAsPNG : function() {
-		app.enableQE();
-		var activeSequence	= qe.project.getActiveSequence(); 	// note: make sure a sequence is active in PPro UI
+
+		$._nim_PPP_.updateEventPanel('FUNCTION: exportCurrentFrameAsPNG',2);
+
+		try {
+			app.enableQE();
+		}
+		catch (e) {
+			message = "Failed to enable QE";
+			alert(message);
+			return message;
+		}
+
+		try {
+			var activeSequence	= qe.project.getActiveSequence(); 	// note: make sure a sequence is active in PPro UI
+		}
+		catch (e) {
+			message = "Failed to retrieve active sequence.<br />Please load a sequence onto the timeline.";
+			$._nim_PPP_.updateEventPanel(message,0);
+			// alert(message);
+			return message;
+		}
+
 		if (activeSequence) {
 			// Create a file name based on timecode of frame.
 			var time			= activeSequence.CTI.timecode; 	// CTI = Current Time Indicator.
-			var removeThese 	= /:|;/ig;    // Why? Because Windows chokes on colons.
+			var removeThese 	= /:|;/ig;    					// Why? Because Windows chokes on colons.
 			var timeName = time.replace(removeThese, '_');
-			var outputPath		= new File("~/.nim/tmp");
+			
+			//var outputPath		= new File("~/.nim/tmp");
+			var outputPath = new File($._nim_PPP_.nimTempDirectory);
+
 			var outputName 		= activeSequence.name+"_"+timeName+"_"+$._nim_PPP_.guid();
 			outputName = outputName.replace(/\ /g,'_');
-
 			var outputFileName	= outputPath.fsName + $._nim_PPP_.getSep() + outputName;
-			activeSequence.exportFramePNG(time, outputFileName);
+
+			try {
+				activeSequence.exportFramePNG(time, outputFileName);
+			}
+			catch (e) {
+				message = "Failed to execute exportFramePNG with the following settings: "+time+" - "+outputFileName;
+				alert(message);
+				return message;
+			}
+
 			outputFileName += ".png";
 			return outputFileName;
 		} else {
 			$._nim_PPP_.updateEventPanel("No active sequence",0);
-			//$._nim_PPP_.message("No active sequence.");
 		}
 		return false;
 	},
 
 	importReviewItem : function(reviewPath){
-		$._nim_PPP_.updateEventPanel("importReviewItem",2);
+
+		$._nim_PPP_.updateEventPanel("FUNCTION: importReviewItem",2);
+		
 		var result = false;
 
 		if(reviewPath){
@@ -608,7 +761,9 @@ $._nim_PPP_={
 	},
 
 	importElements : function(shotTree, destination, binName) {
-		$._nim_PPP_.updateEventPanel("importElements",2);
+
+		$._nim_PPP_.updateEventPanel("FUNCTION: importElements",2);
+		
 		var result = false;
 
 		if (app.project) {
@@ -627,7 +782,13 @@ $._nim_PPP_={
 				}
 			}
 
-			shotTree = JSON.parse(shotTree);
+			try {
+				shotTree = JSON.parse(shotTree);
+			}
+			catch (e) {
+				$._nim_PPP_.updateEventPanel("Failed to read shot tree in importElements.",1);
+			}
+
 			if (shotTree) 
 			{
 				for(var i=0; i<shotTree.length; i++){
@@ -672,6 +833,9 @@ $._nim_PPP_={
 	},
 
 	findBin : function(rootBin, binName) {
+
+		$._nim_PPP_.updateEventPanel('FUNCTION: findBin',2);
+
 		var binFound = false;
 		var bin = null;
 		if (app.project) {
@@ -704,6 +868,9 @@ $._nim_PPP_={
 	},
 
 	findFile : function(rootBin, fileName) {
+
+		$._nim_PPP_.updateEventPanel('FUNCTION: findFile',2);
+
 		var fileFound = false;
 		var fileItem = null;
 		if (app.project) {
@@ -736,6 +903,9 @@ $._nim_PPP_={
 	},
 
 	getProjectPath : function() {
+
+		$._nim_PPP_.updateEventPanel('FUNCTION: getProjectPath',2);
+
 		var projectPath = app.project.path;
 		var pathArray = projectPath.split(/[\\\/]/);
 		var basename = pathArray.pop();
@@ -744,6 +914,9 @@ $._nim_PPP_={
 	},
 
 	getActiveSequenceFramerate : function() {
+
+		$._nim_PPP_.updateEventPanel('FUNCTION: getActiveSequenceFramerate',2);
+
 		var ticksPerSecond = 254016000000; 							// Ticks per second
 		var ticksPerFrame = app.project.activeSequence.timebase; 	// Ticks per frame
 		var framerate = 0;
@@ -754,7 +927,8 @@ $._nim_PPP_={
 	},
 
 	createSequenceMarker : function(nodeID, startTime, endTime, name, comment) {
-		$._nim_PPP_.updateEventPanel("createSequenceMarker: ",2);
+
+		$._nim_PPP_.updateEventPanel("FUNCTION: createSequenceMarker: ",2);
 		$._nim_PPP_.updateEventPanel("nodeID: "+nodeID,2);
 
 		var projectItem = '';
@@ -808,6 +982,9 @@ $._nim_PPP_={
 	},
 
 	guid : function() {
+
+		$._nim_PPP_.updateEventPanel("FUNCTION: guid: ",2);
+
 		function s4() {
 			return Math.floor((1 + Math.random()) * 0x10000)
 			.toString(16)
@@ -818,6 +995,9 @@ $._nim_PPP_={
 	},
 
 	padNumber : function( number, padding) {
+
+		$._nim_PPP_.updateEventPanel("FUNCTION: padNumber: ",2);
+
 		var width = padding - number.length;
 		if(width > 0){
 			for(var i=0;i<width;i++){
@@ -828,6 +1008,9 @@ $._nim_PPP_={
 	},
 
 	getSep : function() {
+
+		$._nim_PPP_.updateEventPanel("FUNCTION: getSep: ",2);
+
 		if (Folder.fs == 'Macintosh') {
 			return '/';
 		} else {
@@ -836,11 +1019,17 @@ $._nim_PPP_={
 	},
 
 	message : function (msg) {
+
+		$._nim_PPP_.updateEventPanel("FUNCTION: message: ",2);
+
 		// Using '$' object will invoke ExtendScript Toolkit, if installed.
 		$.writeln(msg);	 
 	},
 
 	setDebugLevel : function (level) {
+
+		$._nim_PPP_.updateEventPanel("FUNCTION: setDebugLevel: ",2);
+
 		if(!level){
 			level = 0;
 		}
@@ -855,6 +1044,9 @@ $._nim_PPP_={
 	},
 
 	debugLog : function (msg) {
+
+		$._nim_PPP_.updateEventPanel("FUNCTION: debugLog: ",2);
+
 		if($._nim_PPP_.debug){
 			//$.writeln(msg);	 // Using '$' object will invoke ExtendScript Toolkit, if installed.
 			app.setSDKEventMessage(message, 'info');
@@ -862,6 +1054,7 @@ $._nim_PPP_={
 	},
 
 	updateEventPanel : function (message, level) {
+
 		// SET MESSAGE HEADER
 		var level_type = 'ERROR';
 		if(level == 0){
@@ -881,7 +1074,6 @@ $._nim_PPP_={
 				message = String(message);
 			}
 			catch (e) {
-				alert(message);
 				level_type = 'ERROR';
 				message = 'Failed to stringify event panel message.';
 				app.setSDKEventMessage(message, 'error');
@@ -913,92 +1105,151 @@ $._nim_PPP_={
 
 	// Callbacks
 	onEncoderJobComplete : function (jobID, outputFilePath) {
-		var eoName;
-		if (Folder.fs == 'Macintosh') {
-			eoName = "PlugPlugExternalObject";							
-		} else {
-			eoName = "PlugPlugExternalObject.dll";
-		}
-		var mylib = new ExternalObject('lib:' + eoName);
-				
-		var jobData = $._nim_PPP_.exportJobs[jobID];
-		jobData['outputFilePath'] = outputFilePath;
-		delete $._nim_PPP_.exportJobs[jobID];
 
-		var nimEvent = new CSXSEvent();
-		nimEvent.type = "com.nim-labs.events.PProExportEditComplete";
-		nimEvent.data = JSON.stringify(jobData);
-		nimEvent.dispatch();
+		try {
+			$._nim_PPP_.updateEventPanel("CALLBACK: onEncoderJobComplete: ",2);
+
+			if(typeof $._nim_PPP_.exportJobs[jobID] !== "undefined"){
+				var jobData = $._nim_PPP_.exportJobs[jobID];
+				jobData['outputFilePath'] = outputFilePath;
+				delete $._nim_PPP_.exportJobs[jobID];
+
+				var nimEvent = new CSXSEvent();
+				nimEvent.type = "com.nim-labs.events";
+				if( jobData["encode"] == "sequence"){
+					nimEvent.type = "com.nim-labs.events.PProExportEditComplete";
+				}
+				else if( jobData["encode"] == "clip"){
+					nimEvent.type = "com.nim-labs.events.PProExportShotComplete";
+				}
+
+				nimEvent.data = JSON.stringify(jobData);
+				nimEvent.dispatch();
+			}
+			else {
+				$._nim_PPP_.updateEventPanel("onEncoderJobComplete: Job does not exist.",1);
+			}
+		}
+		catch(e){
+			$._nim_PPP_.updateEventPanel("FAILED: onEncoderJobComplete: "+e,0);
+		}
 	},
 
 	onEncoderJobError : function (jobID, errorMessage) {
-		var eoName; 
 
-		if (Folder.fs === 'Macintosh') {
-			eoName	= "PlugPlugExternalObject";							
-		} else {
-			eoName	= "PlugPlugExternalObject.dll";
+		try {
+			$._nim_PPP_.updateEventPanel("CALLBACK: onEncoderJobError: "+errorMessage,0);
+
+			if(typeof $._nim_PPP_.exportJobs[jobID] !== "undefined"){
+				var jobData = $._nim_PPP_.exportJobs[jobID];
+
+				var nimEvent	= new CSXSEvent();
+				nimEvent.type = "com.nim-labs.events";
+				if( jobData["encode"] == "sequence"){
+					nimEvent.type = "com.nim-labs.events.PProExportEditError";
+				}
+				else if( jobData["encode"] == "clip"){
+					nimEvent.type = "com.nim-labs.events.PProExportShotError";
+				}
+				nimEvent.data	= "Job " + jobID + " failed, due to " + errorMessage + ".";
+				nimEvent.dispatch();
+			}
+			else {
+				$._nim_PPP_.updateEventPanel("onEncoderJobError: Job does not exist.",1);
+			}
 		}
-				
-		var mylib		= new ExternalObject('lib:' + eoName);
-		var eventObj	= new CSXSEvent();
-
-		eventObj.type	= "com.nim-labs.events.PProExportEditError";
-		eventObj.data	= "Job " + jobID + " failed, due to " + errorMessage + ".";
-		eventObj.dispatch();
+		catch (e) {
+			$._nim_PPP_.updateEventPanel("FAILED: onEncoderJobError: "+e,0);
+		}
 	},
 	
 	onEncoderJobProgress : function (jobID, progress) {
-		$._nim_PPP_.updateEventPanel('onEncoderJobProgress called. jobID = ' + jobID + '. progress = ' + progress + '.',2);
 
-		var eoName;
-		if (Folder.fs == 'Macintosh') {
-			eoName = "PlugPlugExternalObject";							
-		} else {
-			eoName = "PlugPlugExternalObject.dll";
+		try {
+			$._nim_PPP_.updateEventPanel('CALLBACK: onEncoderJobProgress called. jobID = ' + jobID + '. progress = ' + progress + '.',2);
+
+			if(typeof $._nim_PPP_.exportJobs[jobID] !== "undefined"){
+				var jobData = $._nim_PPP_.exportJobs[jobID];
+
+				var jobProgress = { jobID: jobID, progress: progress, encode: jobData["encode"], itemID: jobData["itemID"] };
+
+				var nimEvent = new CSXSEvent();
+				nimEvent.type = "com.nim-labs.events";
+				if( jobData["encode"] == "sequence"){
+					nimEvent.type = "com.nim-labs.events.PProExportEditProgress";
+				}
+				else if( jobData["encode"] == "clip"){
+					nimEvent.type = "com.nim-labs.events.PProExportShotProgress";
+				}
+				nimEvent.data = JSON.stringify(jobProgress);
+				nimEvent.dispatch();
+			}
+			else {
+				$._nim_PPP_.updateEventPanel("onEncoderJobProgress: Job does not exist.",1);
+			}
+			
 		}
-		var mylib = new ExternalObject('lib:' + eoName);
-		
-		var jobData = $._nim_PPP_.exportJobs[jobID];
-
-		var jobProgress = { jobID: jobID, progress: progress, encode: jobData["encode"], itemID: jobData["itemID"] };
-
-		var nimEvent = new CSXSEvent();
-
-		nimEvent.type = "com.nim-labs.events";
-		if( jobData["encode"] == "sequence"){
-			nimEvent.type = "com.nim-labs.events.PProExportEditProgress";
+		catch(e){
+			$._nim_PPP_.updateEventPanel("FAILED: onEncoderJobProgress: "+e,0);
 		}
-		else if( jobData["encode"] == "clip"){
-			nimEvent.type = "com.nim-labs.events.PProExportShotProgress";
-		}
-		nimEvent.data = JSON.stringify(jobProgress);
-		nimEvent.dispatch();
 	},
 
 	onEncoderJobQueued : function (jobID) {
 
-		var eoName;
-		if (Folder.fs == 'Macintosh') {
-			eoName = "PlugPlugExternalObject";							
-		} else {
-			eoName = "PlugPlugExternalObject.dll";
+		try {
+			$._nim_PPP_.updateEventPanel("CALLBACK: onEncoderJobQueued: ",2);
+
+			if(typeof $._nim_PPP_.exportJobs[jobID] !== "undefined"){
+				var jobData = $._nim_PPP_.exportJobs[jobID];
+
+				var nimEvent = new CSXSEvent();
+				nimEvent.type = "com.nim-labs.events";
+				if( jobData["encode"] == "sequence"){
+					nimEvent.type = "com.nim-labs.events.PProExportEditQueued";
+				}
+				else if( jobData["encode"] == "clip"){
+					nimEvent.type = "com.nim-labs.events.PProExportShotQueued";
+				}
+				nimEvent.data = JSON.stringify(jobData);
+				nimEvent.dispatch();
+
+				app.encoder.startBatch();
+			}
+			else {
+				$._nim_PPP_.updateEventPanel("onEncoderJobQueued: Job does not exist.",1);
+			}
 		}
-		var mylib = new ExternalObject('lib:' + eoName);
-		
-		//$._nim_PPP_.exportJobs[jobID]['jobID'] = jobID;
-		var jobData = $._nim_PPP_.exportJobs[jobID];
-
-		var nimEvent = new CSXSEvent();
-		nimEvent.type = "com.nim-labs.events.PProExportEditQueued";
-		nimEvent.data = JSON.stringify(jobData);
-		nimEvent.dispatch();
-
-		app.encoder.startBatch();
+		catch (e) {
+			$._nim_PPP_.updateEventPanel("FAILED: onEncoderJobQueued: "+e,0);
+		}
 	},
 
 	onEncoderJobCanceled : function (jobID) {
-		$._nim_PPP_.updateEventPanel('OnEncoderJobCanceled called. jobID = ' + jobID +  '.',2);
+
+		try {
+			$._nim_PPP_.updateEventPanel("CALLBACK: OnEncoderJobCanceled: " + jobID, 2);
+
+			if(typeof $._nim_PPP_.exportJobs[jobID] !== "undefined"){
+				var jobData = $._nim_PPP_.exportJobs[jobID];
+
+				var nimEvent = new CSXSEvent();
+				nimEvent.type = "com.nim-labs.events";
+				if( jobData["encode"] == "sequence"){
+					nimEvent.type = "com.nim-labs.events.PProExportEditCanceled";
+				}
+				else if( jobData["encode"] == "clip"){
+					nimEvent.type = "com.nim-labs.events.PProExportShotCanceled";
+				}
+				nimEvent.data = JSON.stringify(jobData);
+				nimEvent.dispatch();
+			}
+			else {
+				$._nim_PPP_.updateEventPanel("OnEncoderJobCanceled: Job does not exist.",1);
+			}
+		}
+		catch (e) {
+			$._nim_PPP_.updateEventPanel("FAILED: OnEncoderJobCanceled: "+e,0);
+		}
 	},
 
 };
