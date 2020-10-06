@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: hook.py
-# Version:  v4.0.49.200410
+# Version:  v4.0.55.201006
 #
 # Copyright (c) 2014-2020 NIM Labs LLC
 # All rights reserved.
@@ -195,7 +195,14 @@ def customUIAction( info, userData ):
          clipFail = nimScanDlg.clipFail
  
          utf8 = QtCore.QTextCodec.codecForName("utf-8")
-         QtCore.QTextCodec.setCodecForCStrings(utf8)
+         
+         # QtCore.QTextCodec.setCodecForCStrings(utf8) deprecated in QT5
+         # Left in for backwards compatiblity with older versions of QT
+         try :
+            QtCore.QTextCodec.setCodecForCStrings(utf8)
+         except :
+            pass
+
          title = "New Versions Found"
          msg = "New Versions Found: "+str(clipCount)
          if clipFail > 0 :
@@ -221,7 +228,14 @@ def customUIAction( info, userData ):
          clipFail = nimScanDlg.clipFail
 
          utf8 = QtCore.QTextCodec.codecForName("utf-8")
-         QtCore.QTextCodec.setCodecForCStrings(utf8)
+
+         # QtCore.QTextCodec.setCodecForCStrings(utf8) deprecated in QT5
+         # Left in for backwards compatiblity with older versions of QT
+         try :
+            QtCore.QTextCodec.setCodecForCStrings(utf8)
+         except :
+            pass
+
          title = "New Versions Found"
          msg = "New Versions Found: "+str(clipCount)
          if clipFail > 0 :
@@ -246,7 +260,14 @@ def customUIAction( info, userData ):
          clipFail = nimScanDlg.clipFail
 
          utf8 = QtCore.QTextCodec.codecForName("utf-8")
-         QtCore.QTextCodec.setCodecForCStrings(utf8)
+         
+         # QtCore.QTextCodec.setCodecForCStrings(utf8) deprecated in QT5
+         # Left in for backwards compatiblity with older versions of QT
+         try :
+            QtCore.QTextCodec.setCodecForCStrings(utf8)
+         except :
+            pass
+
          title = "New Versions Found"
          msg = "New Versions Found: "+str(clipCount)
          if clipFail > 0 :
