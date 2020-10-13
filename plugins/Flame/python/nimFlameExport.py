@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: Flame/python/nimFlameExport.py
-# Version:  v4.0.56.201006
+# Version:  v4.0.56.201012
 #
 # Copyright (c) 2014-2020 NIM Labs LLC
 # All rights reserved.
@@ -419,9 +419,9 @@ class NimScanForVersionsDialog(QDialog):
 		'''Action when update option is changed'''
 		updateOption = self.nim_updateChooser.currentText()
 		if updateOption == 'All Elements' :
-			self.nim_updateAll = True
+			self.nim_updateAll = 1
 		else :
-			self.nim_updateAll = False
+			self.nim_updateAll = 0
 
 
 	def acceptTest(self):
@@ -442,6 +442,8 @@ class NimScanForVersionsDialog(QDialog):
 		self.nim_showChooser.setDisabled(True)
 		self.nim_updateChooser.setDisabled(True)
 		self._buttonbox.setDisabled(True)
+
+		print "Update All Elements: %s" % self.nim_updateAll
 
 		shotCount = 0
 		for shot in shots :
@@ -3330,7 +3332,7 @@ def uploadDaily(nim_taskID=None, mov_path='') :
 	return success
 
 
-def nimScanForVersions(nim_showID=None, nim_shotID=None, updateAll=False) :
+def nimScanForVersions(nim_showID=None, nim_shotID=None, updateAll=0) :
 	# find_elements in show with metadata flameAssetType : batchOpenClip
 	# get element type
 	# find all elements of type in shot
@@ -3374,7 +3376,6 @@ def nimScanForVersions(nim_showID=None, nim_shotID=None, updateAll=False) :
 						elementMetadata = json.loads(element['metadata'])
 						
 						clipUsed = False
-						updateAll = False
 						usedClipIDs = []
 
 						# flameUsedInClip metadata is an array of fileIDs relating to 
@@ -3393,8 +3394,9 @@ def nimScanForVersions(nim_showID=None, nim_shotID=None, updateAll=False) :
 								# print "usedClipIDs is not list"
 								pass
 
-						if updateAll is False and clipUsed is True :
+						if updateAll is 0 and clipUsed is True :
 							appendElement = False
+							print "Element %s has been already added to clip %s... Skipping" % (element['name'], clipName)
 						
 						if appendElement :
 							# print "New Element found for shotID %s" % shotID
@@ -3786,7 +3788,12 @@ def resolveServerOsPath(path='') :
 				# Compare against windows and linux & set to osx
 
 				#case in-sensitive
-				if winPath and path.lower().startswith(winPath.lower()) :
+				if osxPath and path.lower().startswith(osxPath.lower()) :
+					print "OSX Path Found"
+					break
+
+				#case in-sensitive
+				elif winPath and path.lower().startswith(winPath.lower()) :
 					print "Translating Windows Path" 
 					pathTail = path[path.lower().startswith(winPath.lower()) and len(winPath):]
 					if pathTail.startswith('/') :
@@ -3810,8 +3817,13 @@ def resolveServerOsPath(path='') :
 				print "OS: Linux"
 				# Compare against windows and osx & set to linux
 
+				#case sensitive
+				if linuxPath and path.startswith(linuxPath) :
+					print "Linux Path Found" 
+					break
+
 				#case in-sensitive
-				if winPath and path.lower().startswith(winPath.lower()) :
+				elif winPath and path.lower().startswith(winPath.lower()) :
 					print "Translating Windows Path"
 					pathTail = path[path.lower().startswith(winPath.lower()) and len(winPath):]
 					if pathTail.startswith('/') :
@@ -4126,10 +4138,12 @@ def updateOpenClip( masterFile='', elementPath='', elementName='', elementWildca
 							
 					outFile = masterFile
 
-					print " Adding feed version %s" % vuid
+					print "Adding feed version: %s" % elementBasename
 					
 					with open(outFile,"w") as f:
 						f.write( resultXML )
+
+					print "openClip Updated: %s" % outFile
 
 					clipUpdated = True
 
@@ -4183,8 +4197,12 @@ def updateOpenClip( masterFile='', elementPath='', elementName='', elementWildca
 
 				resultXML = ET.tostring(xmlRoot)
 
+				print "Adding feed version: %s" % elementBasename
+
 				with open(tmpfile,"w") as f:
 					f.write( resultXML )
+
+				print "openClip Updated: %s" % tmpfile
 
 				clipUpdated = True
 
