@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: hook.py
-# Version:  v4.0.49.200410
+# Version:  v4.0.56.201012
 #
 # Copyright (c) 2014-2020 NIM Labs LLC
 # All rights reserved.
@@ -139,19 +139,19 @@ def previewWindowConfigChanged(description,width,height,bitDepth,
 def getCustomUIActions( ):
 
    action1 = {}
-   action1[ "name" ] = "nimScanForVersions"
+   action1[ "name" ] = "Scan for Versions"
    action1[ "caption" ] = "Scan for Versions"
 
    action2 = {}
-   action2[ "name" ] = "nimBuildOpenClipFromElements"
+   action2[ "name" ] = "Build OpenClip from Elements"
    action2[ "caption" ] = "Build OpenClip from Elements"
 
    action3 = {}
-   action3[ "name" ] = "nimBuildOpenClipFromProject"
+   action3[ "name" ] = "Build OpenClip from Project"
    action3[ "caption" ] = "Build OpenClip from Project"
 
    action4 = {}
-   action4[ "name" ] = "nimChangeUser"
+   action4[ "name" ] = "Change User"
    action4[ "caption" ] = "Change User"
 
    group1 = {}
@@ -183,8 +183,8 @@ def getCustomUIActions( ):
 def customUIAction( info, userData ):
    
 
-   if info[ "name" ] == "nimScanForVersions" :
-      print "nimScanForVersions"
+   if info[ "name" ] == "Scan for Versions" :
+      print "Scan for Versions"
       #print info["selection"]
 
       nimScanDlg = nimFlameExport.NimScanForVersionsDialog()
@@ -195,7 +195,14 @@ def customUIAction( info, userData ):
          clipFail = nimScanDlg.clipFail
  
          utf8 = QtCore.QTextCodec.codecForName("utf-8")
-         QtCore.QTextCodec.setCodecForCStrings(utf8)
+         
+         # QtCore.QTextCodec.setCodecForCStrings(utf8) deprecated in QT5
+         # Left in for backwards compatiblity with older versions of QT
+         try :
+            QtCore.QTextCodec.setCodecForCStrings(utf8)
+         except :
+            pass
+
          title = "New Versions Found"
          msg = "New Versions Found: "+str(clipCount)
          if clipFail > 0 :
@@ -207,8 +214,8 @@ def customUIAction( info, userData ):
             userInput='OK'
 
 
-   if info[ "name" ] == "nimBuildOpenClipFromElements" :
-      print "nimBuildOpenClipFromElements"
+   if info[ "name" ] == "Build OpenClip from Elements" :
+      print "Build OpenClip from Elements"
       #print info["selection"]
       title = "Build OpenClip from Elements"
       
@@ -221,7 +228,14 @@ def customUIAction( info, userData ):
          clipFail = nimScanDlg.clipFail
 
          utf8 = QtCore.QTextCodec.codecForName("utf-8")
-         QtCore.QTextCodec.setCodecForCStrings(utf8)
+
+         # QtCore.QTextCodec.setCodecForCStrings(utf8) deprecated in QT5
+         # Left in for backwards compatiblity with older versions of QT
+         try :
+            QtCore.QTextCodec.setCodecForCStrings(utf8)
+         except :
+            pass
+
          title = "New Versions Found"
          msg = "New Versions Found: "+str(clipCount)
          if clipFail > 0 :
@@ -232,8 +246,8 @@ def customUIAction( info, userData ):
             userInput='OK'
 
 
-   if info[ "name" ] == "nimBuildOpenClipFromProject" :
-      print "nimBuildOpenClipFromProject"
+   if info[ "name" ] == "Build OpenClip from Project" :
+      print "Build OpenClip from Project"
       #print info["selection"]
       title = "Build OpenClip from Project Structure"
       
@@ -246,7 +260,14 @@ def customUIAction( info, userData ):
          clipFail = nimScanDlg.clipFail
 
          utf8 = QtCore.QTextCodec.codecForName("utf-8")
-         QtCore.QTextCodec.setCodecForCStrings(utf8)
+         
+         # QtCore.QTextCodec.setCodecForCStrings(utf8) deprecated in QT5
+         # Left in for backwards compatiblity with older versions of QT
+         try :
+            QtCore.QTextCodec.setCodecForCStrings(utf8)
+         except :
+            pass
+
          title = "New Versions Found"
          msg = "New Versions Found: "+str(clipCount)
          if clipFail > 0 :
@@ -257,8 +278,8 @@ def customUIAction( info, userData ):
             userInput='OK'
       
 
-   if info[ "name" ] == "nimChangeUser" :
-      print "nimChangeUser triggered"
+   if info[ "name" ] == "Change User" :
+      print "Change User triggered"
       #print info["selection"]
 
       import nim_core.nim_win as Win;
