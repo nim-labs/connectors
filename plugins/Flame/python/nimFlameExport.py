@@ -3777,7 +3777,7 @@ def resolveServerOsPath(path='') :
 				osxPath 	= server['osxPath'].replace('\\', '/')
 
 			# print "--------------------------"
-			# print "Server: %s" % server
+			print "Resolving Server: %s" % server['server']
 			# print "Path: %s" % path
 			# print "Linux Path: %s" % linuxPath
 			# print "Windows Path: %s" % winPath
