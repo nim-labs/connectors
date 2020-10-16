@@ -1790,16 +1790,31 @@ def to_filePath( nim=None, padding=2, pub=False ) :
         return False
 
 
-def get_bases( shotID=None, assetID=None, showID=None, task='', taskID=None, pub=False ) :
-    'Retrieves the dictionary of available basenames from the API'
+def get_bases( shotID=None, assetID=None, showID=None, task='', taskType=None, taskID=None, taskTypeID=None, pub=False ) :
     '''
-    if shotID and not assetID :
-        ID=shotID
-        _type='SHOT'
-    else :
-        ID=assetID
-        _type='ASSET'
+    Retrieves the dictionary of basenames for a show, shot or asset.
+
+    def get_bases( shotID=None, assetID=None, showID=None, task='', taskType=None, taskID=None, taskTypeID=None, pub=False )
+
+        Parameters              Description                                  Type            Values                      Default        Required
+    _____________________________________________________________________________________________________________________________________________
+
+        shotID, assetID, or showID                                                                                                      YES
+            shotID              The shot ID to find basenames                integer                                                    ---
+            assetID             The asset ID to find basenames               integer                                                    ---
+            showID              The show ID to find basenames                integer                                                    ---
+        task / taskType         Task Type Name to filter results             string
+        taskID / taskTypeID     Task Type ID to filter results               integer
+        pub                     Filter to only return published basenames    boolean         True/False                  False
+
+    Return:
+        dictionary
     '''
+
+    # Alternative variable name entries for clairity
+    if taskType is not None : task = taskType
+    if taskTypeID is not None : taskID = taskTypeID
+
     if shotID :
         ID=shotID
         _type='SHOT'
@@ -1815,11 +1830,15 @@ def get_bases( shotID=None, assetID=None, showID=None, task='', taskID=None, pub
             basenameDict=get( {'q': 'getBasenames', 'ID': str(ID), 'class': _type, 'type': task.upper()} )
         elif not task and taskID :
             basenameDict=get( {'q': 'getBasenames', 'ID': str(ID), 'class': _type, 'task_type_ID': taskID} )
+        else :
+            basenameDict=get( {'q': 'getBasenames', 'ID': str(ID), 'class': _type} )
     elif pub :
         if task and not taskID :
             basenameDict=get( {'q': 'getBasenameAllPub', 'ID': str(ID), 'class': _type, 'type': task.upper()} )
         elif not task and taskID :
             basenameDict=get( {'q': 'getBasenameAllPub', 'ID': str(ID), 'class': _type, 'task_type_ID': taskID} )
+        else :
+            basenameDict=get( {'q': 'getBasenameAllPub', 'ID': str(ID), 'class': _type} )
     return basenameDict
 
 def get_basesPub( shotID=None, assetID=None, basename='', username=None ) :
