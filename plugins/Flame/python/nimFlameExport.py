@@ -26,6 +26,7 @@ try:
 except ImportError:
 	import xml.etree.ElementTree as ET
 
+flameConnectorVersion = "4.0.57.201016"
 
 # Relative path to append for NIM Scripts
 nimFlamePythonPath = os.path.dirname(os.path.realpath(__file__))
@@ -34,6 +35,7 @@ nimScriptPath = re.sub(r"\/plugins/Flame/python$", "", nimFlamePythonPath)
 nimFlamePresetPath = os.path.join(re.sub(r"\/python$", "", nimFlamePythonPath),'presets')
 nimFlameImgPath = os.path.join(re.sub(r"\/python$", "", nimFlamePythonPath),'img')
 
+print "NIM Flame Connector Version: %s" % flameConnectorVersion
 print "NIM Script Path: %s" % nimScriptPath
 print "NIM Python Path: %s" % nimFlamePythonPath
 print "NIM Preset Path: %s" % nimFlamePresetPath

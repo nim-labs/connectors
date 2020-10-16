@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: exportHook.py
-# Version:  v4.0.56.201006
+# Version:  v4.0.57.201016
 #
 # Copyright (c) 2014-2020 NIM Labs LLC
 # All rights reserved.
@@ -35,9 +35,9 @@ nimFlamePythonPath = nimFlamePythonPath.replace('\\','/')
 nimScriptPath = re.sub(r"\/plugins/Flame/python$", "", nimFlamePythonPath)
 nimFlamePresetPath = os.path.join(re.sub(r"\/python$", "", nimFlamePythonPath),'presets')
 
-print "NIM Script Path: %s" % nimScriptPath
-print "NIM Python Path: %s" % nimFlamePythonPath
-print "NIM Preset Path: %s" % nimFlamePresetPath
+#print "NIM Script Path: %s" % nimScriptPath
+#print "NIM Python Path: %s" % nimFlamePythonPath
+#print "NIM Preset Path: %s" % nimFlamePresetPath
 
 # If relocating these scripts uncomment the line below and enter the fixed path
 # to the NIM Connector Root directory
