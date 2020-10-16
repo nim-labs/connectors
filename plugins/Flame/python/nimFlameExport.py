@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: Flame/python/nimFlameExport.py
-# Version:  v4.0.56.201012
+# Version:  v4.0.57.201016
 #
 # Copyright (c) 2014-2020 NIM Labs LLC
 # All rights reserved.
@@ -4058,7 +4058,7 @@ def updateOpenClip( masterFile='', elementPath='', elementName='', elementWildca
 			try :
 				vuid = ''
 				elementExists = False
-
+				elementsAdded = 0
 
 				# Get first item in feed and use as the nbTicks reference
 				src_nbTicks = None
@@ -4087,9 +4087,10 @@ def updateOpenClip( masterFile='', elementPath='', elementName='', elementWildca
 
 					newPathObject = newTrack.find("feeds/feed/spans/span/path")
 					newPath = newPathObject.text
-					# print "uid: %s" % uid
+					
+					print "uid: %s" % uid
 					# print "newFeed: %s" % ET.tostring(newFeed)
-					# print "newPath: %s" % newPath
+					print "newPath: %s" % newPath
 					
 					# Check for path in sourceFile 
 					# If Path exists ... skip append
@@ -4104,8 +4105,10 @@ def updateOpenClip( masterFile='', elementPath='', elementName='', elementWildca
 						for srcTrack in sourceXML.iter('track') :
 							newFeed.set('vuid', elementBasename)
 							srcTrack.find('feeds').append(newFeed)
+							print "Appending element: %s" % elementBasename
+							elementsAdded += 1
 
-				if not elementExists:
+				if elementsAdded > 0:
 					# Append vUID to versions
 					newVersion = sourceXML.find('versions')
 					newVersionElement = ET.Element("version", {"type": "version", "uid": elementBasename})
