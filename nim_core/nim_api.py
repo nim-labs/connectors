@@ -893,9 +893,27 @@ def upload_jobIcon( jobID=None, img=None, nimURL=None, apiKey=None ) :
 
     params["q"] = action.encode('ascii')
     params["jobID"] = job_str.encode('ascii')
-    params["file"] = open(img,'rb')
+    
+    if img is not None :
+        img = os.path.normpath( img )
+        if os.path.isfile(img) :
+            params["file"] = open(img,'rb')
+        else :
+            result = {}
+            result['success'] = False
+            result['error'] = "File does not exist"
+            return result
+    else :
+        result = {}
+        result['success'] = False
+        result['error'] = "Image file not defined"
+        return result
 
-    result = upload(params=params, nimURL=nimURL, apiKey=apiKey)
+    if img is not None :
+        result = upload(params=params, nimURL=nimURL, apiKey=apiKey)
+    else :
+        result = connect( method='get', params=params, nimURL=nimURL, apiKey=apiKey )
+
     return result
 
 def get_jobInfo( jobID=None ) :
@@ -1084,9 +1102,27 @@ def upload_assetIcon( assetID=None, img=None, nimURL=None, apiKey=None ) :
 
     params["q"] = action.encode('ascii')
     params["assetID"] = asset_str.encode('ascii')
-    params["file"] = open(img,'rb')
+    
+    if img is not None :
+        img = os.path.normpath( img )
+        if os.path.isfile(img) :
+            params["file"] = open(img,'rb')
+        else :
+            result = {}
+            result['success'] = False
+            result['error'] = "File does not exist"
+            return result
+    else :
+        result = {}
+        result['success'] = False
+        result['error'] = "Image file not defined"
+        return result
 
-    result = upload(params=params, nimURL=nimURL, apiKey=apiKey)
+    if img is not None :
+        result = upload(params=params, nimURL=nimURL, apiKey=apiKey)
+    else :
+        result = connect( method='get', params=params, nimURL=nimURL, apiKey=apiKey )
+
     return result
 
 def get_assetInfo( assetID=None ) :
@@ -1361,9 +1397,27 @@ def upload_shotIcon( shotID=None, img=None, nimURL=None, apiKey=None ) :
 
     params["q"] = action.encode('ascii')
     params["shotID"] = shot_str.encode('ascii')
-    params["file"] = open(img,'rb')
+    
+    if img is not None :
+        img = os.path.normpath( img )
+        if os.path.isfile(img) :
+            params["file"] = open(img,'rb')
+        else :
+            result = {}
+            result['success'] = False
+            result['error'] = "File does not exist"
+            return result
+    else :
+        result = {}
+        result['success'] = False
+        result['error'] = "Image file not defined"
+        return result
 
-    result = upload(params=params, nimURL=nimURL, apiKey=apiKey)
+    if img is not None :
+        result = upload(params=params, nimURL=nimURL, apiKey=apiKey)
+    else :
+        result = connect( method='get', params=params, nimURL=nimURL, apiKey=apiKey )
+
     return result
 
 def get_shotInfo( shotID=None ) :
@@ -2499,7 +2553,7 @@ def add_file( nim=None, filePath='', comment='', pub=False ) :
     return True
 
 def save_file( parent='SHOW', parentID=0, task_type_ID=0, task_folder='', userID=0, basename='', filename='', \
-    path='', ext='', version='', comment='', serverID=0, pub=False, forceLink=1, work=True, metadata=None, customKeys=None ):
+    path='', ext='', version='', comment='', serverID=0, pub=False, forceLink=1, work=True, metadata=None, customKeys=None ) :
     '''General Purpose Save File Function that Adds a File to the NIM Database with brute force data.
 
        Required Parameters:
@@ -2616,7 +2670,7 @@ def save_file( parent='SHOW', parentID=0, task_type_ID=0, task_folder='', userID
     return result
 
 def update_file( ID=None, task_type_ID=None, task_folder=None, userID=None, basename=None, filename=None, path=None, ext=None, \
-    version=None, comment=None, serverID=None, pub=False, forceLink=None, work=None, metadata=None, customKeys=None ):
+    version=None, comment=None, serverID=None, pub=False, forceLink=None, work=None, metadata=None, customKeys=None ) :
     '''General Purpose Update File Function that Updates and existing File in the NIM Database'''
     is_work = 0
     if work:
@@ -2736,7 +2790,7 @@ def get_elementType( ID=None):
     elementType=get( {'q': 'getElementType', 'ID': ID} )
     return elementType
 
-def find_elements( name='', path='', jobID='', showID='', shotID='', assetID='', taskID='', renderID='', elementTypeID='', ext='', metadata=''):
+def find_elements( name='', path='', jobID='', showID='', shotID='', assetID='', taskID='', renderID='', elementTypeID='', ext='', metadata='') :
     'Retrieves a dictionary of elements matching one of the included IDs plus name, path, elementTypeID, ext, or metadata'
     elements=get( {'q': 'findElements', 'name': name, 'path': path, 'jobID': jobID, 'showID': showID, 'shotID': shotID, 'assetID': assetID, 'taskID': taskID, 'renderID': renderID, 'elementTypeID': elementTypeID, 'ext': ext, 'metadata': metadata} )
     return elements
@@ -2751,7 +2805,7 @@ def get_elements( parent='shot', parentID=None, elementTypeID=None, getLastEleme
     return publishedElements
 
 def add_element( parent='shot', parentID=None, userID=None, typeID='', path='', name='', startFrame=None, endFrame=None, \
-    handles=None, isPublished=False, metadata='', nimURL=None, apiKey=None ):
+    handles=None, isPublished=False, metadata='', nimURL=None, apiKey=None ) :
     'Adds an element to an asset, shot, task, or render'
     # nimURL and apiKey are optional for Render API Key overrride
     params = {'q': 'addElement', 'parent': parent, 'userID':userID, 'typeID': typeID, 'parentID': parentID, 'path': path, \
@@ -2760,7 +2814,7 @@ def add_element( parent='shot', parentID=None, userID=None, typeID='', path='', 
     return result
 
 def update_element(ID=None, userID=None, jobID=None, assetID=None, shotID=None, taskID=None, renderID=None, elementTypeID=None, \
-    name=None, path=None, startFrame=None, endFrame=None, handles=None, isPublished=None, metadata=None, nimURL=None, apiKey=None ):
+    name=None, path=None, startFrame=None, endFrame=None, handles=None, isPublished=None, metadata=None, nimURL=None, apiKey=None ) :
     'Updates an existing element by element ID'
     # nimURL and apiKey are optional for Render API Key override
     params = {'q': 'updateElement'}
@@ -2841,12 +2895,27 @@ def upload_renderIcon( renderID=None, renderKey='', img=None, nimURL=None, apiKe
     params["q"] = "uploadRenderIcon"
     params["renderID"] = renderID
     params["renderKey"] = renderKey
-    if img is not None:
-        params["file"] = open(img,'rb')
+    
+    if img is not None :
+        img = os.path.normpath( img )
+        if os.path.isfile(img) :
+            params["file"] = open(img,'rb')
+        else :
+            result = {}
+            result['success'] = False
+            result['error'] = "File does not exist"
+            return result
     else :
-        params["file"] = ''
+        result = {}
+        result['success'] = False
+        result['error'] = "Image file not defined"
+        return result
 
-    result = upload(params=params, nimURL=nimURL, apiKey=apiKey)
+    if img is not None :
+        result = upload(params=params, nimURL=nimURL, apiKey=apiKey)
+    else :
+        result = connect( method='get', params=params, nimURL=nimURL, apiKey=apiKey )
+
     return result
 
 def get_lastShotRender( shotID=None ):
@@ -2876,13 +2945,27 @@ def upload_edit( showID=None, path=None, nimURL=None, apiKey=None ) :
 
     params["q"] = "uploadEdit"
     params["showID"] = showID
-    if path is not None:
+    
+    if path is not None :
         path = os.path.normpath( path )
-        params["file"] = open(path,'rb')
+        if os.path.isfile(path) :
+            params["file"] = open(path,'rb')
+        else :
+            result = {}
+            result['success'] = False
+            result['error'] = "File does not exist"
+            return result
     else :
-        params["file"] = ''
+        result = {}
+        result['success'] = False
+        result['error'] = "Path not defined"
+        return result
 
-    result = upload(params=params, nimURL=nimURL, apiKey=apiKey)
+    if path is not None :
+        result = upload(params=params, nimURL=nimURL, apiKey=apiKey)
+    else :
+        result = connect( method='get', params=params, nimURL=nimURL, apiKey=apiKey )
+
     return result
 
 # DEPRECATED - upload_dailies() #
@@ -2917,17 +3000,30 @@ def upload_dailies( taskID=None, renderID=None, renderKey=None, itemID=None, ite
     if renderID is not None : params['renderID'] = renderID
     if renderKey is not None : params['renderKey'] = renderKey
 
-    if path is not None:
+    if path is not None :
         path = os.path.normpath( path )
-        params["file"] = open(path,'rb')
+        if os.path.isfile(path) :
+            params["file"] = open(path,'rb')
+        else :
+            result = {}
+            result['success'] = False
+            result['error'] = "File does not exist"
+            return result
     else :
-        params["file"] = ''
+        result = {}
+        result['success'] = False
+        result['error'] = "Path not defined"
+        return result
 
     if submit is not None : params['submit'] = submit
     if itemID is not None : params['itemID'] = itemID
     if itemType is not None : params['itemType'] = itemType
 
-    result = upload(params=params, nimURL=nimURL, apiKey=apiKey)
+    if path is not None :
+        result = upload(params=params, nimURL=nimURL, apiKey=apiKey)
+    else :
+        result = connect( method='get', params=params, nimURL=nimURL, apiKey=apiKey )
+
     return result
 
 # DEPRECATED - upload_dailies() #
@@ -2941,16 +3037,32 @@ def upload_dailiesNote( dailiesID=None, name='', img=None, note='', frame=0, tim
     params["q"] = action.encode('ascii')
     params["dailiesID"] = shot_str.encode('ascii')
     params["name"] = name.encode('ascii')
-    if img is not None:
-        params["file"] = open(img,'rb')
+    
+    if img is not None :
+        img = os.path.normpath( img )
+        if os.path.isfile(img) :
+            params["file"] = open(img,'rb')
+        else :
+            result = {}
+            result['success'] = False
+            result['error'] = "File does not exist"
+            return result
     else :
-        params["file"] = ''
+        result = {}
+        result['success'] = False
+        result['error'] = "Image file not defined"
+        return result
+
     params["note"] = note.encode('ascii')
     params["frame"] = frame
     params["time"] = time
     params["userID"] = userID
 
-    result = upload(params=params, nimURL=nimURL, apiKey=apiKey)
+    if img is not None :
+        result = upload(params=params, nimURL=nimURL, apiKey=apiKey)
+    else :
+        result = connect( method='get', params=params, nimURL=nimURL, apiKey=apiKey )
+
     return result
 
 
@@ -3042,7 +3154,6 @@ def upload_reviewItem( taskID=None, renderID=None, renderKey=None, itemID=None, 
     # userID              integer     The userID for the owner of the review item 
     #                                 * userID takes precedence over username if both are supplied
 
-
     params = {}
 
     params["q"] = "uploadReviewItem"
@@ -3051,11 +3162,21 @@ def upload_reviewItem( taskID=None, renderID=None, renderKey=None, itemID=None, 
     if renderID is not None : params['renderID'] = renderID
     if renderKey is not None : params['renderKey'] = renderKey
 
-    if path is not None:
+    if path is not None :
         path = os.path.normpath( path )
-        params["file"] = open(path,'rb')
+        if os.path.isfile(path) :
+            path = os.path.normpath( path )
+            params["file"] = open(path,'rb')
+        else :
+            result = {}
+            result['success'] = False
+            result['error'] = "File does not exist"
+            return result
     else :
-        params["file"] = ''
+        result = {}
+        result['success'] = False
+        result['error'] = "Path not defined"
+        return result
 
     if submit is not None : params['submit'] = submit
     if itemID is not None : params['itemID'] = itemID
@@ -3068,7 +3189,10 @@ def upload_reviewItem( taskID=None, renderID=None, renderKey=None, itemID=None, 
     if username is not None : params['username'] = username
     if userID is not None : params['userID'] = userID
 
-    result = upload(params=params, nimURL=nimURL, apiKey=apiKey)
+    if path is not None :
+        result = upload(params=params, nimURL=nimURL, apiKey=apiKey)
+    else :
+        result = connect( method='get', params=params, nimURL=nimURL, apiKey=apiKey )
     return result
 
 def upload_reviewNote( ID=None, name='', img=None, note='', frame=0, time=-1, userID=None, nimURL=None, apiKey=None ) :
@@ -3094,16 +3218,32 @@ def upload_reviewNote( ID=None, name='', img=None, note='', frame=0, time=-1, us
     params["q"] = action.encode('ascii')
     params["ID"] = str(ID).encode('ascii')
     params["name"] = str(name).encode('ascii')
-    if img is not None:
-        params["file"] = open(img,'rb')
+    
+    if img is not None :
+        img = os.path.normpath( img )
+        if os.path.isfile(img) :
+            params["file"] = open(img,'rb')
+        else :
+            result = {}
+            result['success'] = False
+            result['error'] = "File does not exist"
+            return result
     else :
-        params["file"] = ''
+        result = {}
+        result['success'] = False
+        result['error'] = "Image file not defined"
+        return result
+
     params["note"] = str(note).encode('ascii')
     params["frame"] = str(frame).encode('ascii')
     params["time"] = str(time).encode('ascii')
     params["userID"] = str(userID).encode('ascii')
 
-    result = upload(params=params, nimURL=nimURL, apiKey=apiKey)
+    if img is not None :
+        result = upload(params=params, nimURL=nimURL, apiKey=apiKey)
+    else :
+        result = connect( method='get', params=params, nimURL=nimURL, apiKey=apiKey )
+
     return result
 
 
