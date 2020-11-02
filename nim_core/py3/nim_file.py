@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: nim_file.py
-# Version:  v4.0.49.200410
+# Version:  v4.0.57.201016
 #
 # Copyright (c) 2014-2020 NIM Labs LLC
 # All rights reserved.
@@ -23,7 +23,7 @@ from . import nim as Nim
 
 
 #  Variables :
-version='v4.0.49'
+version='v4.0.57'
 winTitle='NIM_'+version
 _os=platform.system().lower()
 #  Compiled REGEX Searches :
