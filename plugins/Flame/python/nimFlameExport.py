@@ -20,6 +20,7 @@ import json
 import xml.dom.minidom as minidom
 import shutil
 import subprocess
+import time
 
 try:
 	import xml.etree.cElementTree as ET
@@ -3981,9 +3982,35 @@ def updateOpenClip( masterFile='', elementPath='', elementName='', elementWildca
 			print "cmd: %s" % cmd_args
 
 			pipes = subprocess.Popen(cmd_args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-			std_out, std_err = pipes.communicate()
 
-			if pipes.returncode != 0:
+			# Communicate with subprocess - timeout after 15 seconds if no reponse is found
+			# Python 3.x
+			#	try:
+			#		std_out, std_err = pipes.communicate(timeout=15)
+			#	except TimeoutExpired:
+			#		pipes.kill()
+			#		std_out, std_err = pipes.communicate()
+
+			# Python 2.7
+			x = 15 #some amount of seconds
+			delay = 1.0
+			timeout = int(x / delay)
+			
+			#while the process is still executing and we haven't timed-out yet
+			while pipes.poll() is None and timeout > 0:
+				#do other things too if necessary e.g. print, check resources, etc.
+				time.sleep(delay)
+				timeout -= delay
+				print "Waiting for dl_get_media_info for %s more seconds..." % timeout
+			# End timeout
+
+			std_out, std_err = pipes.communicate()
+			
+			if pipes.returncode is None :
+				pipes.kill()
+				print 'ERROR: dl_get_media_info failed to return after 15 seconds. Killing process and skipping media import'
+				return False
+			elif pipes.returncode != 0:
 				# Error
 				err_msg = "%s. Code: %s" % (std_err.strip(), pipes.returncode)
 				print '%s' % err_msg
