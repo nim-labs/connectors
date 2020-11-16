@@ -27,7 +27,7 @@ try:
 except ImportError:
 	import xml.etree.ElementTree as ET
 
-flameConnectorVersion = "4.0.57.201016"
+flameConnectorVersion = "4.0.57.201116"
 
 # Relative path to append for NIM Scripts
 nimFlamePythonPath = os.path.dirname(os.path.realpath(__file__))
@@ -4003,30 +4003,31 @@ def updateOpenClip( masterFile='', elementPath='', elementName='', elementWildca
 				timeout -= delay
 				print "Waiting for dl_get_media_info for %s more seconds..." % timeout
 			# End timeout
-
-			std_out, std_err = pipes.communicate()
 			
 			if pipes.returncode is None :
 				pipes.kill()
 				print 'ERROR: dl_get_media_info failed to return after 15 seconds. Killing process and skipping media import'
 				return False
-			elif pipes.returncode != 0:
-				# Error
-				err_msg = "%s. Code: %s" % (std_err.strip(), pipes.returncode)
-				print '%s' % err_msg
-				return False
-			elif len(std_err):
-				# return code is 0 (no error) : but we might have warning messages indicating failure
-				print "ERROR: %s" % std_err
-				if std_err.startswith("Could not get metadata from") :
-					print "Possible directory attempted for scan - keep trying"
-				else :
-					print "Unknown Error - skipping media import"
-					return False
+			else :
+				std_out, std_err = pipes.communicate()
 
-			# Process Output
-			print "Successfully parsed media"
-			# print "std_out: %s" % std_out
+				if pipes.returncode != 0 :
+					# Error
+					err_msg = "%s. Code: %s" % (std_err.strip(), pipes.returncode)
+					print '%s' % err_msg
+					return False
+				elif len(std_err) :
+					# return code is 0 (no error) : but we might have warning messages indicating failure
+					print "ERROR: %s" % std_err
+					if std_err.startswith("Could not get metadata from") :
+						print "Possible directory attempted for scan - keep trying"
+					else :
+						print "Unknown Error - skipping media import"
+						return False
+				else :
+					print "Successfully parsed media"
+					# print "std_out: %s" % std_out
+
 
 			with open(tmpfile, "w") as f:
 				f.write("{0}".format(std_out))
