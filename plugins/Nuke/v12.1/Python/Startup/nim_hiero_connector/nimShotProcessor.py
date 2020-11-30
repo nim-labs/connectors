@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: Nuke/Python/Startup/nim_hiero_connector/nimShotProcessor.py
-# Version:  v4.0.57.201118
+# Version:  v4.0.57.201130
 #
 # Nuke 12.1v1
 #
@@ -823,10 +823,10 @@ class NimShotProcessorPreset(hiero.core.ProcessorPreset):
     resolver.addResolver("{nim_shot_render}", "NIM Shot Render Output Directory", lambda keyword, task: shotRenderPath(task))
     resolver.addResolver("{nim_shot_comp}", "NIM Shot Comp Output Directory", lambda keyword, task: shotCompPath(task))
 
-    resolver.addResolver("{nim_file_task_name}", "NIM File Task Type Name", lambda keyword, task: fileTaskType(task))
-    resolver.addResolver("{nim_file_task_short}", "NIM File Task Type Short Name", lambda keyword, task: fileTaskShort(task))
-    resolver.addResolver("{nim_file_task_folder}", "NIM File Task Folder", lambda keyword, task: fileTaskFolder(task))
-    resolver.addResolver("{nim_element_type}", "NIM Element Type", lambda keyword, task: elementType(task))
+    # resolver.addResolver("{nim_file_task_name}", "NIM File Task Type Name", lambda keyword, task: fileTaskType(task))
+    # resolver.addResolver("{nim_file_task_short}", "NIM File Task Type Short Name", lambda keyword, task: fileTaskShort(task))
+    # resolver.addResolver("{nim_file_task_folder}", "NIM File Task Folder", lambda keyword, task: fileTaskFolder(task))
+    # resolver.addResolver("{nim_element_type}", "NIM Element Type", lambda keyword, task: elementType(task))
 
     #NOTE: Use encode('ascii') on return value to avoid PyZMQ errors
 
@@ -1096,29 +1096,29 @@ class NimShotProcessorPreset(hiero.core.ProcessorPreset):
       nim_compPath = nim_compPath.encode('ascii')
       return nim_compPath
 
-    def fileTaskType(task):
-      return nimHieroConnector.g_nim_expTask.encode('ascii')
+    # def fileTaskType(task):
+    #   return nimHieroConnector.g_nim_expTask.encode('ascii')
 
-    def fileTaskFolder(task):
-      return nimHieroConnector.g_nim_expTaskFolder.encode('ascii')
+    # def fileTaskFolder(task):
+    #   return nimHieroConnector.g_nim_expTaskFolder.encode('ascii')
 
-    def fileTaskShort(task):
-      nim_hiero_debug = False
-      nim_taskTypeShortName = ''
-      taskTypeID = nimHieroConnector.g_nim_expTaskTypeID
-      nim_taskTypes = nimAPI.get_taskTypes()
-      if nim_taskTypes:
-        if len(nim_taskTypes)>0:
-          for taskType in nim_taskTypes :
-            if int(taskTypeID) == int(taskType['ID']) :
-              nim_taskTypeShortName = taskType['short_name']
-              break
-          if nim_hiero_debug:
-            print "nim_taskTypeShortName: %s" % nim_taskTypeShortName
-      return nim_taskTypeShortName.encode('ascii')
+    # def fileTaskShort(task):
+    #   nim_hiero_debug = False
+    #   nim_taskTypeShortName = ''
+    #   taskTypeID = nimHieroConnector.g_nim_expTaskTypeID
+    #   nim_taskTypes = nimAPI.get_taskTypes()
+    #   if nim_taskTypes:
+    #     if len(nim_taskTypes)>0:
+    #       for taskType in nim_taskTypes :
+    #         if int(taskTypeID) == int(taskType['ID']) :
+    #           nim_taskTypeShortName = taskType['short_name']
+    #           break
+    #       if nim_hiero_debug:
+    #         print "nim_taskTypeShortName: %s" % nim_taskTypeShortName
+    #   return nim_taskTypeShortName.encode('ascii')
 
-    def elementType(task):
-      return nimHieroConnector.g_nim_element.encode('ascii')
+    # def elementType(task):
+    #   return nimHieroConnector.g_nim_element.encode('ascii')
     
 
       
