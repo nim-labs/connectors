@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: UI.py
-# Version:  v4.0.57.201016
+# Version:  v4.0.59.201216
 #
 # Copyright (c) 2014-2020 NIM Labs LLC
 # All rights reserved.
@@ -43,7 +43,7 @@ except ImportError :
 #  Variables :
 WIN=''
 startTime=''
-version='v4.0.57'
+version='v4.0.59'
 winTitle='NIM_'+version
 _os=platform.system().lower()
 _osCap=platform.system()

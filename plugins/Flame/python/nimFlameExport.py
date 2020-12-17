@@ -20,13 +20,14 @@ import json
 import xml.dom.minidom as minidom
 import shutil
 import subprocess
+import time
 
 try:
 	import xml.etree.cElementTree as ET
 except ImportError:
 	import xml.etree.ElementTree as ET
 
-flameConnectorVersion = "4.0.57.201016"
+flameConnectorVersion = "4.0.57.201116"
 
 # Relative path to append for NIM Scripts
 nimFlamePythonPath = os.path.dirname(os.path.realpath(__file__))
@@ -3981,25 +3982,52 @@ def updateOpenClip( masterFile='', elementPath='', elementName='', elementWildca
 			print "cmd: %s" % cmd_args
 
 			pipes = subprocess.Popen(cmd_args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-			std_out, std_err = pipes.communicate()
 
-			if pipes.returncode != 0:
-				# Error
-				err_msg = "%s. Code: %s" % (std_err.strip(), pipes.returncode)
-				print '%s' % err_msg
+			# Communicate with subprocess - timeout after 15 seconds if no reponse is found
+			# Python 3.x
+			#	try:
+			#		std_out, std_err = pipes.communicate(timeout=15)
+			#	except TimeoutExpired:
+			#		pipes.kill()
+			#		std_out, std_err = pipes.communicate()
+
+			# Python 2.7
+			x = 15 #some amount of seconds
+			delay = 1.0
+			timeout = int(x / delay)
+			
+			#while the process is still executing and we haven't timed-out yet
+			while pipes.poll() is None and timeout > 0:
+				#do other things too if necessary e.g. print, check resources, etc.
+				time.sleep(delay)
+				timeout -= delay
+				print "Waiting for dl_get_media_info for %s more seconds..." % timeout
+			# End timeout
+			
+			if pipes.returncode is None :
+				pipes.kill()
+				print 'ERROR: dl_get_media_info failed to return after 15 seconds. Killing process and skipping media import'
 				return False
-			elif len(std_err):
-				# return code is 0 (no error) : but we might have warning messages indicating failure
-				print "ERROR: %s" % std_err
-				if std_err.startswith("Could not get metadata from") :
-					print "Possible directory attempted for scan - keep trying"
-				else :
-					print "Unknown Error - skipping media import"
-					return False
+			else :
+				std_out, std_err = pipes.communicate()
 
-			# Process Output
-			print "Successfully parsed media"
-			# print "std_out: %s" % std_out
+				if pipes.returncode != 0 :
+					# Error
+					err_msg = "%s. Code: %s" % (std_err.strip(), pipes.returncode)
+					print '%s' % err_msg
+					return False
+				elif len(std_err) :
+					# return code is 0 (no error) : but we might have warning messages indicating failure
+					print "ERROR: %s" % std_err
+					if std_err.startswith("Could not get metadata from") :
+						print "Possible directory attempted for scan - keep trying"
+					else :
+						print "Unknown Error - skipping media import"
+						return False
+				else :
+					print "Successfully parsed media"
+					# print "std_out: %s" % std_out
+
 
 			with open(tmpfile, "w") as f:
 				f.write("{0}".format(std_out))
