@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: nim_print.py
-# Version:  v4.0.57.201016
+# Version:  v4.0.59.201216
 #
 # Copyright (c) 2014-2020 NIM Labs LLC
 # All rights reserved.
