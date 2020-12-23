@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: nim_file.py
-# Version:  v4.0.59.201216
+# Version:  v4.0.60.201223
 #
 # Copyright (c) 2014-2020 NIM Labs LLC
 # All rights reserved.
@@ -23,7 +23,7 @@ import nim as Nim
 
 
 #  Variables :
-version='v4.0.59'
+version='v4.0.60'
 winTitle='NIM_'+version
 _os=platform.system().lower()
 #  Compiled REGEX Searches :
@@ -616,29 +616,42 @@ def verUp( nim=None, padding=2, selected=False, win_launch=False, pub=False, sym
             #  Set Vars :
             import nim_houdini as Houdini
             Houdini.set_vars( nim=nim )
+
             #Save File
             if _os.lower() in ['windows', 'win32'] :
-                hipFilePath = new_filePath.replace('\\','/')
-            P.info( 'Saving file as %s \n' % hipFilePath )
-            hou.hipFile.save(file_name=str(hipFilePath))
+                new_filePath = new_filePath.replace('\\','/')
+            
+            P.info( 'Saving file as %s \n' % new_filePath )
+            try :
+                hou.hipFile.save(file_name=str(new_filePath))
+                P.info('Houdini successfully save the file.')
+            except hou.OperationFailed :
+                P.info('Houdini failed to save the file.' )
+                P.info( hou.OperationFailed.description() )
+
             #Set $HIP var to location of current file
             if _os.lower() in ['windows', 'win32'] :
-                hipProj = projDir.replace('\\','/')
-            hou.hscript("set -g HIP = '" + str(hipProj) + "'")
+                projDir = projDir.replace('\\','/')
+            
+            hou.hscript("set -g HIP = '" + str(projDir) + "'")
+
             #Set $HIPNAME var to current file
             hipName = os.path.splitext(new_fileName)[0]
             hou.hscript("set -g HIPNAME = '" + str(hipName) + "'")
+
         else :
             #Save Selected Items
             #TODO: set to saveSelect items... currently saving entire scene
             if _os.lower() in ['windows', 'win32'] :
-                hipFilePath = new_filePath.replace('\\','/')
-            P.info( 'Saving selected items as %s \n' % hipFilePath )
-            hou.hipFile.save(file_name=str(hipFilePath))
+                new_filePath = new_filePath.replace('\\','/')
+            P.info( 'Saving selected items as %s \n' % new_filePath )
+            hou.hipFile.save(file_name=str(new_filePath))
+
             #Set $HIP var to location of current file
             if _os.lower() in ['windows', 'win32'] :
-                hipProj = projDir.replace('\\','/')
-            hou.hscript("set -g HIP = '" + str(hipProj) + "'")
+                projDir = projDir.replace('\\','/')
+            hou.hscript("set -g HIP = '" + str(projDir) + "'")
+
             #Set $HIPNAME var to current file
             hipName = os.path.splitext(new_fileName)[0]
             hou.hscript("set -g HIPNAME = '" + str(hipName) + "'")
@@ -652,7 +665,7 @@ def verUp( nim=None, padding=2, selected=False, win_launch=False, pub=False, sym
         if os.path.isfile( pub_filePath ) :
             os.chmod( pub_filePath, stat.S_IWRITE )
             os.remove( pub_filePath )
-        #  Copy fiile and make it read-only :
+        #  Copy file and make it read-only :
         shutil.copyfile( new_filePath, pub_filePath )
         os.chmod( pub_filePath, stat.S_IREAD )
         
