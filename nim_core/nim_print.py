@@ -2,9 +2,9 @@
 #******************************************************************************
 #
 # Filename: nim_print.py
-# Version:  v4.0.60.201223
+# Version:  v4.0.61.210104
 #
-# Copyright (c) 2014-2020 NIM Labs LLC
+# Copyright (c) 2014-2021 NIM Labs LLC
 # All rights reserved.
 #
 # Use of this software is subject to the terms of the NIM Labs license
