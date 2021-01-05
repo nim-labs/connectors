@@ -2,9 +2,9 @@
 #******************************************************************************
 #
 # Filename: nim_file.py
-# Version:  v4.0.60.201223
+# Version:  v4.0.61.210104
 #
-# Copyright (c) 2014-2020 NIM Labs LLC
+# Copyright (c) 2014-2021 NIM Labs LLC
 # All rights reserved.
 #
 # Use of this software is subject to the terms of the NIM Labs license
@@ -14,7 +14,7 @@
 
 
 #  General Imports :
-import os, platform, re, shutil, stat, traceback
+import os, platform, re, shutil, stat, traceback, time
 #  NIM Imports :
 import nim_api as Api
 import nim_print as P
@@ -23,7 +23,7 @@ import nim as Nim
 
 
 #  Variables :
-version='v4.0.60'
+version='v4.0.61'
 winTitle='NIM_'+version
 _os=platform.system().lower()
 #  Compiled REGEX Searches :
@@ -641,20 +641,34 @@ def verUp( nim=None, padding=2, selected=False, win_launch=False, pub=False, sym
 
         else :
             #Save Selected Items
-            #TODO: set to saveSelect items... currently saving entire scene
             if _os.lower() in ['windows', 'win32'] :
                 new_filePath = new_filePath.replace('\\','/')
             P.info( 'Saving selected items as %s \n' % new_filePath )
-            hou.hipFile.save(file_name=str(new_filePath))
+           
+            try :
+                tmp_filePath = new_filePath+"."+time.strftime('%Y%m%d_%H%M%S')+".tmp"
+                parentNode = "hou.node('/obj/')"
+                selected = hou.selectedNodes()
+                selectedParent = selected[0].parent()
+                selectedParent.saveItemsToFile(selected, file_name=str(tmp_filePath))
+                P.info('Houdini saved items to file.' )
+            except hou.OperationFailed :
+                P.info('Houdini failed to save selected items to file.' )
+                P.info( hou.OperationFailed.description() )
 
-            #Set $HIP var to location of current file
-            if _os.lower() in ['windows', 'win32'] :
-                projDir = projDir.replace('\\','/')
-            hou.hscript("set -g HIP = '" + str(projDir) + "'")
+            saveCode = '"' + "import os, time; newParent = "+parentNode+"; newParent.loadChildrenFromFile('"+tmp_filePath+"'); hou.hipFile.save('"+new_filePath+"')" + '"'
+            pyCmd = os.environ["HFS"] + '/bin/hython -c ' + saveCode
 
-            #Set $HIPNAME var to current file
-            hipName = os.path.splitext(new_fileName)[0]
-            hou.hscript("set -g HIPNAME = '" + str(hipName) + "'")
+            try :
+                os.system(pyCmd)
+            except :
+                P.info('Failed to run hython for external Houini save.')
+
+            try:
+                os.remove(tmp_filePath)
+            except OSError:
+                pass
+
 
     #  Make a copy of the file, if publishing :
     if pub and not symLink :
