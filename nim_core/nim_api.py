@@ -1859,7 +1859,7 @@ def get_bases( shotID=None, assetID=None, showID=None, task='', taskType=None, t
             showID              The show ID to find basenames                integer                                                    ---
         task / taskType         Task Type Name to filter results             string
         taskID / taskTypeID     Task Type ID to filter results               integer
-        pub                     Filter to only return published basenames    boolean         True/False                  False
+        pub                     Filter to return published basename files    boolean         True/False                  False
 
     Return:
         dictionary
