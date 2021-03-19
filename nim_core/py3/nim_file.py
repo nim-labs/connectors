@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: nim_file.py
-# Version:  v4.0.57.201016
+# Version:  v4.0.67.210318
 #
 # Copyright (c) 2014-2020 NIM Labs LLC
 # All rights reserved.
@@ -14,7 +14,7 @@
 
 
 #  General Imports :
-import os, platform, re, shutil, stat, traceback
+import os, platform, re, shutil, stat, traceback, importlib
 #  NIM Imports :
 from . import nim_api as Api
 from . import nim_print as P
@@ -23,7 +23,7 @@ from . import nim as Nim
 
 
 #  Variables :
-version='v4.0.57'
+version='v4.0.67'
 winTitle='NIM_'+version
 _os=platform.system().lower()
 #  Compiled REGEX Searches :
@@ -679,34 +679,34 @@ def scripts_reload() :
         from . import nim_print as P
         from . import nim_win as Win
         from . import nim_tools
-        reload(Nim)
-        reload(Api)
-        reload(F)
-        reload(Prefs)
-        reload(P)
-        reload(Win)
-        reload(nim_tools)
+        importlib.reload(Nim)
+        importlib.reload(Api)
+        importlib.reload(F)
+        importlib.reload(Prefs)
+        importlib.reload(P)
+        importlib.reload(Win)
+        importlib.reload(nim_tools)
         #  App specific modules :
         app=get_app()
         try :
             from . import UI as UI
-            reload(UI)
+            importlib.reload(UI)
         except : pass
         if app=='Maya' :
             from . import nim_maya as M
-            reload(M)
+            importlib.reload(M)
         elif app=='Nuke' :
             from . import nim_nuke as N
-            reload(N)
+            importlib.reload(N)
         elif app=='C4D' :
             from . import nim_c4d as C
-            reload(C)
+            importlib.reload(C)
         elif app=='3dsMax' :
             from . import nim_3dsmax as Max
-            reload(Max)
+            importlib.reload(Max)
         elif app=='Houdini' :
             from . import nim_houdini as Houdini
-            reload(Houdini)
+            importlib.reload(Houdini)
         P.info( '    NIM scripts. have been reloaded.' )
     except Exception as e :
         print('Sorry, problem reloading scripts...')

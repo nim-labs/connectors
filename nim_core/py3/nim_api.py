@@ -2,9 +2,9 @@
 #******************************************************************************
 #
 # Filename: nim_api.py
-# Version:  v4.0.57.201016
+# Version:  v4.0.67.210318
 #
-# Copyright (c) 2014-2020 NIM Labs LLC
+# Copyright (c) 2014-2021 NIM Labs LLC
 # All rights reserved.
 #
 # Use of this software is subject to the terms of the NIM Labs license
@@ -58,7 +58,7 @@ from . import nim_tools
 from . import nim_win as Win
 
 #  Variables :
-version='v4.0.57'
+version='v4.0.67'
 winTitle='NIM_'+version
 
 '''
@@ -654,11 +654,9 @@ def get_jobs( userID=None, folders=False ) :
     try:
         for job in _jobs :
             if not folders :
-                #jobDict[str(job['number'])+'_'+str(job['jobname'])]=str(job['ID'])
-                jobDict[ ' '.join((job['number'],job['jobname'])).encode('utf-8') ] = job['ID'].encode('utf-8')
+                jobDict[ ' '.join((job['number'],job['jobname'])) ] = job['ID']
             else :
-                #jobDict[str(job['number'])+'_'+str(job['folder'])]=str(job['ID'])
-                jobDict[ ' '.join((job['number'],'_',job['folder'])).encode('utf-8') ] = job['ID'].encode('utf-8')
+                jobDict[ ' '.join((job['number'],'_',job['folder'])) ] = job['ID']
         return jobDict
     except :
         P.error("Failed to get jobs")
