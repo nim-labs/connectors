@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: Nuke/menu.py
-# Version:  v4.0.67.210318
+# Version:  v4.0.67.200319
 #
 # Copyright (c) 2014-2021 NIM Labs LLC
 # All rights reserved.
@@ -32,7 +32,7 @@ try:
 			isNuke = True
 			
 	if isNuke:
-		print("Loading NIM Menu for Nuke")
+		# print("Loading NIM Menu for Nuke")
 		m=nuke.menu('Nuke')
 		nimRootMenu=m.addMenu("NIM")
 
