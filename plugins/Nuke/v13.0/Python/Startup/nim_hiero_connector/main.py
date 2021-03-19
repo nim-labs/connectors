@@ -208,8 +208,8 @@ def nimProjectReloadScripts():
 		import nim_core.nim_file as nimFile
 		import nim_hiero_connector.core.nimHieroConnector as nimHC
 		import nim_hiero_connector.core.nim_nukeStudioUI as nimNS_UI
-		import nim_hiero_connector.core.nimProcessorUI
-		import nim_hiero_connector.core.nimShotProcessor
+		import nim_hiero_connector.core.nimProcessorUI as nimProcessorUI
+		import nim_hiero_connector.core.nimShotProcessor as nimShotProcessor
 		importlib.reload(nimPrefs)
 		importlib.reload(nimUI)
 		importlib.reload(nimAPI)
