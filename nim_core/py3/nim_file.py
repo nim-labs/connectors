@@ -14,7 +14,7 @@
 
 
 #  General Imports :
-import os, platform, re, shutil, stat, traceback, importlib
+import os, platform, re, shutil, stat, traceback, time, importlib
 #  NIM Imports :
 from . import nim_api as Api
 from . import nim_print as P
@@ -622,30 +622,56 @@ def verUp( nim=None, padding=2, selected=False, win_launch=False, pub=False, sym
             Houdini.set_vars( nim=nim )
             #Save File
             if _os.lower() in ['windows', 'win32'] :
-                hipFilePath = new_filePath.replace('\\','/')
-            P.info( 'Saving file as %s \n' % hipFilePath )
-            hou.hipFile.save(file_name=str(hipFilePath))
+                new_filePath = new_filePath.replace('\\','/')
+            
+            P.info( 'Saving file as %s \n' % new_filePath )
+            try :
+                hou.hipFile.save(file_name=str(new_filePath))
+                P.info('Houdini successfully save the file.')
+            except hou.OperationFailed :
+                P.info('Houdini failed to save the file.' )
+                P.info( hou.OperationFailed.description() )
+
             #Set $HIP var to location of current file
             if _os.lower() in ['windows', 'win32'] :
-                hipProj = projDir.replace('\\','/')
-            hou.hscript("set -g HIP = '" + str(hipProj) + "'")
+                projDir = projDir.replace('\\','/')
+            
+            hou.hscript("set -g HIP = '" + str(projDir) + "'")
+
             #Set $HIPNAME var to current file
             hipName = os.path.splitext(new_fileName)[0]
             hou.hscript("set -g HIPNAME = '" + str(hipName) + "'")
+
         else :
             #Save Selected Items
-            #TODO: set to saveSelect items... currently saving entire scene
             if _os.lower() in ['windows', 'win32'] :
-                hipFilePath = new_filePath.replace('\\','/')
-            P.info( 'Saving selected items as %s \n' % hipFilePath )
-            hou.hipFile.save(file_name=str(hipFilePath))
-            #Set $HIP var to location of current file
-            if _os.lower() in ['windows', 'win32'] :
-                hipProj = projDir.replace('\\','/')
-            hou.hscript("set -g HIP = '" + str(hipProj) + "'")
-            #Set $HIPNAME var to current file
-            hipName = os.path.splitext(new_fileName)[0]
-            hou.hscript("set -g HIPNAME = '" + str(hipName) + "'")
+                new_filePath = new_filePath.replace('\\','/')
+            P.info( 'Saving selected items as %s \n' % new_filePath )
+           
+            try :
+                tmp_filePath = new_filePath+"."+time.strftime('%Y%m%d_%H%M%S')+".tmp"
+                parentNode = "hou.node('/obj/')"
+                selected = hou.selectedNodes()
+                selectedParent = selected[0].parent()
+                selectedParent.saveItemsToFile(selected, file_name=str(tmp_filePath))
+                P.info('Houdini saved items to file.' )
+            except hou.OperationFailed :
+                P.info('Houdini failed to save selected items to file.' )
+                P.info( hou.OperationFailed.description() )
+
+            saveCode = '"' + "import os, time; newParent = "+parentNode+"; newParent.loadChildrenFromFile('"+tmp_filePath+"'); hou.hipFile.save('"+new_filePath+"')" + '"'
+            pyCmd = os.environ["HFS"] + '/bin/hython -c ' + saveCode
+
+            try :
+                os.system(pyCmd)
+            except :
+                P.info('Failed to run hython for external Houini save.')
+
+            try:
+                os.remove(tmp_filePath)
+            except OSError:
+                pass
+
 
     #  Make a copy of the file, if publishing :
     if pub and not symLink :
@@ -656,7 +682,7 @@ def verUp( nim=None, padding=2, selected=False, win_launch=False, pub=False, sym
         if os.path.isfile( pub_filePath ) :
             os.chmod( pub_filePath, stat.S_IWRITE )
             os.remove( pub_filePath )
-        #  Copy fiile and make it read-only :
+        #  Copy file and make it read-only :
         shutil.copyfile( new_filePath, pub_filePath )
         os.chmod( pub_filePath, stat.S_IREAD )
         

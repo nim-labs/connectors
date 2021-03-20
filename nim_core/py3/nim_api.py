@@ -23,7 +23,7 @@
 # result = nimAPI.add_render(taskID=14941, renderName='myRender')
 # if result['success'] == 'true':
 #    nimAPI.upload_renderIcon(renderID=result['ID'],img='/path/to/icon.jpeg')
-#    nimAPI.upload_dailies(renderID=result['ID'],path='/path/to/movie/myImages.mov',submit=0)
+#    nimAPI.upload_reviewItem(renderID=result['ID'],path='/path/to/movie/myImages.mov',submit=0)
 #    nimAPI.add_element( parent='render', parentID=result['ID'], path='/path/to/frames', name='myImage.####.exr', \
 #                           startFrame=1, endFrame=128, handles=12, isPublished=False )
 #    nimAPI.add_element( parent='render', parentID=result['ID'], path='/path/to/frames', name='myImage_matte.####.exr', \

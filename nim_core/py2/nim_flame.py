@@ -93,7 +93,7 @@ def set_vars( nim=None ) :
 	if nim.tab()=='SHOT' :
 		# h_root.setUserData("nim_name", str(nim.name('shot')))
 		os.environ['nim_name'] = str(nim.name('shot'))
-	elif 
+	else : 
 		# h_root.setUserData("nim_name", str(nim.name('asset')))
 		os.environ['nim_name'] = str(nim.name('asset'))
 
