@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: nim_nuke.py
-# Version:  v4.0.67.200319
+# Version:  v5.0.0.210408
 #
 # Copyright (c) 2014-2021 NIM Labs LLC
 # All rights reserved.
@@ -20,8 +20,7 @@ from . import nim_api as Api
 from . import nim_print as P
 #  Nuke Imports :
 import nuke, nukescripts
-#  Import Pythong GUI Packages :
-#from PySide import QtCore, QtGui
+
 #  Import Python GUI packages :
 try : 
     from PySide2 import QtWidgets as QtGui

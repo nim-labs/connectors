@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: nim_prefs.py
-# Version:  v4.0.67.200319
+# Version:  v5.0.0.210408
 #
 # Copyright (c) 2014-2021 NIM Labs LLC
 # All rights reserved.
@@ -23,16 +23,6 @@ import nim_file as F
 import nim_print as P
 import nim_win as Win
 
-'''
-isGUI = True
-try :
-    #Validate Against Terminal
-    if sys.stdin.isatty():
-        isGUI = False
-except :
-    pass
-'''
-
 isGUI = False
 try :
     #Validate Against DCC Environment
@@ -41,12 +31,10 @@ try :
 except :
     pass
 
-#print "isGUI: %s" % isGUI
-
 #  Variables :
+version='v5.0.0'
 prefs_dirName='.nim'
 prefs_fileName='prefs.nim'
-version='v4.0.67'
 winTitle='NIM_'+version
 nim_URL='http://hostname/nimAPI.php'
 nim_useSLL='False'

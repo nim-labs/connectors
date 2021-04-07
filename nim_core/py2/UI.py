@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: UI.py
-# Version:  v4.0.67.200319
+# Version:  v5.0.0.210408
 #
 # Copyright (c) 2014-2021 NIM Labs LLC
 # All rights reserved.
@@ -48,9 +48,9 @@ except ImportError :
                 print "NIM UI: Failed to UI Modules"
 
 #  Variables :
+version='v5.0.0'
 WIN=''
 startTime=''
-version='v4.0.67'
 winTitle='NIM_'+version
 _os=platform.system().lower()
 _osCap=platform.system()
