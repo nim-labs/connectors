@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: nim_houdini.py
-# Version:  v4.0.67.200319
+# Version:  v5.0.0.210408
 #
 # Copyright (c) 2014-2021 NIM Labs LLC
 # All rights reserved.
@@ -33,7 +33,7 @@ except :
             pass
 
 #  Variables :
-version='v4.0.67'
+version='v5.0.0'
 winTitle='NIM_'+version
 
 def get_mainWin() :

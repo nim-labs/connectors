@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: nim_win.py
-# Version:  v4.0.67.200319
+# Version:  v5.0.0.210408
 #
 # Copyright (c) 2014-2021 NIM Labs LLC
 # All rights reserved.
@@ -20,29 +20,6 @@ from . import nim_prefs as Prefs
 from . import nim_print as P
 
 qt_import=True
-
-
-'''
-isGUI = True
-try :
-    #Validate Against Terminal
-    if sys.stdin.isatty():
-        isGUI = False
-except :
-    pass
-'''
-'''
-# Moved to inline functions
-isGUI = False
-try :
-    #Validate Against DCC Environment
-    if F.get_app() is not None :
-        isGUI = True
-except :
-    pass
-'''
-#print "isGUI: %s" % isGUI
-
 
 #  Import Python GUI packages :
 try : 
