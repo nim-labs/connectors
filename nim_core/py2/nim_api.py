@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: nim_api.py
-# Version:  v4.0.67.200319
+# Version:  v5.0.0.210408
 #
 # Copyright (c) 2014-2021 NIM Labs LLC
 # All rights reserved.
@@ -56,18 +56,9 @@ import nim_tools
 import nim_win as Win
 
 #  Variables :
-version='v4.0.67'
+version='v5.0.0'
 winTitle='NIM_'+version
 
-'''
-isGUI = True
-try :
-    #Validate Against Terminal
-    if sys.stdin.isatty():
-        isGUI = False
-except :
-    pass
-'''
 
 isGUI = False
 try :
@@ -77,7 +68,7 @@ try :
 except :
     pass
 
-#print "isGUI: %s" % isGUI
+
 
 def testAPI(nimURL=None, nim_apiUser='', nim_apiKey='') :
     sqlCmd={'q': 'testAPI'}
