@@ -1,0 +1,14 @@
+// C4D-DialogResource
+
+DIALOG NIM_FILE_UI
+{
+  NAME NIM_FILE_UI_NAME; CENTER_V; CENTER_H; 
+  
+  GROUP
+  {
+      COLUMNS 1;
+      SPACE 4,4;
+      BORDERSIZE 4, 4, 4, 4;
+      STATICTEXT { NAME NIM_FILE_UI_NAME; }
+  }
+}
