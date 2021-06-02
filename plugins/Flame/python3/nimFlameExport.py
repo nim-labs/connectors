@@ -3398,7 +3398,7 @@ def nimScanForVersions(nim_showID=None, nim_shotID=None, updateAll=0) :
 								# print "usedClipIDs is not list"
 								pass
 
-						if updateAll is 0 and clipUsed is True :
+						if updateAll == 0 and clipUsed == True :
 							appendElement = False
 							print("Element %s has been already added to clip %s... Skipping" % (element['name'], clipName))
 						
