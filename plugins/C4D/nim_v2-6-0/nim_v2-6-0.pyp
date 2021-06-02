@@ -4,7 +4,7 @@
 # Filename: C4D/nim_v2-6-0.py
 # Version:  v2.6.01.170504
 #
-# Copyright (c) 2014-2021 NIM Labs LLC
+# Copyright (c) 2014-2020 NIM Labs LLC
 # All rights reserved.
 #
 # Use of this software is subject to the terms of the NIM Labs license
