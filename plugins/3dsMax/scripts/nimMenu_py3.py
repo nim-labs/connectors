@@ -2,7 +2,7 @@
 #
 # Filename:     3dsMax/nimMenu.py
 # Version:      5.0.0.210602
-# Compatible:   Python 3.x
+# Compatible:   3dsMax 2022 and higher
 #
 # Copyright (c) 2014-2021 NIM Labs LLC
 # All rights reserved.
@@ -12,8 +12,6 @@
 # otherwise accompanies this software in either electronic or hard copy form.
 #
 # ****************************************************************************
-
-#import MaxPlus
 
 from pymxs import runtime as rt
 import os,sys,re,traceback
@@ -92,7 +90,6 @@ def add_to_main_menu_bar(menu):
     main_menu = rt.menuMan.GetMainMenuBar()
     sub_menu_index = main_menu.numItems() - 1
     sub_menu_item = rt.menuMan.createSubMenuItem('-', menu)
-
     main_menu.addItem(sub_menu_item, sub_menu_index)
     rt.menuMan.updateMenuBar()
 
@@ -135,12 +132,7 @@ def main():
         add_func_to_global('nim_changeUserActionn', changeUserAction)
         add_func_to_global('nim_reloadScriptsAction', reloadScriptsAction)
 
-        # Get the main menu bar
         mainMenuBar = rt.menuMan.getMainMenuBar()
-        
-        
-        
-        # Create a new menu
         nimMenu = rt.menuMan.createMenu("NIM")
         add_to_main_menu_bar(nimMenu)
         add_to_menu(nimMenu, 'Open', 'nim_openFileAction()')
@@ -155,13 +147,9 @@ def main():
         add_separator(nimMenu)
         add_to_menu(nimMenu, 'Change User', 'nim_changeUserActionn()')
         add_to_menu(nimMenu, 'Reload Scripts', 'nim_reloadScriptsAction()')
-
         add_separator(nimMenu)
         
         print( "NIM Menu Created" )
-        #else :
-        #    print( "Failed to Register NIM Menu" )
-
 
     except Exception as e :
         print( "Failed to create NIM menu" )
