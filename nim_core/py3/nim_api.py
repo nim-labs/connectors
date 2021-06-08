@@ -578,7 +578,8 @@ def get_app() :
         return 'Hiero'
     except : pass
     try :
-        import MaxPlus
+        # import MaxPlus
+        import pymxs
         return '3dsMax'
     except : pass
     try :
@@ -2171,7 +2172,7 @@ def versionUp( nim=None, padding=2, selected=False, win_launch=False, pub=False,
     if not shotCheck and not assetCheck :
         msg='Sorry, unable to retrieve Shot/Asset IDs from the current file.'
         if not win_launch :
-            msg +='\n  Please try saving from the NIM GUI'
+            msg +='\n  Please try saving from the NIM > Save As menu.'
         P.error( '\n'+msg )
         P.error( '    File Path = %s' % nim.filePath() )
         nim.Print()
@@ -2330,10 +2331,9 @@ def versionUp( nim=None, padding=2, selected=False, win_launch=False, pub=False,
                             return False
                     
                     elif nim.app()=='3dsMax' :
-                        import MaxPlus
-                        maxFM = MaxPlus.FileManager
+                        from pymxs import runtime as maxRT
                         try :
-                            maxFM.Open(filePath)
+                            maxRT.loadMaxFile(filePath)
                             #  Set env vars brought over from nim_file
                             P.info('Setting Environment Variables')
                             P.info('NIM: %s \n' % verUpNim.name(elem='base'))

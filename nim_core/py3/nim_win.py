@@ -137,9 +137,6 @@ def popup( title='', msg='', type='ok', defaultInput='', pyside=False, _list=[],
     
     #  3dsMax :
     elif app=='3dsMax' :
-        import MaxPlus
-        #maxWin=MaxPlus.Win32_GetMAXHWnd()
-
         if type=='ok' :
             dialog=QtGui.QMessageBox.information( None, title, msg, \
                 QtGui.QMessageBox.Ok)

@@ -13,8 +13,10 @@
 #
 # ****************************************************************************
 
-import MaxPlus
-import os,sys,re
+#import MaxPlus
+
+from pymxs import runtime as rt
+import os,sys,re,traceback
 import importlib
 
 nim3dsMaxScriptPath = os.path.dirname(os.path.realpath(__file__))
@@ -51,9 +53,9 @@ def importFileAction():
     nimUI.mk('LOAD', _import=True )
     print('NIM: importFileAction')
 
-def refereceFileAction():
+def referenceFileAction():
     nimUI.mk('LOAD', ref=True)
-    print('NIM: refereceFileAction')
+    print('NIM: referenceFileAction')
 
 def saveFileAction():
     nimUI.mk('SAVE')
@@ -84,106 +86,86 @@ def reloadScriptsAction():
     nimFile.scripts_reload()
     print('NIM: reloadScriptsAction')
 
-nimOpen = MaxPlus.ActionFactory.Create('Open File', 'Open', openFileAction)
-nimImport = MaxPlus.ActionFactory.Create('Import File', 'Import', importFileAction)
-nimReference = MaxPlus.ActionFactory.Create('Reference File', 'Reference', refereceFileAction)
-nimSaveAs = MaxPlus.ActionFactory.Create('Save As', 'Save As', saveFileAction)
-nimExportSelected = MaxPlus.ActionFactory.Create('Export Selected', 'Export Selected', saveSelectedAction)
-nimVersionUp = MaxPlus.ActionFactory.Create('Version Up', 'Version Up', versionUpAction)
-nimPublish = MaxPlus.ActionFactory.Create('Publish File', 'Publish', publishAction)
-nimChangeUser = MaxPlus.ActionFactory.Create('Change User', 'Change User', changeUserAction)
-nimReload = MaxPlus.ActionFactory.Create('Reload Scripts', 'Reload Scripts', reloadScriptsAction)
 
-def createNimMenu(name):
-    if not MaxPlus.MenuManager.MenuExists(name):
-        mb = MaxPlus.MenuBuilder(name)
 
-        if nimOpen._IsValidWrapper():
-            print("Created nimOpen")
-        else:
-            print("Failed to create nimOpen")
-        mb.AddItem(nimOpen)
-        
-        if nimImport._IsValidWrapper():
-            print("Created nimImport")
-        else:
-            print("Failed to create nimImport")
-        mb.AddItem(nimImport)
+def add_to_main_menu_bar(menu):
+    main_menu = rt.menuMan.GetMainMenuBar()
+    sub_menu_index = main_menu.numItems() - 1
+    sub_menu_item = rt.menuMan.createSubMenuItem('-', menu)
 
-        if nimReference._IsValidWrapper():
-            print("Created nimReference")
-        else:
-            print("Failed to create nimReference")
-        mb.AddItem(nimReference)
-        
-        mb.AddSeparator()
+    main_menu.addItem(sub_menu_item, sub_menu_index)
+    rt.menuMan.updateMenuBar()
 
-        if nimSaveAs._IsValidWrapper():
-            print("Created nimSaveAs")
-        else:
-            print("Failed to create nimSaveAs")
-        mb.AddItem(nimSaveAs)
 
-        if nimExportSelected._IsValidWrapper():
-            print("Created nimExportSelected")
-        else:
-            print("Failed to create nimExportSelected")
-        mb.AddItem(nimExportSelected)
-       
-        mb.AddSeparator()
-       
-        if nimVersionUp._IsValidWrapper():
-            print("Created nimVersionUp")
-        else:
-            print("Failed to create nimVersionUp")
-        mb.AddItem(nimVersionUp)
-        
-        if nimPublish._IsValidWrapper():
-            print("Created nimPublish")
-        else:
-            print("Failed to create nimPublish")
-        mb.AddItem(nimPublish)
-        
-        mb.AddSeparator()
-        
-        if nimChangeUser._IsValidWrapper():
-            print("Created nimChangeUser")
-        else:
-            print("Failed to create nimChangeUser")
-        #mb.AddItem(nimChangeUser)
+def add_to_menu(menu, title, func):
+    macro_name = func.replace('()', '')
+    # category, macroName, tooltip, text, function
+    t = rt.macros.new('nim', macro_name, 'NIM Connectors', '', func)
+    # macro_name, category
+    menu_action = rt.menuMan.createActionItem(macro_name, 'nim')
+    menu_action.setUseCustomTitle(True)
+    menu_action.setTitle(title)
+    menu.addItem(menu_action, -1)
 
-        if nimReload._IsValidWrapper():
-            print("Created nimReload")
-        else:
-            print("Failed to create nimReload")
-        #mb.AddItem(nimReload)
-        
-        menu = mb.Create(MaxPlus.MenuManager.GetMainMenu())
-        
-        if not MaxPlus.MenuManager.MenuExists("NIM Settings"):
-            subMenu = MaxPlus.MenuBuilder("NIM Settings")
-            subMenu.AddItem(nimChangeUser)
-            subMenu.AddItem(nimReload)
-            nimSubMenu = subMenu.Create(menu)
+def add_separator(menu):
+    sep = rt.menuMan.createSeparatorItem()
+    menu.addItem(sep, -1)
 
-        #print 'menu created', menu.Title 
-    else:
-        print('The menu ', name, ' already exists')
+def add_func_to_global(var, func):
+    rt.execute('global ' + var)
+    rt.globalVars.set(var, func)
+
 
 def main():
     try:
-        print("Removing any previously left 'menu items'")
-        MaxPlus.MenuManager.UnregisterMenu("NIM")
-        MaxPlus.MenuManager.UnregisterMenu("NIM Settings")
+        print("Rebuilding NIM menu items")
 
-        print("Reading current NIM menu")
-        outputMenu(MaxPlus.MenuManager.GetMainMenu(), False)
+        while rt.menuMan.findMenu('NIM'):
+            rt.menuMan.unRegisterMenu(rt.menuMan.findMenu('NIM'))
+        while rt.menuMan.findMenu('NIM Settings'):
+            rt.menuMan.unRegisterMenu(rt.menuMan.findMenu('NIM Settings'))
 
-        print("Creating the NIM menu")
-        createNimMenu("NIM")
-        outputMenu(MaxPlus.MenuManager.GetMainMenu(), False)
-    except:
-        print("Failed to create NIM menu")
+        add_func_to_global('nim_openFileAction', openFileAction)
+        add_func_to_global('nim_importFileAction', importFileAction)
+        add_func_to_global('nim_referenceFileAction', referenceFileAction)
+        add_func_to_global('nim_saveFileAction', saveFileAction)
+        add_func_to_global('nim_saveSelectedAction', saveSelectedAction)
+        add_func_to_global('nim_versionUpAction', versionUpAction)
+        add_func_to_global('nim_publishAction', publishAction)
+        add_func_to_global('nim_changeUserActionn', changeUserAction)
+        add_func_to_global('nim_reloadScriptsAction', reloadScriptsAction)
+
+        # Get the main menu bar
+        mainMenuBar = rt.menuMan.getMainMenuBar()
+        
+        
+        
+        # Create a new menu
+        nimMenu = rt.menuMan.createMenu("NIM")
+        add_to_main_menu_bar(nimMenu)
+        add_to_menu(nimMenu, 'Open', 'nim_openFileAction()')
+        add_to_menu(nimMenu, 'Import', 'nim_importFileAction()')
+        add_to_menu(nimMenu, 'Reference', 'nim_referenceFileAction()')
+        add_separator(nimMenu)
+        add_to_menu(nimMenu, 'Save As', 'nim_saveFileAction()')
+        add_to_menu(nimMenu, 'Export Selected', 'nim_saveSelectedAction()')
+        add_separator(nimMenu)
+        add_to_menu(nimMenu, 'Version Up', 'nim_versionUpAction()')
+        add_to_menu(nimMenu, 'Publish', 'nim_publishAction()')
+        add_separator(nimMenu)
+        add_to_menu(nimMenu, 'Change User', 'nim_changeUserActionn()')
+        add_to_menu(nimMenu, 'Reload Scripts', 'nim_reloadScriptsAction()')
+
+        add_separator(nimMenu)
+        
+        print( "NIM Menu Created" )
+        #else :
+        #    print( "Failed to Register NIM Menu" )
+
+
+    except Exception as e :
+        print( "Failed to create NIM menu" )
+        print( "    %s" % traceback.print_exc() )
         
 
 if __name__ == '__main__':

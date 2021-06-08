@@ -118,9 +118,10 @@ def mk( mode='open', _import=False, _export=False, ref=False, pub=False ) :
         # 3dsMax :
         elif app=='3dsMax' :
             try :
-                import MaxPlus
+                from pymxs import runtime as maxRT
                 WIN=GUI( mode=mode )
-                MaxPlus.CUI.DisableAccelerators()
+                # Commenting out DisableAccelerators() for 3dsMax2022
+                # maxRT.CUI.DisableAccelerators()
             except Exception as e :
                 P.error( 'Sorry, unable to retrieve variables from the NIM preference file.' )
                 P.debug( '    %s' % traceback.print_exc() )
@@ -2233,8 +2234,8 @@ class GUI(QtGui.QMainWindow) :
             projects=hiero.core.projects()
             filePath=projects[0].path()
         elif self.app=='3dsMax' :
-            import MaxPlus
-            filePath=MaxPlus.FileManager.GetFileNameAndPath()
+            from pymxs import runtime as maxRT
+            filePath = maxRT.maxFilePath + maxRT.maxFileName
         elif self.app=='Houdini' :
             import hou
             filePath=hou.hipFile.name()
@@ -2466,11 +2467,11 @@ class GUI(QtGui.QMainWindow) :
         if self.app=='3dsMax' :
             #  Open :
             try :
-                import MaxPlus
-                mpFM = MaxPlus.FileManager
-                mpPM = MaxPlus.PathManager
+                # import MaxPlus
+                from pymxs import runtime as maxRT
+                mpPM = maxRT.pathConfig
                 from . import nim_3dsmax as Max
-                mpFM.Open(filePath)
+                maxRT.loadMaxFile(filePath)
             except Exception as e :
                 P.error( 'Failed reading the file: %s' % filePath )
                 P.debug( '    %s' % traceback.print_exc() )
@@ -2481,7 +2482,7 @@ class GUI(QtGui.QMainWindow) :
             if _os=='windows' :
                 projPath=projPath.replace( '\\', '/' )
             if os.path.isdir( projPath ) :
-                mpPM.SetProjectFolderDir( projPath )
+                mpPM.setCurrentProjectFolder ( projPath )
                 P.info( '\nUI - Project set to...\n    %s\n' % projPath )
             else :
                 P.warning('\nProject was not set!\n')
@@ -2596,8 +2597,9 @@ class GUI(QtGui.QMainWindow) :
         
         #  3dsMax Merge :
         if self.app=='3dsMax' :
-            import MaxPlus
-            mpFM = MaxPlus.FileManager
+            # import MaxPlus
+            from pymxs import runtime as maxRT
+
             #  Derive file name to use for namespace :
             index=self.nim.Input('ver').currentItem().text().find(' - ')
             fileName=self.nim.Input('ver').currentItem().text()[0:index]
@@ -2608,13 +2610,12 @@ class GUI(QtGui.QMainWindow) :
                 P.info('File found, importing the following file...')
                 P.info( '    %s' % filePath )
                 if self.checkBox.checkState() :
-                    #  Import file as a group :
-                    #TODO: Group on Import
-                    mpFM.Merge( filePath, True )
+                    #  Group on Import
+                    #  Updated to use application dialog for merge
+                    maxRT.mergeMAXFile( filePath, maxRT.readvalue(maxRT.StringStream('#prompt')) )
                 else :
                     #  Import file :
-                    #mc.file( filePath, i=True, force=True )
-                    mpFM.Merge( filePath, True )
+                    maxRT.mergeMAXFile( filePath, maxRT.readvalue(maxRT.StringStream('#prompt')) )
             else :
                 msg='Sorry, file to import doesn\'t exist...\n    %s' % filePath
                 P.error( msg )
@@ -2699,8 +2700,10 @@ class GUI(QtGui.QMainWindow) :
         #  Version up file and add to API :
         try : 
             Api.versionUp( nim=self.nim, selected=selected, win_launch=True )
-        except :
+        except Exception as e :
             P.error("Failed to Save File")
+            print('    %s' % traceback.print_exc())
+            
         
         # Start Maya Undo Queue
         if self.app=='Maya' :    
@@ -2846,9 +2849,8 @@ class GUI(QtGui.QMainWindow) :
                     print('No Open protocal defined yet')
                 if self.nim.app().lower()=='3dsmax' :
                     P.info( 'Publishing Step #5 - Opening work file...\n    %s' % ver_filePath )
-                    import MaxPlus
-                    mpFM = MaxPlus.FileManager
-                    mpFM.Open( ver_filePath )
+                    from pymxs import runtime as maxRT
+                    maxRT.loadMaxFile( ver_filePath )
                 if self.nim.app().lower()=='houdini' :
                     P.info( 'Publishing Step #5 - Opening work file...\n    %s' % ver_filePath )
                     import hou
@@ -2915,7 +2917,7 @@ class GUI(QtGui.QMainWindow) :
     #  3dsMax File Operations :
     def max_fileReference(self) :
         'References a given 3dsMax file'
-        import MaxPlus
+        from pymxs import runtime as maxRT
 
         #  Get File Path :
         filePath=self.get_filePath()
@@ -2934,24 +2936,15 @@ class GUI(QtGui.QMainWindow) :
         #  Reference the file :
         if self.checkBox.checkState() :
             #GROUPED
-            '''
-            mc.file( filePath, force=True, reference=True, namespace=fileName, groupReference=True, \
-                groupName=fileName+'_GRP' )
-            '''
-            #MaxPlus.SceneSetIgnoreFlag()
             pass
         else :
             #NOT GROUPED
-            #mc.file( filePath, force=True, reference=True, namespace=fileName )
-            #MaxPlus.SceneSetIgnoreFlag()
-
-            value = MaxPlus.FPValue()
-            result = MaxPlus.Core.EvalMAXScript("xrefs.addNewXRefFile \""+filePath.replace('\\','/')+"\"", value)
+            result = maxRT.execute("xrefs.addNewXRefFile \""+filePath.replace('\\','/')+"\"")
             if result:
                 P.info("File Referenced")
             else:
                 P.error("Filepath: %s" % filePath)
-                print((value.Get()))
+                print(value)
             pass
 
         #  Close window upon completion :

@@ -65,7 +65,7 @@ def get_app() :
         return 'Hiero'
     except : pass
     try :
-        import MaxPlus
+        import pymxs
         return '3dsMax'
     except : pass
     try :
@@ -183,9 +183,9 @@ def get_filePath() :
     #   3dsMax :
     if not filePath :
         try :
-            import MaxPlus
+            from pymxs import runtime as maxRT
             P.debug("get_filePath: 3dsMax Found")
-            fm = MaxPlus.FileManager
+            fm = maxRT.FileManager
             filePath=fm.GetFileNameAndPath()
         except : pass
     #   Houdini :
@@ -597,8 +597,7 @@ def verUp( nim=None, padding=2, selected=False, win_launch=False, pub=False, sym
     
     #  3dsMax :
     if nim.app()=='3dsMax' :
-        import MaxPlus
-        maxFM = MaxPlus.FileManager
+        from pymxs import runtime as maxRT
         #  Save File :
         if not selected :
             #  Set Vars :
@@ -606,11 +605,11 @@ def verUp( nim=None, padding=2, selected=False, win_launch=False, pub=False, sym
             Max.set_vars( nim=nim )
             #Save File
             P.info( 'Saving file as %s \n' % new_filePath )
-            maxFM.Save(new_filePath)
+            maxRT.saveMaxFile(new_filePath)
         else :
             #Save Selected Items
             P.info( 'Saving selected items as %s \n' % new_filePath )
-            maxFM.SaveSelected(new_filePath)
+            maxRT.saveNodes(maxRT.selection, new_filePath)
 
     #  Houdini :
     if nim.app()=='Houdini' :
