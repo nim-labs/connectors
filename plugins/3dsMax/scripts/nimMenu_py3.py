@@ -1,7 +1,7 @@
 #****************************************************************************
 #
 # Filename:     3dsMax/nimMenu.py
-# Version:      5.0.0.210602
+# Version:      5.0.1.210608
 # Compatible:   3dsMax 2022 and higher
 #
 # Copyright (c) 2014-2021 NIM Labs LLC
