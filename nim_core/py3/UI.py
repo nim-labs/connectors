@@ -2471,6 +2471,7 @@ class GUI(QtGui.QMainWindow) :
                 from pymxs import runtime as maxRT
                 mpPM = maxRT.pathConfig
                 from . import nim_3dsmax as Max
+                maxRT.checkForSave()
                 maxRT.loadMaxFile(filePath)
             except Exception as e :
                 P.error( 'Failed reading the file: %s' % filePath )
