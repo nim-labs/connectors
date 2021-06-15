@@ -1,8 +1,8 @@
 #! /usr/bin/python
 #******************************************************************************
 #
-# Filename: C4D/nim_v2-6-0.py
-# Version:  v2.6.01.170504
+# Filename: C4D/nim_v5-0-0.py
+# Version:  v5.0.0.210602
 #
 # Copyright (c) 2014-2021 NIM Labs LLC
 # All rights reserved.
@@ -30,12 +30,12 @@ if userHome.endswith( 'Documents' ) :
     userHome=userHome[:-9]
 user_home = os.path.normpath( os.path.join( userHome, prefs_dirName ) )
 prefsFile=os.path.normpath( os.path.join( user_home, prefs_fileName ) )
-print 'NIM ~> NIM preferences:     %s' % prefsFile
+print('NIM ~> NIM preferences:     %s' % prefsFile)
 
 'Reads and stores preferences'
 #  Create preferences, if necessary :
 prefsFound = os.path.exists( prefsFile )
-print 'NIM ~> NIM preferences found:     %s' % prefsFound
+print('NIM ~> NIM preferences found:     %s' % prefsFound)
 
 scriptFindPath=True
 scriptInputPath=''
@@ -48,8 +48,8 @@ if not prefsFound :
     
     while scriptFindPath:
         scriptInputPath=gui.InputDialog( msg )
-        print 'NIM ~> NIM Scripts Set to:     %s' % scriptInputPath
-        print 'NIM ~> Validating Path:'
+        print('NIM ~> NIM Scripts Set to:     %s' % scriptInputPath)
+        print('NIM ~> Validating Path:')
         scriptPathValid = os.path.exists(os.path.join(scriptInputPath,"nim_core"))
         if not scriptPathValid:
             userInput=gui.QuestionDialog( 'Path to NIM Scripts is Invalid:\n %s \nTry again?' % scriptInputPath )
@@ -57,7 +57,7 @@ if not prefsFound :
                 userInput='OK'
             else:
                 scriptFindPath = False
-                print "Exiting without setting NIM Script Path"
+                print("Exiting without setting NIM Script Path")
 
         else:
             scriptFindPath = False
@@ -73,16 +73,16 @@ else:
             if name !='' and name !='\n' :
                 _prefs[name.strip()]=var
         #  Remove empty dictionary entries :
-        prefs=dict( [(k,v) for k,v in _prefs.items() if len(k)>0])
-        if _prefs and 'NIM_Scripts' in _prefs.keys() :
+        prefs=dict( [(k,v) for k,v in list(_prefs.items()) if len(k)>0])
+        if _prefs and 'NIM_Scripts' in list(_prefs.keys()) :
             scriptInputPath=_prefs['NIM_Scripts']
             loadNIM=True
         else:
-            print "NIM Scripts location not found in preference file."
+            print("NIM Scripts location not found in preference file.")
             loadNIM=False
 
-    except Exception, e :
-        print "Unable to read preferences."
+    except Exception as e :
+        print("Unable to read preferences.")
         loadNIM=False
 
 
@@ -90,9 +90,9 @@ if loadNIM:
     nim_path=scriptInputPath
     if not nim_path in sys.path :
         sys.path.append( nim_path )
-        print 'NIM ~> Appended NIM Python directory to system paths...\nNIM ~>     %s' % nim_path
+        print('NIM ~> Appended NIM Python directory to system paths...\nNIM ~>     %s' % nim_path)
 
-    print 'NIM ~> Importing NIM Libraries'
+    print('NIM ~> Importing NIM Libraries')
 
     import nim_core.nim_api as Api
     import nim_core.nim_file as F
@@ -101,7 +101,7 @@ if loadNIM:
     import nim_core.nim_prefs as Prefs
     import nim_core.nim_win as Win
 
-    print 'NIM ~> Loading NIM Variables'
+    print('NIM ~> Loading NIM Variables')
 
     #  Variables :
     version='v2.6.0'
@@ -116,7 +116,7 @@ if loadNIM:
     nim_reloadScripts_ID=1032467
     nim_changeUser_ID=1032468
 
-    print 'NIM ~> Reading NIM Preferences'
+    print('NIM ~> Reading NIM Preferences')
     _prefs=Prefs.read()
 
     if not _prefs:
