@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: UI.py
-# Version:  v5.0.0.210408
+# Version:  v5.0.1.210608
 #
 # Copyright (c) 2014-2021 NIM Labs LLC
 # All rights reserved.
@@ -48,7 +48,7 @@ except ImportError :
                 print("NIM UI: Failed to UI Modules")
 
 #  Variables :
-version='v5.0.0'
+version='v5.0.1'
 WIN=''
 startTime=''
 winTitle='NIM_'+version
@@ -2471,6 +2471,7 @@ class GUI(QtGui.QMainWindow) :
                 from pymxs import runtime as maxRT
                 mpPM = maxRT.pathConfig
                 from . import nim_3dsmax as Max
+                maxRT.checkForSave()
                 maxRT.loadMaxFile(filePath)
             except Exception as e :
                 P.error( 'Failed reading the file: %s' % filePath )
