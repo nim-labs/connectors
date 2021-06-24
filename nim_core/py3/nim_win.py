@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: nim_win.py
-# Version:  v5.0.0.210408
+# Version:  v5.0.1.210608
 #
 # Copyright (c) 2014-2021 NIM Labs LLC
 # All rights reserved.
@@ -137,9 +137,6 @@ def popup( title='', msg='', type='ok', defaultInput='', pyside=False, _list=[],
     
     #  3dsMax :
     elif app=='3dsMax' :
-        import MaxPlus
-        #maxWin=MaxPlus.Win32_GetMAXHWnd()
-
         if type=='ok' :
             dialog=QtGui.QMessageBox.information( None, title, msg, \
                 QtGui.QMessageBox.Ok)
