@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename:    batchHook.py
-# Version:     v5.0.0.210602
+# Version:     v5.0.2.210624
 # Compatible:  Python 3.x
 #
 # Copyright (c) 2014-2021 NIM Labs LLC
@@ -15,15 +15,15 @@
 
 #  Import Python GUI packages :
 try : 
-   from PySide2.QtWidgets import *
-   from PySide2.QtGui import *
-   from PySide2.QtCore import *
+    from PySide2.QtWidgets import *
+    from PySide2.QtGui import *
+    from PySide2.QtCore import *
 except ImportError :
-   try : 
-      from PySide.QtGui import *
-      from PySide.QtCore import *
-   except ImportError : 
-      print("NIM: Failed to load UI Modules")
+    try : 
+        from PySide.QtGui import *
+        from PySide.QtCore import *
+    except ImportError : 
+        print("NIM: Failed to load UI Modules")
 
 import os,sys,re
 
@@ -48,7 +48,7 @@ nimFlamePresetPath = os.path.join(re.sub(r"\/python$", "", nimFlamePythonPath),'
 
 sys.path.append(nimScriptPath)
 
-from . import nimFlameExport
+import nimFlameExport
 
 debug = True
 
@@ -56,28 +56,227 @@ debug = True
 #
 # setupPath: File path of the setup being loaded.
 #
-def batchSetupLoaded( setupPath ):
-   print("batchSetupLoaded - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-   if debug :
-      print(setupPath)
-   print("batchSetupLoaded - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
-   pass
+def batch_setup_loaded(setupPath, *args, **kwargs):
+    print("batch_setup_loaded - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+    if debug :
+        print(setupPath)
+    print("batch_setup_loaded - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
+    pass
 
 
 # Hook called when a batch setup is saved
 #
 # setupPath: File path of the setup being saved.
 #
-def batchSetupSaved( setupPath ):
-   print("batchSetupSaved - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-   if debug :
-      print(setupPath)
-   print("batchSetupSaved - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
-   pass
+def batch_setup_saved(setupPath, *args, **kwargs):
+    print("batch_setup_saved - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+    if debug :
+        print(setupPath)
+    print("batch_setup_saved - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
+    pass
 
 
-# Hook called before an export begins.  Note that for stereo export this
-# function will be called twice (for left then right channel)
+
+# Hook called before a batch iteration is created
+#
+# info [Dictionary] [Modifiable]
+#    Information about the batch iteration,
+#
+#    Keys:
+#
+#    savePath:     [String] [Modifiable]
+#       The path to which a corresponding batch setup file is saved on disk.
+#
+#    setupName:    [String] [Modifiable]
+#       The name of the corresponding batch setup file saved on disk.
+#
+#    abort:        [Boolean] [Modifiable]
+#       Set this variable to True if you want to abort the backup process.
+#       If you do so, batchSetupIteratedPost will not be called.
+#       False if undefined.
+#
+#    abortMessage: [String] [Modifiable]
+#       Error message to describe why the abort happened.
+#       A generic one will be used if left blank.
+#
+# userData [Dictionary] [Modifiable]
+#   Object that will be carried over into the batchSetupIteratedPost hook.
+#   This can be used by the hook to pass black box data around.
+#
+def batch_setup_iterated_pre(info, userData, *args, **kwargs):
+    print("batch_setup_iterated_pre - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+    if debug :
+        print(info)
+        print(userData)
+    print("batch_setup_iterated_pre - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
+    pass
+
+
+# Hook called after a batch iteration is created
+#
+# info [Dictionary]
+#    Information about the batch iteration,
+#
+#    Keys:
+#
+#    savePath:       [String]
+#       The path to which a corresponding batch setup file is saved on disk.
+#
+#    setupName:      [String]
+#       The name of the corresponding batch setup file saved on disk.
+#
+#    abort:          [Boolean]
+#       Will be True if the save failed, it won<t be defined otherwise.
+#       Note: if the save was manually aborted, this hook will not be called.
+#             so this variable only expresses actual errors.
+#
+#    abortMessage:   [String]
+#       Error message to describe why the abort happened.
+#
+# userData [Dictionary]
+#   Object that can be set from the batchSetupIteratedPre hook.
+#   This can be used by the hook to pass black box data around.
+#
+def batch_setup_iterated_post(info, userData, *args, **kwargs):
+    print("batch_setup_iterated_post - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+    if debug :
+        print(info)
+        print(userData)
+    print("batch_setup_iterated_post - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
+    pass
+
+
+# Hook called before a render begins.
+#
+# info [Dictionary] [Modifiable]
+#    Information about the render,
+#
+#    Keys:
+#
+#    backgroundJobName: [String] [Modifiable]
+#       Job name as shown in Backburner. Can be modified by the hook
+#       before the job is actually sent.
+#
+#    aborted: [Boolean] [Modifiable]
+#       Set this variable to True if you want to abort the process.
+#
+#    abortMessage: [String] [Modifiable]
+#       Error message to describe why the abort happened.
+#       A generic one will be used if left blank.
+#
+# userData [Dictionary] [Modifiable]
+#   Object that will be carried over into the batchRenderEnd hook.
+#   This can be used by the hook to pass black box data around.
+#
+def batch_render_begin(info, userData, *args, **kwargs):
+    print("batch_render_begin - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+    if debug :
+        print(info)
+        print(userData)
+    print("batch_render_begin - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
+    pass
+
+
+
+# Hook called when a render ends.
+#
+# This function complements the above batchRenderBegin function.
+#
+# info [Dictionary]
+#    Information about the render,
+#
+#    Keys:
+#
+#    backgroundJobName: [String]
+#       Job name as shown in Backburner.
+#
+#    backgroundJobId: [String]
+#       Id of the background job given by the backburner Manager upon
+#       submission.
+#
+#    aborted: [Boolean]
+#       Indicate if the render has been aborted by the user or by a render
+#       error.
+#
+#    abortMessage: [String]
+#       Error message to describe why the abort happened.
+#
+# userData [Dictionary] [Modifiable]
+#   Object that will be carried over into the batchExportEnd hook.
+#   This can be used by the hook to pass black box data around.
+#
+def batch_render_end(info, userData, *args, **kwargs):
+    print("batch_render_end - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+    if debug :
+        print(info)
+        print(userData)
+    print("batch_render_end - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
+    pass
+
+
+# Hook called before a job is sent to Burn or Background Reactor.
+#
+# info [Dictionary] [Modifiable]
+#    Information about the job,
+#
+#    Keys:
+#
+#    aborted: [Boolean] [Modifiable]
+#       Set this variable to True if you want to abort the process.
+#
+#    abortMessage: [String] [Modifiable]
+#       Error message to describe why the abort happened.
+#       A generic one will be used if left blank.
+#
+# userData [Dictionary] [Modifiable]
+#   Object that will be carried over into the batchRenderEnd hook.
+#   This can be used by the hook to pass black box data around.
+#
+def batch_burn_begin(info, userData, *args, **kwargs):
+    print("batch_burn_begin - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+    if debug :
+        print(info)
+        print(userData)
+    print("batch_burn_begin - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
+    pass
+
+
+# Hook called after a job is sent to Burn or Background Reactor.
+#
+# This function complements the above batch_burn_begin function.
+#
+# info [Dictionary]
+#    Information about the job,
+#
+#    Keys:
+#
+#    aborted: [Boolean]
+#       Indicate if the process has been aborted by the user or by an
+#       error.
+#
+#    abortMessage: [String]
+#       Error message to describe why the abort happened.
+#
+#    backgroundJobId: [String]
+#       Id of the background job given by the backburner Manager upon
+#       submission.
+#
+# userData [Dictionary] [Modifiable]
+#   Object that will be carried over into the batchExportEnd hook.
+#   This can be used by the hook to pass black box data around.
+#
+def batch_burn_end(info, userData, *args, **kwargs):
+    print("batch_burn_end - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+    if debug :
+        print(info)
+        print(userData)
+    print("batch_burn_end - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
+    pass
+
+            
+# Hook called before a write file node starts to export.  Note that for stereo
+# exports this function is called twice, once for each channel
+# (left first, right second).
 #
 # info [Dictionary] [Modifiable]
 #    Information about the export,
@@ -109,6 +308,9 @@ def batchSetupSaved( setupPath ):
 #    versionNumber: [Integer]
 #       Current version number of export (0 if unversioned).
 #
+#    shotName: [String]
+#       Current shot name of export.
+#
 #    openClipNamePattern: [String]
 #       List of optional naming tokens pointing to the open clip created if any
 #       as entered in the application UI. This is only available if versioning
@@ -138,43 +340,54 @@ def batchSetupSaved( setupPath ):
 #
 #    depth: [String]
 #       Frame depth of the exported media.
-#       ( '8-bits', '10-bits', '12-bits', '16 fp' )
+#       ('8-bits', '10-bits', '12-bits', '16 fp')
 #
 #    scanFormat: [String]
 #       Scan format of the exported media.
-#       ( 'FIELD_1', 'FIELD_2', 'PROGRESSIVE' )
+#       ('FIELD_1', 'FIELD_2', 'PROGRESSIVE')
+#
+#    colourSpace: [String]
+#       Colour space of the exported media.
 #
 #    fps: [Double]
 #       Frame rate of exported asset.
 #
-# userData [Dictionary] [Modifiable]
-#   Empty Dictionary that will be carried over into the batchExportEnd hook.
+#    aborted: [Boolean] [Modifiable]
+#       Set this variable to True if you want to abort the process.
+#
+#    abortMessage: [String] [Modifiable]
+#       Error message to describe why the abort happened.
+#       A generic one will be used if left blank.
+#
+# userData [Object] [Modifiable]
+#   Object that will be carried over into the batchExportEnd hook.
 #   This can be used by the hook to pass black box data around.
 #
-def batchExportBegin( info, userData ):
-   print("batchExportBegin - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-   if debug :
-      print(info)
-      print(userData)
+def batch_export_begin(info, userData, *args, **kwargs):
+    print("batch_export_begin - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+    if debug :
+        print(info)
+        print(userData)
 
-   # Check if Custom NIM export or Standard Export
-   # If standard export then ask for NIM association
-   nimShowDialog = True
+    # Check if Custom NIM export or Standard Export
+    # If standard export then ask for NIM association
+    nimShowDialog = True
+ 
+    batchExportDlg = nimFlameExport.NimBatchExportDialog()
+    batchExportDlg.show()
+    if batchExportDlg.exec_() :
+        nim_comment = batchExportDlg.nim_comment
+        nimFlameExport.nimAddBatchExport(info=info, comment=nim_comment)
 
-   batchExportDlg = nimFlameExport.NimBatchExportDialog()
-   batchExportDlg.show()
-   if batchExportDlg.exec_() :
-      nim_comment = batchExportDlg.nim_comment
-      nimFlameExport.nimAddBatchExport(info=info, comment=nim_comment)
-
-   print("batchExportBegin - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
-   pass
+    print("batch_export_begin - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
+    pass
 
 
-# Hook called when an export ends. Note that for stereo export this
-# function will be called twice (for left then right channel)
+# Hook called when a write file node ends the export. Note that for stereo
+# exports this function is called twice, once for each channel
+# (left first, right second).
 #
-# This function complements the above batchExportBegin function.
+# This function complements the above batch_export_begin function.
 #
 # info [Dictionary]
 #    Information about the export,
@@ -205,6 +418,9 @@ def batchExportBegin( info, userData ):
 #    versionNumber: [Integer]
 #       Current version number of export (0 if unversioned).
 #
+#    shotName: [String]
+#       Current shot name of export.
+#
 #    openClipNamePattern: [String]
 #       List of optional naming tokens pointing to the open clip created if any
 #       as entered in the application UI. This is only available if versioning
@@ -234,29 +450,38 @@ def batchExportBegin( info, userData ):
 #
 #    depth: [String]
 #       Frame depth of the exported media.
-#       ( '8-bits', '10-bits', '12-bits', '16 fp' )
+#       ('8-bits', '10-bits', '12-bits', '16 fp')
 #
 #    scanFormat: [String]
 #       Scan format of the exported media.
-#       ( 'FIELD_1', 'FIELD_2', 'PROGRESSIVE' )
+#       ('FIELD_1', 'FIELD_2', 'PROGRESSIVE')
 #
 #    fps: [Double]
 #       Frame rate of exported asset.
 #
+#    backgroundJobId: [String]
+#       Id of the background job given by the backburner Manager upon
+#       submission. Empty if job is done in foreground.
+#
 #    aborted: [Boolean]
-#       Indicate if the export has been aborted by the user.
+#       Indicate if the export has been aborted by the user or by a render
+#       error.
+#
+#    abortMessage: [String]
+#       Error message to describe why the abort happened.
 #
 # userData [Dictionary]
-#   Dictionary optionally filled by the batchExportBegin hook.
+#   Object optionally filled by the batchExportBegin hook.
 #   This can be used by the hook to pass black box data around.
 #
-def batchExportEnd( info, userData ):
-   print("batchExportEnd - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-   if debug :
-      print(info)
-      print(userData)
-   print("batchExportEnd - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
-   pass
+def batch_export_end(info, userData, *args, **kwargs):
+    print("batch_export_end - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+    if debug :
+        print(info)
+        print(userData)
+    print("batch_export_end - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
+    pass
+
 
 # Hook called when starting the application and when switching project
 # This default name will be used at batch creation.
@@ -266,18 +491,22 @@ def batchExportEnd( info, userData ):
 #    batch iteration name for this project will be returned.
 #
 # Ex: if project == "project_name":
-#        return "<batch name>_<iteration###>_project"
+#         return "<batch name>_<iteration###>_project"
 #     return "<batch name>_<iteration###>_global"
 #
 # The returned string should contains the following mandatory tokens:
 # <batch name> and <iteration>
+#
+# :note: This method can be implemented only once.
+#        First instance found will be used
+#
+def batch_default_iteration_name(project, *args, **kwargs):
+    print("batch_default_iteration_name - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+    if debug :
+        print(project)
+    print("batch_default_iteration_name - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
+    return ""
 
-def batchDefaultIterationName( project ):
-   print("batchDefaultIterationName - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-   if debug :
-      print(project)
-   print("batchDefaultIterationName - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
-   return ""
 
 # Hook called when starting the application and when switching project
 # This default name will be used at render node creation.
@@ -287,16 +516,19 @@ def batchDefaultIterationName( project ):
 #    render node name for this project will be returned.
 #
 # Ex: if project == "project_name":
-#        return "<batch name>_render_project"
+#         return "<batch name>_render_project"
 #     return "<batch name>_render_global"
 #
+# :note: This method can be implemented only once.
+#        First instance found will be used
+#
+def batch_default_render_node_name(project, *args, **kwargs):
+    print("batch_default_render_node_name - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+    if debug :
+        print(project)
+    print("batch_default_render_node_name - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
+    return ""
 
-def batchDefaultRenderNodeName( project ):
-   print("batchDefaultRenderNodeName - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-   if debug :
-      print(project)
-   print("batchDefaultRenderNodeName - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
-   return ""
 
 # Hook called when starting the application and when switching project
 # This default name will be used at write file node creation.
@@ -306,15 +538,19 @@ def batchDefaultRenderNodeName( project ):
 #    write file node name for this project will be returned.
 #
 # Ex: if project == "project_name":
-#        return "<batch name>_writefile_project"
+#         return "<batch name>_writefile_project"
 #     return "<batch name>_writefile_global"
+#
+# :note: This method can be implemented only once.
+#        First instance found will be used
+#
+def batch_default_write_file_node_name(project, *args, **kwargs):
+    print("batch_default_write_file_node_name - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+    if debug :
+        print(project)
+    print("batch_default_write_file_node_name - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
+    return ""
 
-def batchDefaultWriteFileNodeName( project ):
-   print("batchDefaultWriteFileNodeName - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-   if debug :
-      print(project)
-   print("batchDefaultWriteFileNodeName - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
-   return ""
 
 # Hook called when starting the application and when switching project
 # This default batch group path will be used to save setups.
@@ -324,16 +560,19 @@ def batchDefaultWriteFileNodeName( project ):
 #    Batch group path for this project will be returned.
 #
 # Ex: if project == "project_name":
-#        return "~/specialPathForthatProject/batch/<batch name>"
+#         return "~/specialPathForthatProject/batch/<batch name>"
 #     return "~/batch/<batch name>"
 #
+# :note: This method can be implemented only once.
+#        First instance found will be used
+#
+def batch_default_group_path(project, *args, **kwargs):
+    print("batch_default_group_path - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+    if debug :
+        print(project)
+    print("batch_default_group_path - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
+    return ""
 
-def batchDefaultGroupPath( project ):
-   print("batchDefaultGroupPath - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-   if debug :
-      print(project)
-   print("batchDefaultGroupPath - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
-   return ""
 
 # Hook called when starting the application and when switching project
 # This default batch iteration path will be used to save setups.
@@ -343,16 +582,19 @@ def batchDefaultGroupPath( project ):
 #    Batch iteration path for this project will be returned.
 #
 # Ex: if project == "project_name":
-#        return "~/specialPathForthatProject/batch/<batch name>/iterations"
+#         return "~/specialPathForthatProject/batch/<batch name>/iterations"
 #     return "~/batch/<batch name>/iterations"
 #
+# :note: This method can be implemented only once.
+#        First instance found will be used
+#
+def batch_default_iteration_path(project, *args, **kwargs):
+    print("batch_default_iteration_path - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+    if debug :
+        print(project)
+    print("batch_default_iteration_path - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
+    return ""
 
-def batchDefaultIterationPath( project ):
-   print("batchDefaultIterationPath - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-   if debug :
-      print(project)
-   print("batchDefaultIterationPath - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
-   return ""
 
 # Hook called when starting the application and when switching project
 # This default atcion geometry path will be used to import geometry.
@@ -362,14 +604,16 @@ def batchDefaultIterationPath( project ):
 #    Action geometry path for this project will be returned.
 #
 # Ex: if project == "project_name":
-#        return "~/specialPathForthatProject/batch/<batch name>/fileformats"
+#         return "~/specialPathForthatProject/batch/<batch name>/fileformats"
 #     return "~/batch/<batch name>/fileformats"
 #
-
-def actionDefaultGeometryPath( project ):
-   print("actionDefaultGeometryPath - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-   if debug :
-      print(project)
-   print("actionDefaultGeometryPath - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
-   return ""
+# :note: This method can be implemented only once.
+#        First instance found will be used
+#
+def action_default_geometry_path(project, *args, **kwargs):
+    print("action_default_geometry_path - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+    if debug :
+        print(project)
+    print("action_default_geometry_path - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
+    return ""
 

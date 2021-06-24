@@ -1,71 +1,107 @@
-#!/bin/env python
-#******************************************************************************
+
+# Hook called when application is started
+# info: Information about the current executable -- dictionary
 #
-# Filename:    hook.py
-# Version:     v5.0.0.210602
-# Compatible:  Python 3.x
+#    Keys:
 #
-# Copyright (c) 2014-2021 NIM Labs LLC
-# All rights reserved.
+#    homeDirectory: [String]
+#       Home directory of the started executable.
+#       Example: /opt/Autodesk/flame_2016.1.2
 #
-# Use of this software is subject to the terms of the NIM Labs license
-# agreement provided at the time of installation or download, or which
-# otherwise accompanies this software in either electronic or hard copy form.
-# *****************************************************************************
-
-#  Import Python GUI packages :
-try : 
-   from PySide2 import QtWidgets as QtGui
-   from PySide2 import QtCore
-except ImportError :
-   try : 
-      from PySide import QtCore, QtGui
-   except ImportError : 
-      print("NIM: Failed to load UI Modules")
-
-import os,sys,re
-
-nim_app = 'Flame'
-os.environ['NIM_APP'] = str(nim_app)
-os.environ['NIM_EXPORT'] = ''
-
-# Relative path to append for NIM Scripts
-nimFlamePythonPath = os.path.dirname(os.path.realpath(__file__))
-nimFlamePythonPath = nimFlamePythonPath.replace('\\','/')
-nimScriptPath = re.sub(r"\/plugins/Flame/python$", "", nimFlamePythonPath)
-nimFlamePresetPath = os.path.join(re.sub(r"\/python$", "", nimFlamePythonPath),'presets')
-
-#print "NIM Script Path: %s" % nimScriptPath
-#print "NIM Python Path: %s" % nimFlamePythonPath
-#print "NIM Preset Path: %s" % nimFlamePresetPath
-
-# If relocating these scripts uncomment the line below and enter the fixed path
-# to the NIM Connector Root directory
+#    version: [String]
+#       Decorated version string of the started executable.
+#       Example: Using the previous example, version == "2016.1.2"
 #
-# nimScriptPath = [NIM_CONNECTOR_ROOT]
+#    versionMajor: [String]
+#       Major version of the started executable.
+#       Example: Using the previous example, versionMajor == "2016"
 #
+#    versionMinor: [String]
+#       Minor version of the started executable.
+#       Example: Using the previous example, versionMinor == "1"
+#
+#    versionPatch: [String]
+#       Patch version of the started executable.
+#       Example: Using the previous example, versionPatch == "2"
+#
+#   versionStamp: [String]
+#        Stamp version of the started executable.
+#        Example: versionStamp == "185" (Not visible on homeDirectory path)
+#
+#    configPath: [String]
+#       Path to the loaded config file.
+#       Example: Using the previous example, default is /opt/Autodesk/flame_2016.1.2/cfg/init.cfg
+def app_started(info):
+    pass
 
-sys.path.append(nimScriptPath)
 
-from . import nimFlameExport
+# Hook called when application is exiting
+# info: Information about the current executable -- dictionary
+#
+#    Keys:
+#
+#    homeDirectory: [String]
+#       Home directory of the started executable.
+#       Example: /opt/Autodesk/flame_2016.1.2
+#
+#    version: [String]
+#       Decorated version string of the started executable.
+#       Example: Using the previous example, version == "2016.1.2"
+#
+#    versionMajor: [String]
+#       Major version of the started executable.
+#       Example: Using the previous example, versionMajor == "2016"
+#
+#    versionMinor: [String]
+#       Minor version of the started executable.
+#       Example: Using the previous example, versionMinor == "1"
+#
+#    versionPatch: [String]
+#       Patch version of the started executable.
+#       Example: Using the previous example, versionPatch == "2"
+#
+#   versionStamp: [String]
+#        Stamp version of the started executable.
+#        Example: versionStamp == "185" (Not visible on homeDirectory path)
+#
+#    configPath: [String]
+#       Path to the loaded config file.
+#       Example: Using the previous example, default is /opt/Autodesk/flame_2016.1.2/cfg/init.cfg
+def app_exit(info):
+    pass
 
+
+# Hook called when a new user is loaded in the application.
+# info: Information about the user switching -- dictionary
+#
+#    Keys:
+#
+#    userName: [String]
+#       Loaded user's userName
+#
+#    context: [String]
+#       Context of the user change
+#           context == "splash" if userChanged is triggered from the splash screen
+#           context == "settings" if userChanged is triggered from the settings
+def user_changed(info):
+    pass
 
 
 # Hook called when a sequence finishes rendering (even if unsuccessful).
-# moduleName : Name of the rendering module -- String.
-# sequenceName : Name of the rendered sequence -- String.
-# elapsedTimeInSeconds : number of seconds used to render -- Float
-def renderEnded(moduleName, sequenceName, elapsedTimeInSeconds):
-   print("renderEnded - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-   print("renderEnded - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
-   pass
+# module_name : Name of the rendering module -- String.
+# sequence_name : Name of the rendered sequence -- String.
+# elapsed_time_in_seconds : number of seconds used to render -- Float
+def render_ended(module_name, sequence_name, elapsed_time_in_seconds):
+    #print("render_ended - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+    #print("render_ended - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
+    pass
 
 
 # Hook called when a sequence finishes playback (even if unsuccessful).
-# sequenceName : Name of the rendered sequence -- String.
+# sequence_name : Name of the rendered sequence -- String.
 # fps : FPS -- Float
-# debugInfo: Debugging Playback Information -- Dict
-def  playbackEnded(sequenceName, fps, debugInfo):
+# debug_info: Debugging Playback Information -- Dict
+def playback_ended(sequence_name, fps, debug_info):
     pass
 
 
@@ -75,217 +111,15 @@ def  playbackEnded(sequenceName, fps, debugInfo):
 #               (ex : "1920x1080@5994i_free")
 # width : Width of the preview device -- Integer.
 # height : Height of the preview device -- Integer.
-# bitDepth : Bit depth of the preview device -- Integer.
-# rateString : Rate of the preview device -- String.
-#              (ex : "6000i")
-# syncString : Sync source of the preview device -- String.
+# bit_depth : Bit depth of the preview device -- Integer.
+# rate_string : Rate of the preview device -- String.
+#               (ex : "6000i")
+# sync_string : Sync source of the preview device -- String.
 #              (ex : "freesync")
-def previewWindowConfigChanged(description,width,height,bitDepth,
-      rateString,syncString):
-   pass
-
-
-# Hook returning the custom ui actions to display to the user in the
-# contextual menu.
-#
-#    Returns a tuple of group dictionaries.
-#
-#    A group dictionary defines a custom menu group where keys defines
-#    the group.
-#
-#    Keys:
-#
-#    name: [String] 
-#       Name of the action group that will be created in the menu.
-#
-#    actions: [String]
-#       Tuple of action dictionary which menu items will be created
-#       in the group.
-#
-#    An action dictionary of userData where the keys defines
-#    the action
-#
-#    Keys:
-#
-#    name: [String] 
-#       Name of the action that will be passed on customUIAction
-#       callback.
-#
-#    caption: [String]
-#       Caption of the menu item.
-#
-#    For example: 2 menu groups containing 1 custom action
-#
-#    def getCustomUIActions():
-#
-#        action1 = {}
-#        action1[ "name" ] = "action1"
-#        action1[ "caption" ] = "Action Number 1"
-#
-#        group1 = {}
-#        group1[ "name" ] = "Custom Group 1"
-#        group1[ "actions" ] = ( action1, )
-#
-#        action2 = {}
-#        action2[ "name" ] = "action2"
-#        action2[ "caption" ] = "Action Number 2"
-#
-#        group2 = {}
-#        group2[ "name" ] = "Custom Group 2"
-#        group2[ "actions" ] = ( action2, )
-#
-#        return ( group1, group2 )
-#
-#
-def getCustomUIActions( ):
-
-   action1 = {}
-   action1[ "name" ] = "Scan for Versions"
-   action1[ "caption" ] = "Scan for Versions"
-
-   action2 = {}
-   action2[ "name" ] = "Build OpenClip from Elements"
-   action2[ "caption" ] = "Build OpenClip from Elements"
-
-   action3 = {}
-   action3[ "name" ] = "Build OpenClip from Project"
-   action3[ "caption" ] = "Build OpenClip from Project"
-
-   action4 = {}
-   action4[ "name" ] = "Change User"
-   action4[ "caption" ] = "Change User"
-
-   group1 = {}
-   group1[ "name" ] = "NIM Update OpenClips"
-   group1[ "actions" ] = ( action1, action2, action3, )
-
-   group2 = {}
-   group2[ "name" ] = "NIM Settings"
-   group2[ "actions" ] = ( action4, )
-
-   return ( group1, group2, )
-
-# Hook called when a custom action is triggered in the menu
-#
-# info [Dictionary] [Modifiable]
-#    Information about the custom action,
-#
-#    Keys:
-#
-#    name: [String] 
-#       Name of the action being triggered.
-#
-#    selection: [Tuple]
-#       Tuple of wiretap ids.
-#
-# userData [Dictionary] [Modifiable]
-#   Dictionary that is passed to getCustomUIActions.
-#
-def customUIAction( info, userData ):
-   
-
-   if info[ "name" ] == "Scan for Versions" :
-      print("Scan for Versions")
-      #print info["selection"]
-
-      nimScanDlg = nimFlameExport.NimScanForVersionsDialog()
-      nimScanDlg.show()
-      if nimScanDlg.exec_() :
-         nim_showID = nimScanDlg.nim_showID
-         clipCount = nimScanDlg.clipCount
-         clipFail = nimScanDlg.clipFail
- 
-         utf8 = QtCore.QTextCodec.codecForName("utf-8")
-         
-         # QtCore.QTextCodec.setCodecForCStrings(utf8) deprecated in QT5
-         # Left in for backwards compatiblity with older versions of QT
-         try :
-            QtCore.QTextCodec.setCodecForCStrings(utf8)
-         except :
-            pass
-
-         title = "New Versions Found"
-         msg = "New Versions Found: "+str(clipCount)
-         if clipFail > 0 :
-            msg += "\nFailed to Read Versions: "+str(clipFail)
-            msg += "\nPlease try again"
-
-         dialog=QtGui.QMessageBox.information( None, title, msg, QtGui.QMessageBox.Ok)
-         if dialog==QtGui.QMessageBox.Ok :
-            userInput='OK'
-
-
-   if info[ "name" ] == "Build OpenClip from Elements" :
-      print("Build OpenClip from Elements")
-      #print info["selection"]
-      title = "Build OpenClip from Elements"
-      
-      nimScanDlg = nimFlameExport.NimBuildOpenClipsFromElementDialog()
-      nimScanDlg.show()
-      if nimScanDlg.exec_() :
-         nim_showID = nimScanDlg.nim_showID
-         nim_serverID = nimScanDlg.nim_serverID
-         clipCount = nimScanDlg.clipCount
-         clipFail = nimScanDlg.clipFail
-
-         utf8 = QtCore.QTextCodec.codecForName("utf-8")
-
-         # QtCore.QTextCodec.setCodecForCStrings(utf8) deprecated in QT5
-         # Left in for backwards compatiblity with older versions of QT
-         try :
-            QtCore.QTextCodec.setCodecForCStrings(utf8)
-         except :
-            pass
-
-         title = "New Versions Found"
-         msg = "New Versions Found: "+str(clipCount)
-         if clipFail > 0 :
-            msg += "\nFailed to Read Versions: "+str(clipFail)
-            msg += "\nPlease try again"
-         dialog=QtGui.QMessageBox.information( None, title, msg, QtGui.QMessageBox.Ok)
-         if dialog==QtGui.QMessageBox.Ok :
-            userInput='OK'
-
-
-   if info[ "name" ] == "Build OpenClip from Project" :
-      print("Build OpenClip from Project")
-      #print info["selection"]
-      title = "Build OpenClip from Project Structure"
-      
-      nimScanDlg = nimFlameExport.NimBuildOpenClipsFromProjectDialog()
-      nimScanDlg.show()
-      if nimScanDlg.exec_() :
-         nim_showID = nimScanDlg.nim_showID
-         nim_serverID = nimScanDlg.nim_serverID
-         clipCount = nimScanDlg.clipCount
-         clipFail = nimScanDlg.clipFail
-
-         utf8 = QtCore.QTextCodec.codecForName("utf-8")
-         
-         # QtCore.QTextCodec.setCodecForCStrings(utf8) deprecated in QT5
-         # Left in for backwards compatiblity with older versions of QT
-         try :
-            QtCore.QTextCodec.setCodecForCStrings(utf8)
-         except :
-            pass
-
-         title = "New Versions Found"
-         msg = "New Versions Found: "+str(clipCount)
-         if clipFail > 0 :
-            msg += "\nFailed to Read Versions: "+str(clipFail)
-            msg += "\nPlease try again"
-         dialog=QtGui.QMessageBox.information( None, title, msg, QtGui.QMessageBox.Ok)
-         if dialog==QtGui.QMessageBox.Ok :
-            userInput='OK'
-      
-
-   if info[ "name" ] == "Change User" :
-      print("Change User triggered")
-      #print info["selection"]
-
-      import nim_core.nim_win as Win;
-      Win.userInfo()
-   pass
+def preview_window_config_changed(
+    description, width, height, bit_depth, rate_string, sync_string
+):
+    pass
 
 
 # Hook called when starting the application and when switching project
@@ -295,8 +129,114 @@ def customUIAction( info, userData ):
 #    Usually called with current project.
 #
 # Ex: if project == "project_name":
-#        return "<track>_<segment>_project"
+#         return "<track>_<segment>_project"
 #     return "<track>_<segment>_global"
+#
+# :note: This method can be implemented only once.
+#        First instance found will be used
+#
+def timeline_default_shot_name(project, *args, **kwargs):
+    pass
 
-def timelineDefaultShotName( project ):
-   return ""
+
+# Hook called when starting the application and when switching project
+# This value will be used as default for the marker name
+#
+# project: [String]
+#    Usually called with current project.
+#
+# Ex: if project == "project_name":
+#         return "<user>_<time>_project"
+#     return "<user>_<time>_global"
+#
+# :note: This method can be implemented only once.
+#        First instance found will be used
+#
+def timeline_default_marker_name(project, *args, **kwargs):
+    pass
+
+
+# Hook called when starting the application and when switching project
+# This value will be used as default for the marker comment
+#
+# project: [String]
+#    Usually called with current project.
+#
+# Ex: if project == "project_name":
+#         return "<user>_<time>_project"
+#     return "<user>_<time>_global"
+#
+# :note: This method can be implemented only once.
+#        First instance found will be used
+#
+def timeline_default_marker_comment(project, *args, **kwargs):
+    pass
+
+
+# Hook called when starting the application and when switching project
+# This value will be used as default for the segment marker name
+#
+# project: [String]
+#    Usually called with current project.
+#
+# Ex: if project == "project_name":
+#         return "<user>_<time>_project"
+#     return "<user>_<time>_global"
+#
+# :note: This method can be implemented only once.
+#        First instance found will be used
+#
+def timeline_default_segment_marker_name(project, *args, **kwargs):
+    pass
+
+
+# Hook called when starting the application and when switching project
+# This value will be used as default for the segment marker comment
+#
+# project: [String]
+#    Usually called with current project.
+#
+# Ex: if project == "project_name":
+#         return "<user>_<time>_project"
+#     return "<user>_<time>_global"
+#
+# :note: This method can be implemented only once.
+#        First instance found will be used
+#
+def timeline_default_segment_marker_comment(project, *args, **kwargs):
+    pass
+
+
+# Hook called when starting the application and when switching project
+# This value will be used as default name for gap bfx.
+#
+# project: [String]
+#    Usually called with current project.
+#
+# Ex: if project == "project_name":
+#         return "<track>_<segment>_project"
+#     return "<track>_<segment>_global"
+#
+# :note: This method can be implemented only once.
+#        First instance found will be used
+#
+def timeline_default_gap_bfx_name(project, *args, **kwargs):
+    pass
+
+
+# Hook called when starting the application and when switching project
+# This value will be used as default for the reference name
+#
+# project: [String]
+#    Usually called with current project.
+#
+# Ex: if project == "project_name":
+#         return "<user>_<time>_project"
+#     return "<user>_<time>_global"
+#
+# :note: This method can be implemented only once.
+#        First instance found will be used
+#
+def default_reference_name(project, *args, **kwargs):
+    pass
+
