@@ -24,6 +24,7 @@ except ImportError :
         print("NIM: Failed to load UI Modules")
 
 import os,sys,re
+import flame
 
 nim_app = 'Flame'
 os.environ['NIM_APP'] = str(nim_app)
@@ -34,6 +35,19 @@ nimFlamePythonPath = os.path.dirname(os.path.realpath(__file__))
 nimFlamePythonPath = nimFlamePythonPath.replace('\\','/')
 nimScriptPath = re.sub(r"\/plugins/Flame/python$", "", nimFlamePythonPath)
 nimFlamePresetPath = os.path.join(re.sub(r"\/python$", "", nimFlamePythonPath),'presets')
+
+try :
+    if int(flame.get_version_major()) >= 2022 :
+        nimFlamePresetPath = os.path.join(nimFlamePresetPath,'Flame_2022')
+    else :
+        nimFlamePresetPath = os.path.join(nimFlamePresetPath,'Flame_2020')
+except :
+    nimFlamePresetPath = os.path.join(nimFlamePresetPath,'Flame_2020')
+
+
+# print ("NIM Script Path: %s" % nimScriptPath)
+# print ("NIM Python Path: %s" % nimFlamePythonPath)
+# print ("NIM Preset Path: %s" % nimFlamePresetPath)
 
 
 # If relocating these scripts uncomment the line below and enter the fixed path

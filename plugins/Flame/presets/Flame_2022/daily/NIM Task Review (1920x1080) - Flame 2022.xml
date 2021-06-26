@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<preset version="11">
+   <type>movie</type>
+   <comment>Creates an 8-bit QuickTime file (H.264 Main 1920x1080 1.8Mbps).</comment>
+   <movie>
+      <fileType>QuickTime</fileType>
+      <namePattern>&lt;nim_shot_root&gt;/FLAME/dailies/&lt;name&gt;</namePattern>
+      <yuvHeadroom>False</yuvHeadroom>
+      <yuvColourSpace>PCS_UNKNOWN</yuvColourSpace>
+   </movie>
+   <video>
+      <fileType>QuickTime</fileType>
+      <codec>33622016</codec>
+      <codecProfile>
+        <rootPath>/opt/Autodesk/mediaconverter/</rootPath>
+        <targetVersion>2022.0.1</targetVersion>
+        <pathSuffix>/profiles/.33622016/Main_Apple_1_8Mbits.cdxprof</pathSuffix>
+      </codecProfile>
+      <namePattern>&lt;nim_shot_root&gt;/FLAME/dailies/&lt;name&gt;</namePattern>
+      <overwriteWithVersions>False</overwriteWithVersions>
+      <resize>
+         <resizeType>fit</resizeType>
+         <resizeFilter>lanczos</resizeFilter>
+         <width>1920</width>
+         <height>1080</height>
+         <bitsPerChannel>8</bitsPerChannel>
+         <numChannels>3</numChannels>
+         <floatingPoint>False</floatingPoint>
+         <bigEndian>True</bigEndian>
+         <pixelRatio>1</pixelRatio>
+         <scanFormat></scanFormat>
+      </resize>
+   </video>
+   <audio>
+      <fileType>QuickTime</fileType>
+      <codec>4027060226</codec>
+      <codecProfile>
+        <rootPath>/opt/Autodesk/mediaconverter/</rootPath>
+        <targetVersion>2022.0.1</targetVersion>
+        <pathSuffix>/profiles/.4027060226/96 kbps.cdxprof</pathSuffix>
+      </codecProfile>
+      <namePattern>&lt;nim_shot_root&gt;/FLAME/dailies/&lt;name&gt;</namePattern>
+      <mixdown>To2</mixdown>
+      <sampleRate>-1</sampleRate>
+      <bitDepth>-1</bitDepth>
+   </audio>
+</preset>

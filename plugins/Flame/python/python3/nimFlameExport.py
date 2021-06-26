@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: 	Flame/python/nimFlameExport.py
-# Version:     	v5.0.0.210602
+# Version:     	v5.0.2.210624
 # Compatible:	Python 3.x
 #
 # Copyright (c) 2014-2021 NIM Labs LLC
@@ -22,20 +22,30 @@ import xml.dom.minidom as minidom
 import shutil
 import subprocess
 import time
+import flame
 
 try:
 	import xml.etree.cElementTree as ET
 except ImportError:
 	import xml.etree.ElementTree as ET
 
-flameConnectorVersion = "4.0.57.201116"
+flameConnectorVersion = "5.0.03.210625"
 
 # Relative path to append for NIM Scripts
 nimFlamePythonPath = os.path.dirname(os.path.realpath(__file__))
 nimFlamePythonPath = nimFlamePythonPath.replace('\\','/')
 nimScriptPath = re.sub(r"\/plugins/Flame/python$", "", nimFlamePythonPath)
-nimFlamePresetPath = os.path.join(re.sub(r"\/python$", "", nimFlamePythonPath),'presets')
 nimFlameImgPath = os.path.join(re.sub(r"\/python$", "", nimFlamePythonPath),'img')
+nimFlamePresetPath = os.path.join(re.sub(r"\/python$", "", nimFlamePythonPath),'presets')
+
+try :
+    if int(flame.get_version_major()) >= 2022 :
+        nimFlamePresetPath = os.path.join(nimFlamePresetPath,'Flame_2022')
+    else :
+        nimFlamePresetPath = os.path.join(nimFlamePresetPath,'Flame_2020')
+except :
+    nimFlamePresetPath = os.path.join(nimFlamePresetPath,'Flame_2020')
+
 
 print("NIM Flame Connector Version: %s" % flameConnectorVersion)
 print("NIM Script Path: %s" % nimScriptPath)
@@ -2092,7 +2102,7 @@ class NimExportEditDialog(QDialog):
 		self.nim_showDict = {}
 		self.nim_showID = None
 		
-		self.setWindowTitle("NIM: Export Edit")
+		self.setWindowTitle("NIM: Export Show Review")
 		self.setStyleSheet("QLabel {font: 14pt}")
 		self.setSizeGripEnabled(True)
 
@@ -2505,7 +2515,7 @@ class NimExportDailyDialog(QDialog):
 		self.nim_taskDict = {}
 		self.nim_taskID = None
 		
-		self.setWindowTitle("NIM: Export Daily")
+		self.setWindowTitle("NIM: Export Task Review")
 		self.setStyleSheet("QLabel {font: 14pt}")
 		self.setSizeGripEnabled(True)
 
@@ -3002,7 +3012,7 @@ def nimCreateShot(nim_showID=None, info=None) :
 				pathRoot = pathPartition[0]
 				iconFrame = pathPartition[2].rpartition('-')[0]
 
-				iconPath = string.join([pathRoot, iconFrame,'.',mediaExt],'')
+				iconPath = "".join([pathRoot, iconFrame,'.',mediaExt])
 				
 				# Append iconPath to result
 				result['nim_iconPath'] = nimResolvePath(nim_shotID=nim_shotID, keyword_string=iconPath)
@@ -3362,8 +3372,12 @@ def nimScanForVersions(nim_showID=None, nim_shotID=None, updateAll=0) :
 			for openClipElement in openClipElements :
 				clipID = openClipElement['ID']
 				shotID = openClipElement['shotID']
-				clipPath = openClipElement['path'].encode('utf-8')
-				clipName = openClipElement['name'].encode('utf-8')
+				
+				#clipPath = openClipElement['path'].encode('utf-8')
+				#clipName = openClipElement['name'].encode('utf-8')
+				clipPath = openClipElement['path']
+				clipName = openClipElement['name']
+
 				clipFile = os.path.join(clipPath,clipName)
 
 				elementTypeID = openClipElement['elementTypeID']
@@ -3404,8 +3418,10 @@ def nimScanForVersions(nim_showID=None, nim_shotID=None, updateAll=0) :
 						
 						if appendElement :
 							# print "New Element found for shotID %s" % shotID
-							elementPath = element['path'].encode('utf-8')
-							elementName = element['name'].encode('utf-8')
+							#elementPath = element['path'].encode('utf-8')
+							#elementName = element['name'].encode('utf-8')
+							elementPath = element['path']
+							elementName = element['name']
 							
 							# Update elementPath using server os resolution
 							# print "Raw Element Path: %s" % elementPath
@@ -3501,7 +3517,9 @@ def nimBuildOpenClipFromElements(nim_showID=None, nim_shotID=None, nim_serverID=
 					nim_comp_path = nimResolvePath(nim_shotID=nim_shotID, keyword_string=nim_comp_path)
 					# print "nim_comp_path: %s" % nim_comp_path
 
-					clipPath = nim_comp_path.encode('utf-8')
+					#clipPath = nim_comp_path.encode('utf-8')
+					clipPath = nim_comp_path
+
 					clipName = nim_shotName +"_nimElement_"+ elementTypeName +".clip"
 					clipFile = os.path.join(clipPath,clipName)
 
@@ -3515,8 +3533,10 @@ def nimBuildOpenClipFromElements(nim_showID=None, nim_shotID=None, nim_serverID=
 
 						if not isOpenClip :
 							print("Element found for shotID %s" % nim_shotID)
-							elementPath = element['path'].encode('utf-8')
-							elementName = element['name'].encode('utf-8')
+							#elementPath = element['path'].encode('utf-8')
+							#elementName = element['name'].encode('utf-8')
+							elementPath = element['path']
+							elementName = element['name']
 							
 							# Update elementPath using server os resolution
 							# print "Raw ElementPath: %s" % elementPath
@@ -3592,7 +3612,8 @@ def nimBuildOpenClipFromFolders(nim_showID=None, nim_shotID=None, nim_serverID=N
 					nim_folder_path = nimResolvePath(nim_shotID=nim_shotID, keyword_string=nim_folder_path)
 					# print "nim_folder_path: %s" % nim_folder_path
 
-					clipPath = nim_folder_path.encode('utf-8')
+					#clipPath = nim_folder_path.encode('utf-8')
+					clipPath = nim_folder_path
 					clipName = nim_shotName+"_nimProject_"+folderName+".clip"
 					clipFile = os.path.join(clipPath,clipName)
 					
@@ -3606,8 +3627,10 @@ def nimBuildOpenClipFromFolders(nim_showID=None, nim_shotID=None, nim_serverID=N
 					for subfolder in subfolders :
 						print("------folder iteration------------------------------------------------------------->")
 
-						elementPath = subfolder.encode('utf-8')
-						elementName = subfolder.rpartition('/')[2].encode('utf-8')
+						#elementPath = subfolder.encode('utf-8')
+						#elementName = subfolder.rpartition('/')[2].encode('utf-8')
+						elementPath = subfolder
+						elementName = subfolder.rpartition('/')[2]
 						
 						# Update elementPath using server os resolution
 						# print "Raw Element Path: %s" % elementPath
@@ -3710,8 +3733,8 @@ def nimResolvePath(nim_jobID=None, nim_showID=None, nim_shotID=None, keyword_str
 	if 'nim_shot_comp' in nimPaths :
 		keyword_string = keyword_string.replace(tokenL+'nim_shot_comp'+tokenR, nimPaths['nim_shot_comp'])
 
-	return keyword_string.encode('utf-8')
-
+	#return keyword_string.encode('utf-8')
+	return keyword_string
 
 def resolveBatchKeywords(nim_shotID=None, batch_path=None) :
 	'''Scrubs batch files for NIM keywords and resolves path'''
@@ -3982,7 +4005,7 @@ def updateOpenClip( masterFile='', elementPath='', elementName='', elementWildca
 
 			print("cmd: %s" % cmd_args)
 
-			pipes = subprocess.Popen(cmd_args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+			pipes = subprocess.Popen(cmd_args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
 
 			# Communicate with subprocess - timeout after 15 seconds if no reponse is found
 			# Python 3.x
@@ -4027,7 +4050,7 @@ def updateOpenClip( masterFile='', elementPath='', elementName='', elementWildca
 						return False
 				else :
 					print("Successfully parsed media")
-					# print "std_out: %s" % std_out
+					# print("std_out: %s" % std_out) 
 
 
 			with open(tmpfile, "w") as f:
@@ -4038,8 +4061,9 @@ def updateOpenClip( masterFile='', elementPath='', elementName='', elementWildca
 			try :
 				tmpXML = ET.parse(tmpfile)
 			except :
-				print("Failed to parse XML. XML could be empty.")
-				if os.path.isfile(tmpfile):
+				print("Failed to parse temp XML. XML could be empty.")
+				print('%s' % traceback.print_exc())
+				if os.path.isfile(tmpfile):	
 					os.remove(tmpfile)
 				return False
 
@@ -4071,18 +4095,18 @@ def updateOpenClip( masterFile='', elementPath='', elementName='', elementWildca
 			try :
 				sourceXML 	= ET.parse(masterFile)
 			except :
-				print("Failed to parse XML. XML could be empty.")
-				# print'%s' % traceback.print_exc()
-				if os.path.isfile(tmpfile):
+				print("Failed to parse source XML. XML could be empty.")
+				print('%s' % traceback.print_exc())
+				if os.path.isfile(tmpfile):	
 					os.remove(tmpfile)
 				return False
 
 			try :
 				newXML 		= ET.parse(tmpfile)
 			except :
-				print("Failed to parse XML. XML could be empty.")
-				# print'%s' % traceback.print_exc()
-				if os.path.isfile(tmpfile):
+				print("Failed to parse new XML. XML could be empty.")
+				print('%s' % traceback.print_exc())
+				if os.path.isfile(tmpfile):	
 					os.remove(tmpfile)
 				return False
 
@@ -4152,7 +4176,7 @@ def updateOpenClip( masterFile='', elementPath='', elementName='', elementWildca
 						print("Handler found")
 						xmlRoot.remove(handler)
 
-					resultXML	= ET.tostring(xmlRoot)
+					resultXML	= ET.tostring(xmlRoot).decode('utf-8')
 
 					# Create a backup of the original file
 					bakfile = "%s.bak" % masterFile
@@ -4173,7 +4197,8 @@ def updateOpenClip( masterFile='', elementPath='', elementName='', elementWildca
 					outFile = masterFile
 
 					print("Adding feed version: %s" % elementBasename)
-					
+					#print("resultXML: %s" % resultXML)
+
 					with open(outFile,"w") as f:
 						f.write( resultXML )
 
@@ -4229,7 +4254,7 @@ def updateOpenClip( masterFile='', elementPath='', elementName='', elementWildca
 					print("Handler found")
 					xmlRoot.remove(handler)
 
-				resultXML = ET.tostring(xmlRoot)
+				resultXML = ET.tostring(xmlRoot).decode('utf-8')
 
 				print("Adding feed version: %s" % elementBasename)
 

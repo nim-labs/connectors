@@ -26,6 +26,7 @@ except ImportError :
         print("NIM: Failed to load UI Modules")
 
 import os,sys,re
+import flame 
 
 nim_app = 'Flame'
 os.environ['NIM_APP'] = str(nim_app)
@@ -36,9 +37,19 @@ nimFlamePythonPath = nimFlamePythonPath.replace('\\','/')
 nimScriptPath = re.sub(r"\/plugins/Flame/python$", "", nimFlamePythonPath)
 nimFlamePresetPath = os.path.join(re.sub(r"\/python$", "", nimFlamePythonPath),'presets')
 
-#print "NIM Script Path: %s" % nimScriptPath
-#print "NIM Python Path: %s" % nimFlamePythonPath
-#print "NIM Preset Path: %s" % nimFlamePresetPath
+try :
+    if int(flame.get_version_major()) >= 2022 :
+        nimFlamePresetPath = os.path.join(nimFlamePresetPath,'Flame_2022')
+    else :
+        nimFlamePresetPath = os.path.join(nimFlamePresetPath,'Flame_2020')
+except :
+    nimFlamePresetPath = os.path.join(nimFlamePresetPath,'Flame_2020')
+
+
+# print ("NIM Script Path: %s" % nimScriptPath)
+# print ("NIM Python Path: %s" % nimFlamePythonPath)
+# print ("NIM Preset Path: %s" % nimFlamePresetPath)
+
 
 # If relocating these scripts uncomment the line below and enter the fixed path
 # to the NIM Connector Root directory
@@ -930,9 +941,9 @@ def export_overwrite_file(path, *args, **kwargs):
 #
 def get_custom_export_profiles(profiles, *args, **kwargs):
     print("get_custom_export_profiles - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-    profiles['NIM Publish Sequence']        = {'nim_export_type':'NimExportSequence'} #Adds an entry to the 'userData' dictionary
-    profiles['NIM Export Clip to Daily']        = {'nim_export_type':'NimExportDaily'}    #Adds an entry to the 'userData' dictionary
-    profiles['NIM Export Clip to Edit']        = {'nim_export_type':'NimExportEdit'}     #Adds an entry to the 'userData' dictionary
+    profiles['NIM Publish Sequence']         = {'nim_export_type':'NimExportSequence'}   #Adds an entry to the 'userData' dictionary
+    profiles['NIM Export Review to Show']    = {'nim_export_type':'NimExportEdit'}       #Adds an entry to the 'userData' dictionary
+    profiles['NIM Export Review to Task']    = {'nim_export_type':'NimExportDaily'}      #Adds an entry to the 'userData' dictionary
     
     print("get_custom_export_profiles - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
     pass
