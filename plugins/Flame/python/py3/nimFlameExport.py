@@ -29,22 +29,24 @@ try:
 except ImportError:
 	import xml.etree.ElementTree as ET
 
-flameConnectorVersion = "5.0.03.210625"
+flameConnectorVersion = "5.0.3.210625"
 
 # Relative path to append for NIM Scripts
 nimFlamePythonPath = os.path.dirname(os.path.realpath(__file__))
 nimFlamePythonPath = nimFlamePythonPath.replace('\\','/')
-nimScriptPath = re.sub(r"\/plugins/Flame/python$", "", nimFlamePythonPath)
-nimFlameImgPath = os.path.join(re.sub(r"\/python$", "", nimFlamePythonPath),'img')
-nimFlamePresetPath = os.path.join(re.sub(r"\/python$", "", nimFlamePythonPath),'presets')
+nimScriptPath = re.sub(r"\/plugins/Flame/python/py3$", "", nimFlamePythonPath)
+nimFlameImgPath = os.path.join(re.sub(r"\/python/py3$", "", nimFlamePythonPath),'img')
+nimFlamePresetPathBase = os.path.join(re.sub(r"\/python/py3$", "", nimFlamePythonPath),'presets')
 
 try :
-    if int(flame.get_version_major()) >= 2022 :
-        nimFlamePresetPath = os.path.join(nimFlamePresetPath,'Flame_2022')
-    else :
-        nimFlamePresetPath = os.path.join(nimFlamePresetPath,'Flame_2020')
+    flame_major_version = flame.get_version_major()
+    nimFlamePresetPath = os.path.join(nimFlamePresetPathBase, flame_major_version)
+
+    if os.path.isdir(nimFlamePresetPath) == False :
+        nimFlamePresetPath = os.path.join(nimFlamePresetPathBase,'_default')
+        print("NIM Preset folder for Flame major version %s not found.  Using default preset folder." % flame_major_version)
 except :
-    nimFlamePresetPath = os.path.join(nimFlamePresetPath,'Flame_2020')
+    nimFlamePresetPath = os.path.join(nimFlamePresetPathBase,'_default')
 
 
 print("NIM Flame Connector Version: %s" % flameConnectorVersion)

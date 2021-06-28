@@ -32,10 +32,22 @@ flameConnectorVersion = "4.0.57.201116"
 # Relative path to append for NIM Scripts
 nimFlamePythonPath = os.path.dirname(os.path.realpath(__file__))
 nimFlamePythonPath = nimFlamePythonPath.replace('\\','/')
-nimScriptPath = re.sub(r"\/plugins/Flame/python$", "", nimFlamePythonPath)
-nimFlamePresetPath = os.path.join(re.sub(r"\/python$", "", nimFlamePythonPath),'presets')
-nimFlameImgPath = os.path.join(re.sub(r"\/python$", "", nimFlamePythonPath),'img')
+nimScriptPath = re.sub(r"\/plugins/Flame/python/py2$", "", nimFlamePythonPath)
+nimFlamePresetPathBase = os.path.join(re.sub(r"\/python/py2$", "", nimFlamePythonPath),'presets')
+nimFlameImgPath = os.path.join(re.sub(r"\/python/py2$", "", nimFlamePythonPath),'img')
 
+try :
+   import flame
+   flame_major_version = flame.get_version_major()
+   nimFlamePresetPath = os.path.join(nimFlamePresetPathBase, flame_major_version)
+
+   if os.path.isdir(nimFlamePresetPath) == False :
+      nimFlamePresetPath = os.path.join(nimFlamePresetPathBase,'_default')
+      print "NIM Preset folder for Flame major version %s not found.  Using default preset folder." % flame_major_version
+except :
+   nimFlamePresetPath = os.path.join(nimFlamePresetPathBase,'_default')
+
+    
 print "NIM Flame Connector Version: %s" % flameConnectorVersion
 print "NIM Script Path: %s" % nimScriptPath
 print "NIM Python Path: %s" % nimFlamePythonPath

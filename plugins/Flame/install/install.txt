@@ -2,17 +2,29 @@ Flame Install:
 
 Linux:
 
-	Set the DL_PYTHON_HOOK_PATH environment variable to the [NIM_CONNECTOR_ROOT]/plugins/Flame/python location
+	Set the DL_PYTHON_HOOK_PATH environment variable to the [NIM_CONNECTOR_ROOT]/plugins/Flame/python/pyX location.
 
 	Edit the ~/.cshrc file to include the following:
 
-	setenv DL_PYTHON_HOOK_PATH [NIM_CONNECTOR_ROOT]/plugins/Flame/python
+	
+	For Flame 2022 and greater:
+
+		setenv DL_PYTHON_HOOK_PATH [NIM_CONNECTOR_ROOT]/plugins/Flame/python/py3
+
+	
+	For versions of Flame prior to 2022:
+
+		setenv DL_PYTHON_HOOK_PATH [NIM_CONNECTOR_ROOT]/plugins/Flame/python/py2
+
 
 	Replace [NIM_CONNECTOR_ROOT] with the full path to the NIM Connector root folder.
 
 
 
 OSX +10.11.x:
+
+	For Flame 2022 and greater use the .plist file in the install/py3 folder.
+	For all versions for Flame prior to 2022, use the .plist file in the install/py2 folder.
 
 	Edit the setenv.DL_PYTHON_HOOK_PATH.plist file and replace [NIM_CONNECTOR_ROOT] with the full path to the NIM Connector root folder.
 
@@ -29,6 +41,9 @@ OSX +10.11.x:
 
 
 OSX 10.10.x
+
+	For Flame 2022 and greater use the launchd.conf file in the install/py3 folder.
+	For all versions for Flame prior to 2022, use the launchd.conf file in the install/py2 folder.
 
 	Edit the launchd.conf file and replace [NIM_CONNECTOR_ROOT] with the full path to the NIM Connector root folder. 
 	
