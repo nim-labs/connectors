@@ -4,7 +4,7 @@
    <comment>Creates an 8-bit QuickTime file (H.264 Main 1920x1080 1.8Mbps).</comment>
    <movie>
       <fileType>QuickTime</fileType>
-      <namePattern>&lt;nim_shot_root&gt;/FLAME/dailies/&lt;name&gt;</namePattern>
+      <namePattern>&lt;nim_shot_root&gt;/FLAME/REVIEW/&lt;name&gt;</namePattern>
       <yuvHeadroom>False</yuvHeadroom>
       <yuvColourSpace>PCS_UNKNOWN</yuvColourSpace>
    </movie>
@@ -16,7 +16,7 @@
         <targetVersion>2022.0.1</targetVersion>
         <pathSuffix>/profiles/.33622016/Main_Apple_1_8Mbits.cdxprof</pathSuffix>
       </codecProfile>
-      <namePattern>&lt;nim_shot_root&gt;/FLAME/dailies/&lt;name&gt;</namePattern>
+      <namePattern>&lt;nim_shot_root&gt;/FLAME/REVIEW/&lt;name&gt;</namePattern>
       <overwriteWithVersions>False</overwriteWithVersions>
       <resize>
          <resizeType>fit</resizeType>
@@ -39,7 +39,7 @@
         <targetVersion>2022.0.1</targetVersion>
         <pathSuffix>/profiles/.4027060226/96 kbps.cdxprof</pathSuffix>
       </codecProfile>
-      <namePattern>&lt;nim_shot_root&gt;/FLAME/dailies/&lt;name&gt;</namePattern>
+      <namePattern>&lt;nim_shot_root&gt;/FLAME/REVIEW/&lt;name&gt;</namePattern>
       <mixdown>To2</mixdown>
       <sampleRate>-1</sampleRate>
       <bitDepth>-1</bitDepth>
