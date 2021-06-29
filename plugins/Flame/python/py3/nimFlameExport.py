@@ -3738,6 +3738,7 @@ def nimResolvePath(nim_jobID=None, nim_showID=None, nim_shotID=None, keyword_str
 	#return keyword_string.encode('utf-8')
 	return keyword_string
 
+
 def resolveBatchKeywords(nim_shotID=None, batch_path=None) :
 	'''Scrubs batch files for NIM keywords and resolves path'''
 	success = False
@@ -4117,17 +4118,36 @@ def updateOpenClip( masterFile='', elementPath='', elementName='', elementWildca
 				elementExists = False
 				elementsAdded = 0
 
-				# Get first item in feed and use as the nbTicks reference
+				# Get first item in feed and use as the rate and nbTicks reference
+				src_editRateNumerator = None
+				src_editRateDenominator = None
 				src_nbTicks = None
+				src_rate = None
+				src_dropMode = None
+
 				for srcTrack in sourceXML.iter('track') :
+					src_editRateNumeratorObj = srcTrack.find('editRate/numerator')
+					src_editRateNumerator = src_editRateNumeratorObj.text
+					src_editRateDenominatorObj = srcTrack.find('editRate/denominator')
+					src_editRateDenominator = src_editRateDenominatorObj.text
+
 					for srcFeed in srcTrack.iter('feed') :
 						src_nbTicksObj = srcFeed.find('startTimecode/nbTicks')
 						src_nbTicks = src_nbTicksObj.text
+						src_rateObj = srcFeed.find('startTimecode/rate')
+						src_rate = src_rateObj.text
+						src_dropModeObj = srcFeed.find('startTimecode/dropMode')
+						src_dropMode = src_dropModeObj.text
 						break
 					else :
 						continue
 					break
-				# print "Source nbTicks: %s" % src_nbTicks
+
+				print("Source editRate/numerator: %s" % src_editRateNumerator)
+				print("Source editRate/denominator: %s" % src_editRateDenominator)
+				print("Source startTimecode/nbTicks: %s" % src_nbTicks)
+				print("Source startTimecode/rate: %s" % src_rate)
+				print("Source startTimecode/dropMode: %s" % src_dropMode)
 
 
 				# Get new feed from file
@@ -4138,15 +4158,27 @@ def updateOpenClip( masterFile='', elementPath='', elementName='', elementWildca
 					feedHandler = newFeed.find("./handler")
 					newFeed.remove(feedHandler)
 					
+					if src_editRateNumerator :
+						new_editRateNumeratorObject = newTrack.find("feeds/feed/sampleRate/numerator")
+						new_editRateNumeratorObject.text = src_editRateNumerator
+					if src_editRateDenominator :
+						new_editRateDenominatorObject = newTrack.find("feeds/feed/sampleRate/denominator")
+						new_editRateDenominatorObject.text = src_editRateDenominator
+					if src_rate :
+						new_rateObject = newTrack.find("feeds/feed/startTimecode/rate")
+						new_rateObject.text = src_rate
 					if src_nbTicks :
 						new_nbTicksObject = newTrack.find("feeds/feed/startTimecode/nbTicks")
 						new_nbTicksObject.text = src_nbTicks
+					if src_dropMode :
+						new_dropModeObj = newTrack.find("feeds/feed/startTimecode/dropMode")
+						new_dropModeObj.text = src_dropMode
 
 					newPathObject = newTrack.find("feeds/feed/spans/span/path")
 					newPath = newPathObject.text
 					
 					print("uid: %s" % uid)
-					# print "newFeed: %s" % ET.tostring(newFeed)
+					#print("newFeed: %s" % ET.tostring(newFeed).decode('utf-8'))
 					print("newPath: %s" % newPath)
 					
 					# Check for path in sourceFile 
