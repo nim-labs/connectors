@@ -32,9 +32,20 @@ os.environ['NIM_APP'] = str(nim_app)
 # Relative path to append for NIM Scripts
 nimFlamePythonPath = os.path.dirname(os.path.realpath(__file__))
 nimFlamePythonPath = nimFlamePythonPath.replace('\\','/')
-nimScriptPath = re.sub(r"\/plugins/Flame/python$", "", nimFlamePythonPath)
-nimFlamePresetPath = os.path.join(re.sub(r"\/python$", "", nimFlamePythonPath),'presets')
+nimScriptPath = re.sub(r"\/plugins/Flame/python/py2$", "", nimFlamePythonPath)
+nimFlamePresetPathBase = os.path.join(re.sub(r"\/python/py2$", "", nimFlamePythonPath),'presets')
 
+try :
+   import flame
+   flame_major_version = flame.get_version_major()
+   nimFlamePresetPath = os.path.join(nimFlamePresetPathBase, flame_major_version)
+
+   if os.path.isdir(nimFlamePresetPath) == False :
+      nimFlamePresetPath = os.path.join(nimFlamePresetPathBase,'_default')
+except :
+   nimFlamePresetPath = os.path.join(nimFlamePresetPathBase,'_default')
+
+    
 #print "NIM Script Path: %s" % nimScriptPath
 #print "NIM Python Path: %s" % nimFlamePythonPath
 #print "NIM Preset Path: %s" % nimFlamePresetPath

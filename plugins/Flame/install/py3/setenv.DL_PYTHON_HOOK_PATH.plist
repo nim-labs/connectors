@@ -9,7 +9,7 @@
         <string>/bin/launchctl</string>
         <string>setenv</string>
         <string>DL_PYTHON_HOOK_PATH</string>
-        <string>[NIM_CONNECTOR_ROOT]/plugins/Flame/python</string>
+        <string>[NIM_CONNECTOR_ROOT]/plugins/Flame/python/py3</string>
       </array>
     <key>RunAtLoad</key>
     <true/>
