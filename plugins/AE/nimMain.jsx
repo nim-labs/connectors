@@ -62,13 +62,9 @@ function webRequest(method, endpoint, query) {
 
 	try {
 		var timestamp = Date.now(),
-			nimTempFolder = new Folder(tempFolderPath),
 			tempFilePath = tempFolderPath + timestamp,
-			tempFile = new File(tempFilePath),
-			winTempFilePath = winTempFolderPath + timestamp;
-
-		if (!nimTempFolder.exists)
-			nimTempFolder.create();
+			winTempFilePath = winTempFolderPath + timestamp,
+			tempFile;
 
 		if (os == 'win') {
 			var winTempFolder = new Folder(winTempFolderPath);
@@ -86,6 +82,13 @@ function webRequest(method, endpoint, query) {
 			curlCmd = 'cscript "' + wincurl + '" /Method:' + method + ' /URL:' + endpoint + ' /Query:' + query + ' /TempFilePath:' + winTempFilePath + ' ' + userHeader + keyHeader + '//nologo';
 		}
 		else {
+			var nimTempFolder = new Folder(tempFolderPath);
+
+			tempFile = new File(tempFilePath);
+
+			if (!nimTempFolder.exists)
+				nimTempFolder.create();
+
 			if (username) userHeader = '--header "X-NIM-API-USER: ' + username + '" ';
 			else userHeader = '';
 			if (nimKey) keyHeader = '--header "X-NIM-API-KEY: ' + nimKey + '" ';
