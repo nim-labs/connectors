@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: nim_hiero.py
-# Version:  v5.0.2.210624
+# Version:  v5.0.8.210715
 #
 # Copyright (c) 2014-2021 NIM Labs LLC
 # All rights reserved.
