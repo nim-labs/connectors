@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: UI.py
-# Version:  v5.0.8.210715
+# Version:  v5.0.10.210719
 #
 # Copyright (c) 2014-2021 NIM Labs LLC
 # All rights reserved.
@@ -48,7 +48,7 @@ except ImportError :
                 print("NIM UI: Failed to UI Modules")
 
 #  Variables :
-version='v5.0.8'
+version='v5.0.10'
 WIN=''
 startTime=''
 winTitle='NIM_'+version
@@ -2991,7 +2991,7 @@ class GUI(QtGui.QMainWindow) :
                 #self.pref_styleSheetDir = self.pref_styleSheetDir.rstrip('/')
                 nimScriptPath = os.path.dirname(os.path.realpath(__file__))
                 nimScriptPath = nimScriptPath.replace('\\','/')
-                nimScriptPath = nimScriptPath.replace('/nim_core','')
+                nimScriptPath = nimScriptPath.replace('/nim_core/py3','')
                 darkStyleSheetPath = nimScriptPath+'/css/nim_darkStyleSheet.css'
                 with open(darkStyleSheetPath, 'r') as styleSheetFile:
                     darkStyleSheet=styleSheetFile.read().replace('\n', '')
