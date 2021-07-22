@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: nim_api.py
-# Version:  v5.0.10.210719
+# Version:  v5.0.11.210722
 #
 # Copyright (c) 2014-2021 NIM Labs LLC
 # All rights reserved.
@@ -58,7 +58,7 @@ from . import nim_tools
 from . import nim_win as Win
 
 #  Variables :
-version='v5.0.10'
+version='v5.0.11'
 winTitle='NIM_'+version
 
 
@@ -530,8 +530,11 @@ class FormPostHandler(urllib.request.BaseHandler):
                 # This is designed to catch when the user submits
                 # a StringIO object
                 filename = 'temp.pdf'
-            contenttype = mimetypes.guess_type(filename)[0] or \
-                b'application/octet-stream'
+            contenttype = mimetypes.guess_type(filename)[0] or b'application/octet-stream'
+            try:
+                contenttype = contenttype.encode("utf-8")
+            except (UnicodeEncodeError, AttributeError):
+                pass
             buf.write(b'--' + boundary.encode("utf-8") + b'\r\n')
             buf.write(
                 b'Content-Disposition: form-data; ' +
@@ -540,7 +543,7 @@ class FormPostHandler(urllib.request.BaseHandler):
             )
             buf.write(
                 b'Content-Type: ' +
-                contenttype.encode("utf-8") +
+                contenttype +
                 b'\r\n'
             )
             fd.seek(0)
