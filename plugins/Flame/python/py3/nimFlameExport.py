@@ -3247,14 +3247,17 @@ def nimAddBatchExport(info=None, comment='') :
 
 	# Resolve shot by associated openClipResolvedPath
 	elements = nimAPI.find_elements(name=clipName, path=clipPath)
-	print("Matching Clip Element Found: ")
-	# print elements 
+	
 
 	if len(elements) > 1 :
 		print("Found more than one result...")
+	elif len(elements) < 1 :
+		print("No matching elements found...")
 	else :
 		# Get Element metadata to read sequenceName
-
+		print("Matching Clip Element Found: ")
+		print(elements)
+		
 		nim_shotID = elements[0]['shotID']
 		print("NIM shotID: %s" % nim_shotID)
 		elementTypeID = elements[0]['elementTypeID']
