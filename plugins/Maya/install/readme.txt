@@ -21,6 +21,9 @@ Step 1 - Install the NIM module:
 			OSX MAYA_APP_DIR = ~<username>/Library/Preferences/Autodesk/maya/modules
 			LINUX MAYA_APP_DIR = ~<username>/maya/modules
 
+	OSX
+		/Applications/Autodesk/maya2022/Maya.app/Contents/modules
+
 	Edit the nim.mod file and replace [NIM_CONNECTOR_ROOT] with the full path to the NIM Connector root folder.
 
 

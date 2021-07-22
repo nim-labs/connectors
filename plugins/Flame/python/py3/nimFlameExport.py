@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: 	Flame/python/nimFlameExport.py
-# Version:     	v5.0.2.210624
+# Version:     	v5.0.11.210722
 # Compatible:	Python 3.x
 #
 # Copyright (c) 2014-2021 NIM Labs LLC
@@ -29,7 +29,7 @@ try:
 except ImportError:
 	import xml.etree.ElementTree as ET
 
-flameConnectorVersion = "5.0.3.210625"
+flameConnectorVersion = "5.0.11.210722"
 
 # Relative path to append for NIM Scripts
 nimFlamePythonPath = os.path.dirname(os.path.realpath(__file__))
@@ -3247,14 +3247,17 @@ def nimAddBatchExport(info=None, comment='') :
 
 	# Resolve shot by associated openClipResolvedPath
 	elements = nimAPI.find_elements(name=clipName, path=clipPath)
-	print("Matching Clip Element Found: ")
-	# print elements 
+	
 
 	if len(elements) > 1 :
 		print("Found more than one result...")
+	elif len(elements) < 1 :
+		print("No matching elements found...")
 	else :
 		# Get Element metadata to read sequenceName
-
+		print("Matching Clip Element Found: ")
+		print(elements)
+		
 		nim_shotID = elements[0]['shotID']
 		print("NIM shotID: %s" % nim_shotID)
 		elementTypeID = elements[0]['elementTypeID']
