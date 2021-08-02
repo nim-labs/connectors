@@ -23,7 +23,7 @@ class NIM( object ) :
     
     def __init__(self) :
         'Initializes the NIM attributes'
-        super( NIM, self ).__init__()
+        # super( NIM, self ).__init__()
         self.nim={}
         
         #  Store preferences :
