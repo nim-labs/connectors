@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: nim_tools.py
-# Version:  v5.0.11.210722
+# Version:  v5.0.12.210802
 #
 # Copyright (c) 2014-2021 NIM Labs LLC
 # All rights reserved.
