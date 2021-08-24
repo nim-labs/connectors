@@ -1,119 +1,112 @@
-#! C:/Program Files/Nuke11.0v1/nuke-11.0.1.dll -nx
-#write_info WriteNIM_MOV_n11 file:"[ value nimPath ]/[value nimFolder]/[value nimFilename]" format:"2048 1556 1" chans:":" framerange:"1 100" fps:"0" colorspace:"default (Gamma2.2)" datatype:"unknown" transfer:"unknown" views:"main" colorManagement:"Nuke"
-version 11.0 v1
+#! /Applications/Nuke13.0v1/Nuke13.0v1.app/Contents/MacOS/libnuke-13.0.1.dylib -nx
+#write_info WriteNIM_MOV file:"[ value nimPath ]/[value nimFolder]/[value nimFilename]" format:"2048 1556 1" chans:":" framerange:"1 100" fps:"0" colorspace:"default (Gamma2.2)" datatype:"unknown" transfer:"unknown" views:"main" colorManagement:"Nuke"
+version 13.0 v1
 Gizmo {
- knobChanged "\nn = nuke.thisNode()\nk = nuke.thisKnob()\nprint k.name()\nif k.name()=='nimCompTag':\n    print 'changed'\n    nuke.thisNode()\['nim_outputFileText'].setValue(nuke.thisNode()\['nimFilename'].value())\n"
  addUserKnob {20 User l WriteNIM_MOV}
  addUserKnob {26 nim_outputFileText l Filename T "expected integer but got \"\""}
- addUserKnob {41 nimCompPrefix l "Render Prefix" T WriteNIM_MOV_n11.nimCompPrefix}
- addUserKnob {41 nimCompTag l "Render Tag" T WriteNIM_MOV_n11.nimCompTag}
- addUserKnob {41 nimFilename l INVISIBLE +INVISIBLE T WriteNIM_MOV_n11.nimFilename}
- addUserKnob {22 refreshFilename l "Refresh Filename" t "This is a check to visualize the output filename.  The output filename will always be correct.  This button just refreshed the display label incase the file was versioned up or the tag changed while the preference pane was open." T "nuke.thisNode()\['nim_outputFileText'].setValue(nuke.thisNode()\['nimFilename'].value())" +STARTLINE}
- addUserKnob {52 pythonFilenameScript T "nuke.thisNode()\['nim_outputFileText'].setValue(nuke.thisNode()\['nimFilename'].value())" +STARTLINE}
+ addUserKnob {41 nimCompPrefix l "Render Prefix" T WriteNIM_MOV.nimCompPrefix}
+ addUserKnob {41 nimCompTag l "Render Tag" T WriteNIM_MOV.nimCompTag}
+ addUserKnob {41 nimFilename l "NIM Filename" +INVISIBLE T WriteNIM_MOV.nimFilename}
+ addUserKnob {22 refreshFilename l "Refresh Filename" t "This is a check to visualize the output filename.  The output filename will always be correct.  This button just refreshed the display label incase the file was versioned up or the tag changed while the preference pane was open. " T "nuke.thisNode()\['nim_outputFileText'].setValue(nuke.thisNode()\['nimFilename'].value()) " +STARTLINE}
+ addUserKnob {52 pythonFilenameScript T "nuke.thisNode()\['nim_outputFileText'].setValue(nuke.thisNode()\['nimFilename'].value()) " +STARTLINE}
  addUserKnob {26 "" +STARTLINE}
- addUserKnob {41 channels T WriteNIM_MOV_n11.channels}
- addUserKnob {41 frame_mode l frame T WriteNIM_MOV_n11.frame_mode}
- addUserKnob {41 frame l "" -STARTLINE T WriteNIM_MOV_n11.frame}
- addUserKnob {41 colorspace T WriteNIM_MOV_n11.colorspace}
- addUserKnob {41 premultiplied -STARTLINE T WriteNIM_MOV_n11.premultiplied}
- addUserKnob {41 raw l "raw data" -STARTLINE T WriteNIM_MOV_n11.raw}
- addUserKnob {41 views T WriteNIM_MOV_n11.views}
- addUserKnob {26 "" l "mov Options"}
- addUserKnob {41 meta_codec l codec T WriteNIM_MOV_n11.meta_codec}
- addUserKnob {41 meta_encoder l encoder -STARTLINE T WriteNIM_MOV_n11.meta_encoder}
- addUserKnob {41 mov32_codec l INVISIBLE +INVISIBLE T WriteNIM_MOV_n11.mov32_codec}
- addUserKnob {41 mov64_dnxhd_codec_profile l "codec profile" T WriteNIM_MOV_n11.mov64_dnxhd_codec_profile}
- addUserKnob {41 mov32_fps l fps T WriteNIM_MOV_n11.mov32_fps}
- addUserKnob {41 mov32_audiofile l "audio file" T WriteNIM_MOV_n11.mov32_audiofile}
- addUserKnob {41 mov32_audio_offset l "audio offset" T WriteNIM_MOV_n11.mov32_audio_offset}
- addUserKnob {41 mov32_units l units T WriteNIM_MOV_n11.mov32_units}
- addUserKnob {41 mov32_write_timecode l "write time code" -STARTLINE T WriteNIM_MOV_n11.mov32_write_timecode}
- addUserKnob {20 mov32_advanced l Advanced +HIDDEN n 2}
- mov32_advanced 1
- addUserKnob {41 mov32_codecoptions l "codec options" T WriteNIM_MOV_n11.mov32_codecoptions}
- addUserKnob {41 mov32_flatten l "fast start" -STARTLINE T WriteNIM_MOV_n11.mov32_flatten}
- addUserKnob {41 mov32_use_format_aspect l "use format aspect" -STARTLINE T WriteNIM_MOV_n11.mov32_use_format_aspect}
- addUserKnob {41 mov32_ycbcr_matrix_type l "ycbcr matrix" T WriteNIM_MOV_n11.mov32_ycbcr_matrix_type}
- addUserKnob {41 mov32_pixel_format l "pixel format" T WriteNIM_MOV_n11.mov32_pixel_format}
- addUserKnob {41 mov32_write_nclc l "write nclc" -STARTLINE T WriteNIM_MOV_n11.mov32_write_nclc}
- addUserKnob {41 mov32_write_gamma l "write gamma" -STARTLINE T WriteNIM_MOV_n11.mov32_write_gamma}
- addUserKnob {41 mov32_write_prores l "write prores" -STARTLINE T WriteNIM_MOV_n11.mov32_write_prores}
- addUserKnob {20 "" n -1}
- addUserKnob {41 mov64_format l INVISIBLE +INVISIBLE T WriteNIM_MOV_n11.mov64_format}
- addUserKnob {41 mov64_codec l INVISIBLE +INVISIBLE T WriteNIM_MOV_n11.mov64_codec}
- addUserKnob {41 mov64_fps l INVISIBLE +INVISIBLE T WriteNIM_MOV_n11.mov64_fps}
- addUserKnob {41 mov64_audiofile l INVISIBLE +INVISIBLE T WriteNIM_MOV_n11.mov64_audiofile}
- addUserKnob {41 mov64_audio_offset l INVISIBLE +INVISIBLE T WriteNIM_MOV_n11.mov64_audio_offset}
- addUserKnob {41 mov64_units l INVISIBLE +INVISIBLE T WriteNIM_MOV_n11.mov64_units}
- addUserKnob {41 mov64_write_timecode l INVISIBLE +INVISIBLE T WriteNIM_MOV_n11.mov64_write_timecode}
+ addUserKnob {41 channels T WriteNIM_MOV.channels}
+ addUserKnob {41 frame_mode l frame T WriteNIM_MOV.frame_mode}
+ addUserKnob {41 frame l "" -STARTLINE T WriteNIM_MOV.frame}
+ addUserKnob {41 colorspace T WriteNIM_MOV.colorspace}
+ addUserKnob {41 premultiplied -STARTLINE T WriteNIM_MOV.premultiplied}
+ addUserKnob {41 raw l "raw data" -STARTLINE T WriteNIM_MOV.raw}
+ addUserKnob {41 views T WriteNIM_MOV.views}
+ addUserKnob {26 "" l "<b>MOV Options</b>"}
+ addUserKnob {41 mov64_format +INVISIBLE T WriteNIM_MOV.mov64_format}
+ addUserKnob {41 mov64_codec l Codec T WriteNIM_MOV.mov64_codec}
+ addUserKnob {41 mov64_fps l FPS T WriteNIM_MOV.mov64_fps}
+ addUserKnob {41 mov64_dnxhd_codec_profile l "Codec Profile" +HIDDEN T WriteNIM_MOV.mov64_dnxhd_codec_profile}
+ addUserKnob {41 mov64_dnxhr_codec_profile l "Codec Profile" +HIDDEN T WriteNIM_MOV.mov64_dnxhr_codec_profile}
+ addUserKnob {41 mov_prores_codec_profile l "Codec Profile" +HIDDEN T WriteNIM_MOV.mov_prores_codec_profile}
+ addUserKnob {41 mov_h264_codec_profile l "Codec Profile" +HIDDEN T WriteNIM_MOV.mov_h264_codec_profile}
+ addUserKnob {41 mov64_pixel_format l "Pixel Format" T WriteNIM_MOV.mov64_pixel_format}
+ addUserKnob {41 mov64_quality l Quality +HIDDEN T WriteNIM_MOV.mov64_quality}
+ addUserKnob {41 mov64_ycbcr_matrix_type l "YCbCr Matrix" +HIDDEN T WriteNIM_MOV.mov64_ycbcr_matrix_type}
+ addUserKnob {41 mov64_audiofile l "Audio File" T WriteNIM_MOV.mov64_audiofile}
+ addUserKnob {41 mov64_audio_offset l "Audio Offset" T WriteNIM_MOV.mov64_audio_offset}
+ addUserKnob {41 mov64_units l Units -STARTLINE T WriteNIM_MOV.mov64_units}
  addUserKnob {20 mov64_advanced l Advanced n 2}
- addUserKnob {41 mov64_dnxhd_encode_video_range l "output range" T WriteNIM_MOV_n11.mov64_dnxhd_encode_video_range}
- addUserKnob {41 mov64_bitrate l bitrate T WriteNIM_MOV_n11.mov64_bitrate}
- addUserKnob {41 mov64_bitrate_tolerance l "bitrate tolerance" T WriteNIM_MOV_n11.mov64_bitrate_tolerance}
- addUserKnob {41 mov64_quality_min l "quality min" T WriteNIM_MOV_n11.mov64_quality_min}
- addUserKnob {41 mov64_quality_max l max -STARTLINE T WriteNIM_MOV_n11.mov64_quality_max}
- addUserKnob {41 mov64_gop_size l "gop size" T WriteNIM_MOV_n11.mov64_gop_size}
- addUserKnob {41 mov64_b_frames l "b frames" T WriteNIM_MOV_n11.mov64_b_frames}
- addUserKnob {41 mov64_write_nclc l "write nclc" T WriteNIM_MOV_n11.mov64_write_nclc}
+ addUserKnob {41 dataRange l "Data Range" T WriteNIM_MOV.dataRange}
+ addUserKnob {41 mov64_fast_start l "Fast Start" T WriteNIM_MOV.mov64_fast_start}
+ addUserKnob {41 mov64_write_timecode l "Write Timecode" -STARTLINE T WriteNIM_MOV.mov64_write_timecode}
+ addUserKnob {41 mov64_gop_size l "GOP Size" T WriteNIM_MOV.mov64_gop_size}
+ addUserKnob {41 mov64_b_frames l "B Frames" +HIDDEN T WriteNIM_MOV.mov64_b_frames}
+ addUserKnob {26 mov64_bitrate_divider l "" +STARTLINE +HIDDEN}
+ addUserKnob {41 mov64_limit_bitrate l "Limit Bitrate" +HIDDEN T WriteNIM_MOV.mov64_limit_bitrate}
+ addUserKnob {41 mov64_bitrate l Bitrate +HIDDEN T WriteNIM_MOV.mov64_bitrate}
+ addUserKnob {41 mov64_bitrate_tolerance l "Bitrate Tolerance" +HIDDEN T WriteNIM_MOV.mov64_bitrate_tolerance}
+ addUserKnob {41 mov64_quality_min l "Quantizer Min" +HIDDEN T WriteNIM_MOV.mov64_quality_min}
+ addUserKnob {41 mov64_quality_max l "Quantizer Max" -STARTLINE +HIDDEN T WriteNIM_MOV.mov64_quality_max}
  addUserKnob {20 "" n -1}
  addUserKnob {26 ""}
- addUserKnob {41 create_directories l "create directories" T WriteNIM_MOV_n11.create_directories}
- addUserKnob {41 render_order l "render order" T WriteNIM_MOV_n11.render_order}
- addUserKnob {41 Render -STARTLINE T WriteNIM_MOV_n11.Render}
- addUserKnob {41 first l "frame range" T WriteNIM_MOV_n11.first}
- addUserKnob {41 last l "" -STARTLINE T WriteNIM_MOV_n11.last}
- addUserKnob {41 use_limit l "limit to range" T WriteNIM_MOV_n11.use_limit}
+ addUserKnob {26 ""}
+ addUserKnob {41 create_directories l "create directories" T WriteNIM_MOV.create_directories}
+ addUserKnob {41 render_order l "render order" T WriteNIM_MOV.render_order}
+ addUserKnob {41 Render -STARTLINE T WriteNIM_MOV.Render}
+ addUserKnob {41 first l "frame range" T WriteNIM_MOV.first}
+ addUserKnob {41 last l "" -STARTLINE T WriteNIM_MOV.last}
+ addUserKnob {41 use_limit l "limit to range" -STARTLINE T WriteNIM_MOV.use_limit}
  addUserKnob {26 "" l " "}
- addUserKnob {41 reading l "read file" T WriteNIM_MOV_n11.reading}
- addUserKnob {41 checkHashOnRead l "check file matches input" -STARTLINE T WriteNIM_MOV_n11.checkHashOnRead}
- addUserKnob {41 on_error l "missing frames" T WriteNIM_MOV_n11.on_error}
- addUserKnob {41 reload l Reload -STARTLINE T WriteNIM_MOV_n11.reload}
- addUserKnob {41 read_all_lines l "read all lines" -STARTLINE T WriteNIM_MOV_n11.read_all_lines}
+ addUserKnob {41 reading l "read file" T WriteNIM_MOV.reading}
+ addUserKnob {41 checkHashOnRead l "check file matches input" T WriteNIM_MOV.checkHashOnRead}
+ addUserKnob {41 on_error l "missing frames" T WriteNIM_MOV.on_error}
+ addUserKnob {41 reload l Reload -STARTLINE T WriteNIM_MOV.reload}
+ addUserKnob {41 read_all_lines l "read all lines" -STARTLINE T WriteNIM_MOV.read_all_lines}
  addUserKnob {20 "" l OCIO}
  addUserKnob {26 "" l Context}
- addUserKnob {41 key1 T WriteNIM_MOV_n11.key1}
- addUserKnob {41 value1 -STARTLINE T WriteNIM_MOV_n11.value1}
- addUserKnob {41 key2 T WriteNIM_MOV_n11.key2}
- addUserKnob {41 value2 -STARTLINE T WriteNIM_MOV_n11.value2}
- addUserKnob {41 key3 T WriteNIM_MOV_n11.key3}
- addUserKnob {41 value3 -STARTLINE T WriteNIM_MOV_n11.value3}
- addUserKnob {41 key4 T WriteNIM_MOV_n11.key4}
- addUserKnob {41 value4 -STARTLINE T WriteNIM_MOV_n11.value4}
- addUserKnob {41 in_colorspace l INVISIBLE +INVISIBLE T WriteNIM_MOV_n11.in_colorspace}
- addUserKnob {41 out_colorspace l INVISIBLE +INVISIBLE T WriteNIM_MOV_n11.out_colorspace}
- addUserKnob {41 reverse_transform l INVISIBLE +INVISIBLE T WriteNIM_MOV_n11.reverse_transform}
+ addUserKnob {41 key1 T WriteNIM_MOV.key1}
+ addUserKnob {41 value1 -STARTLINE T WriteNIM_MOV.value1}
+ addUserKnob {26 ""}
+ addUserKnob {41 key2 T WriteNIM_MOV.key2}
+ addUserKnob {41 value2 -STARTLINE T WriteNIM_MOV.value2}
+ addUserKnob {26 ""}
+ addUserKnob {41 key3 T WriteNIM_MOV.key3}
+ addUserKnob {41 value3 -STARTLINE T WriteNIM_MOV.value3}
+ addUserKnob {26 ""}
+ addUserKnob {41 key4 T WriteNIM_MOV.key4}
+ addUserKnob {41 value4 -STARTLINE T WriteNIM_MOV.value4}
+ addUserKnob {26 ""}
  addUserKnob {20 "" l Python}
- addUserKnob {41 beforeRender l "before render" T WriteNIM_MOV_n11.beforeRender}
- addUserKnob {41 beforeFrameRender l "before each frame" T WriteNIM_MOV_n11.beforeFrameRender}
- addUserKnob {41 afterFrameRender l "after each frame" T WriteNIM_MOV_n11.afterFrameRender}
- addUserKnob {41 afterRender l "after render" T WriteNIM_MOV_n11.afterRender}
- addUserKnob {41 renderProgress l "render progress" T WriteNIM_MOV_n11.renderProgress}
+ addUserKnob {41 beforeRender l "before render" T WriteNIM_MOV.beforeRender}
+ addUserKnob {41 beforeFrameRender l "before each frame" T WriteNIM_MOV.beforeFrameRender}
+ addUserKnob {41 afterFrameRender l "after each frame" T WriteNIM_MOV.afterFrameRender}
+ addUserKnob {41 afterRender l "after render" T WriteNIM_MOV.afterRender}
+ addUserKnob {41 renderProgress l "render progress" T WriteNIM_MOV.renderProgress}
 }
  Input {
   inputs 0
   name Input1
-  xpos 335
-  ypos 218
+  xpos 662
+  ypos -18
  }
  Write {
   file "\[ value nimPath ]/\[value nimFolder]/\[value nimFilename]"
   file_type mov
-  meta_codec ap4h
-  mov32_codec "rle "
-  mov32_pixel_format {{0} "default (RGBA  8-bit)" "RGBA  8-bit"}
-  mov64_codec ap4h
-  mov64_bitrate 20000
-  mov64_bitrate_tolerance 40000000
-  mov64_quality_min 2
-  mov64_quality_max 31
+  mov64_codec "rle "
+  mov_h264_codec_profile "High 4:2:0 8-bit"
+  mov64_pixel_format {{0} "rgb24\tRGB 8-bit" "rgb555be\t\7" "argb\tRGBA 8-bit" "gray\t\7"}
+  mov64_quality High
+  mov64_advanced 1
+  mov64_fast_start true
+  mov64_write_timecode true
   mov64_gop_size 12
   mov64_b_frames 0
+  mov64_bitrate 28000
+  mov64_bitrate_tolerance 0
+  mov64_quality_min 1
+  mov64_quality_max 3
   checkHashOnRead false
   beforeRender "import nim_tools; nim_tools.CheckOutputPath()"
-  name WriteNIM_MOV_n11
-  knobChanged "\nn = nuke.thisNode()\nk = nuke.thisKnob()\nif k.name()=='meta_encoder':\n    nParent = nuke.toNode( '.'.join( n.fullName().split('.')\[:-1] ) ) or nuke.root()\n    if n\['meta_encoder'].getValue()==0:\n        nParent\['mov64_dnxhd_codec_profile'].setVisible(True)\n        nParent\['mov64_advanced'].setVisible(True)\n        nParent\['mov32_advanced'].setVisible(False)\n    else:\n        nParent\['mov64_dnxhd_codec_profile'].setVisible(False)\n        nParent\['mov32_advanced'].setVisible(True)\n        nParent\['mov64_advanced'].setVisible(False)\n        \n"
-  xpos 335
-  ypos 258
+  name WriteNIM_MOV
+  knobChanged "\nn = nuke.thisNode()\nk = nuke.thisKnob()\nnParent = nuke.toNode( '.'.join( n.fullName().split('.')\[:-1] ) ) or nuke.root()\n\nif k.name()=='nimCompTag':\n    nParent.knobs()\['nim_outputFileText'].setValue(n\['nimFilename'].value())\n\nif k.name()=='mov64_codec':\n    \n    if n\['mov64_codec'].getValue()==10:\n        #print(\"showing Animation\")\n        nParent.knobs()\['mov64_dnxhd_codec_profile'].setVisible(False)\n        nParent.knobs()\['mov64_dnxhr_codec_profile'].setVisible(False)\n        nParent.knobs()\['mov_prores_codec_profile'].setVisible(False)\n        nParent.knobs()\['mov_h264_codec_profile'].setVisible(False)\n        nParent.knobs()\['mov64_pixel_format'].setVisible(True)\n        nParent.knobs()\['mov64_quality'].setVisible(False)\n        nParent.knobs()\['mov64_ycbcr_matrix_type'].setVisible(False)\n        nParent.knobs()\['mov64_gop_size'].setVisible(True)\n        nParent.knobs()\['mov64_b_frames'].setVisible(False)\n        nParent.knobs()\['mov64_bitrate_divider'].setVisible(False)\n        nParent.knobs()\['mov64_limit_bitrate'].setVisible(False)\n        nParent.knobs()\['mov64_bitrate'].setVisible(False)\n        nParent.knobs()\['mov64_bitrate_tolerance'].setVisible(False)\n        nParent.knobs()\['mov64_quality_min'].setVisible(False)\n        nParent.knobs()\['mov64_quality_max'].setVisible(False)\n\n    elif n\['mov64_codec'].getValue()==11:\n        #print(\"showing ProRes\")\n        nParent.knobs()\['mov64_dnxhd_codec_profile'].setVisible(False)\n        nParent.knobs()\['mov64_dnxhr_codec_profile'].setVisible(False)\n        nParent.knobs()\['mov_prores_codec_profile'].setVisible(True)\n        nParent.knobs()\['mov_h264_codec_profile'].setVisible(False)\n        nParent.knobs()\['mov64_pixel_format'].setVisible(False)\n        nParent.knobs()\['mov64_quality'].setVisible(False)\n        nParent.knobs()\['mov64_ycbcr_matrix_type'].setVisible(True)\n        nParent.knobs()\['mov64_gop_size'].setVisible(False)\n        nParent.knobs()\['mov64_b_frames'].setVisible(False)\n        nParent.knobs()\['mov64_bitrate_divider'].setVisible(False)\n        nParent.knobs()\['mov64_limit_bitrate'].setVisible(False)\n        nParent.knobs()\['mov64_bitrate'].setVisible(False)\n        nParent.knobs()\['mov64_bitrate_tolerance'].setVisible(False)\n        nParent.knobs()\['mov64_quality_min'].setVisible(False)\n        nParent.knobs()\['mov64_quality_max'].setVisible(False)\n        nParent.knobs()\['mov_prores_codec_profile'].setEnabled(True)\n\n\n    elif n\['mov64_codec'].getValue()==12:\n        #print(\"showing DNxHD\")\n        nParent.knobs()\['mov64_dnxhd_codec_profile'].setVisible(True)\n        nParent.knobs()\['mov64_dnxhr_codec_profile'].setVisible(False)\n        nParent.knobs()\['mov_prores_codec_profile'].setVisible(False)\n        nParent.knobs()\['mov_h264_codec_profile'].setVisible(False)\n        nParent.knobs()\['mov64_pixel_format'].setVisible(False)\n        nParent.knobs()\['mov64_quality'].setVisible(False)\n        nParent.knobs()\['mov64_ycbcr_matrix_type'].setVisible(False)\n        nParent.knobs()\['mov64_gop_size'].setVisible(False)\n        nParent.knobs()\['mov64_b_frames'].setVisible(False)\n        nParent.knobs()\['mov64_bitrate_divider'].setVisible(False)\n        nParent.knobs()\['mov64_limit_bitrate'].setVisible(False)\n        nParent.knobs()\['mov64_bitrate'].setVisible(False)\n        nParent.knobs()\['mov64_bitrate_tolerance'].setVisible(False)\n        nParent.knobs()\['mov64_quality_min'].setVisible(False)\n        nParent.knobs()\['mov64_quality_max'].setVisible(False)\n        nParent.knobs()\['mov64_dnxhd_codec_profile'].setEnabled(True)\n\n    elif n\['mov64_codec'].getValue()==13:\n        #print(\"showing DNxHR\")\n        nParent.knobs()\['mov64_dnxhd_codec_profile'].setVisible(False)\n        nParent.knobs()\['mov64_dnxhr_codec_profile'].setVisible(True)\n        nParent.knobs()\['mov_prores_codec_profile'].setVisible(False)\n        nParent.knobs()\['mov_h264_codec_profile'].setVisible(False)\n        nParent.knobs()\['mov64_pixel_format'].setVisible(False)\n        nParent.knobs()\['mov64_quality'].setVisible(False)\n        nParent.knobs()\['mov64_ycbcr_matrix_type'].setVisible(False)\n        nParent.knobs()\['mov64_gop_size'].setVisible(False)\n        nParent.knobs()\['mov64_b_frames'].setVisible(False)\n        nParent.knobs()\['mov64_bitrate_divider'].setVisible(False)\n        nParent.knobs()\['mov64_limit_bitrate'].setVisible(False)\n        nParent.knobs()\['mov64_bitrate'].setVisible(False)\n        nParent.knobs()\['mov64_bitrate_tolerance'].setVisible(False)\n        nParent.knobs()\['mov64_quality_min'].setVisible(False)\n        nParent.knobs()\['mov64_quality_max'].setVisible(False)\n        nParent.knobs()\['mov64_dnxhr_codec_profile'].setEnabled(True)\n\n    elif n\['mov64_codec'].getValue()==14:\n        #print(\"showing h264\")\n        nParent.knobs()\['mov64_dnxhd_codec_profile'].setVisible(False)\n        nParent.knobs()\['mov64_dnxhr_codec_profile'].setVisible(False)\n        nParent.knobs()\['mov_prores_codec_profile'].setVisible(False)\n        nParent.knobs()\['mov_h264_codec_profile'].setVisible(True)\n        nParent.knobs()\['mov64_pixel_format'].setVisible(False)\n        nParent.knobs()\['mov64_quality'].setVisible(True)\n        nParent.knobs()\['mov64_ycbcr_matrix_type'].setVisible(True)\n        nParent.knobs()\['mov64_gop_size'].setVisible(True)\n        nParent.knobs()\['mov64_b_frames'].setVisible(True)\n        nParent.knobs()\['mov64_bitrate_divider'].setVisible(True)\n        nParent.knobs()\['mov64_limit_bitrate'].setVisible(False)\n        nParent.knobs()\['mov64_bitrate'].setVisible(True)\n        nParent.knobs()\['mov64_bitrate_tolerance'].setVisible(True)\n        nParent.knobs()\['mov64_quality_min'].setVisible(True)\n        nParent.knobs()\['mov64_quality_max'].setVisible(True)\n        nParent.knobs()\['mov_h264_codec_profile'].setEnabled(True)\n\n    elif n\['mov64_codec'].getValue()==15:\n        #print(\"showing Motion JPEG A\")\n        nParent.knobs()\['mov64_dnxhd_codec_profile'].setVisible(False)\n        nParent.knobs()\['mov64_dnxhr_codec_profile'].setVisible(False)\n        nParent.knobs()\['mov_prores_codec_profile'].setVisible(False)\n        nParent.knobs()\['mov_h264_codec_profile'].setVisible(False)\n        nParent.knobs()\['mov64_pixel_format'].setVisible(True)\n        nParent.knobs()\['mov64_quality'].setVisible(True)\n        nParent.knobs()\['mov64_ycbcr_matrix_type'].setVisible(True)\n        nParent.knobs()\['mov64_gop_size'].setVisible(False)\n        nParent.knobs()\['mov64_b_frames'].setVisible(False)\n        nParent.knobs()\['mov64_bitrate_divider'].setVisible(True)\n        nParent.knobs()\['mov64_limit_bitrate'].setVisible(False)\n        nParent.knobs()\['mov64_bitrate'].setVisible(True)\n        nParent.knobs()\['mov64_bitrate_tolerance'].setVisible(True)\n        nParent.knobs()\['mov64_quality_min'].setVisible(True)\n        nParent.knobs()\['mov64_quality_max'].setVisible(True)\n        nParent.knobs()\['mov64_pixel_format'].setEnabled(True)\n\n    elif n\['mov64_codec'].getValue()==16:\n        #print(\"showing Motion JPEG B\")\n        nParent.knobs()\['mov64_dnxhd_codec_profile'].setVisible(False)\n        nParent.knobs()\['mov64_dnxhr_codec_profile'].setVisible(False)\n        nParent.knobs()\['mov_prores_codec_profile'].setVisible(False)\n        nParent.knobs()\['mov_h264_codec_profile'].setVisible(False)\n        nParent.knobs()\['mov64_pixel_format'].setVisible(True)\n        nParent.knobs()\['mov64_quality'].setVisible(True)\n        nParent.knobs()\['mov64_ycbcr_matrix_type'].setVisible(True)\n        nParent.knobs()\['mov64_gop_size'].setVisible(False)\n        nParent.knobs()\['mov64_b_frames'].setVisible(False)\n        nParent.knobs()\['mov64_bitrate_divider'].setVisible(True)\n        nParent.knobs()\['mov64_limit_bitrate'].setVisible(False)\n        nParent.knobs()\['mov64_bitrate'].setVisible(True)\n        nParent.knobs()\['mov64_bitrate_tolerance'].setVisible(True)\n        nParent.knobs()\['mov64_quality_min'].setVisible(True)\n        nParent.knobs()\['mov64_quality_max'].setVisible(True)\n        nParent.knobs()\['mov64_pixel_format'].setEnabled(True)\n\n    elif n\['mov64_codec'].getValue()==17:\n        #print(\"showing MEPG-4\")\n        nParent.knobs()\['mov64_dnxhd_codec_profile'].setVisible(False)\n        nParent.knobs()\['mov64_dnxhr_codec_profile'].setVisible(False)\n        nParent.knobs()\['mov_prores_codec_profile'].setVisible(False)\n        nParent.knobs()\['mov_h264_codec_profile'].setVisible(False)\n        nParent.knobs()\['mov64_pixel_format'].setVisible(True)\n        nParent.knobs()\['mov64_quality'].setVisible(True)\n        nParent.knobs()\['mov64_ycbcr_matrix_type'].setVisible(True)\n        nParent.knobs()\['mov64_gop_size'].setVisible(True)\n        nParent.knobs()\['mov64_b_frames'].setVisible(True)\n        nParent.knobs()\['mov64_bitrate_divider'].setVisible(True)\n        nParent.knobs()\['mov64_limit_bitrate'].setVisible(True)\n        nParent.knobs()\['mov64_bitrate'].setVisible(True)\n        nParent.knobs()\['mov64_bitrate_tolerance'].setVisible(True)\n        nParent.knobs()\['mov64_quality_min'].setVisible(True)\n        nParent.knobs()\['mov64_quality_max'].setVisible(True)\n        nParent.knobs()\['mov64_pixel_format'].setEnabled(True)\n\n    elif n\['mov64_codec'].getValue()==18:\n        #print(\"showing Photo - JPEG\")\n        nParent.knobs()\['mov64_dnxhd_codec_profile'].setVisible(False)\n        nParent.knobs()\['mov64_dnxhr_codec_profile'].setVisible(False)\n        nParent.knobs()\['mov_prores_codec_profile'].setVisible(False)\n        nParent.knobs()\['mov_h264_codec_profile'].setVisible(False)\n        nParent.knobs()\['mov64_pixel_format'].setVisible(True)\n        nParent.knobs()\['mov64_quality'].setVisible(True)\n        nParent.knobs()\['mov64_ycbcr_matrix_type'].setVisible(True)\n        nParent.knobs()\['mov64_gop_size'].setVisible(False)\n        nParent.knobs()\['mov64_b_frames'].setVisible(False)\n        nParent.knobs()\['mov64_bitrate_divider'].setVisible(True)\n        nParent.knobs()\['mov64_limit_bitrate'].setVisible(False)\n        nParent.knobs()\['mov64_bitrate'].setVisible(True)\n        nParent.knobs()\['mov64_bitrate_tolerance'].setVisible(True)\n        nParent.knobs()\['mov64_quality_min'].setVisible(True)\n        nParent.knobs()\['mov64_quality_max'].setVisible(True)\n        nParent.knobs()\['mov64_pixel_format'].setEnabled(True)\n\n    elif n\['mov64_codec'].getValue()==19:\n        #print(\"showing PNG\")\n        nParent.knobs()\['mov64_dnxhd_codec_profile'].setVisible(False)\n        nParent.knobs()\['mov64_dnxhr_codec_profile'].setVisible(False)\n        nParent.knobs()\['mov_prores_codec_profile'].setVisible(False)\n        nParent.knobs()\['mov_h264_codec_profile'].setVisible(False)\n        nParent.knobs()\['mov64_pixel_format'].setVisible(True)\n        nParent.knobs()\['mov64_quality'].setVisible(False)\n        nParent.knobs()\['mov64_ycbcr_matrix_type'].setVisible(False)\n        nParent.knobs()\['mov64_gop_size'].setVisible(False)\n        nParent.knobs()\['mov64_b_frames'].setVisible(False)\n        nParent.knobs()\['mov64_bitrate_divider'].setVisible(False)\n        nParent.knobs()\['mov64_limit_bitrate'].setVisible(False)\n        nParent.knobs()\['mov64_bitrate'].setVisible(False)\n        nParent.knobs()\['mov64_bitrate_tolerance'].setVisible(False)\n        nParent.knobs()\['mov64_quality_min'].setVisible(False)\n        nParent.knobs()\['mov64_quality_max'].setVisible(False)\n        nParent.knobs()\['mov64_pixel_format'].setEnabled(True)\n\n    elif n\['mov64_codec'].getValue()==20:\n        #print(\"showing Uncompressed\")\n        nParent.knobs()\['mov64_dnxhd_codec_profile'].setVisible(False)\n        nParent.knobs()\['mov64_dnxhr_codec_profile'].setVisible(False)\n        nParent.knobs()\['mov_prores_codec_profile'].setVisible(False)\n        nParent.knobs()\['mov_h264_codec_profile'].setVisible(False)\n        nParent.knobs()\['mov64_pixel_format'].setVisible(True)\n        nParent.knobs()\['mov64_quality'].setVisible(False)\n        nParent.knobs()\['mov64_ycbcr_matrix_type'].setVisible(True)\n        nParent.knobs()\['mov64_gop_size'].setVisible(False)\n        nParent.knobs()\['mov64_b_frames'].setVisible(False)\n        nParent.knobs()\['mov64_bitrate_divider'].setVisible(False)\n        nParent.knobs()\['mov64_limit_bitrate'].setVisible(False)\n        nParent.knobs()\['mov64_bitrate'].setVisible(False)\n        nParent.knobs()\['mov64_bitrate_tolerance'].setVisible(False)\n        nParent.knobs()\['mov64_quality_min'].setVisible(False)\n        nParent.knobs()\['mov64_quality_max'].setVisible(False)\n        nParent.knobs()\['mov64_pixel_format'].setEnabled(True)\n\n    else :\n        #print(\"Unknown Codec - showing All\")\n        nParent.knobs()\['mov64_dnxhd_codec_profile'].setVisible(True)\n        nParent.knobs()\['mov64_dnxhr_codec_profile'].setVisible(True)\n        nParent.knobs()\['mov_prores_codec_profile'].setVisible(True)\n        nParent.knobs()\['mov_h264_codec_profile'].setVisible(True)\n        nParent.knobs()\['mov64_pixel_format'].setVisible(True)\n        nParent.knobs()\['mov64_quality'].setVisible(True)\n        nParent.knobs()\['mov64_ycbcr_matrix_type'].setVisible(True)\n        nParent.knobs()\['mov64_gop_size'].setVisible(True)\n        nParent.knobs()\['mov64_b_frames'].setVisible(True)\n        nParent.knobs()\['mov64_bitrate_divider'].setVisible(True)\n        nParent.knobs()\['mov64_limit_bitrate'].setVisible(True)\n        nParent.knobs()\['mov64_bitrate'].setVisible(True)\n        nParent.knobs()\['mov64_bitrate_tolerance'].setVisible(True)\n        nParent.knobs()\['mov64_quality_min'].setVisible(True)\n        nParent.knobs()\['mov64_quality_max'].setVisible(True)\n        \n"
+  xpos 662
+  ypos 22
   addUserKnob {20 User}
   addUserKnob {1 nimCompPrefix l "Render Prefix"}
   addUserKnob {1 nimCompTag l "Render Tag"}
@@ -126,7 +119,7 @@ Gizmo {
  }
  Output {
   name Output1
-  xpos 335
-  ypos 358
+  xpos 662
+  ypos 122
  }
 end_group
