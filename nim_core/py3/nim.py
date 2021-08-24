@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: nim.py
-# Version:  v5.0.11.210722
+# Version:  v5.0.12.210802
 #
 # Copyright (c) 2014-2021 NIM Labs LLC
 # All rights reserved.
@@ -23,7 +23,7 @@ class NIM( object ) :
     
     def __init__(self) :
         'Initializes the NIM attributes'
-        super( NIM, self ).__init__()
+        # super( NIM, self ).__init__()
         self.nim={}
         
         #  Store preferences :
