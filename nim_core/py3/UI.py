@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: UI.py
-# Version:  v5.0.12.210802
+# Version:  v5.0.13.210825
 #
 # Copyright (c) 2014-2021 NIM Labs LLC
 # All rights reserved.
@@ -48,7 +48,7 @@ except ImportError :
                 print("NIM UI: Failed to UI Modules")
 
 #  Variables :
-version='v5.0.12'
+version='v5.0.13'
 WIN=''
 startTime=''
 winTitle='NIM_'+version
@@ -1974,13 +1974,17 @@ class GUI(QtGui.QMainWindow) :
         #  Set Shot/Asset image :
         if _type and img_loc :
             #print("set image")
+            _data = None
             try :
                 myssl = ssl.create_default_context()
                 myssl.check_hostname=False
                 myssl.verify_mode=ssl.CERT_NONE
                 _data=urllib.request.urlopen( img_loc,context=myssl ).read()
             except :
-                _data=urllib.request.urlopen( img_loc ).read()
+                try :
+                    _data=urllib.request.urlopen( img_loc ).read()
+                except :
+                    print('Failed to read image from url.')
             
             if _data is not None :
                 try :
