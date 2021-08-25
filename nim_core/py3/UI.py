@@ -1974,13 +1974,17 @@ class GUI(QtGui.QMainWindow) :
         #  Set Shot/Asset image :
         if _type and img_loc :
             #print("set image")
+            _data = None
             try :
                 myssl = ssl.create_default_context()
                 myssl.check_hostname=False
                 myssl.verify_mode=ssl.CERT_NONE
                 _data=urllib.request.urlopen( img_loc,context=myssl ).read()
             except :
-                _data=urllib.request.urlopen( img_loc ).read()
+                try :
+                    _data=urllib.request.urlopen( img_loc ).read()
+                except :
+                    print('Failed to read image from url.')
             
             if _data is not None :
                 try :
