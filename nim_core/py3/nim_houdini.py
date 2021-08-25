@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: nim_houdini.py
-# Version:  v5.0.12.210802
+# Version:  v5.0.13.210825
 #
 # Copyright (c) 2014-2021 NIM Labs LLC
 # All rights reserved.
@@ -33,7 +33,7 @@ except :
             pass
 
 #  Variables :
-version='v5.0.12'
+version='v5.0.13'
 winTitle='NIM_'+version
 
 def get_mainWin() :
@@ -474,21 +474,6 @@ def mk_workspace( proj_folder='', renPath='' ) :
     workspace +='Scenes=./scenes\n'
     workspace +='Sounds=./sceneassets/sound\n'
     workspace +='VideoPost=./vpost\n'
-    workspace +='[XReferenceDirs]\n'
-    workspace +='Dir1=./scenes\n'
-
-    #TODO: UPDATE WITH ACTIVE BITMAP DIRS
-    workspace +='[BitmapDirs]\n'
-    workspace +='Dir1=C:/Program Files/Autodesk/3ds Max 2016/Maps\n'
-    workspace +='Dir2=C:/Program Files/Autodesk/3ds Max 2016/Maps/glare\n'
-    workspace +='Dir3=C:/Program Files/Autodesk/3ds Max 2016/Maps/adskMtl\n'
-    workspace +='Dir4=C:/Program Files/Autodesk/3ds Max 2016/Maps/Noise\n'
-    workspace +='Dir5=C:/Program Files/Autodesk/3ds Max 2016/Maps/Substance\noises\n'
-    workspace +='Dir6=C:/Program Files/Autodesk/3ds Max 2016/Maps/Substance\textures\n'
-    workspace +='Dir7=C:/Program Files/Autodesk/3ds Max 2016/Maps/mental_mill\n'
-    workspace +='Dir8=C:/Program Files/Autodesk/3ds Max 2016/Maps/fx\n'
-    workspace +='Dir9=C:/Program Files/Autodesk/3ds Max 2016/Maps/Particle Flow Presets\n'
-    workspace +='Dir10=./downloads\n'
 
     return workspace
     
