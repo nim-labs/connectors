@@ -53,12 +53,30 @@ def set_vars( nim=None ) :
     try:
         #TEST FOR EXISTING NIM DATA
         rt.execute("rootNodeDataCA.nim_user")
+        rt.execute("sceneDataCA.nim_user")
     except:   
         makeGlobalAttrs = True
     
 
     if makeGlobalAttrs :
         P.info("NIM DATA Not Found.\nAdding Global Attributes")
+
+        # clear custom attributes
+        nimAttrDel = 'z=1 \n\
+                        while z !=undefined do \n\
+                        ( \n\
+                            x = rootscene \n\
+                            z = custattributes.getdef x 1 \n\
+                            custAttributes.delete x z \n\
+                        )'
+        try :
+            rt.execute(nimAttrDel)
+            P.info("Root and Scene attributes cleared")
+        except :
+            P.error("Failed to clear global attributes")
+            return
+
+        # add custom attributes
         nimAttrCmd = 'sceneDataCADef = attributes sceneDataCADef version:1 attribID:#(0x4fb91dfa, 0x73284f9e) \n\
                         (   \n\
                             parameters main rollout:params \n\
@@ -124,20 +142,23 @@ def set_vars( nim=None ) :
             P.error("Failed to create global attributes")
             return
 
-    P.info("Reading Global Attributes")
-    nimAttrReadCmd = 'thescene = (refs.dependents rootnode)[1] \n\
-                      rootNodeDataCA = undefined \n\
-                      if(rootnode.custAttributes.count != 0) do \n\
-                         rootNodeDataCA = rootnode.custAttributes[rootnode.custAttributes.count] \n\
-                      sceneDataCA = undefined \n\
-                      if(thescene.custAttributes.count != 0) do \n\
-                         sceneDataCA = thescene.custAttributes[thescene.custAttributes.count] \n'
-    try:
-        rt.execute(nimAttrReadCmd)
-    except:
-        P.error('Failed to read global attributes')
-        return
+        # read custom attributes
+        nimAttrReadCmd = 'thescene = (refs.dependents rootnode)[1] \n\
+                          rootNodeDataCA = undefined \n\
+                          if(rootnode.custAttributes.count != 0) do \n\
+                             rootNodeDataCA = rootnode.custAttributes[rootnode.custAttributes.count] \n\
+                          sceneDataCA = undefined \n\
+                          if(thescene.custAttributes.count != 0) do \n\
+                             sceneDataCA = thescene.custAttributes[thescene.custAttributes.count] \n'
+        try:
+            rt.execute(nimAttrReadCmd)
+        except:
+            P.error('Failed to read global attributes')
+            return
 
+
+    P.info("Reading Global Attributes")
+    
     #  User :
     userInfo=nim.userInfo()
     
@@ -589,16 +610,18 @@ def mk_workspace( proj_folder='', renPath='' ) :
     workspace +='Dir1=./scenes\n'
 
     #TODO: UPDATE WITH ACTIVE BITMAP DIRS
+    maxLocation = rt.symbolicPaths.getPathValue('$max')
+
     workspace +='[BitmapDirs]\n'
-    workspace +='Dir1=C:/Program Files/Autodesk/3ds Max 2016/Maps\n'
-    workspace +='Dir2=C:/Program Files/Autodesk/3ds Max 2016/Maps/glare\n'
-    workspace +='Dir3=C:/Program Files/Autodesk/3ds Max 2016/Maps/adskMtl\n'
-    workspace +='Dir4=C:/Program Files/Autodesk/3ds Max 2016/Maps/Noise\n'
-    workspace +='Dir5=C:/Program Files/Autodesk/3ds Max 2016/Maps/Substance\noises\n'
-    workspace +='Dir6=C:/Program Files/Autodesk/3ds Max 2016/Maps/Substance\textures\n'
-    workspace +='Dir7=C:/Program Files/Autodesk/3ds Max 2016/Maps/mental_mill\n'
-    workspace +='Dir8=C:/Program Files/Autodesk/3ds Max 2016/Maps/fx\n'
-    workspace +='Dir9=C:/Program Files/Autodesk/3ds Max 2016/Maps/Particle Flow Presets\n'
+    workspace +='Dir1='+maxLocation+'/Maps\n'
+    workspace +='Dir2='+maxLocation+'/Maps/glare\n'
+    workspace +='Dir3='+maxLocation+'/Maps/adskMtl\n'
+    workspace +='Dir4='+maxLocation+'/Maps/Noise\n'
+    workspace +='Dir5='+maxLocation+'/Maps/Substance/noises\n'
+    workspace +='Dir6='+maxLocation+'/Maps/Substance/textures\n'
+    workspace +='Dir7='+maxLocation+'/Maps/mental_mill\n'
+    workspace +='Dir8='+maxLocation+'/Maps/fx\n'
+    workspace +='Dir9='+maxLocation+'/Maps/Particle Flow Presets\n'
     workspace +='Dir10=./downloads\n'
 
     return workspace
@@ -657,11 +680,12 @@ def mk_proj( path='', renPath='' ) :
     try :
         pathToSet=path.replace('\\', '/')+'/'
         if os.path.isdir( pathToSet ) :
-            mpPM.setCurrentProjectFolder ( projPath )
+            mpPM.setCurrentProjectFolder ( pathToSet )
             P.info( 'nim_3dsmax - Current Project Set: %s\n' % pathToSet )
         else :
             P.info('Project not set!')
-    except : pass
+    except : 
+        P.error('Failed to set project.')
     
     return True
     
