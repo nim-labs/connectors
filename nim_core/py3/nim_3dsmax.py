@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: nim_3dsmax.py
-# Version:  v5.0.13.210825
+# Version:  v5.0.14.210902
 #
 # Copyright (c) 2014-2021 NIM Labs LLC
 # All rights reserved.
@@ -45,33 +45,32 @@ def get_mainWin() :
     return maxWin
 
 def set_vars( nim=None ) :
-    'Add variables to 3dsMax Globals'
+    'Add custom attributes to 3dsMax Globals'
     
-    P.info( '\n3dsMax - Setting Globals variables...' )
+    P.info( '\n3dsMax - Setting Globals Attributes...' )
 
     makeGlobalAttrs = False
     try:
         #TEST FOR EXISTING NIM DATA
         rt.execute("rootNodeDataCA.nim_user")
-        rt.execute("sceneDataCA.nim_user")
     except:   
         makeGlobalAttrs = True
     
 
     if makeGlobalAttrs :
-        P.info("NIM DATA Not Found.\nAdding Global Attributes")
+        P.info("NIM data not found...\nAdding Global Attributes")
 
         # clear custom attributes
         nimAttrDel = 'z=1 \n\
                         while z !=undefined do \n\
                         ( \n\
-                            x = rootscene \n\
+                            x = rootnode \n\
                             z = custattributes.getdef x 1 \n\
                             custAttributes.delete x z \n\
                         )'
         try :
             rt.execute(nimAttrDel)
-            P.info("Root and Scene attributes cleared")
+            P.info("Global attributes cleared")
         except :
             P.error("Failed to clear global attributes")
             return
@@ -128,28 +127,21 @@ def set_vars( nim=None ) :
                                 edittext nim_fileType "NIM nim_fileType" \n\
                             ) \n\
                         ) \n\
-                        thescene = (refs.dependents rootnode)[1] \n\
                         rootNodeDataCA = undefined \n\
                         if (custattributes.add rootnode sceneDataCADef) do \n\
-                            rootNodeDataCA = rootnode.custAttributes[rootnode.custAttributes.count] \n\
-                        sceneDataCA = undefined \n\
-                        if (custattributes.add thescene sceneDataCADef) do \n\
-                            sceneDataCA = thescene.custAttributes[thescene.custAttributes.count] \n'
+                            rootNodeDataCA = rootnode.custAttributes[rootnode.custAttributes.count] \n'
         try:
             rt.execute(nimAttrCmd)
-            P.info("Root and Scene attributes added")
+            P.info("Global attributes added")
         except:
             P.error("Failed to create global attributes")
             return
 
-        # read custom attributes
-        nimAttrReadCmd = 'thescene = (refs.dependents rootnode)[1] \n\
-                          rootNodeDataCA = undefined \n\
-                          if(rootnode.custAttributes.count != 0) do \n\
-                             rootNodeDataCA = rootnode.custAttributes[rootnode.custAttributes.count] \n\
-                          sceneDataCA = undefined \n\
-                          if(thescene.custAttributes.count != 0) do \n\
-                             sceneDataCA = thescene.custAttributes[thescene.custAttributes.count] \n'
+    else :
+        P.info("Loading Global Attributes")
+        # load custom attributes
+        nimAttrReadCmd = 'if(rootnode.custAttributes.count != 0) do \n\
+                             rootNodeDataCA = rootnode.custAttributes[rootnode.custAttributes.count] \n'
         try:
             rt.execute(nimAttrReadCmd)
         except:
@@ -157,207 +149,76 @@ def set_vars( nim=None ) :
             return
 
 
-    P.info("Reading Global Attributes")
+    P.info("Setting Global Attributes")
     
     #  User :
     userInfo=nim.userInfo()
     
-    '''
-    if not mc.attributeQuery( 'nim_user', node='defaultRenderGlobals', exists=True) :
-        mc.addAttr( 'defaultRenderGlobals', longName='nim_user', dt='string' )
-    mc.setAttr( 'defaultRenderGlobals.nim_user', userInfo['name'], type='string' )
-    '''
     rt.execute('rootNodeDataCA.nim_user="'+str(userInfo['name'])+'"' )
-    rt.execute('sceneDataCA.nim_user="'+str(userInfo['name'])+'"' )
 
     #  User ID :
-    '''
-    if not mc.attributeQuery( 'nim_userID', node='defaultRenderGlobals', exists=True) :
-        mc.addAttr( 'defaultRenderGlobals', longName='nim_userID', dt='string' )
-    mc.setAttr( 'defaultRenderGlobals.nim_userID', userInfo['ID'], type='string' )
-    '''
     rt.execute('rootNodeDataCA.nim_userID="'+str(userInfo['ID'])+'"' )
-    rt.execute('sceneDataCA.nim_userID="'+str(userInfo['ID'])+'"' )
 
     #  Tab/Class :
-    '''
-    if not mc.attributeQuery( 'nim_class', node='defaultRenderGlobals', exists=True) :
-        mc.addAttr( 'defaultRenderGlobals', longName='nim_class', dt='string' )
-    mc.setAttr( 'defaultRenderGlobals.nim_class', nim.tab(), type='string' )
-    '''
     rt.execute('rootNodeDataCA.nim_class="'+str(nim.tab())+'"' )
-    rt.execute('sceneDataCA.nim_class="'+str(nim.tab())+'"' )
 
     #  Server :
-    '''
-    if not mc.attributeQuery( 'nim_server', node='defaultRenderGlobals', exists=True) :
-        mc.addAttr( 'defaultRenderGlobals', longName='nim_server', dt="string")
-    mc.setAttr( 'defaultRenderGlobals.nim_server', nim.server(), type='string' )
-    '''
     rt.execute('rootNodeDataCA.nim_server="'+str(nim.server())+'"' )
-    rt.execute('sceneDataCA.nim_server="'+str(nim.server())+'"' )
 
     #  Server ID :
-    '''
-    if not mc.attributeQuery( 'nim_serverID', node='defaultRenderGlobals', exists=True) :
-        mc.addAttr( 'defaultRenderGlobals', longName='nim_serverID', dt="string")
-    mc.setAttr( 'defaultRenderGlobals.nim_serverID', str(nim.ID('server')), type='string' )
-    '''
     rt.execute('rootNodeDataCA.nim_serverID="'+str(nim.ID('server'))+'"' )
-    rt.execute('sceneDataCA.nim_serverID="'+str(nim.ID('server'))+'"' )
 
     #  Job :
-    '''
-    if not mc.attributeQuery( 'nim_jobName', node='defaultRenderGlobals', exists=True) :
-        mc.addAttr( 'defaultRenderGlobals', longName='nim_jobName', dt="string")
-    mc.setAttr( 'defaultRenderGlobals.nim_jobName', nim.name('job'), type='string' )
-    '''
     rt.execute('rootNodeDataCA.nim_jobName="'+str(nim.name('job'))+'"' )
-    rt.execute('sceneDataCA.nim_jobName="'+str(nim.name('job'))+'"' )
 
     #  Job ID :
-    '''
-    if not mc.attributeQuery( 'nim_jobID', node='defaultRenderGlobals', exists=True) :
-        mc.addAttr( 'defaultRenderGlobals', longName='nim_jobID', dt="string")
-    mc.setAttr( 'defaultRenderGlobals.nim_jobID', str(nim.ID('job')), type='string' )
-    '''
     rt.execute('rootNodeDataCA.nim_jobID="'+str(nim.ID('job'))+'"' )
-    rt.execute('sceneDataCA.nim_jobID="'+str(nim.ID('job'))+'"' )
 
     #  Show :
-    '''
-    if not mc.attributeQuery( 'nim_showName', node='defaultRenderGlobals', exists=True) :
-        mc.addAttr( 'defaultRenderGlobals', longName='nim_showName', dt="string")
-    mc.setAttr( 'defaultRenderGlobals.nim_showName', nim.name('show'), type='string' )
-    '''
     rt.execute('rootNodeDataCA.nim_showName="'+str(nim.name('show'))+'"' )
-    rt.execute('sceneDataCA.nim_showName="'+str(nim.name('show'))+'"' )
 
     #  Show ID :
-    '''
-    if nim.tab()=='SHOT' :
-        if not mc.attributeQuery( 'nim_showID', node='defaultRenderGlobals', exists=True) :
-            mc.addAttr( 'defaultRenderGlobals', longName='nim_showID', dt="string")
-        mc.setAttr( 'defaultRenderGlobals.nim_showID', str(nim.ID('show')), type='string' )
-    '''
     rt.execute('rootNodeDataCA.nim_showID="'+str(nim.ID('show'))+'"' )
-    rt.execute('sceneDataCA.nim_showID="'+str(nim.ID('show'))+'"' )
 
     #  Shot :
-    '''
-    if not mc.attributeQuery( 'nim_shot', node='defaultRenderGlobals', exists=True) :
-        mc.addAttr( 'defaultRenderGlobals', longName='nim_shot', dt="string")
-    mc.setAttr( 'defaultRenderGlobals.nim_shot', str(nim.name('shot')), type='string' )
-    '''
     rt.execute('rootNodeDataCA.nim_shot="'+str(nim.name('shot'))+'"' )
-    rt.execute('sceneDataCA.nim_shot="'+str(nim.name('shot'))+'"' )
 
     #  Shot ID :
-    '''
-    if not mc.attributeQuery( 'nim_shotID', node='defaultRenderGlobals', exists=True) :
-        mc.addAttr( 'defaultRenderGlobals', longName='nim_shotID', dt="string")
-    mc.setAttr( 'defaultRenderGlobals.nim_shotID', str(nim.ID('shot')), type='string' )
-    '''
     rt.execute('rootNodeDataCA.nim_shotID="'+str(nim.ID('shot'))+'"' )
-    rt.execute('sceneDataCA.nim_shotID="'+str(nim.ID('shot'))+'"' )
 
     #  Asset :
-    '''
-    if nim.tab()=='ASSET' :
-        if not mc.attributeQuery( 'nim_asset', node='defaultRenderGlobals', exists=True) :
-            mc.addAttr( 'defaultRenderGlobals', longName='nim_asset', dt="string")
-        mc.setAttr( 'defaultRenderGlobals.nim_asset', str(nim.name('asset')), type='string' )
-    '''
     rt.execute('rootNodeDataCA.nim_asset="'+str(nim.name('asset'))+'"' )
-    rt.execute('sceneDataCA.nim_asset="'+str(nim.name('asset'))+'"' )
 
     #  Asset ID :
-    '''
-    if nim.tab()=='ASSET' :
-        if not mc.attributeQuery( 'nim_assetID', node='defaultRenderGlobals', exists=True) :
-            mc.addAttr( 'defaultRenderGlobals', longName='nim_assetID', dt="string")
-        mc.setAttr( 'defaultRenderGlobals.nim_assetID', str(nim.ID('asset')), type='string' )
-    '''
     rt.execute('rootNodeDataCA.nim_assetID="'+str(nim.ID('asset'))+'"' )
-    rt.execute('sceneDataCA.nim_assetID="'+str(nim.ID('asset'))+'"' )
 
     #  File ID :
-    '''
-    if not mc.attributeQuery( 'nim_fileID', node='defaultRenderGlobals', exists=True) :
-        mc.addAttr( 'defaultRenderGlobals', longName='nim_fileID', dt="string")
-    mc.setAttr( 'defaultRenderGlobals.nim_fileID', str(nim.ID('ver')), type='string' )
-    '''
     P.info("FileID: %s" % str(nim.ID('ver')))
     rt.execute('rootNodeDataCA.nim_fileID="'+str(nim.ID('ver'))+'"' )
-    rt.execute('sceneDataCA.nim_fileID="'+str(nim.ID('ver'))+'"' )
 
     #  Shot/Asset Name :
-    '''
-    if not mc.attributeQuery( 'nim_name', node='defaultRenderGlobals', exists=True) :
-        mc.addAttr( 'defaultRenderGlobals', longName='nim_name', dt="string")
-    '''
     if nim.tab()=='SHOT' :
-        #mc.setAttr( 'defaultRenderGlobals.nim_name', nim.name('shot'), type='string' )
         rt.execute('rootNodeDataCA.nim_name="'+str(nim.name('shot'))+'"' )
-        rt.execute('sceneDataCA.nim_name="'+str(nim.name('shot'))+'"' )
     elif nim.tab()=='ASSET' :
-        #mc.setAttr( 'defaultRenderGlobals.nim_name', nim.name('asset'), type='string' )
         rt.execute('rootNodeDataCA.nim_name="'+str(nim.name('asset'))+'"' )
-        rt.execute('sceneDataCA.nim_name="'+str(nim.name('asset'))+'"' )
     
     #  Basename :
-    '''
-    if not mc.attributeQuery( 'nim_basename', node='defaultRenderGlobals', exists=True) :
-        mc.addAttr( 'defaultRenderGlobals', longName='nim_basename', dt="string")
-    mc.setAttr( 'defaultRenderGlobals.nim_basename', nim.name('base'), type='string' )
-    '''
     rt.execute('rootNodeDataCA.nim_basename="'+str(nim.name('base'))+'"' )
-    rt.execute('sceneDataCA.nim_basename="'+str(nim.name('base'))+'"' )
 
     #  Task :
-    '''
-    if not mc.attributeQuery( 'nim_type', node='defaultRenderGlobals', exists=True) :
-        mc.addAttr( 'defaultRenderGlobals', longName='nim_type', dt="string")
-    mc.setAttr( 'defaultRenderGlobals.nim_type', nim.name( elem='task' ), type='string' )
-    '''
     rt.execute('rootNodeDataCA.nim_type="'+str(nim.name( elem='task'))+'"' )
-    rt.execute('sceneDataCA.nim_type="'+str(nim.name( elem='task'))+'"' )
 
     #  Task ID :
-    '''
-    if not mc.attributeQuery( 'nim_typeID', node='defaultRenderGlobals', exists=True) :
-        mc.addAttr( 'defaultRenderGlobals', longName='nim_typeID', dt="string")
-    mc.setAttr( 'defaultRenderGlobals.nim_typeID', str(nim.ID( elem='task' )), type='string' )
-    '''
     rt.execute('rootNodeDataCA.nim_typeID="'+str(nim.ID( elem='task' ))+'"' )
-    rt.execute('sceneDataCA.nim_typeID="'+str(nim.ID( elem='task' ))+'"' )
 
     #  Task Folder :
-    '''
-    if not mc.attributeQuery( 'nim_typeFolder', node='defaultRenderGlobals', exists=True) :
-        mc.addAttr( 'defaultRenderGlobals', longName='nim_typeFolder', dt="string")
-    mc.setAttr( 'defaultRenderGlobals.nim_typeFolder', str(nim.taskFolder()), type='string' )
-    '''
     rt.execute('rootNodeDataCA.nim_typeFolder="'+str(nim.taskFolder())+'"' )
-    rt.execute('sceneDataCA.nim_typeFolder="'+str(nim.taskFolder())+'"' )
 
     #  Tag :
-    '''
-    if not mc.attributeQuery( 'nim_tag', node='defaultRenderGlobals', exists=True) :
-        mc.addAttr( 'defaultRenderGlobals', longName='nim_tag', dt="string")
-    mc.setAttr( 'defaultRenderGlobals.nim_tag', nim.name('tag'), type='string' )
-    '''
     rt.execute('rootNodeDataCA.nim_tag="'+str(nim.name('tag'))+'"' )
-    rt.execute('sceneDataCA.nim_tag="'+str(nim.name('tag'))+'"' )
 
     #  File Type :
-    '''
-    if not mc.attributeQuery( 'nim_fileType', node='defaultRenderGlobals', exists=True) :
-        mc.addAttr( 'defaultRenderGlobals', longName='nim_fileType', dt="string")
-    mc.setAttr( 'defaultRenderGlobals.nim_fileType', nim.fileType(), type='string' )
-    '''
     rt.execute('rootNodeDataCA.nim_fileType="'+str(nim.fileType())+'"' )
-    rt.execute('sceneDataCA.nim_fileType="'+str(nim.fileType())+'"' )
 
     P.info('    Completed setting NIM attributes root node.')
     #nim.Print()
