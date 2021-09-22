@@ -1,9 +1,9 @@
 #****************************************************************************
 #
 # Filename: Houdini/nimMenu.py
-# Version:  2.5.0.161013
+# Version:  5.0.15.210922
 #
-# Copyright (c) 2014-2020 NIM Labs LLC
+# Copyright (c) 2014-2021 NIM Labs LLC
 # All rights reserved.
 #
 # Use of this software is subject to the terms of the NIM Labs license
@@ -18,13 +18,21 @@ action = sys.argv[1]
 
 nimScriptPath = hou.expandString('$NIM_CONNECTOR_ROOT')
 sys.path.append(nimScriptPath)
-print "NIM Script Path: %s" % nimScriptPath
+print("NIM Script Path: %s" % nimScriptPath)
 
 
 import nim_core.UI as nimUI
 import nim_core.nim_api as nimAPI
 import nim_core.nim_file as nimFile
 import nim_core.nim_win as nimWin
+
+try:
+    reload  # Python 2.7
+except NameError:
+    try:
+        from importlib import reload  # Python 3.4+
+    except ImportError:
+        from imp import reload  # Python 3.0 - 3.3
 
 reload(nimUI)
 reload(nimAPI)
@@ -33,69 +41,69 @@ reload(nimWin)
 
 def openFileAction():
     nimUI.mk('FILE')
-    print 'NIM: openFileAction'
+    print('NIM: openFileAction')
 
 def importFileAction():
     nimUI.mk('LOAD', _import=True )
-    print 'NIM: importFileAction'
+    print('NIM: importFileAction')
 
 def refereceFileAction():
     nimUI.mk('LOAD', ref=True)
-    print 'NIM: refereceFileAction'
+    print('NIM: refereceFileAction')
 
 def saveFileAction():
     nimUI.mk('SAVE')
-    print 'NIM: saveFileAction'
+    print('NIM: saveFileAction')
 
 def saveSelectedAction():
     nimUI.mk( mode='SAVE', _export=True )
-    print 'NIM: saveSelectedAction'
+    print('NIM: saveSelectedAction')
 
 def versionUpAction():
     nimAPI.versionUp()
-    print 'NIM: versionUpAction'
+    print('NIM: versionUpAction')
 
 def publishAction():
     nimUI.mk('PUB')
-    print 'NIM: publishAction'
+    print('NIM: publishAction')
 
 def changeUserAction():
     try:
         nimWin.userInfo()
-    except Exception, e :
-        print 'Sorry, there was a problem choosing NIM user...'
-        print '    %s' % traceback.print_exc()
-    print 'NIM: changeUserAction'
+    except Exception as e:
+        print('Sorry, there was a problem choosing NIM user...')
+        print('    %s' % traceback.print_exc())
+    print('NIM: changeUserAction')
 
 
 def reloadScriptsAction():
     nimFile.scripts_reload()
-    print 'NIM: reloadScriptsAction'
+    print('NIM: reloadScriptsAction')
 
 
 if action == 'open':
-	openFileAction()
+    openFileAction()
 
 if action == 'import':
-	importFileAction()
+    importFileAction()
 
 if action == 'ref':
-	refereceFileAction()
+    refereceFileAction()
 
 if action == 'saveas':
-	saveFileAction()
+    saveFileAction()
 
 if action == 'savesel':
-	saveSelectedAction()
+    saveSelectedAction()
 
 if action == 'ver':
-	versionUpAction()
+    versionUpAction()
 
 if action == 'pub':
-	publishAction()
+    publishAction()
 
 if action == 'user':
     changeUserAction()
 
 if action == 'reload':
-	reloadScriptsAction()
+    reloadScriptsAction()
