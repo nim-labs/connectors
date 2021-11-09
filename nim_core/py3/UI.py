@@ -1094,7 +1094,7 @@ class GUI(QtGui.QMainWindow) :
         self.checkBox.setText('Pub SymLink')
         self.checkBox.setMaximumWidth(90)
         self.checkBox.setCheckState( QtCore.Qt.Checked )
-        self.checkBox.setVisible( True )
+        self.checkBox.setVisible( False )
         
         #  Button elements :
         self.btn_1.setText('Publish')
