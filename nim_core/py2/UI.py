@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: UI.py
-# Version:  v5.0.15.210922
+# Version:  v5.0.18.211109
 #
 # Copyright (c) 2014-2021 NIM Labs LLC
 # All rights reserved.
@@ -48,7 +48,7 @@ except ImportError :
                 print "NIM UI: Failed to UI Modules"
 
 #  Variables :
-version='v5.0.15'
+version='v5.0.18'
 WIN=''
 startTime=''
 winTitle='NIM_'+version
@@ -1093,7 +1093,7 @@ class GUI(QtGui.QMainWindow) :
         self.checkBox.setText('Pub SymLink')
         self.checkBox.setMaximumWidth(90)
         self.checkBox.setCheckState( QtCore.Qt.Checked )
-        self.checkBox.setVisible( True )
+        self.checkBox.setVisible( False )
         
         #  Button elements :
         self.btn_1.setText('Publish')
