@@ -1494,7 +1494,7 @@ def get_tasks( app='all', userType='artist', assetID=None, shotID=None, onlyWith
     result = connect( method='get', params=params )
     return result
 
-def get_taskTypes( app='all', userType='artist', assetID=None, shotID=None, onlyWithFiles=None ) :
+def get_taskTypes( app='all', userType='artist', assetID=None, shotID=None, onlyWithFiles=None, pub=None ) :
     '''
     Retrieves the dictionary of available tasks types.
 
@@ -1529,6 +1529,10 @@ def get_taskTypes( app='all', userType='artist', assetID=None, shotID=None, only
         if onlyWithFiles == True : onlyWithFiles = 1
         else : onlyWithFiles = 0
         params['onlyWithFiles'] = onlyWithFiles
+    if pub is not None : 
+        if pub == True : pub = 1
+        else : pub = 0
+        params['pub'] = pub
 
     result = connect( method='get', params=params )
     return result
