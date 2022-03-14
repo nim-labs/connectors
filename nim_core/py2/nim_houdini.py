@@ -2,9 +2,9 @@
 #******************************************************************************
 #
 # Filename: nim_houdini.py
-# Version:  v5.0.18.211109
+# Version:  v5.1.2.220314
 #
-# Copyright (c) 2014-2021 NIM Labs LLC
+# Copyright (c) 2014-2022 NIM Labs LLC
 # All rights reserved.
 #
 # Use of this software is subject to the terms of the NIM Labs license
@@ -34,7 +34,7 @@ except :
             pass
 
 #  Variables :
-version='v5.0.18'
+version='v5.1.2'
 winTitle='NIM_'+version
 
 def get_mainWin() :
