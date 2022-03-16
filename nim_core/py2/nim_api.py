@@ -2,9 +2,9 @@
 #******************************************************************************
 #
 # Filename: nim_api.py
-# Version:  v5.0.18.211109
+# Version:  v5.1.2.220314
 #
-# Copyright (c) 2014-2021 NIM Labs LLC
+# Copyright (c) 2014-2022 NIM Labs LLC
 # All rights reserved.
 #
 # Use of this software is subject to the terms of the NIM Labs license
@@ -56,7 +56,7 @@ import nim_tools
 import nim_win as Win
 
 #  Variables :
-version='v5.0.18'
+version='v5.1.2'
 winTitle='NIM_'+version
 
 
@@ -1464,7 +1464,7 @@ def get_tasks( app='all', userType='artist', assetID=None, shotID=None, onlyWith
     result = connect( method='get', params=params )
     return result
 
-def get_taskTypes( app='all', userType='artist', assetID=None, shotID=None, onlyWithFiles=None ) :
+def get_taskTypes( app='all', userType='artist', assetID=None, shotID=None, onlyWithFiles=None, pub=None ) :
     '''
     Retrieves the dictionary of available tasks types.
 
@@ -1499,6 +1499,10 @@ def get_taskTypes( app='all', userType='artist', assetID=None, shotID=None, only
         if onlyWithFiles == True : onlyWithFiles = 1
         else : onlyWithFiles = 0
         params['onlyWithFiles'] = onlyWithFiles
+    if pub is not None : 
+        if pub == True : pub = 1
+        else : pub = 0
+        params['pub'] = pub
 
     result = connect( method='get', params=params )
     return result
