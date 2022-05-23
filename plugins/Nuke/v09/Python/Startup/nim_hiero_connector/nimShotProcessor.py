@@ -4,7 +4,7 @@
 # Filename: Nuke/Python/Startup/nim_hiero_connector/nimShotProcessor.py
 # Version:  v2.7.27.171106
 #
-# Copyright (c) 2014-2020 NIM Labs LLC
+# Copyright (c) 2014-2022 NIM Labs LLC
 # All rights reserved.
 #
 # Use of this software is subject to the terms of the NIM Labs license

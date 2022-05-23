@@ -3,7 +3,7 @@
 # Filename: AE/nimPanel.jsx
 # Version:  v2.0.0.160511
 #
-# Copyright (c) 2014-2020 NIM Labs LLC
+# Copyright (c) 2014-2022 NIM Labs LLC
 # All rights reserved.
 #
 # Use of this software is subject to the terms of the NIM Labs license
