@@ -5,7 +5,7 @@
 # Version:     	v5.0.11.210722
 # Compatible:	Python 3.x
 #
-# Copyright (c) 2014-2021 NIM Labs LLC
+# Copyright (c) 2014-2022 NIM Labs LLC
 # All rights reserved.
 #
 # Use of this software is subject to the terms of the NIM Labs license

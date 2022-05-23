@@ -3,7 +3,7 @@
 // Filename: nimPremiere.jsx
 // Version:  v4.0.55.200807
 //
-// Copyright (c) 2014-2020 NIM Labs LLC
+// Copyright (c) 2014-2022 NIM Labs LLC
 // All rights reserved.
 //
 // Use of this software is subject to the terms of the NIM Labs license

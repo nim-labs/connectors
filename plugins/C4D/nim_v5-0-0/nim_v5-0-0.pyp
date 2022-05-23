@@ -4,7 +4,7 @@
 # Filename: C4D/nim_v5-0-0.py
 # Version:  v5.0.0.210602
 #
-# Copyright (c) 2014-2021 NIM Labs LLC
+# Copyright (c) 2014-2022 NIM Labs LLC
 # All rights reserved.
 #
 # Use of this software is subject to the terms of the NIM Labs license
