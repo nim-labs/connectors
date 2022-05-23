@@ -4,7 +4,7 @@
 # Version:      4.0.47.200224
 # Compatible:   3dsMax 2021 and lower
 #
-# Copyright (c) 2014-2021 NIM Labs LLC
+# Copyright (c) 2014-2022 NIM Labs LLC
 # All rights reserved.
 #
 # Use of this software is subject to the terms of the NIM Labs license

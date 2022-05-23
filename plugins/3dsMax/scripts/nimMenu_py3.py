@@ -4,7 +4,7 @@
 # Version:      5.0.1.210608
 # Compatible:   3dsMax 2022 and higher
 #
-# Copyright (c) 2014-2021 NIM Labs LLC
+# Copyright (c) 2014-2022 NIM Labs LLC
 # All rights reserved.
 #
 # Use of this software is subject to the terms of the NIM Labs license
