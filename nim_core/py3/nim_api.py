@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: nim_api.py
-# Version:  v5.1.7.220523
+# Version:  v5.1.10.220615
 #
 # Copyright (c) 2014-2022 NIM Labs LLC
 # All rights reserved.
@@ -58,7 +58,7 @@ from . import nim_tools
 from . import nim_win as Win
 
 #  Variables :
-version='v5.1.7'
+version='v5.1.10'
 winTitle='NIM_'+version
 
 
@@ -600,6 +600,22 @@ def get_app() :
     except: pass
     return None
 
+def get_cultureCodes() :
+    '''
+    Returns a dictionary of active culture codes
+
+    Return:
+      Returns an associative array in the format
+      result->success        True/False
+      result->error          Includes any error or security messaging    
+      result->rows           An array of returned data
+      result->totalRows      The total count of returned rows in the array
+    
+    '''
+    params = {'q': 'getCultureCodes'}
+    result = connect( method='get', params=params )
+    return result
+
 
 #  Users  #
 
@@ -663,7 +679,7 @@ def add_job( name=None, number=None, numberTemplate=None, description=None, clie
     prod_shoot_date=None, prod_location=None, prod_supervised=None, editorial=None, editor=None, grading=None, colorist=None, \
     music=None, mix=None, sound=None, creative_lead=None, projectStatus=None, folder=None, projectStructureID=None, projectStructure=None, \
     jobStatusID=None, jobStatus=None, biddingLocationID=None, biddingLocation=None, \
-    assignedLocationID=None, assignedLocation=None, startDate=None, endDate=None, currency=None, customKeys=None, keywords=None) :
+    assignedLocationID=None, assignedLocation=None, startDate=None, endDate=None, currency=None, cultureID=None, customKeys=None, keywords=None) :
     '''
     Creates a new job. 
 
@@ -725,7 +741,10 @@ def add_job( name=None, number=None, numberTemplate=None, description=None, clie
         
         start_date              date            YYYY-mm-dd
         end_date                date            YYYY-mm-dd
-        currency                string          3 digit currency code
+        currency                string          3 digit currency code (DEPRECATED)
+                                                cultureID should be used instead of currency
+                                                If currency is set insead of cultureID, NIM will use the first matching cultureID
+        cultureID               integer         
         customKeys              dictionary      {"Custom Key Name" : "Value"}
         keywords                list            ["keyword1", "keyword2"]
         
@@ -771,6 +790,7 @@ def add_job( name=None, number=None, numberTemplate=None, description=None, clie
     if startDate is not None : params['start_date'] = startDate
     if endDate is not None : params['end_date'] = endDate
     if currency is not None : params['currency'] = currency
+    if cultureID is not None : params['cultureID'] = cultureID
     if customKeys is not None : params['customKeys'] = json.dumps(customKeys)
     if keywords is not None : params['keywords'] = json.dumps(keywords)
 
@@ -782,7 +802,7 @@ def update_job( jobID=None, name=None, number=None, description=None, client=Non
     prod_shoot_date=None, prod_location=None, prod_supervised=None, editorial=None, editor=None, grading=None, colorist=None, \
     music=None, mix=None, sound=None, creative_lead=None, projectStatus=None, folder=None, projectStructureID=None, projectStructure=None, \
     jobStatusID=None, jobStatus=None, biddingLocationID=None, biddingLocation=None, \
-    assignedLocationID=None, assignedLocation=None, startDate=None, endDate=None, currency=None, customKeys=None, keywords=None) :
+    assignedLocationID=None, assignedLocation=None, startDate=None, endDate=None, currency=None, cultureID=None, customKeys=None, keywords=None) :
     '''
     Updates an existing job based on the jobID.
 
@@ -847,7 +867,10 @@ def update_job( jobID=None, name=None, number=None, description=None, client=Non
 
         start_date              date            YYYY-mm-dd
         end_date                date            YYYY-mm-dd
-        currency                string          3 digit currency code
+        currency                string          3 digit currency code (DEPRECATED)
+                                                cultureID should be used instead of currency
+                                                If currency is set insead of cultureID, NIM will use the first matching cultureID
+        cultureID               integer
         customKeys              dictionary      {"Custom Key Name" : "Value"}
         keywords                list            ["keyword1", "keyword2"]
     '''
@@ -892,6 +915,7 @@ def update_job( jobID=None, name=None, number=None, description=None, client=Non
     if startDate is not None : params['start_date'] = startDate
     if endDate is not None : params['end_date'] = endDate
     if currency is not None : params['currency'] = currency
+    if cultureID is not None : params['cultureID'] = cultureID
     if customKeys is not None : params['customKeys'] = json.dumps(customKeys)
     if keywords is not None : params['keywords'] = json.dumps(keywords)
 
