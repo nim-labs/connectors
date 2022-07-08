@@ -41,11 +41,11 @@ try:
 				sys.path.append(nim_root+'/plugins/Nuke/v13.0/Python/Startup')
 				hiero.core.addPluginPath(nim_root+'/plugins/Nuke/v13.0/Python/Startup')
 			elif HieroVersionMajor == 13 and HieroVersionMinor >= 2:
-				# Loading NIM menu for NukeStudio 13.0vX
+				# Loading NIM menu for NukeStudio 13.2vX
 				sys.path.append(nim_root+'/plugins/Nuke/v13.2/Python/Startup')
 				hiero.core.addPluginPath(nim_root+'/plugins/Nuke/v13.2/Python/Startup')
 			else:
-				# Loading NIM menu for NukeStudio 13.0vX
+				# Loading NIM menu for NukeStudio 13.2vX
 				sys.path.append(nim_root+'/plugins/Nuke/v13.2/Python/Startup/nim_hiero_connector')
 				hiero.core.addPluginPath(nim_root+'/plugins/Nuke/v13.2/Python/Startup/nim_hiero_connector')
 	except:
