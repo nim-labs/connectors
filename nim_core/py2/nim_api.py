@@ -2173,7 +2173,7 @@ def versionUp( nim=None, padding=2, selected=False, win_launch=False, pub=False,
     if not shotCheck and not assetCheck :
         msg='Sorry, unable to retrieve Shot/Asset IDs from the current file.'
         if not win_launch :
-            msg +='\n  Please try saving from the NIM GUI'
+            msg +='\n  Please try saving from the NIM > Save As menu.'
         P.error( '\n'+msg )
         P.error( '    File Path = %s' % nim.filePath() )
         nim.Print()
@@ -2183,200 +2183,209 @@ def versionUp( nim=None, padding=2, selected=False, win_launch=False, pub=False,
     #  Version Up File :
     #  [AS] returning nim object from verUp to update if loading exported file
     verUpResult=F.verUp( nim=nim, padding=padding, selected=selected, win_launch=win_launch, pub=pub, symLink=symLink )
-    filePath = verUpResult['filepath']
-    verUpNim = verUpResult['nim']
-    P.info('Filepath: %s' % filePath)
-    P.info('NIM Basename: %s \n' % verUpNim.name(elem='base'))
-    #  [AS] END
     
-    #  Add file to API :
-    if filePath and os.path.isfile( filePath ) :
-        result_addFile=add_file( nim=nim, filePath=filePath, comment=nim.name( 'comment' ), pub=pub )
-        if result_addFile :
-            action=''
-            if nim.mode().lower() in ['pub', 'publish'] :
-                action='Published'
-            elif nim.mode().lower() in ['save', 'saveas'] :
-                action='Saved'
-            elif nim.mode().lower() in ['ver', 'verup', 'version', 'versionup'] :
-                action='Versioned Up'
-            P.info( 'File has been %s successfully.\n' % action )
-            if not pub :
-                if nim.mode().lower() in ['save', 'saveas'] :
-                    Win.popup( title=winTitle+' - Versioned Up', msg='File has been Saved successfully.' )
+    if verUpResult :
+        filePath = verUpResult['filepath']
+        verUpNim = verUpResult['nim']
+        P.info('Filepath: %s' % filePath)
+        P.info('NIM Basename: %s \n' % verUpNim.name(elem='base'))
+        #  [AS] END
+    
+        #  Add file to API :
+        if filePath and os.path.isfile( filePath ) :
+            result_addFile=add_file( nim=nim, filePath=filePath, comment=nim.name( 'comment' ), pub=pub )
+            if result_addFile :
+                action=''
+                if nim.mode().lower() in ['pub', 'publish'] :
+                    action='Published'
+                elif nim.mode().lower() in ['save', 'saveas'] :
+                    action='Saved'
                 elif nim.mode().lower() in ['ver', 'verup', 'version', 'versionup'] :
-                    Win.popup( title=winTitle+' - Versioned Up', msg='File has been Versioned Up successfully.' )
-            else :
-                #Win.popup( title=winTitle+' - Version\'ed Up', msg='File has been Published successfully.' )
-                pass
-            
-            #  Publish Sym-Links :
-            if pub and symLink :
-                P.info( 'Initiating Sym-Link Publish...' )
-                fileID, versInfo=None, None
-                basename=to_basename( nim=nim )
-                if nim.tab()=='SHOT' :
-                    versInfo=get_vers( shotID=nim.ID( 'shot' ), basename=basename, pub=True )
-                elif nim.tab()=='ASSET' :
-                    versInfo=get_vers( assetID=nim.ID( 'asset' ), basename=basename, pub=True )
-                for verInfo in versInfo :
-                    temp_path=os.path.normpath( os.path.join( verInfo['filepath'], verInfo['filename'] ) )
-                    if temp_path==filePath :
-                        fileID=verInfo['fileID']
-                        P.info( 'File ID = %s' % fileID )
-                        P.info( 'Publishing Sym-Link...' )
-                        #  Publish sym link, if necessary :
-                        if fileID :
-                            result=get( {'q': 'publishSymlink', 'fileID': str(fileID)} )
-                            P.info( '    Sym-Link Published!' )
-                            #Win.popup( title=winTitle+' - Publish', msg='Sym-Link Published!' )
-                        else :
-                            Win.popup( title=winTitle+' - Publish Error', msg='Problem publishing Sym-Link!!!' )
-                            P.error( 'Sorry!  Problem retrieving File ID.' )
-                        break
-            
-            #  Prompt to open exported file :
-            if selected :
-                result=Win.popup( title='NIM - Open Export?', type='okCancel', \
-                    msg='Would you like to open your newly exported file?' )
-                if result=='OK' :
-                    #  Maya :
-                    if nim.app()=='Maya' :
-                        import maya.cmds as mc
-                        try :
-                            mc.file( filePath, force=True, open=True, ignoreVersion=True, prompt=False )
-                            #  Set env vars brought over from nim_file
-                            P.info('Setting Environment Variables')
-                            P.info('NIM: %s \n' % verUpNim.name(elem='base'))
-                            import nim_maya as M
-                            M.set_vars( nim=verUpNim )
-                            nim = verUpNim
-                            
-                        except Exception, e :
-                            P.error( 'Failed reading the file: %s' % filePath )
-                            P.error( '    %s' % traceback.print_exc() )
-                            return False
-                    #  Nuke :
-                    elif nim.app()=='Nuke' :
-                        import nuke
-                        try :
-                            #  Prompt to Save :
-                            if nuke.root().modified() :
+                    action='Versioned Up'
+                P.info( 'File has been %s successfully.\n' % action )
+                if not pub :
+                    if nim.mode().lower() in ['save', 'saveas'] :
+                        Win.popup( title=winTitle+' - Versioned Up', msg='File has been Saved successfully.' )
+                    elif nim.mode().lower() in ['ver', 'verup', 'version', 'versionup'] :
+                        Win.popup( title=winTitle+' - Versioned Up', msg='File has been Versioned Up successfully.' )
+                else :
+                    #Win.popup( title=winTitle+' - Version\'ed Up', msg='File has been Published successfully.' )
+                    pass
+                
+                #  Publish Sym-Links :
+                if pub and symLink :
+                    P.info( 'Initiating Sym-Link Publish...' )
+                    fileID, versInfo=None, None
+                    basename=to_basename( nim=nim )
+                    if nim.tab()=='SHOT' :
+                        versInfo=get_vers( shotID=nim.ID( 'shot' ), basename=basename, pub=True )
+                    elif nim.tab()=='ASSET' :
+                        versInfo=get_vers( assetID=nim.ID( 'asset' ), basename=basename, pub=True )
+                    for verInfo in versInfo :
+                        temp_path=os.path.normpath( os.path.join( verInfo['filepath'], verInfo['filename'] ) )
+                        if temp_path==filePath :
+                            fileID=verInfo['fileID']
+                            P.info( 'File ID = %s' % fileID )
+                            P.info( 'Publishing Sym-Link...' )
+                            #  Publish sym link, if necessary :
+                            if fileID :
+                                result=get( {'q': 'publishSymlink', 'fileID': str(fileID)} )
+                                P.info( '    Sym-Link Published!' )
+                                #Win.popup( title=winTitle+' - Publish', msg='Sym-Link Published!' )
+                            else :
+                                Win.popup( title=winTitle+' - Publish Error', msg='Problem publishing Sym-Link!!!' )
+                                P.error( 'Sorry!  Problem retrieving File ID.' )
+                            break
+                
+                #  Prompt to open exported file :
+                if selected :
+                    result=Win.popup( title='NIM - Open Export?', type='okCancel', \
+                        msg='Would you like to open your newly exported file?' )
+                    if result=='OK' :
+                        #  Maya :
+                        if nim.app()=='Maya' :
+                            import maya.cmds as mc
+                            try :
+                                mc.file( filePath, force=True, open=True, ignoreVersion=True, prompt=False )
+                                #  Set env vars brought over from nim_file
+                                P.info('Setting Environment Variables')
+                                P.info('NIM: %s \n' % verUpNim.name(elem='base'))
+                                import nim_maya as M
+                                M.set_vars( nim=verUpNim )
+                                nim = verUpNim
+                                
+                            except Exception, e :
+                                P.error( 'Failed reading the file: %s' % filePath )
+                                P.error( '    %s' % traceback.print_exc() )
+                                return False
+                        #  Nuke :
+                        elif nim.app()=='Nuke' :
+                            import nuke
+                            try :
+                                #  Prompt to Save :
+                                if nuke.root().modified() :
+                                    import nim_nuke as N
+                                    result=N.Win_SavePySide.get_btn()
+                                    if result.lower()=='save' :
+                                        P.info('\nSaving file...\n')
+                                        cur_filePath=F.get_filePath()
+                                        nuke.scriptSaveAs( cur_filePath )
+                                    elif result.lower()=='verup' :
+                                        P.info('\nVersioning file up...\n')
+                                        try : versionUp()
+                                        except :
+                                            P.error('Problem running version up command.  Nothing done.')
+                                            return False
+                                    elif result.lower()=='no' :
+                                        P.info( '\nFile not saved before openning.\n' )
+                                    elif result.lower()=='cancel' :
+                                        P.info('\nCancelling file operation.\n')
+                                        return None
+                                #  Clear the scene, load file and rename :
+                                nuke.scriptClear()
+                                nuke.scriptOpen( filePath )
+                                PS=nuke.root()
+                                knob=PS.knob('name')
+                                knob.setValue( filePath.replace( '\\', '/' ) )
+                                
+                                #  Set env vars brought over from nim_file
+                                P.info('Setting Environment Variables')
+                                P.info('NIM: %s \n' % verUpNim.name(elem='base'))
                                 import nim_nuke as N
-                                result=N.Win_SavePySide.get_btn()
-                                if result.lower()=='save' :
-                                    P.info('\nSaving file...\n')
-                                    cur_filePath=F.get_filePath()
-                                    nuke.scriptSaveAs( cur_filePath )
-                                elif result.lower()=='verup' :
-                                    P.info('\nVersioning file up...\n')
-                                    try : versionUp()
-                                    except :
-                                        P.error('Problem running version up command.  Nothing done.')
-                                        return False
-                                elif result.lower()=='no' :
-                                    P.info( '\nFile not saved before openning.\n' )
-                                elif result.lower()=='cancel' :
-                                    P.info('\nCancelling file operation.\n')
-                                    return None
-                            #  Clear the scene, load file and rename :
-                            nuke.scriptClear()
-                            nuke.scriptOpen( filePath )
-                            PS=nuke.root()
-                            knob=PS.knob('name')
-                            knob.setValue( filePath.replace( '\\', '/' ) )
-                            
-                            #  Set env vars brought over from nim_file
-                            P.info('Setting Environment Variables')
-                            P.info('NIM: %s \n' % verUpNim.name(elem='base'))
-                            import nim_nuke as N
-                            N.set_vars( nim=verUpNim )
-                            nim = verUpNim
-                            
-                        except Exception, e :
-                            P.error( 'Failed reading the file: %s' % filePath )
-                            P.error( '    %s' % traceback.print_exc() )
-                            return False
-                        try :
-                            P.info( 'Setting Nuke environment variables...' )
-                            import nim_nuke as N
-                            N.set_vars( nim )
-                        except :
-                            P.warning( 'Unable to set Nuke environment variables.  Dealine may be affected' )
-                            P.warning( '    %s' % traceback.print_exc() )
-                            Win.popup( title='NIM - ENV VARS, not set', \
-                                msg='Unable to set Nuke environment variables.  Dealine may be affected' )
-                    #  Hiero :
-                    elif nim.app()=='Hiero' :
-                        import hiero.core
-                        try : hiero.core.openProject( filePath )
-                        except Exception, e :
-                            P.error( 'Failed reading the file: %s' % filePath )
-                            P.error( '    %s' % traceback.print_exc() )
-                            return False
-                    
-                    elif nim.app()=='C4D' :
-                        import c4d
-                        P.info( 'Opening file...\n    %s' % filePath )
-                        try:
-                            c4d.documents.LoadFile( str(filePath) )
-                            #  Set Variables :
-                            nim_plugin_ID=1032427
-                            import nim_c4d as C
-                            C.set_vars( nim=verUpNim, ID=nim_plugin_ID )
-                            nim = verUpNim
-                            
-                        except Exception, e :
-                            P.error( 'Failed reading the file: %s' % filePath )
-                            P.error( '    %s' % traceback.print_exc() )
-                            return False
-                    
-                    elif nim.app()=='3dsMax' :
-                        import MaxPlus
-                        maxFM = MaxPlus.FileManager
-                        try :
-                            maxFM.Open(filePath)
-                            #  Set env vars brought over from nim_file
-                            P.info('Setting Environment Variables')
-                            P.info('NIM: %s \n' % verUpNim.name(elem='base'))
-                            import nim_3dsmax as Max
-                            Max.set_vars( nim=verUpNim )
-                            nim = verUpNim
-                            
-                        except Exception, e :
-                            P.error( 'Failed reading the file: %s' % filePath )
-                            P.error( '    %s' % traceback.print_exc() )
-                            return False
+                                N.set_vars( nim=verUpNim )
+                                nim = verUpNim
+                                
+                            except Exception, e :
+                                P.error( 'Failed reading the file: %s' % filePath )
+                                P.error( '    %s' % traceback.print_exc() )
+                                return False
+                            try :
+                                P.info( 'Setting Nuke environment variables...' )
+                                import nim_nuke as N
+                                N.set_vars( nim )
+                            except :
+                                P.warning( 'Unable to set Nuke environment variables.  Dealine may be affected' )
+                                P.warning( '    %s' % traceback.print_exc() )
+                                Win.popup( title='NIM - ENV VARS, not set', \
+                                    msg='Unable to set Nuke environment variables.  Dealine may be affected' )
+                        #  Hiero :
+                        elif nim.app()=='Hiero' :
+                            import hiero.core
+                            try : hiero.core.openProject( filePath )
+                            except Exception, e :
+                                P.error( 'Failed reading the file: %s' % filePath )
+                                P.error( '    %s' % traceback.print_exc() )
+                                return False
+                        
+                        elif nim.app()=='C4D' :
+                            import c4d
+                            P.info( 'Opening file...\n    %s' % filePath )
+                            try:
+                                c4d.documents.LoadFile( str(filePath) )
+                                #  Set Variables :
+                                nim_plugin_ID=1032427
+                                import nim_c4d as C
+                                C.set_vars( nim=verUpNim, ID=nim_plugin_ID )
+                                nim = verUpNim
+                                
+                            except Exception, e :
+                                P.error( 'Failed reading the file: %s' % filePath )
+                                P.error( '    %s' % traceback.print_exc() )
+                                return False
+                        
+                        elif nim.app()=='3dsMax' :
+                            import MaxPlus
+                            maxFM = MaxPlus.FileManager
+                            try :
+                                maxFM.Open(filePath)
+                                #  Set env vars brought over from nim_file
+                                P.info('Setting Environment Variables')
+                                P.info('NIM: %s \n' % verUpNim.name(elem='base'))
+                                import nim_3dsmax as Max
+                                Max.set_vars( nim=verUpNim )
+                                nim = verUpNim
+                                
+                            except Exception, e :
+                                P.error( 'Failed reading the file: %s' % filePath )
+                                P.error( '    %s' % traceback.print_exc() )
+                                return False
 
-                    elif nim.app()=='Houdini' :
-                        import hou
-                        try :
-                            #TODO: check unsaved changed RuntimeError
-                            #if hou.hipFile.hasUnsavedChanges():
-                            #    raise RuntimeError
-                            #hou.hipFile.load(file_name=str(filePath), suppress_save_prompt=True)
-                            P.error('Loading File in nim_api')
-                            filePath = filePath.replace('\\','/')
-                            hou.hipFile.load(file_name=str(filePath))
-                            #  Set env vars brought over from nim_file
-                            P.info('Setting Environment Variables')
-                            P.info('NIM: %s \n' % verUpNim.name(elem='base'))
-                            import nim_houdini as Houdini
-                            Houdini.set_vars( nim=verUpNim )
-                            nim = verUpNim
-                            
-                        except Exception, e :
-                            P.error( 'Failed reading the file: %s' % filePath )
-                            P.error( '    %s' % traceback.print_exc() )
-                            return False
-            
-            return filePath
+                        elif nim.app()=='Houdini' :
+                            import hou
+                            try :
+                                #TODO: check unsaved changed RuntimeError
+                                #if hou.hipFile.hasUnsavedChanges():
+                                #    raise RuntimeError
+                                #hou.hipFile.load(file_name=str(filePath), suppress_save_prompt=True)
+                                P.error('Loading File in nim_api')
+                                filePath = filePath.replace('\\','/')
+                                hou.hipFile.load(file_name=str(filePath))
+                                #  Set env vars brought over from nim_file
+                                P.info('Setting Environment Variables')
+                                P.info('NIM: %s \n' % verUpNim.name(elem='base'))
+                                import nim_houdini as Houdini
+                                Houdini.set_vars( nim=verUpNim )
+                                nim = verUpNim
+                                
+                            except Exception, e :
+                                P.error( 'Failed reading the file: %s' % filePath )
+                                P.error( '    %s' % traceback.print_exc() )
+                                return False
+                
+                return filePath
     
+        #  If not successful, fail :
+        else :
+            P.error( 'Failed to log the file to NIM.' )
+            Win.popup( title=winTitle+' - Version Up Failure', \
+                msg='Failed to log the file to NIM.\n\nPlease check the application logs for more details.' )
+            return False
+
     #  If not successful, fail :
     else :
-        P.error( 'FAILED to Version Up the file.' )
+        P.error( 'Failed to save the file.' )
         Win.popup( title=winTitle+' - Version Up Failure', \
-            msg='FAILED to Version Up the file.' )
+            msg='Failed to save the file.\n\nPlease check the application logs for more details.' )
         return False
 
 

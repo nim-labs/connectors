@@ -1566,6 +1566,11 @@ class GUI(QtGui.QMainWindow) :
 
             P.debug( '    _os = %s' % _os)
             for js in self.nim.Dict('server') :
+                js['winPath'] = "" if js['winPath'] is None else js['winPath']
+                js['osxPath'] = "" if js['osxPath'] is None else js['osxPath']
+                js['path'] = "" if js['path'] is None else js['path']
+                js['server'] = "" if js['server'] is None else js['server']
+
                 if _os in ['windows', 'win32'] :
                     self.nim.Input('server').addItem( js['winPath']+' - ("'+js['server']+'")' )
                     if js['ID'] ==self.pref_serverID :
