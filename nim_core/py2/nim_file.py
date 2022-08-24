@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: nim_file.py
-# Version:  v5.1.10.220615
+# Version:  v5.2.0.220706
 #
 # Copyright (c) 2014-2022 NIM Labs LLC
 # All rights reserved.
@@ -23,7 +23,7 @@ import nim as Nim
 
 
 #  Variables :
-version='v5.1.10'
+version='v5.2.0'
 winTitle='NIM_'+version
 _os=platform.system().lower()
 #  Compiled REGEX Searches :
@@ -266,27 +266,48 @@ def os_filePath( path='', nim=None, serverID=None ) :
             elif re.search( '^'+serverDict[0]['path'], path.replace('/', '\\') ) :
                 fp_noServer=path[len(serverDict[0]['path']):]
         
+        fp_noServer = "" if fp_noServer is None else fp_noServer
+
         #  Store file path :
+        filePath_success = 'success'
+
         if _os.lower() in ['windows', 'win32'] :
             server=serverDict[0]['winPath']
+            server = "" if server is None else server
             path=server+fp_noServer
             filePath=path.replace('/', '\\')
-            return filePath
+            if filePath == '' :
+                filePath_success = 'blank'
+
         elif _os.lower() in ['darwin', 'mac'] :
             server=serverDict[0]['osxPath']
+            server = "" if server is None else server
             path=server+fp_noServer
             filePath=path.replace('\\', '/')
-            return filePath
+            if filePath == '' :
+                filePath_success = 'blank'
+
         elif _os.lower() in ['linux', 'linux2'] :
             server=serverDict[0]['path']
+            server = "" if server is None else server
             path=server+fp_noServer
             filePath=path.replace('\\', '/')
-            return filePath
+            if filePath == '' :
+                filePath_success = 'blank'
+
         else :
+            filePath_success = 'invalid'
+
+        if filePath_success == 'invalid' :
             P.info( 'Operating system, %s, not in valid list of operating systems' %_os )
             return False
+        elif filePath_success == 'blank' :
+            P.info( 'Server path is empty. Please check the server settings in NIM.')
+            return False
+        else :
+            return filePath
         
-        P.info( 'Filepath set to - %s' % filePath )
+        #P.info( 'Filepath set to - %s' % filePath )
     
     else :
         P.error('Unable to convert filepath by platform!')
@@ -400,9 +421,10 @@ def verUp( nim=None, padding=2, selected=False, win_launch=False, pub=False, sym
     
     #  Error Checking :
     if not fileDir or not basename :
-        msg='Sorry, you must either: Save the file from the NIM File GUI, or\n'+\
-            '    save the file in the appropriate folders, with the correct name.\n\n'+\
-            'File NOT saved.'
+        msg='ERROR: File not saved\n\n'+\
+            'This can be due to missing server or project structure information in NIM.\n\n'+\
+            'Please save the file manually and add to NIM using the NIM Files panel.\n\n'+\
+            'Check the application logs for more details.'
         P.error( msg )
         Win.popup( title='NIM - Version Up Error', msg=msg )
         return False
