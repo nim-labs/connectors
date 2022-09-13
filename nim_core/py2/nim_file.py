@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: nim_file.py
-# Version:  v5.2.0.220706
+# Version:  v5.2.1.220913
 #
 # Copyright (c) 2014-2022 NIM Labs LLC
 # All rights reserved.
@@ -23,7 +23,7 @@ import nim as Nim
 
 
 #  Variables :
-version='v5.2.0'
+version='v5.2.1'
 winTitle='NIM_'+version
 _os=platform.system().lower()
 #  Compiled REGEX Searches :
@@ -651,9 +651,9 @@ def verUp( nim=None, padding=2, selected=False, win_launch=False, pub=False, sym
             try :
                 hou.hipFile.save(file_name=str(new_filePath))
                 P.info('Houdini successfully save the file.')
-            except hou.OperationFailed :
+            except hou.OperationFailed as e:
                 P.info('Houdini failed to save the file.' )
-                P.info( hou.OperationFailed.description() )
+                P.info( hou.OperationFailed.description(e) )
 
             #Set $HIP var to location of current file
             if _os.lower() in ['windows', 'win32'] :
@@ -678,9 +678,9 @@ def verUp( nim=None, padding=2, selected=False, win_launch=False, pub=False, sym
                 selectedParent = selected[0].parent()
                 selectedParent.saveItemsToFile(selected, file_name=str(tmp_filePath))
                 P.info('Houdini saved items to file.' )
-            except hou.OperationFailed :
+            except hou.OperationFailed as e:
                 P.info('Houdini failed to save selected items to file.' )
-                P.info( hou.OperationFailed.description() )
+                P.info( hou.OperationFailed.description(e) )
 
             saveCode = '"' + "import os, time; newParent = "+parentNode+"; newParent.loadChildrenFromFile('"+tmp_filePath+"'); hou.hipFile.save('"+new_filePath+"')" + '"'
             pyCmd = os.environ["HFS"] + '/bin/hython -c ' + saveCode
