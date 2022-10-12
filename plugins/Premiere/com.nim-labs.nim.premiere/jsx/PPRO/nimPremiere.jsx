@@ -706,7 +706,8 @@ $._nim_PPP_={
 			var outputPath = new File($._nim_PPP_.nimTempDirectory);
 
 			var outputName 		= activeSequence.name+"_"+timeName+"_"+$._nim_PPP_.guid();
-			outputName = outputName.replace(/\ /g,'_');
+			outputName = outputName.replace(/\s|\.|\ /g, '_'); 	// Remove all spaces and periods
+			
 			var outputFileName	= outputPath.fsName + $._nim_PPP_.getSep() + outputName;
 
 			try {
