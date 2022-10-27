@@ -701,12 +701,11 @@ $._nim_PPP_={
 			var time			= activeSequence.CTI.timecode; 	// CTI = Current Time Indicator.
 			var removeThese 	= /:|;/ig;    					// Why? Because Windows chokes on colons.
 			var timeName = time.replace(removeThese, '_');
-			
-			//var outputPath		= new File("~/.nim/tmp");
 			var outputPath = new File($._nim_PPP_.nimTempDirectory);
 
 			var outputName 		= activeSequence.name+"_"+timeName+"_"+$._nim_PPP_.guid();
-			outputName = outputName.replace(/\ /g,'_');
+			outputName = outputName.replace(/\s|\.|\ /g, '_'); 	// Remove all spaces and periods
+
 			var outputFileName	= outputPath.fsName + $._nim_PPP_.getSep() + outputName;
 
 			try {
