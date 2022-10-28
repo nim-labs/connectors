@@ -1,7 +1,7 @@
 //******************************************************************************
 //
 // Filename: nimPremiere.jsx
-// Version:  v4.0.55.200807
+// Version:  v5.3.0.221027
 //
 // Copyright (c) 2014-2022 NIM Labs LLC
 // All rights reserved.
@@ -17,7 +17,7 @@ if(typeof JSON!=='object'){JSON={};}(function(){'use strict';function f(n){retur
 
 $._nim_PPP_={
 	
-	version : '4.0.55',
+	version : '5.3.0',
 	debug : false,
 	debug_level : 0,
 	exportJobs : {},
