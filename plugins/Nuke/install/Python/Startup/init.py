@@ -44,10 +44,14 @@ try:
 				# Loading NIM menu for NukeStudio 13.2vX
 				sys.path.append(nim_root+'/plugins/Nuke/v13.2/Python/Startup')
 				hiero.core.addPluginPath(nim_root+'/plugins/Nuke/v13.2/Python/Startup')
+			elif HieroVersionMajor == 14 and HieroVersionMinor >= 0:
+				# Loading NIM menu for NukeStudio 14.0vX
+				sys.path.append(nim_root+'/plugins/Nuke/v14.0/Python/Startup')
+				hiero.core.addPluginPath(nim_root+'/plugins/Nuke/v14.0/Python/Startup')
 			else:
-				# Loading NIM menu for NukeStudio 13.2vX
-				sys.path.append(nim_root+'/plugins/Nuke/v13.2/Python/Startup/nim_hiero_connector')
-				hiero.core.addPluginPath(nim_root+'/plugins/Nuke/v13.2/Python/Startup/nim_hiero_connector')
+				# Loading NIM menu for NukeStudio 14.0vX
+				sys.path.append(nim_root+'/plugins/Nuke/v14.0/Python/Startup')
+				hiero.core.addPluginPath(nim_root+'/plugins/Nuke/v14.0/Python/Startup')
 	except:
 		# Loading NIM Hiero Connector for Hiero 9.XvX
 		sys.path.append(nim_root+'/plugins/Nuke/v09/Python/Startup/nim_hiero_connector')
