@@ -1480,7 +1480,7 @@ class GUI(QtGui.QMainWindow) :
                                         item.setFlags( QtCore.Qt.ItemIsEditable )
                                 #  Set from preferences :
                                 if option['filename']+' - '+option['note']==self.pref_version and \
-                                    self.nim.mode() is not 'publish' :
+                                    self.nim.mode() != 'publish' :
                                     self.nim.Input( elem ).setCurrentItem( item )
                                     #  Set variables :
                                     self.nim.set_name( elem=elem, name=option['filename']+' - '+option['note'] )
@@ -1522,7 +1522,7 @@ class GUI(QtGui.QMainWindow) :
                                     item.setFlags( QtCore.Qt.ItemIsEditable )
                             #  Set from preferences :
                             if option['filename']+' - '+option['note']==self.pref_version and \
-                                self.nim.mode() is not 'publish' :
+                                self.nim.mode() != 'publish' :
                                 self.nim.Input( elem ).setCurrentItem( item )
                                 #  Set variables :
                                 self.nim.set_name( elem=elem, name=option['filename']+' - '+option['note'] )

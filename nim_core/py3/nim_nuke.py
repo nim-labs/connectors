@@ -288,7 +288,7 @@ class NIM_Node() :
     def elem_populate( self, elem='' ) :
         'Populates each of the combo boxes, when specified'
         
-        if elem is not 'job' :
+        if elem != 'job' :
             prevElem=self.elements[self.elements.index(elem)-1]
         
         if elem=='job' :
