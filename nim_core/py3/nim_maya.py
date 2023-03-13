@@ -468,7 +468,8 @@ def makeProject(projectLocation='', renderPath='') :
         ruleValue = fileRules[i+1]
         mc.workspace(fr=(ruleName,ruleValue))
         if createDirectories :
-            mc.workspace(create=ruleValue)
+            if ruleValue != '' :
+                mc.workspace(create=ruleValue)
 
     #Adding images folder to project
     mc.workspace(create='images')
