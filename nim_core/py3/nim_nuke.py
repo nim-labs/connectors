@@ -93,7 +93,7 @@ def set_vars( nim=None ) :
                 knob.setValue( correctedPath )
             #  Otherwise, set the knob as normal :
             else :
-                knob.setValue( knobCmds[x] )
+                knob.setValue( str(knobCmds[x]) )
         knob.setEnabled( False )
     
     P.info( '    Done setting Nuke Vars.' )
