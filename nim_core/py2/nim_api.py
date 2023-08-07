@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: nim_api.py
-# Version:  v5.4.0.230117
+# Version:  v6.0.0.230807
 #
 # Copyright (c) 2014-2023 NIM Labs LLC
 # All rights reserved.
@@ -16,7 +16,7 @@
 # EXAMPLE:
 #   Adding a render to a task
 #   uploading an icon to the render
-#   uploading dialies to a render
+#   uploading review items to a render
 #   adding elements to a render
 #
 # import nim_core.nim_api as nimAPI
@@ -56,7 +56,7 @@ import nim_tools
 import nim_win as Win
 
 #  Variables :
-version='v5.4.0'
+version='v6.0.0'
 winTitle='NIM_'+version
 
 
