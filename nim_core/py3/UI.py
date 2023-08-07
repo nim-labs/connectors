@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: UI.py
-# Version:  v5.4.0.230117
+# Version:  v6.0.0.230807
 #
 # Copyright (c) 2014-2023 NIM Labs LLC
 # All rights reserved.
@@ -48,7 +48,7 @@ except ImportError :
                 print("NIM UI: Failed to UI Modules")
 
 #  Variables :
-version='v5.4.0'
+version='v6.0.0'
 WIN=''
 startTime=''
 winTitle='NIM_'+version
@@ -1480,7 +1480,7 @@ class GUI(QtGui.QMainWindow) :
                                         item.setFlags( QtCore.Qt.ItemIsEditable )
                                 #  Set from preferences :
                                 if option['filename']+' - '+option['note']==self.pref_version and \
-                                    self.nim.mode() is not 'publish' :
+                                    self.nim.mode() != 'publish' :
                                     self.nim.Input( elem ).setCurrentItem( item )
                                     #  Set variables :
                                     self.nim.set_name( elem=elem, name=option['filename']+' - '+option['note'] )
@@ -1522,7 +1522,7 @@ class GUI(QtGui.QMainWindow) :
                                     item.setFlags( QtCore.Qt.ItemIsEditable )
                             #  Set from preferences :
                             if option['filename']+' - '+option['note']==self.pref_version and \
-                                self.nim.mode() is not 'publish' :
+                                self.nim.mode() != 'publish' :
                                 self.nim.Input( elem ).setCurrentItem( item )
                                 #  Set variables :
                                 self.nim.set_name( elem=elem, name=option['filename']+' - '+option['note'] )
