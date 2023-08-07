@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: nim_prefs.py
-# Version:  v5.4.0.230117
+# Version:  v6.0.0.230807
 #
 # Copyright (c) 2014-2023 NIM Labs LLC
 # All rights reserved.
@@ -32,7 +32,7 @@ except :
     pass
 
 #  Variables :
-version='v5.4.0'
+version='v6.0.0'
 prefs_dirName='.nim'
 prefs_fileName='prefs.nim'
 winTitle='NIM_'+version
