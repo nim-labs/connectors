@@ -96,6 +96,7 @@ class NimHieroConnector():
 
 	def exportTrackItem(self, showID, trackItem):
 		'''Add video trackItem as shot in NIM and add NIM tag to trackItem'''
+		showID = str(showID)
 		shotID = False
 		trackItem_mediaType = trackItem.mediaType()
 
@@ -194,7 +195,7 @@ class NimHieroConnector():
 
 	def updateTrackItem(self, showID, trackItem):
 		'''Update trackItem linked to shot in NIM'''
-
+		showID = str(showID)
 		trackItem_mediaType = trackItem.mediaType()
 
 		exportTrackItem = False
