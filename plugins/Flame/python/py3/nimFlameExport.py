@@ -2,10 +2,10 @@
 #******************************************************************************
 #
 # Filename: 	Flame/python/nimFlameExport.py
-# Version:     	v5.0.11.210722
+# Version:     	v6.0.4.230905
 # Compatible:	Python 3.x
 #
-# Copyright (c) 2014-2022 NIM Labs LLC
+# Copyright (c) 2014-2023 NIM Labs LLC
 # All rights reserved.
 #
 # Use of this software is subject to the terms of the NIM Labs license
@@ -29,7 +29,7 @@ try:
 except ImportError:
 	import xml.etree.ElementTree as ET
 
-flameConnectorVersion = "5.0.11.210722"
+flameConnectorVersion = "6.0.4.230905"
 
 # Relative path to append for NIM Scripts
 nimFlamePythonPath = os.path.dirname(os.path.realpath(__file__))
