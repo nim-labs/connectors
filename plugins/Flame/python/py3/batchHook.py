@@ -69,10 +69,10 @@ debug = True
 # setupPath: File path of the setup being loaded.
 #
 def batch_setup_loaded(setupPath, *args, **kwargs):
-    print("batch_setup_loaded - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+    print("batch_setup_loaded - START")
     if debug :
         print(setupPath)
-    print("batch_setup_loaded - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
+    print("batch_setup_loaded - END")
     pass
 
 
@@ -81,10 +81,10 @@ def batch_setup_loaded(setupPath, *args, **kwargs):
 # setupPath: File path of the setup being saved.
 #
 def batch_setup_saved(setupPath, *args, **kwargs):
-    print("batch_setup_saved - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+    print("batch_setup_saved - START")
     if debug :
         print(setupPath)
-    print("batch_setup_saved - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
+    print("batch_setup_saved - END")
     pass
 
 
@@ -116,11 +116,11 @@ def batch_setup_saved(setupPath, *args, **kwargs):
 #   This can be used by the hook to pass black box data around.
 #
 def batch_setup_iterated_pre(info, userData, *args, **kwargs):
-    print("batch_setup_iterated_pre - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+    print("batch_setup_iterated_pre - START")
     if debug :
         print(info)
         print(userData)
-    print("batch_setup_iterated_pre - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
+    print("batch_setup_iterated_pre - END")
     pass
 
 
@@ -150,11 +150,11 @@ def batch_setup_iterated_pre(info, userData, *args, **kwargs):
 #   This can be used by the hook to pass black box data around.
 #
 def batch_setup_iterated_post(info, userData, *args, **kwargs):
-    print("batch_setup_iterated_post - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+    print("batch_setup_iterated_post - START")
     if debug :
         print(info)
         print(userData)
-    print("batch_setup_iterated_post - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
+    print("batch_setup_iterated_post - END")
     pass
 
 
@@ -181,11 +181,11 @@ def batch_setup_iterated_post(info, userData, *args, **kwargs):
 #   This can be used by the hook to pass black box data around.
 #
 def batch_render_begin(info, userData, *args, **kwargs):
-    print("batch_render_begin - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+    print("batch_render_begin - START")
     if debug :
         print(info)
         print(userData)
-    print("batch_render_begin - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
+    print("batch_render_begin - END")
     pass
 
 
@@ -218,11 +218,11 @@ def batch_render_begin(info, userData, *args, **kwargs):
 #   This can be used by the hook to pass black box data around.
 #
 def batch_render_end(info, userData, *args, **kwargs):
-    print("batch_render_end - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+    print("batch_render_end - START")
     if debug :
         print(info)
         print(userData)
-    print("batch_render_end - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
+    print("batch_render_end - END")
     pass
 
 
@@ -245,11 +245,11 @@ def batch_render_end(info, userData, *args, **kwargs):
 #   This can be used by the hook to pass black box data around.
 #
 def batch_burn_begin(info, userData, *args, **kwargs):
-    print("batch_burn_begin - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+    print("batch_burn_begin - START")
     if debug :
         print(info)
         print(userData)
-    print("batch_burn_begin - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
+    print("batch_burn_begin - END")
     pass
 
 
@@ -278,11 +278,11 @@ def batch_burn_begin(info, userData, *args, **kwargs):
 #   This can be used by the hook to pass black box data around.
 #
 def batch_burn_end(info, userData, *args, **kwargs):
-    print("batch_burn_end - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+    print("batch_burn_end - START")
     if debug :
         print(info)
         print(userData)
-    print("batch_burn_end - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
+    print("batch_burn_end - END")
     pass
 
             
@@ -376,7 +376,7 @@ def batch_burn_end(info, userData, *args, **kwargs):
 #   This can be used by the hook to pass black box data around.
 #
 def batch_export_begin(info, userData, *args, **kwargs):
-    print("batch_export_begin - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+    print("batch_export_begin - START")
     if debug :
         print(info)
         print(userData)
@@ -391,7 +391,7 @@ def batch_export_begin(info, userData, *args, **kwargs):
         nim_comment = batchExportDlg.nim_comment
         nimFlameExport.nimAddBatchExport(info=info, comment=nim_comment)
 
-    print("batch_export_begin - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
+    print("batch_export_begin - END")
     pass
 
 
@@ -487,11 +487,11 @@ def batch_export_begin(info, userData, *args, **kwargs):
 #   This can be used by the hook to pass black box data around.
 #
 def batch_export_end(info, userData, *args, **kwargs):
-    print("batch_export_end - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+    print("batch_export_end - START")
     if debug :
         print(info)
         print(userData)
-    print("batch_export_end - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
+    print("batch_export_end - END")
     pass
 
 
@@ -513,10 +513,10 @@ def batch_export_end(info, userData, *args, **kwargs):
 #        First instance found will be used
 #
 def batch_default_iteration_name(project, *args, **kwargs):
-    print("batch_default_iteration_name - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+    print("batch_default_iteration_name - START")
     if debug :
         print(project)
-    print("batch_default_iteration_name - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
+    print("batch_default_iteration_name - END")
     return ""
 
 
@@ -535,10 +535,10 @@ def batch_default_iteration_name(project, *args, **kwargs):
 #        First instance found will be used
 #
 def batch_default_render_node_name(project, *args, **kwargs):
-    print("batch_default_render_node_name - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+    print("batch_default_render_node_name - START")
     if debug :
         print(project)
-    print("batch_default_render_node_name - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
+    print("batch_default_render_node_name - END")
     return ""
 
 
@@ -557,10 +557,10 @@ def batch_default_render_node_name(project, *args, **kwargs):
 #        First instance found will be used
 #
 def batch_default_write_file_node_name(project, *args, **kwargs):
-    print("batch_default_write_file_node_name - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+    print("batch_default_write_file_node_name - START")
     if debug :
         print(project)
-    print("batch_default_write_file_node_name - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
+    print("batch_default_write_file_node_name - END")
     return ""
 
 
@@ -579,10 +579,10 @@ def batch_default_write_file_node_name(project, *args, **kwargs):
 #        First instance found will be used
 #
 def batch_default_group_path(project, *args, **kwargs):
-    print("batch_default_group_path - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+    print("batch_default_group_path - START")
     if debug :
         print(project)
-    print("batch_default_group_path - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
+    print("batch_default_group_path - END")
     return ""
 
 
@@ -601,10 +601,10 @@ def batch_default_group_path(project, *args, **kwargs):
 #        First instance found will be used
 #
 def batch_default_iteration_path(project, *args, **kwargs):
-    print("batch_default_iteration_path - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+    print("batch_default_iteration_path - START")
     if debug :
         print(project)
-    print("batch_default_iteration_path - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
+    print("batch_default_iteration_path - END")
     return ""
 
 
@@ -623,9 +623,9 @@ def batch_default_iteration_path(project, *args, **kwargs):
 #        First instance found will be used
 #
 def action_default_geometry_path(project, *args, **kwargs):
-    print("action_default_geometry_path - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+    print("action_default_geometry_path - START")
     if debug :
         print(project)
-    print("action_default_geometry_path - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
+    print("action_default_geometry_path - END")
     return ""
 

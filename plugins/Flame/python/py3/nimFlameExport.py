@@ -119,8 +119,6 @@ class NimScanForVersionsDialog(QDialog):
 			#self.app=nimFile.get_app()
 			self.app = 'Flame'
 			self.prefs=nimPrefs.read()
-			print("NIM - Prefs: ")
-			print(self.prefs)
 
 			if 'NIM_User' in self.prefs :
 				self.user=self.prefs['NIM_User']
@@ -279,12 +277,15 @@ class NimScanForVersionsDialog(QDialog):
 			for key, value in sorted(list(self.nim_jobs.items()), reverse=True):
 				self.nim_jobChooser.addItem(self.clearPix, key)
 				if self.nim_jobID:
-					if self.nim_jobID == value:
+					if str(self.nim_jobID) == str(value):
 						print("Found matching jobID, job=", key)
 						self.pref_job = key
 						jobIndex = jobIter
 				else:
-					if self.pref_job == key:
+					if str(self.pref_job) == str(value):
+						print("Found matching Job Name, job=", key)
+						jobIndex = jobIter
+					elif str(self.pref_job) == str(key):
 						print("Found matching Job Name, job=", key)
 						jobIndex = jobIter
 				jobIter += 1
@@ -389,17 +390,9 @@ class NimScanForVersionsDialog(QDialog):
 						self.nim_showDict[show['showname']] = show['ID']
 					for key, value in sorted(list(self.nim_showDict.items()), reverse=False):
 						self.nim_showChooser.addItem(self.clearPix, key)
-						'''
-						if self.nim_showID:
-							if self.nim_showID == value:
-								print "Found matching showID, show=", key
-								self.pref_show == key
-								showIndex = showIter
-						else:
-							if self.pref_show == key:
-								print "Found matching Show Name, show=", key
-								showIndex = showIter
-						'''
+						if str(self.pref_show) == str(value):
+							print("Found matching Show Name, show=", key)
+							showIndex = showIter
 						showIter += 1
 
 					if self.pref_show != '':
@@ -487,8 +480,6 @@ class NimBuildOpenClipsFromElementDialog(QDialog):
 			#self.app=nimFile.get_app()
 			self.app = 'Flame'
 			self.prefs=nimPrefs.read()
-			print("NIM - Prefs: ")
-			print(self.prefs)
 
 			if 'NIM_User' in self.prefs :
 				self.user=self.prefs['NIM_User']
@@ -639,12 +630,15 @@ class NimBuildOpenClipsFromElementDialog(QDialog):
 			for key, value in sorted(list(self.nim_jobs.items()), reverse=True):
 				self.nim_jobChooser.addItem(self.clearPix, key)
 				if self.nim_jobID:
-					if self.nim_jobID == value:
+					if str(self.nim_jobID) == str(value):
 						print("Found matching jobID, job=", key)
 						self.pref_job = key
 						jobIndex = jobIter
 				else:
-					if self.pref_job == key:
+					if str(self.pref_job) == str(value):
+						print("Found matching Job Name, job=", key)
+						jobIndex = jobIter
+					elif str(self.pref_job) == str(key):
 						print("Found matching Job Name, job=", key)
 						jobIndex = jobIter
 				jobIter += 1
@@ -736,6 +730,8 @@ class NimBuildOpenClipsFromElementDialog(QDialog):
 		self.nim_serverID = ''
 		self.nim_serverOSPath = ''
 		self.nim_serverDict = {}
+		serverIndex = 0
+		serverIter = 0
 		try:
 			self.nim_serverChooser.clear()
 			if self.nim_serverChooser:
@@ -744,6 +740,14 @@ class NimBuildOpenClipsFromElementDialog(QDialog):
 						self.nim_serverDict[server['server']] = server['ID']
 					for key, value in sorted(list(self.nim_serverDict.items()), reverse=False):
 						self.nim_serverChooser.addItem(self.clearPix, key)
+						if str(self.pref_serverID) == str(value):
+							print("Found server preference=", key)
+							serverIndex = serverIter
+						
+						serverIter += 1
+
+					if self.pref_serverID != '':
+						self.nim_serverChooser.setCurrentIndex(serverIndex)
 		except:
 			pass
 
@@ -784,17 +788,9 @@ class NimBuildOpenClipsFromElementDialog(QDialog):
 						self.nim_showDict[show['showname']] = show['ID']
 					for key, value in sorted(list(self.nim_showDict.items()), reverse=False):
 						self.nim_showChooser.addItem(self.clearPix, key)
-						'''
-						if self.nim_showID:
-							if self.nim_showID == value:
-								print "Found matching showID, show=", key
-								self.pref_show == key
-								showIndex = showIter
-						else:
-							if self.pref_show == key:
-								print "Found matching Show Name, show=", key
-								showIndex = showIter
-						'''
+						if str(self.pref_show) == str(value):
+							print("Found matching Show Name, show=", key)
+							showIndex = showIter
 						showIter += 1
 
 					if self.pref_show != '':
@@ -871,8 +867,6 @@ class NimBuildOpenClipsFromProjectDialog(QDialog):
 			#self.app=nimFile.get_app()
 			self.app = 'Flame'
 			self.prefs=nimPrefs.read()
-			print("NIM - Prefs: ")
-			print(self.prefs)
 
 			if 'NIM_User' in self.prefs :
 				self.user=self.prefs['NIM_User']
@@ -1043,12 +1037,15 @@ class NimBuildOpenClipsFromProjectDialog(QDialog):
 			for key, value in sorted(list(self.nim_jobs.items()), reverse=True):
 				self.nim_jobChooser.addItem(self.clearPix, key)
 				if self.nim_jobID:
-					if self.nim_jobID == value:
+					if str(self.nim_jobID) == str(value):
 						print("Found matching jobID, job=", key)
 						self.pref_job = key
 						jobIndex = jobIter
 				else:
-					if self.pref_job == key:
+					if str(self.pref_job) == str(value):
+						print("Found matching Job Name, job=", key)
+						jobIndex = jobIter
+					if str(self.pref_job) == str(key):
 						print("Found matching Job Name, job=", key)
 						jobIndex = jobIter
 				jobIter += 1
@@ -1142,6 +1139,8 @@ class NimBuildOpenClipsFromProjectDialog(QDialog):
 		self.nim_serverID = ''
 		self.nim_serverOSPath = ''
 		self.nim_serverDict = {}
+		serverIndex = 0
+		serverIter = 0
 		try:
 			self.nim_serverChooser.clear()
 			if self.nim_serverChooser:
@@ -1150,6 +1149,14 @@ class NimBuildOpenClipsFromProjectDialog(QDialog):
 						self.nim_serverDict[server['server']] = server['ID']
 					for key, value in sorted(list(self.nim_serverDict.items()), reverse=False):
 						self.nim_serverChooser.addItem(self.clearPix, key)
+						if str(self.pref_serverID) == str(value):
+							print("Found server preference=", key)
+							serverIndex = serverIter
+						
+						serverIter += 1
+
+					if self.pref_serverID != '':
+						self.nim_serverChooser.setCurrentIndex(serverIndex)
 		except:
 			pass
 
@@ -1190,17 +1197,9 @@ class NimBuildOpenClipsFromProjectDialog(QDialog):
 						self.nim_showDict[show['showname']] = show['ID']
 					for key, value in sorted(list(self.nim_showDict.items()), reverse=False):
 						self.nim_showChooser.addItem(self.clearPix, key)
-						'''
-						if self.nim_showID:
-							if self.nim_showID == value:
-								print "Found matching showID, show=", key
-								self.pref_show == key
-								showIndex = showIter
-						else:
-							if self.pref_show == key:
-								print "Found matching Show Name, show=", key
-								showIndex = showIter
-						'''
+						if str(self.pref_show) == str(value):
+							print("Found matching Show Name, show=", key)
+							showIndex = showIter
 						showIter += 1
 
 					if self.pref_show != '':
@@ -1368,8 +1367,6 @@ class NimExportSequenceDialog(QDialog):
 		try:
 			self.app = 'Flame'
 			self.prefs=nimPrefs.read()
-			print("NIM - Prefs: ")
-			print(self.prefs)
 
 			if 'NIM_User' in self.prefs :
 				self.user=self.prefs['NIM_User']
@@ -1549,10 +1546,10 @@ class NimExportSequenceDialog(QDialog):
 		if len(self.nim_jobs)>0:
 			for key, value in sorted(list(self.nim_jobs.items()), reverse=True):
 				self.nim_jobChooser.addItem(self.clearPix, key)
-				if self.flamePrefs['jobID'] == value:
+				if str(self.flamePrefs['jobID']) == str(value):
 					print("Found matching Job Name, job=", key)
 					jobIndex = jobIter
-			jobIter += 1
+				jobIter += 1
 
 			if self.flamePrefs['jobID'] != '':
 				self.nim_jobChooser.setCurrentIndex(jobIndex)
@@ -1642,7 +1639,7 @@ class NimExportSequenceDialog(QDialog):
 			videoIter = 0
 			for key, value in sorted(list(self.nim_elementTypesDict.items()), reverse=False):
 				self.nim_videoChooser.addItem(self.clearPix, key)
-				if self.flamePrefs['videoElementID'] == value:
+				if str(self.flamePrefs['videoElementID']) == str(value):
 					print("Found video element preference=", key)
 					videoIndex = videoIter
 				videoIter += 1
@@ -1674,7 +1671,7 @@ class NimExportSequenceDialog(QDialog):
 			audioIter = 0
 			for key, value in sorted(list(self.nim_elementTypesDict.items()), reverse=False):
 				self.nim_audioChooser.addItem(self.clearPix, key)
-				if self.flamePrefs['audioElementID'] == value:
+				if str(self.flamePrefs['audioElementID']) == str(value):
 					print("Found audio element preference=", key)
 					audioIndex = audioIter
 				audioIter += 1
@@ -1705,7 +1702,7 @@ class NimExportSequenceDialog(QDialog):
 			sourceIter = 0
 			for key, value in sorted(list(self.nim_elementTypesDict.items()), reverse=False):
 				self.nim_openClipChooser.addItem(self.clearPix, key)
-				if self.flamePrefs['sourceElementID'] == value:
+				if str(self.flamePrefs['sourceElementID']) == str(value):
 					print("Found source element preference=", key)
 					sourceIndex = sourceIter
 				sourceIter += 1
@@ -1736,7 +1733,7 @@ class NimExportSequenceDialog(QDialog):
 			batchIter = 0
 			for key, value in sorted(list(self.nim_elementTypesDict.items()), reverse=False):
 				self.nim_batchOpenClipChooser.addItem(self.clearPix, key)
-				if self.flamePrefs['batchElementID'] == value:
+				if str(self.flamePrefs['batchElementID']) == str(value):
 					print("Found batch element preference=", key)
 					batchIndex = batchIter
 				batchIter += 1
@@ -1791,7 +1788,7 @@ class NimExportSequenceDialog(QDialog):
 			batchFileIter = 0
 			for key, value in sorted(list(self.nim_taskTypesDict.items()), reverse=False):
 				self.nim_batchChooser.addItem(self.clearPix, key)
-				if self.flamePrefs['batchTaskTypeID'] == value:
+				if str(self.flamePrefs['batchTaskTypeID']) == str(value):
 					print("Found batchFile element preference=", key)
 					batchFileIndex = batchFileIter
 				batchFileIter += 1
@@ -1889,7 +1886,7 @@ class NimExportSequenceDialog(QDialog):
 					for key, value in sorted(list(self.nim_serverDict.items()), reverse=False):
 						self.nim_serverChooser.addItem(self.clearPix, key)
 
-						if self.flamePrefs['serverID'] == value:
+						if str(self.flamePrefs['serverID']) == str(value):
 							print("Found server preference=", key)
 							serverIndex = serverIter
 						
@@ -1937,7 +1934,7 @@ class NimExportSequenceDialog(QDialog):
 					for key, value in sorted(list(self.nim_showDict.items()), reverse=False):
 						self.nim_showChooser.addItem(self.clearPix, key)
 
-						if self.flamePrefs['showID'] == value:
+						if str(self.flamePrefs['showID']) == str(value):
 							print("Found show preference=", key)
 							showIndex = showIter
 						
@@ -2048,8 +2045,6 @@ class NimExportEditDialog(QDialog):
 			#self.app=nimFile.get_app()
 			self.app = 'Flame'
 			self.prefs=nimPrefs.read()
-			print("NIM - Prefs: ")
-			print(self.prefs)
 
 			if 'NIM_User' in self.prefs :
 				self.user=self.prefs['NIM_User']
@@ -2212,10 +2207,10 @@ class NimExportEditDialog(QDialog):
 		if len(self.nim_jobs)>0:
 			for key, value in sorted(list(self.nim_jobs.items()), reverse=True):
 				self.nim_jobChooser.addItem(self.clearPix, key)
-				if self.flamePrefs['jobID'] == value:
+				if str(self.flamePrefs['jobID']) == str(value):
 					print("Found Job Preferences")
 					jobIndex = jobIter
-			jobIter += 1
+				jobIter += 1
 
 			if self.flamePrefs['jobID'] != '':
 				self.nim_jobChooser.setCurrentIndex(jobIndex)
@@ -2337,7 +2332,7 @@ class NimExportEditDialog(QDialog):
 					for key, value in sorted(list(self.nim_serverDict.items()), reverse=False):
 						self.nim_serverChooser.addItem(self.clearPix, key)
 
-						if self.flamePrefs['serverID'] == value:
+						if str(self.flamePrefs['serverID']) == str(value):
 							print("Found server preference=", key)
 							serverIndex = serverIter
 						
@@ -2384,7 +2379,7 @@ class NimExportEditDialog(QDialog):
 					for key, value in sorted(list(self.nim_showDict.items()), reverse=False):
 						self.nim_showChooser.addItem(self.clearPix, key)
 
-						if self.flamePrefs['showID'] == value:
+						if str(self.flamePrefs['showID']) == str(value):
 							print("Found show preference=", key)
 							showIndex = showIter
 						
@@ -2453,8 +2448,6 @@ class NimExportDailyDialog(QDialog):
 			#self.app=nimFile.get_app()
 			self.app = 'Flame'
 			self.prefs=nimPrefs.read()
-			print("NIM - Prefs: ")
-			print(self.prefs)
 
 			if 'NIM_User' in self.prefs :
 				self.user=self.prefs['NIM_User']
@@ -2607,10 +2600,10 @@ class NimExportDailyDialog(QDialog):
 		if len(self.nim_jobs)>0:
 			for key, value in sorted(list(self.nim_jobs.items()), reverse=True):
 				self.nim_jobChooser.addItem(self.clearPix, key)
-				if self.flamePrefs['jobID'] == value:
+				if str(self.flamePrefs['jobID']) == str(value):
 					print("Found Job Preferences")
 					jobIndex = jobIter
-			jobIter += 1
+				jobIter += 1
 
 			if self.flamePrefs['jobID'] != '':
 				self.nim_jobChooser.setCurrentIndex(jobIndex)
@@ -2768,7 +2761,7 @@ class NimExportDailyDialog(QDialog):
 					for key, value in sorted(list(self.nim_serverDict.items()), reverse=False):
 						self.nim_serverChooser.addItem(self.clearPix, key)
 
-						if self.flamePrefs['serverID'] == value:
+						if str(self.flamePrefs['serverID']) == str(value):
 							print("Found server preference=", key)
 							serverIndex = serverIter
 						
@@ -2815,7 +2808,7 @@ class NimExportDailyDialog(QDialog):
 					for key, value in sorted(list(self.nim_showDict.items()), reverse=False):
 						self.nim_showChooser.addItem(self.clearPix, key)
 						
-						if self.flamePrefs['showID'] == value:
+						if str(self.flamePrefs['showID']) == str(value):
 							print("Found show preference=", key)
 							showIndex = showIter
 						
@@ -2869,7 +2862,7 @@ class NimExportDailyDialog(QDialog):
 					for key, value in sorted(list(self.nim_shotDict.items()), reverse=False):
 						self.nim_shotChooser.addItem(self.clearPix, key)
 						
-						if self.flamePrefs['shotID'] == value:
+						if str(self.flamePrefs['shotID']) == str(value):
 							print("Found shot preference=", key)
 							shotIndex = shotIter
 						
@@ -2920,7 +2913,7 @@ class NimExportDailyDialog(QDialog):
 					for key, value in sorted(list(self.nim_taskDict.items()), reverse=False):
 						self.nim_taskChooser.addItem(self.clearPix, key)
 						
-						if self.flamePrefs['taskID'] == value:
+						if str(self.flamePrefs['taskID']) == str(value):
 							print("Found task preference=", key)
 							taskIndex = taskIter
 						
@@ -2980,6 +2973,10 @@ def nimCreateShot(nim_showID=None, info=None) :
 		nim_handleIn = info['handleIn']
 		nim_handleOut = info['handleOut']
 		nim_duration = nim_sourceOut - nim_sourceIn
+		nim_fps = info['fps']
+		nim_format = info['aspectRatio']
+		nim_format = float(nim_format)
+		nim_format = int(nim_format * 100) / 100.0
 		nim_assetType = info['assetType']
 		nim_destinationPath = info['destinationPath']
 		nim_resolvedPath = info['resolvedPath']
@@ -2988,7 +2985,7 @@ def nimCreateShot(nim_showID=None, info=None) :
 		#TODO: If shotName is '' then set to assetName
 
 		print("NIM - Exporting Shot Info")
-		shotInfo = nimAPI.add_shot( showID=nim_showID, name=nim_shotName, frames=nim_duration )
+		shotInfo = nimAPI.add_shot( showID=nim_showID, name=nim_shotName, frames=nim_duration, heads=nim_handleIn, tails=nim_handleOut, fps=nim_fps, format=nim_format )
 
 		if shotInfo['success'] == 'true':
 			result['success'] = True
@@ -3884,8 +3881,6 @@ def getNimPrefs() :
 		#self.app=nimFile.get_app()
 		app = 'Flame'
 		prefs=nimPrefs.read()
-		print("NIM - Prefs: ")
-		print(prefs)
 
 		if 'NIM_User' in prefs :
 			user=prefs['NIM_User']
@@ -4146,11 +4141,11 @@ def updateOpenClip( masterFile='', elementPath='', elementName='', elementWildca
 						continue
 					break
 
-				print("Source editRate/numerator: %s" % src_editRateNumerator)
-				print("Source editRate/denominator: %s" % src_editRateDenominator)
-				print("Source startTimecode/nbTicks: %s" % src_nbTicks)
-				print("Source startTimecode/rate: %s" % src_rate)
-				print("Source startTimecode/dropMode: %s" % src_dropMode)
+				print("Source editRate/numerator: ", str(src_editRateNumerator))
+				print("Source editRate/denominator: ", str(src_editRateDenominator))
+				print("Source startTimecode/nbTicks: ", str(src_nbTicks))
+				print("Source startTimecode/rate: ", str(src_rate))
+				print("Source startTimecode/dropMode: ", str(src_dropMode))
 
 
 				# Get new feed from file
@@ -4383,7 +4378,7 @@ def writeFlamePrefs( flamePrefs=None ) :
 	try :
 		with open(flamePrefFile, 'w') as flameFile :
 			for key, value in oldPrefs.items() :
-				line = key+"="+value+"\n"
+				line = str(key)+"="+str(value)+"\n"
 				flameFile.write(line)
 	except :
 		print("Failed to write NIM Flame Preferences")

@@ -92,8 +92,8 @@ def user_changed(info):
 # sequence_name : Name of the rendered sequence -- String.
 # elapsed_time_in_seconds : number of seconds used to render -- Float
 def render_ended(module_name, sequence_name, elapsed_time_in_seconds):
-    #print("render_ended - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-    #print("render_ended - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
+    #print("render_ended - START")
+    #print("render_ended - END")
     pass
 
 

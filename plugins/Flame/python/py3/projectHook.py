@@ -20,11 +20,11 @@ import os
 # Hook called when the user loads a project in the application.
 # project_name : Name of the loaded project -- String.
 def project_changed(project_name):
-    print("project_changed - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+    print("project_changed - START")
     os.environ['NIM_FLAME_PROJECT'] = str(project_name)
     if debug :
         print(project_name)
-    print("project_changed - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
+    print("project_changed - END")
     pass
 
 
