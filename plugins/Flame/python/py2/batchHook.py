@@ -67,10 +67,10 @@ debug = True
 # setupPath: File path of the setup being loaded.
 #
 def batchSetupLoaded( setupPath ):
-   print "batchSetupLoaded - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+   print "batchSetupLoaded - START"
    if debug :
       print setupPath
-   print "batchSetupLoaded - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
+   print "batchSetupLoaded - END"
    pass
 
 
@@ -79,10 +79,10 @@ def batchSetupLoaded( setupPath ):
 # setupPath: File path of the setup being saved.
 #
 def batchSetupSaved( setupPath ):
-   print "batchSetupSaved - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+   print "batchSetupSaved - START"
    if debug :
       print setupPath
-   print "batchSetupSaved - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
+   print "batchSetupSaved - END"
    pass
 
 
@@ -162,7 +162,7 @@ def batchSetupSaved( setupPath ):
 #   This can be used by the hook to pass black box data around.
 #
 def batchExportBegin( info, userData ):
-   print "batchExportBegin - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+   print "batchExportBegin - START"
    if debug :
       print info
       print userData
@@ -177,7 +177,7 @@ def batchExportBegin( info, userData ):
       nim_comment = batchExportDlg.nim_comment
       nimFlameExport.nimAddBatchExport(info=info, comment=nim_comment)
 
-   print "batchExportBegin - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
+   print "batchExportBegin - END"
    pass
 
 
@@ -261,11 +261,11 @@ def batchExportBegin( info, userData ):
 #   This can be used by the hook to pass black box data around.
 #
 def batchExportEnd( info, userData ):
-   print "batchExportEnd - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+   print "batchExportEnd - START"
    if debug :
       print info
       print userData
-   print "batchExportEnd - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
+   print "batchExportEnd - END"
    pass
 
 # Hook called when starting the application and when switching project
@@ -283,10 +283,10 @@ def batchExportEnd( info, userData ):
 # <batch name> and <iteration>
 
 def batchDefaultIterationName( project ):
-   print "batchDefaultIterationName - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+   print "batchDefaultIterationName - START"
    if debug :
       print project
-   print "batchDefaultIterationName - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
+   print "batchDefaultIterationName - END"
    return ""
 
 # Hook called when starting the application and when switching project
@@ -302,10 +302,10 @@ def batchDefaultIterationName( project ):
 #
 
 def batchDefaultRenderNodeName( project ):
-   print "batchDefaultRenderNodeName - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+   print "batchDefaultRenderNodeName - START"
    if debug :
       print project
-   print "batchDefaultRenderNodeName - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
+   print "batchDefaultRenderNodeName - END"
    return ""
 
 # Hook called when starting the application and when switching project
@@ -320,10 +320,10 @@ def batchDefaultRenderNodeName( project ):
 #     return "<batch name>_writefile_global"
 
 def batchDefaultWriteFileNodeName( project ):
-   print "batchDefaultWriteFileNodeName - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+   print "batchDefaultWriteFileNodeName - START"
    if debug :
       print project
-   print "batchDefaultWriteFileNodeName - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
+   print "batchDefaultWriteFileNodeName - END"
    return ""
 
 # Hook called when starting the application and when switching project
@@ -339,10 +339,10 @@ def batchDefaultWriteFileNodeName( project ):
 #
 
 def batchDefaultGroupPath( project ):
-   print "batchDefaultGroupPath - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+   print "batchDefaultGroupPath - START"
    if debug :
       print project
-   print "batchDefaultGroupPath - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
+   print "batchDefaultGroupPath - END"
    return ""
 
 # Hook called when starting the application and when switching project
@@ -358,10 +358,10 @@ def batchDefaultGroupPath( project ):
 #
 
 def batchDefaultIterationPath( project ):
-   print "batchDefaultIterationPath - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+   print "batchDefaultIterationPath - START"
    if debug :
       print project
-   print "batchDefaultIterationPath - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
+   print "batchDefaultIterationPath - END"
    return ""
 
 # Hook called when starting the application and when switching project
@@ -377,9 +377,9 @@ def batchDefaultIterationPath( project ):
 #
 
 def actionDefaultGeometryPath( project ):
-   print "actionDefaultGeometryPath - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+   print "actionDefaultGeometryPath - START"
    if debug :
       print project
-   print "actionDefaultGeometryPath - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
+   print "actionDefaultGeometryPath - END"
    return ""
 

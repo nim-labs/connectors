@@ -123,7 +123,7 @@ debug = True
 #   This can be used by the hook to pass black box data around.
 #
 def preCustomExport( info, userData ):
-   print "preCustomExport - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+   print "preCustomExport - START"
    if debug :
       print info
       print userData
@@ -301,7 +301,7 @@ def preCustomExport( info, userData ):
          info['abort'] = True
 
 
-   print "preCustomExport - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
+   print "preCustomExport - END"
    pass
 
 
@@ -327,11 +327,11 @@ def preCustomExport( info, userData ):
 #   This can be used by the hook to pass black box data around.
 #
 def postCustomExport( info, userData ):
-   print "postCustomExport - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+   print "postCustomExport - START"
    if debug :
       print info
       print userData
-   print "postCustomExport - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
+   print "postCustomExport - END"
    pass
 
 
@@ -364,11 +364,11 @@ def postCustomExport( info, userData ):
 #   This can be used by the hook to pass black box data around.
 #
 def preExport( info, userData ):
-   print "preExport - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+   print "preExport - START"
    if debug :
       print info
       print userData
-   print "preExport - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
+   print "preExport - END"
    pass
 
 
@@ -393,11 +393,11 @@ def preExport( info, userData ):
 #   This can be used by the hook to pass black box data around.
 #
 def postExport( info, userData ):
-   print "postExport - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+   print "postExport - START"
    if debug :
       print info
       print userData
-   print "postExport - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
+   print "postExport - END"
    pass
 
 
@@ -439,7 +439,7 @@ def postExport( info, userData ):
 #   This can be used by the hook to pass black box data around.
 #
 def preExportSequence( info, userData ):
-   print "preExportSequence - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+   print "preExportSequence - START"
 
    if debug :
       print info
@@ -449,7 +449,7 @@ def preExportSequence( info, userData ):
    # If standard export then ask for NIM association
    nimShowDialog = False
 
-   print "preExportSequence - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
+   print "preExportSequence - END"
    pass
 
 
@@ -482,7 +482,7 @@ def preExportSequence( info, userData ):
 #   This can be used by the hook to pass black box data around.
 #
 def postExportSequence( info, userData ):
-   print "postExportSequence - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+   print "postExportSequence - START"
    if debug :
       print info
       print userData
@@ -542,7 +542,7 @@ def postExportSequence( info, userData ):
             mov_path = userData['dailyData']['path']
             result = nimFlameExport.uploadDaily(nim_taskID=nim_taskID, mov_path=mov_path)
 
-   print "postExportSequence - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
+   print "postExportSequence - END"
    pass
 
 
@@ -646,7 +646,7 @@ def postExportSequence( info, userData ):
 #   This can be used by the hook to pass black box data around.
 #
 def preExportAsset( info, userData ):
-   print "preExportAsset - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+   print "preExportAsset - START"
    if debug :
       print info
       print userData
@@ -680,7 +680,7 @@ def preExportAsset( info, userData ):
       print "resolvedPath: %s" % info['resolvedPath']
       #print "shotName: %s" % info['shotName']
 
-   print "preExportAsset - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
+   print "preExportAsset - END"
    pass
 
 
@@ -793,7 +793,7 @@ def preExportAsset( info, userData ):
 #
 def postExportAsset( info, userData ):
 
-   print "postExportAsset - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+   print "postExportAsset - START"
    if debug :
       print info
       print userData
@@ -862,7 +862,7 @@ def postExportAsset( info, userData ):
       #print "shotName: %s" % info['shotName']
       #print "shotID: %s" % userData['currentShotID']
 
-   print "postExportAsset - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<" 
+   print "postExportAsset - END" 
    
    pass
 
@@ -888,12 +888,12 @@ def useBackburnerPostExportAsset():
 #    of the profiles to show in contextual menus.
 #
 def getCustomExportProfiles( profiles ):
-   print "getCustomExportProfiles - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+   print "getCustomExportProfiles - START"
    profiles['NIM Publish Sequence']        = {'nim_export_type':'NimExportSequence'} #Adds an entry to the 'userData' dictionary
    profiles['NIM Export Clip to Daily']        = {'nim_export_type':'NimExportDaily'}    #Adds an entry to the 'userData' dictionary
    profiles['NIM Export Clip to Edit']        = {'nim_export_type':'NimExportEdit'}     #Adds an entry to the 'userData' dictionary
    
-   print "getCustomExportProfiles - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
+   print "getCustomExportProfiles - END"
    pass
 
 
