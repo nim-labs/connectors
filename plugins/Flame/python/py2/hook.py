@@ -65,8 +65,8 @@ import nimFlameExport
 # sequenceName : Name of the rendered sequence -- String.
 # elapsedTimeInSeconds : number of seconds used to render -- Float
 def renderEnded(moduleName, sequenceName, elapsedTimeInSeconds):
-   print "renderEnded - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
-   print "renderEnded - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
+   print "renderEnded - START"
+   print "renderEnded - END"
    pass
 
 

@@ -2,10 +2,10 @@
 #******************************************************************************
 #
 # Filename:    projectHook.py
-# Version:     v5.0.11.210722
+# Version:     v6.0.4.230905
 # Compatible:  Python 3.x
 #
-# Copyright (c) 2014-2022 NIM Labs LLC
+# Copyright (c) 2014-2023 NIM Labs LLC
 # All rights reserved.
 #
 # Use of this software is subject to the terms of the NIM Labs license
@@ -20,11 +20,11 @@ import os
 # Hook called when the user loads a project in the application.
 # project_name : Name of the loaded project -- String.
 def project_changed(project_name):
-    print("project_changed - start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+    print("project_changed - START")
     os.environ['NIM_FLAME_PROJECT'] = str(project_name)
     if debug :
         print(project_name)
-    print("project_changed - end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
+    print("project_changed - END")
     pass
 
 
