@@ -625,10 +625,12 @@ def get_jobs( userID=None, folders=False ) :
         for job in _jobs :
             if not folders :
                 #jobDict[str(job['number'])+'_'+str(job['jobname'])]=str(job['ID'])
-                jobDict[ u' '.join((job['number'],job['jobname'])).encode('utf-8') ] = job['ID'].encode('utf-8')
+                #jobDict[ u' '.join((job['number'],job['jobname'])).encode('utf-8') ] = job['ID'].encode('utf-8')
+                jobDict[ u' '.join((job['number'],job['jobname'])).encode('utf-8') ] = str(job['ID'])
             else :
                 #jobDict[str(job['number'])+'_'+str(job['folder'])]=str(job['ID'])
-                jobDict[ u' '.join((job['number'],'_',job['folder'])).encode('utf-8') ] = job['ID'].encode('utf-8')
+                #jobDict[ u' '.join((job['number'],'_',job['folder'])).encode('utf-8') ] = job['ID'].encode('utf-8')
+                jobDict[ u' '.join((job['number'],'_',job['folder'])).encode('utf-8') ] = str(job['ID'])
         return jobDict
     except :
         P.error("Failed to get jobs")
