@@ -206,7 +206,7 @@ def post( sqlCmd=None, debug=True, nimURL=None ) :
 #       apiKey optional (required if passing nimURL and Require API Keys is enabled)
 #
 def connect( method='get', params=None, nimURL=None, apiUser=None, apiKey=None ) :
-    'Querys MySQL server and returns decoded json array'
+    'Query URL with params and returns decoded json array'
     result=None
     
     isGUI = False
@@ -349,9 +349,10 @@ def connect( method='get', params=None, nimURL=None, apiUser=None, apiKey=None )
 #            params['name'] = 'note name'
 #            params['file'] = open(imageFile,'rb')
 #       nimURL optional (not passing the nimURL will trigger a prefs read)
+#       apiUser optional (required if passing nimURL and Require API Keys is enabled)
 #       apiKey optional (required if passing nimURL and Require API Keys is enabled)
 #
-def upload( params=None, nimURL=None, apiKey=None ) :
+def upload( params=None, nimURL=None, apiUser=None, apiKey=None ) :
 
     isGUI = False
     try :
@@ -372,6 +373,8 @@ def upload( params=None, nimURL=None, apiKey=None ) :
         nim_apiUser = ''
         nim_apiKey = ''
     
+    if apiUser :
+        nim_apiUser = apiUser
     if apiKey :
         nim_apiKey = apiKey
 
