@@ -24,7 +24,7 @@ from . import nim as Nim
 
 #  Variables :
 version='v6.1.4'
-winTitle='NIM_'+version
+winTitle='NIM '+version
 _os=platform.system().lower()
 #  Compiled REGEX Searches :
 ext_srch=re.compile( '\.[a-zA-Z0-9]+$' )

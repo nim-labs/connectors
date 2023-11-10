@@ -29,7 +29,7 @@ from . import nim_win as Win
 
 #  Variables :
 version='v6.1.4'
-winTitle='NIM_'+version+' - '
+winTitle='NIM '+version+' - '
 _os=platform.system().lower()
 nim_plugin_ID=1032427
 

@@ -51,7 +51,7 @@ except ImportError :
 version='v6.1.4'
 WIN=''
 startTime=''
-winTitle='NIM_'+version
+winTitle='NIM '+version
 _os=platform.system().lower()
 _osCap=platform.system()
 

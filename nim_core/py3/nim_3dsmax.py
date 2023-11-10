@@ -36,7 +36,7 @@ except :
 
 #  Variables :
 version='v6.1.4'
-winTitle='NIM_'+version
+winTitle='NIM '+version
 
 def get_mainWin() :
     'Returns the name of the main 3dsMax window'

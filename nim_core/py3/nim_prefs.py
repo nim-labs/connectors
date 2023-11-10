@@ -35,7 +35,7 @@ except :
 version='v6.1.4'
 prefs_dirName='.nim'
 prefs_fileName='prefs.nim'
-winTitle='NIM_'+version
+winTitle='NIM '+version
 nim_URL='http://hostname/nimAPI.php'
 nim_useSLL='False'
 nim_scripts = os.path.abspath(os.path.join(os.path.dirname( __file__ ), os.pardir, os.pardir))
