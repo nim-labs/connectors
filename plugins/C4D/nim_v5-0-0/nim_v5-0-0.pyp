@@ -105,7 +105,7 @@ if loadNIM:
 
     #  Variables :
     version='v2.6.0'
-    winTitle='NIM_'+version+' - '
+    winTitle='NIM '+version+' - '
     nim_plugin_ID=1032427
     nim_openUI_ID=1032462
     nim_saveUI_ID=1032463
