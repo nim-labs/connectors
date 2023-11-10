@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: nim_api.py
-# Version:  v6.0.4.230905
+# Version:  v6.1.4.231110
 #
 # Copyright (c) 2014-2023 NIM Labs LLC
 # All rights reserved.
@@ -58,8 +58,8 @@ from . import nim_tools
 from . import nim_win as Win
 
 #  Variables :
-version='v6.0.4'
-winTitle='NIM_'+version
+version='v6.1.4'
+winTitle='NIM '+version
 
 
 isGUI = False
@@ -202,9 +202,10 @@ def post( sqlCmd=None, debug=True, nimURL=None ) :
 #           params['q'] = 'getShots'
 #           params['showID'] = '100'
 #       nimURL optional (not passing the nimURL will trigger a prefs read)
+#       apiUser optional (required if passing nimURL and Require API Keys is enabled)
 #       apiKey optional (required if passing nimURL and Require API Keys is enabled)
 #
-def connect( method='get', params=None, nimURL=None, apiKey=None ) :
+def connect( method='get', params=None, nimURL=None, apiUser=None, apiKey=None ) :
     'Querys MySQL server and returns decoded json array'
     result=None
     
@@ -227,6 +228,8 @@ def connect( method='get', params=None, nimURL=None, apiKey=None ) :
         nim_apiUser = ''
         nim_apiKey = ''
     
+    if apiUser :
+        nim_apiUser = apiUser
     if apiKey :
         nim_apiKey = apiKey
 

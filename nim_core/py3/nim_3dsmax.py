@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: nim_3dsmax.py
-# Version:  v6.0.4.230905
+# Version:  v6.1.4.231110
 #
 # Copyright (c) 2014-2023 NIM Labs LLC
 # All rights reserved.
@@ -35,8 +35,8 @@ except :
             pass
 
 #  Variables :
-version='v6.0.4'
-winTitle='NIM_'+version
+version='v6.1.4'
+winTitle='NIM '+version
 
 def get_mainWin() :
     'Returns the name of the main 3dsMax window'
