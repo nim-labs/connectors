@@ -2,10 +2,11 @@
 #******************************************************************************
 #
 # Filename:    projectHook.py
-# Version:     v6.0.4.230905
+# Version:     v6.1.12.240419
 # Compatible:  Python 3.x
+#              PySide6
 #
-# Copyright (c) 2014-2023 NIM Labs LLC
+# Copyright (c) 2014-2024 NIM Labs LLC
 # All rights reserved.
 #
 # Use of this software is subject to the terms of the NIM Labs license
@@ -42,12 +43,6 @@ def project_changed(project_name):
 #       Will be empty if there is no link yet.
 #
 def project_changed_dict(info):
-    pass
-
-
-# Hook called when application is fully initialized
-# project_name: the project that was loaded -- String
-def app_initialized(project_name):
     pass
 
 

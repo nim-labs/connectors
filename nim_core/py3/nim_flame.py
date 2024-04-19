@@ -2,9 +2,9 @@
 #******************************************************************************
 #
 # Filename: nim_flame.py
-# Version:  v6.1.4.231110
+# Version:  v6.1.12.240419
 #
-# Copyright (c) 2014-2023 NIM Labs LLC
+# Copyright (c) 2014-2024 NIM Labs LLC
 # All rights reserved.
 #
 # Use of this software is subject to the terms of the NIM Labs license
@@ -21,23 +21,27 @@ from . import nim_print as P
 
 #  Import Python GUI packages :
 try : 
-	from PySide2 import QtWidgets as QtGui
-	from PySide2 import QtCore
+	from PySide6 import QtWidgets as QtGui
+	from PySide6 import QtCore
 except ImportError :
 	try : 
-		from PySide import QtCore, QtGui
+		from PySide2 import QtWidgets as QtGui
+		from PySide2 import QtCore
 	except ImportError :
 		try : 
-			from PyQt4 import QtCore, QtGui
-		except ImportError : 
-			try :
-				from PyQt5 import QtWidgets as QtGui
-				from PyQt5 import QtCore
-			except ImportError :
-				print("NIM: Failed to load UI Modules - Flame")
+			from PySide import QtCore, QtGui
+		except ImportError :
+			try : 
+				from PyQt4 import QtCore, QtGui
+			except ImportError : 
+				try :
+					from PyQt5 import QtWidgets as QtGui
+					from PyQt5 import QtCore
+				except ImportError :
+					print("NIM: Failed to load UI Modules - Flame")
 
 #  Variables :
-version='v6.1.4'
+version='v6.1.12'
 winTitle='NIM '+version
 
 

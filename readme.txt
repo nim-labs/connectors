@@ -1,7 +1,7 @@
 
 NIM Studio Management - NIM Connectors :
 
-	The NIM Connectors are designed to be a flexible set of plugins and core API functions for users to integrate their applications with the NIM Studio Mangement platform. The connectors require a NIM VM to be installed for use.  
+	The NIM Connectors are designed to be a flexible set of plugins and core API functions for users to integrate their applications with the NIM Studio Management platform. The connectors require a NIM VM to be installed for use.  
 
 	More information about NIM and a free 30 day trial can be found at:
 	https://nim-labs.com
@@ -13,13 +13,13 @@ NIM Studio Management - NIM Connectors :
 	https://nim-labs.com/docs/NIM/html/api_python.html
 
 
-	The plugins are application specific plugins and scripts to automate tasks inside of the targeted DCC applications. NIM comes with connectors for major DCC applications and renderfarm integration. The NIM Connectors in 3rd party DCC applications support many file management features including basic functionality such as open, import, save, and save as operations. These features extend to advanced options including referencing, timeline export, and more depending upon the application. The NIM Connectors support automatic version control, pre-determined naming conventions, and loading of published files. Renderfarm support enables automatic logging of renders, dailies generation and uploading to NIM.
+	The plugins are application specific plugins and scripts to automate tasks inside of the targeted DCC applications. NIM comes with connectors for major DCC applications and render farm integration. The NIM Connectors in 3rd party DCC applications support many file management features including basic functionality such as open, import, save, and save as operations. These features extend to advanced options including referencing, timeline export, and more depending upon the application. The NIM Connectors support automatic version control, pre-determined naming conventions, and loading of published files. Renderfarm support enables automatic logging of renders, dailies generation and uploading to NIM.
 
 	Full documentation for the NIM Connector plugins can be found at:
 	https://nim-labs.com/docs/NIM/html/index.html#connectors
 
 
-	In addition to the pre-built connectors, custom connectors can be created using the NIM API directly or by expanding upon the exsting core functionality.
+	In addition to the pre-built connectors, custom connectors can be created using the NIM API directly or by expanding upon the existing core functionality.
 
 
 	The connector directory structure is separated into 4 main folders:

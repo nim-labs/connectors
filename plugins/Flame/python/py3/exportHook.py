@@ -2,10 +2,11 @@
 #******************************************************************************
 #
 # Filename:    exportHook.py
-# Version:     v6.0.4.230905
+# Version:     v6.1.12.240419
 # Compatible:  Python 3.x
+#              PySide6
 #
-# Copyright (c) 2014-2023 NIM Labs LLC
+# Copyright (c) 2014-2024 NIM Labs LLC
 # All rights reserved.
 #
 # Use of this software is subject to the terms of the NIM Labs license
@@ -14,16 +15,21 @@
 # *****************************************************************************
 
 #  Import Python GUI packages :
-try : 
-    from PySide2.QtWidgets import *
-    from PySide2.QtGui import *
-    from PySide2.QtCore import *
-except ImportError :
+try:
+    from PySide6.QtWidgets import *
+    from PySide6.QtGui import *
+    from PySide6.QtCore import *
+except ImportError:
     try : 
-        from PySide.QtGui import *
-        from PySide.QtCore import *
-    except ImportError : 
-        print("NIM: Failed to load UI Modules")
+        from PySide2.QtWidgets import *
+        from PySide2.QtGui import *
+        from PySide2.QtCore import *
+    except ImportError :
+        try : 
+            from PySide.QtGui import *
+            from PySide.QtCore import *
+        except ImportError : 
+            print("NIM: Failed to load UI Modules")
 
 import os,sys,re
 import flame 
