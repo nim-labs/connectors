@@ -6,7 +6,7 @@
         50, 59.94 and 60 fps.</comment>
     <movie>
         <fileType>QuickTime</fileType>
-        <namePattern>&lt;nim_shot_root&gt;/FLAME/EDITS/&lt;name&gt;</namePattern>
+        <namePattern>&lt;nim_show_root&gt;/FLAME/EDITS/&lt;name&gt;</namePattern>
         <yuvHeadroom>0</yuvHeadroom>
         <yuvColourSpace>PCS_UNKNOWN</yuvColourSpace>
         <colorSyncCompat>False</colorSyncCompat>
@@ -19,7 +19,7 @@
             <targetVersion>2024</targetVersion>
             <pathSuffix>/profiles/.33622016/default.cdxprof</pathSuffix>
         </codecProfile>
-        <namePattern>&lt;nim_shot_root&gt;/FLAME/EDITS/&lt;name&gt;</namePattern>
+        <namePattern>&lt;nim_show_root&gt;/FLAME/EDITS/&lt;name&gt;</namePattern>
         <includeAlpha>False</includeAlpha>
         <overwriteWithVersions>False</overwriteWithVersions>
         <resize>
@@ -43,7 +43,7 @@
             <targetVersion>2024</targetVersion>
             <pathSuffix>/profiles/.4027060226/default.cdxprof</pathSuffix>
         </codecProfile>
-        <namePattern>&lt;nim_shot_root&gt;/FLAME/EDITS/&lt;name&gt;</namePattern>
+        <namePattern>&lt;nim_show_root&gt;/FLAME/EDITS/&lt;name&gt;</namePattern>
         <mixdown>To2</mixdown>
         <sampleRate>48000</sampleRate>
         <bitRate>128</bitRate>

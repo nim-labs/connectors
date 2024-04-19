@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<preset version="12">
+<preset version="14">
     <type>sequence</type>
     <comment>Publish sequence to NIM with Generated Media as 16bit EXR including 10 frame handles,
         keeping all tracks, and no Audio using the job&apos;s seleted project structure.</comment>
@@ -44,6 +44,10 @@
             <bigEndian>False</bigEndian>
             <pixelRatio>1</pixelRatio>
             <scanFormat>P</scanFormat>
+            <ResSelectorMode>3</ResSelectorMode>
+            <ResAdaptativeMode>0</ResAdaptativeMode>
+            <ResScalingMode>1</ResScalingMode>
+            <ResScalingValue>50</ResScalingValue>
         </resize>
     </video>
     <name>

@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
-<preset version="12">
+<preset version="14">
     <type>sequence</type>
-    <comment>Publish sequence to NIM with Generated Media as 16bit EXR including 10 frame handles,
+    <comment>Publish sequence to NIM with Generated Media as 10bit DPX including 10 frame handles,
         keeping all tracks, and no Audio using the job&apos;s seleted project structure.</comment>
     <sequence>
         <fileType>NONE</fileType>
@@ -27,23 +27,29 @@
         </audioMedia>
     </sequence>
     <video>
-        <fileType>OpenEXR</fileType>
-        <codec>661624</codec>
+        <fileType>Dpx</fileType>
+        <codec>6176</codec>
         <codecProfile></codecProfile>
         <namePattern>&lt;nim_shot_plates&gt;/&lt;segment name&gt;_&lt;shot name&gt;_&lt;version
             name&gt;/&lt;segment name&gt;_&lt;shot name&gt;_&lt;version name&gt;.</namePattern>
+        <transferCharacteristic>2</transferCharacteristic>
+        <colorimetricSpecification>4</colorimetricSpecification>
         <overwriteWithVersions>False</overwriteWithVersions>
         <resize>
             <resizeType>fit</resizeType>
             <resizeFilter>lanczos</resizeFilter>
             <width>0</width>
             <height>0</height>
-            <bitsPerChannel>16</bitsPerChannel>
+            <bitsPerChannel>10</bitsPerChannel>
             <numChannels>3</numChannels>
-            <floatingPoint>True</floatingPoint>
-            <bigEndian>False</bigEndian>
+            <floatingPoint>False</floatingPoint>
+            <bigEndian>True</bigEndian>
             <pixelRatio>1</pixelRatio>
             <scanFormat>P</scanFormat>
+            <ResSelectorMode>3</ResSelectorMode>
+            <ResAdaptativeMode>0</ResAdaptativeMode>
+            <ResScalingMode>1</ResScalingMode>
+            <ResScalingValue>50</ResScalingValue>
         </resize>
     </video>
     <name>

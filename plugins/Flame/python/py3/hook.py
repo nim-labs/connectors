@@ -1,41 +1,11 @@
 
-# Hook called when application is started
-# info: Information about the current executable -- dictionary
-#
-#    Keys:
-#
-#    homeDirectory: [String]
-#       Home directory of the started executable.
-#       Example: /opt/Autodesk/flame_2016.1.2
-#
-#    version: [String]
-#       Decorated version string of the started executable.
-#       Example: Using the previous example, version == "2016.1.2"
-#
-#    versionMajor: [String]
-#       Major version of the started executable.
-#       Example: Using the previous example, versionMajor == "2016"
-#
-#    versionMinor: [String]
-#       Minor version of the started executable.
-#       Example: Using the previous example, versionMinor == "1"
-#
-#    versionPatch: [String]
-#       Patch version of the started executable.
-#       Example: Using the previous example, versionPatch == "2"
-#
-#   versionStamp: [String]
-#        Stamp version of the started executable.
-#        Example: versionStamp == "185" (Not visible on homeDirectory path)
-#
-#    configPath: [String]
-#       Path to the loaded config file.
-#       Example: Using the previous example, default is /opt/Autodesk/flame_2016.1.2/cfg/init.cfg
-def app_started(info):
+# Hook called when the application is fully initialized after a project is loaded.
+# project_name: the project that was loaded -- String
+def app_initialized(project_name):
     pass
 
 
-# Hook called when application is exiting
+# Hook called when the application is exiting.
 # info: Information about the current executable -- dictionary
 #
 #    Keys:
@@ -67,7 +37,7 @@ def app_started(info):
 #    configPath: [String]
 #       Path to the loaded config file.
 #       Example: Using the previous example, default is /opt/Autodesk/flame_2016.1.2/cfg/init.cfg
-def app_exit(info):
+def app_exited(info):
     pass
 
 
@@ -92,8 +62,6 @@ def user_changed(info):
 # sequence_name : Name of the rendered sequence -- String.
 # elapsed_time_in_seconds : number of seconds used to render -- Float
 def render_ended(module_name, sequence_name, elapsed_time_in_seconds):
-    #print("render_ended - START")
-    #print("render_ended - END")
     pass
 
 
