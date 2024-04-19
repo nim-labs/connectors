@@ -15,21 +15,25 @@ import os
 
 qt_import=True
 try : 
-    from PySide2 import QtWidgets as QtGui
-    from PySide2 import QtCore
+    from PySide6 import QtWidgets as QtGui
+    from PySide6 import QtCore
 except :
-    try :
-        from PySide import QtCore, QtGui
+    try : 
+        from PySide2 import QtWidgets as QtGui
+        from PySide2 import QtCore
     except :
-        try : 
-            from PyQt4 import QtCore, QtGui
+        try :
+            from PySide import QtCore, QtGui
         except :
-            try :
-                from PyQt5 import QtWidgets as QtGui
-                from PyQt5 import QtCore
+            try : 
+                from PyQt4 import QtCore, QtGui
             except :
-                # print "NIM: Failed to load UI Modules - Tools"
-                qt_import=False
+                try :
+                    from PyQt5 import QtWidgets as QtGui
+                    from PyQt5 import QtCore
+                except :
+                    # print "NIM: Failed to load UI Modules - Tools"
+                    qt_import=False
 
 from . import nim_print
 from . import nim_win

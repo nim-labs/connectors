@@ -5,7 +5,7 @@
 # Version:     v6.0.4.230905
 # Compatible:  Python 3.x
 #
-# Copyright (c) 2014-2023 NIM Labs LLC
+# Copyright (c) 2014-2024 NIM Labs LLC
 # All rights reserved.
 #
 # Use of this software is subject to the terms of the NIM Labs license
@@ -14,16 +14,21 @@
 # *****************************************************************************
 
 #  Import Python GUI packages :
-try : 
-    from PySide2.QtWidgets import *
-    from PySide2.QtGui import *
-    from PySide2.QtCore import *
-except ImportError :
+try:
+    from PySide6.QtWidgets import *
+    from PySide6.QtGui import *
+    from PySide6.QtCore import *
+except ImportError:
     try : 
-        from PySide.QtGui import *
-        from PySide.QtCore import *
-    except ImportError : 
-        print("NIM: Failed to load UI Modules")
+        from PySide2.QtWidgets import *
+        from PySide2.QtGui import *
+        from PySide2.QtCore import *
+    except ImportError :
+        try : 
+            from PySide.QtGui import *
+            from PySide.QtCore import *
+        except ImportError : 
+            print("NIM: Failed to load UI Modules")
 
 import os,sys,re
 import flame
@@ -608,24 +613,5 @@ def batch_default_iteration_path(project, *args, **kwargs):
     return ""
 
 
-# Hook called when starting the application and when switching project
-# This default atcion geometry path will be used to import geometry.
-#
-# project: [String]
-#    Usually called with current project.  If specified, the default
-#    Action geometry path for this project will be returned.
-#
-# Ex: if project == "project_name":
-#         return "~/specialPathForthatProject/batch/<batch name>/fileformats"
-#     return "~/batch/<batch name>/fileformats"
-#
-# :note: This method can be implemented only once.
-#        First instance found will be used
-#
-def action_default_geometry_path(project, *args, **kwargs):
-    print("action_default_geometry_path - START")
-    if debug :
-        print(project)
-    print("action_default_geometry_path - END")
-    return ""
+
 

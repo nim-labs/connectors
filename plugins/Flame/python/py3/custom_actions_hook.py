@@ -5,7 +5,7 @@
 # Version:     v6.0.4.230905
 # Compatible:  Python 3.x
 #
-# Copyright (c) 2014-2023 NIM Labs LLC
+# Copyright (c) 2014-2024 NIM Labs LLC
 # All rights reserved.
 #
 # Use of this software is subject to the terms of the NIM Labs license
@@ -14,14 +14,18 @@
 # *****************************************************************************
 
 #  Import Python GUI packages :
-try : 
-    from PySide2 import QtWidgets as QtGui
-    from PySide2 import QtCore
-except ImportError :
+try:
+    from PySide6 import QtWidgets as QtGui
+    from PySide6 import QtCore
+except ImportError:
     try : 
-        from PySide import QtCore, QtGui
-    except ImportError : 
-        print("NIM: Failed to load UI Modules")
+        from PySide2 import QtWidgets as QtGui
+        from PySide2 import QtCore
+    except ImportError :
+        try : 
+            from PySide import QtCore, QtGui
+        except ImportError : 
+            print("NIM: Failed to load UI Modules")
 
 import os,sys,re
 import flame

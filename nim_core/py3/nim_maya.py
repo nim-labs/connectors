@@ -23,20 +23,24 @@ import maya.cmds as mc
 import maya.mel as mm
 #  Import Python GUI packages :
 try : 
-    from PySide2 import QtWidgets as QtGui
-    from PySide2 import QtCore
+    from PySide6 import QtWidgets as QtGui
+    from PySide6 import QtCore
 except ImportError :
     try : 
-        from PySide import QtCore, QtGui
+        from PySide2 import QtWidgets as QtGui
+        from PySide2 import QtCore
     except ImportError :
         try : 
-            from PyQt4 import QtCore, QtGui
-        except ImportError : 
-            try :
-                from PyQt5 import QtWidgets as QtGui
-                from PyQt5 import QtCore
-            except ImportError :
-                print("NIM: Failed to load UI Modules - Maya")
+            from PySide import QtCore, QtGui
+        except ImportError :
+            try : 
+                from PyQt4 import QtCore, QtGui
+            except ImportError : 
+                try :
+                    from PyQt5 import QtWidgets as QtGui
+                    from PyQt5 import QtCore
+                except ImportError :
+                    print("NIM: Failed to load UI Modules - Maya")
 
 #  Variables :
 version='v6.1.4'

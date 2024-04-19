@@ -30,22 +30,27 @@ from . import nim_print as P
 from . import nim_win as Win
 #  Import Python GUI packages :
 try : 
-    from PySide2 import QtWidgets as QtGui
-    from PySide2 import QtGui as QtGui2
-    from PySide2 import QtCore
+    from PySide6 import QtWidgets as QtGui
+    from PySide6 import QtGui as QtGui2
+    from PySide6 import QtCore
 except ImportError :
     try : 
-        from PySide import QtCore, QtGui
+        from PySide2 import QtWidgets as QtGui
+        from PySide2 import QtGui as QtGui2
+        from PySide2 import QtCore
     except ImportError :
         try : 
-            from PyQt4 import QtCore, QtGui
-        except ImportError : 
-            try :
-                from PyQt5 import QtWidgets as QtGui
-                from PyQt5 import QtGui as QtGui2
-                from PyQt5 import QtCore
-            except ImportError :
-                print("NIM UI: Failed to UI Modules")
+            from PySide import QtCore, QtGui
+        except ImportError :
+            try : 
+                from PyQt4 import QtCore, QtGui
+            except ImportError : 
+                try :
+                    from PyQt5 import QtWidgets as QtGui
+                    from PyQt5 import QtGui as QtGui2
+                    from PyQt5 import QtCore
+                except ImportError :
+                    print("NIM UI: Failed to UI Modules")
 
 #  Variables :
 version='v6.1.4'

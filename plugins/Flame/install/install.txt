@@ -30,7 +30,7 @@ OSX +10.11.x:
 
 	Copy the file to: /Library/LaunchAgents/setenv.DL_PYTHON_HOOK_PATH.plist
 
-	Execute the folowing lines to modify the plist permissions.
+	Execute the following lines to modify the plist permissions.
 	The plist will not run if the permissions are not correct.
 
 		sudo chown root /Library/LaunchAgents/setenv.DL_PYTHON_HOOK_PATH.plist
