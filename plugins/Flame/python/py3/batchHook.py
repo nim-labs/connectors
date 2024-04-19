@@ -2,8 +2,9 @@
 #******************************************************************************
 #
 # Filename:    batchHook.py
-# Version:     v6.0.4.230905
+# Version:     v6.1.12.240419
 # Compatible:  Python 3.x
+#              PySide6
 #
 # Copyright (c) 2014-2024 NIM Labs LLC
 # All rights reserved.
