@@ -1,9 +1,7 @@
 <?xml version="1.0"?>
 <preset version="14">
         <type>movie</type>
-        <comment>Creates an 8-bit QuickTime file (High 4:2:0) with 16-bit AAC audio. The resolution of
-                the file is based on the selected clip. Supported frame rates are 23.98, 24, 25, 29.97, 30,
-                50, 59.94 and 60 fps.</comment>
+        <comment>Creates an 8-bit QuickTime file (High 4:2:0) with 16-bit AAC audio. The resolution of the file is based on the selected clip. Supported frame rates are 23.98, 24, 25, 29.97, 30, 50, 59.94 and 60 fps.</comment>
         <movie>
                 <fileType>QuickTime</fileType>
                 <namePattern>&lt;nim_shot_root&gt;/FLAME/REVIEW/&lt;name&gt;</namePattern>
