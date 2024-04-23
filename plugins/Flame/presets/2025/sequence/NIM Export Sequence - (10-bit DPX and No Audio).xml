@@ -1,8 +1,7 @@
 <?xml version="1.0"?>
 <preset version="14">
     <type>sequence</type>
-    <comment>Publish sequence to NIM with Generated Media as 10bit DPX including 10 frame handles,
-        keeping all tracks, and no Audio using the job&apos;s seleted project structure.</comment>
+    <comment>Publish sequence to NIM with Generated Media as 10bit DPX including 10 frame handles, keeping all tracks, and no Audio using the job&apos;s seleted project structure.</comment>
     <sequence>
         <fileType>NONE</fileType>
         <namePattern></namePattern>
@@ -30,8 +29,7 @@
         <fileType>Dpx</fileType>
         <codec>6176</codec>
         <codecProfile></codecProfile>
-        <namePattern>&lt;nim_shot_plates&gt;/&lt;segment name&gt;_&lt;shot name&gt;_&lt;version
-            name&gt;/&lt;segment name&gt;_&lt;shot name&gt;_&lt;version name&gt;.</namePattern>
+        <namePattern>&lt;nim_shot_plates&gt;/&lt;segment name&gt;_&lt;shot name&gt;_&lt;version name&gt;/&lt;segment name&gt;_&lt;shot name&gt;_&lt;version name&gt;.</namePattern>
         <transferCharacteristic>2</transferCharacteristic>
         <colorimetricSpecification>4</colorimetricSpecification>
         <overwriteWithVersions>False</overwriteWithVersions>
@@ -65,11 +63,9 @@
             <name>v&lt;version&gt;</name>
         </version>
         <batchSetup>
-            <namePattern>&lt;nim_shot_root&gt;/FLAME/batch/&lt;shot name&gt;_COMP_&lt;version
-                name&gt;</namePattern>
+            <namePattern>&lt;nim_shot_root&gt;/FLAME/batch/&lt;shot name&gt;_COMP_&lt;version name&gt;</namePattern>
             <exportNamePattern>&lt;nim_shot_comp&gt;/FLAME/&lt;shot name&gt;_COMP</exportNamePattern>
-            <outputPathPattern>&lt;nim_shot_comp&gt;/&lt;shot name&gt;_COMP_&lt;version
-                name&gt;/&lt;shot name&gt;_COMP_&lt;version name&gt;.</outputPathPattern>
+            <outputPathPattern>&lt;nim_shot_comp&gt;/&lt;shot name&gt;_COMP_&lt;version name&gt;/&lt;shot name&gt;_COMP_&lt;version name&gt;.</outputPathPattern>
             <batchGroup>False</batchGroup>
             <batchInputsType>1</batchInputsType>
             <batchGroupPath>/Desktop</batchGroupPath>
