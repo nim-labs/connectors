@@ -2,3 +2,5 @@
 *.pyc
 !nimDarktheme.pyc
 !resources_rc.pyc
+tests
+.vscode
