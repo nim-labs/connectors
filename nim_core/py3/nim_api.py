@@ -983,6 +983,12 @@ def get_jobInfo( jobID=None, nimURL=None, apiUser=None, apiKey=None ) :
     result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
     return result
 
+def get_jobStatuses( nimURL=None, apiUser=None, apiKey=None ) :
+    'Retrieves the list of available job statuses.'
+    result=False
+    params = {'q': 'getJobStatuses'}
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
 
 #  Servers & Project Structures  #
 
@@ -1229,6 +1235,12 @@ def get_assetIcon( assetID=None, nimURL=None, apiUser=None, apiKey=None ) :
     result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
     return result   
 
+def get_assetStatuses( nimURL=None, apiUser=None, apiKey=None ) :
+    'Retrieves the list of available asset statuses.'
+    result=False
+    params = {'q': 'getAssetStatuses'}
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
 
 #  Shows  #
 
@@ -1543,6 +1555,12 @@ def get_shotIcon( shotID=None, nimURL=None, apiUser=None, apiKey=None ) :
     result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
     return result 
 
+def get_shotStatuses( nimURL=None, apiUser=None, apiKey=None ) :
+    'Retrieves the list of available shot statuses.'
+    result=False
+    params = {'q': 'getShotStatuses'}
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
 
 #  Tasks  #
 
@@ -1763,6 +1781,12 @@ def get_taskInfo( ID=None, itemClass=None, itemID=None, nimURL=None, apiUser=Non
     result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
     return result
 
+def get_taskStatuses( nimURL=None, apiUser=None, apiKey=None ) :
+    'Retrieves the list of available task statuses.'
+    result=False
+    params = {'q': 'getTaskStatuses'}
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
 
 #  Files  #
 
@@ -3432,6 +3456,12 @@ def upload_reviewNote( ID=None, name='', img=None, note='', frame=0, time=-1, us
 
     return result
 
+def get_reviewStatuses( nimURL=None, apiUser=None, apiKey=None ) :
+    'Retrieves the list of available review statuses.'
+    result=False
+    params = {'q': 'getReviewStatuses'}
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
 
 #  Timecards  #
 
