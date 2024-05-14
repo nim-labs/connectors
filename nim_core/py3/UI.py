@@ -730,8 +730,7 @@ class GUI(QtGui.QMainWindow) :
         #  Enable Basenames :
         self.nim.Input('base').setEnabled( True )
         for index in range( self.nim.Input('base').count() ) :
-            self.nim.Input('base').item( index ).setFlags( QtCore.Qt.ItemIsSelectable \
-                | QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsEnabled )
+            self.nim.Input('base').item( index ).setFlags( QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled )
         self.nim.Input('base').setSelectionMode( QtGui.QAbstractItemView.SingleSelection )
         
         #  Tag elements :
@@ -811,8 +810,7 @@ class GUI(QtGui.QMainWindow) :
         #  Enable Basenames :
         self.nim.Input('base').setEnabled( True )
         for index in range( self.nim.Input('base').count() ) :
-            self.nim.Input('base').item( index ).setFlags( QtCore.Qt.ItemIsSelectable \
-                | QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsEnabled )
+            self.nim.Input('base').item( index ).setFlags( QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled )
         self.nim.Input('base').setSelectionMode( QtGui.QAbstractItemView.SingleSelection )
         
         #  Tag elements :
@@ -920,8 +918,7 @@ class GUI(QtGui.QMainWindow) :
         #  Enable Basenames :
         self.nim.Input('base').setEnabled( True )
         for index in range( self.nim.Input('base').count() ) :
-            self.nim.Input('base').item( index ).setFlags( QtCore.Qt.ItemIsSelectable \
-                | QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsEnabled )
+            self.nim.Input('base').item( index ).setFlags( QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled )
         self.nim.Input('base').setSelectionMode( QtGui.QAbstractItemView.SingleSelection )
         
         #  Tag elements :
@@ -931,8 +928,7 @@ class GUI(QtGui.QMainWindow) :
         #  Enable Versions :
         self.nim.Input('ver').setEnabled( True )
         for index in range( self.nim.Input('ver').count() ) :
-            self.nim.Input('ver').item( index ).setFlags( QtCore.Qt.ItemIsSelectable \
-                | QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsEnabled )
+            self.nim.Input('ver').item( index ).setFlags( QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled )
         self.nim.Input('ver').setSelectionMode( QtGui.QAbstractItemView.SingleSelection )
         
         #  Comment :
@@ -1069,8 +1065,7 @@ class GUI(QtGui.QMainWindow) :
         #  Enable basenames :
         self.nim.Input('base').setEnabled( True )
         for index in range( self.nim.Input('base').count() ) :
-            self.nim.Input('base').item( index ).setFlags( QtCore.Qt.ItemIsSelectable \
-                | QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsEnabled )
+            self.nim.Input('base').item( index ).setFlags( QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled )
         self.nim.Input('base').setSelectionMode( QtGui.QAbstractItemView.SingleSelection )
         
         #  Tag elements :
@@ -1169,6 +1164,12 @@ class GUI(QtGui.QMainWindow) :
             #QtGui.QMainWindow.close(self)
             raise Exception("Failed to populate elements")
             return
+
+        #  Clear version data
+        self.verPath.setText('<path>')
+        self.verUser.setText('<user>')
+        self.verDate.setText('<date>')
+        self.verNote.setText('<comment>')
 
         #  Clear Fields for Empty Dictionaries :
         if not self.nim.Dict( elem ) or not len(self.nim.Dict( elem )) :
@@ -1291,8 +1292,7 @@ class GUI(QtGui.QMainWindow) :
                     item=QtGui.QListWidgetItem( self.nim.Input( elem ) )
                     item.setText( option['basename'] )
                     if self.nim.name('filter') !='Asset Master' :
-                        item.setFlags( QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEditable \
-                            | QtCore.Qt.ItemIsEnabled )
+                        item.setFlags( QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled )
                     #  Select item, if it matches the preferences :
                     if option['basename']==self.nimPrefs.name( elem ) :
                         self.nim.Input( elem ).setCurrentItem( item )
@@ -1377,20 +1377,34 @@ class GUI(QtGui.QMainWindow) :
                                 #  Add item to list view :
                                 item=QtGui.QListWidgetItem( self.nim.Input('ver') )
                                 item.setText( fileName )
-                                item.setFlags( QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEditable \
-                                    | QtCore.Qt.ItemIsEnabled )
+                                item.setFlags( QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled )
                                 ext=F.get_ext( fileName )
                                 #  Filter file types :
                                 if self.app=='Maya' :
-                                    if ext not in ['.ma', '.mb'] : item.setFlags( QtCore.Qt.ItemIsEditable )
+                                    if ext not in ['.ma', '.mb'] : 
+                                        P.info('File type not supported: %s' % ext)
+                                        item.setFlags( QtCore.Qt.ItemIsEditable )
+                                        item.setForeground(QtGui2.QColor('#666666'))
                                 elif self.app=='Nuke' :
-                                    if ext not in ['.nk', '.nknc'] : item.setFlags( QtCore.Qt.ItemIsEditable )
+                                    if ext not in ['.nk', '.nknc'] : 
+                                        P.info('File type not supported: %s' % ext)
+                                        item.setFlags( QtCore.Qt.ItemIsEditable )
+                                        item.setForeground(QtGui2.QColor('#666666'))
                                 elif self.app=='C4D' :
-                                    if ext !='.c4d' : item.setFlags( QtCore.Qt.ItemIsEditable )
+                                    if ext !='.c4d' : 
+                                        P.info('File type not supported: %s' % ext)
+                                        item.setFlags( QtCore.Qt.ItemIsEditable )
+                                        item.setForeground(QtGui2.QColor('#666666'))
                                 elif self.app=='3dsMax' :
-                                    if ext !='.max' : item.setFlags( QtCore.Qt.ItemIsEditable )
+                                    if ext !='.max' : 
+                                        P.info('File type not supported: %s' % ext)
+                                        item.setFlags( QtCore.Qt.ItemIsEditable )
+                                        item.setForeground(QtGui2.QColor('#666666'))
                                 elif self.app=='Houdini' :
-                                    if ext !='.hip' : item.setFlags( QtCore.Qt.ItemIsEditable )
+                                    if ext !='.hip' : 
+                                        P.info('File type not supported: %s' % ext)
+                                        item.setFlags( QtCore.Qt.ItemIsEditable )
+                                        item.setForeground(QtGui2.QColor('#666666'))
                                 #  Select the item :
                                 self.nim.Input('ver').setCurrentItem( item )
                                 self.verPath.setText( fileDir )
@@ -1425,34 +1439,50 @@ class GUI(QtGui.QMainWindow) :
                                 nimDir=os.path.dirname( fileDir )
                                 fileName=option['basename']+option['ext']
                                 filePath=os.path.normpath( os.path.join( nimDir, fileName ) )
-                                if os.path.isfile( filePath ) :
-                                    #  Add item to list view :
-                                    item=QtGui.QListWidgetItem( self.nim.Input( elem ) )
-                                    item.setText( fileName )
-                                    item.setFlags( QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEditable \
-                                        | QtCore.Qt.ItemIsEnabled )
-                                    #  Filter file types :
-                                    if self.app=='Maya' :
-                                        if option['ext'] not in ['.ma', '.mb'] :
-                                            item.setFlags( QtCore.Qt.ItemIsEditable )
-                                    elif self.app=='Nuke' :
-                                        if option['ext'] not in ['.nk', '.nknc'] :
-                                            item.setFlags( QtCore.Qt.ItemIsEditable )
-                                    elif self.app=='C4D' :
-                                        if option['ext'] !='.c4d' :
-                                            item.setFlags( QtCore.Qt.ItemIsEditable )
-                                    elif self.app=='3dsMax' :
-                                        if option['ext'] !='.max' :
-                                            item.setFlags( QtCore.Qt.ItemIsEditable )
-                                    elif self.app=='Houdini' :
-                                        if option['ext'] !='.hip' :
-                                            item.setFlags( QtCore.Qt.ItemIsEditable )
-                                    #  Select the item :
-                                    #self.nim.Input( elem ).setCurrentItem( item )
-                                    self.verPath.setText( nimDir )
-                                    self.verUser.setText( option['username'] )
-                                    self.verDate.setText( option['date'] )
-                                    self.verNote.setText( '<note>' )
+                                
+                                #  Add item to list view :
+                                item=QtGui.QListWidgetItem( self.nim.Input( elem ) )
+                                item.setText( fileName )
+                                item.setFlags( QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled )
+                                
+                                #  Filter non-existent files :
+                                if not os.path.isfile( filePath ) :
+                                    P.info('File does not exist: %s' % filePath)
+                                    item.setFlags( QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled )
+                                    item.setForeground(QtGui2.QColor('#A47000'))
+
+                                #  Filter file types :
+                                if self.app=='Maya' :
+                                    if option['ext'] not in ['.ma', '.mb'] :
+                                        P.info('File type not supported: %s' % option['ext'])
+                                        item.setFlags( QtCore.Qt.ItemIsEditable )
+                                        item.setForeground(QtGui2.QColor('#666666'))
+                                elif self.app=='Nuke' :
+                                    if option['ext'] not in ['.nk', '.nknc'] :
+                                        P.info('File type not supported: %s' % option['ext'])
+                                        item.setFlags( QtCore.Qt.ItemIsEditable )
+                                        item.setForeground(QtGui2.QColor('#666666'))
+                                elif self.app=='C4D' :
+                                    if option['ext'] !='.c4d' :
+                                        P.info('File type not supported: %s' % option['ext'])
+                                        item.setFlags( QtCore.Qt.ItemIsEditable )
+                                        item.setForeground(QtGui2.QColor('#666666'))
+                                elif self.app=='3dsMax' :
+                                    if option['ext'] !='.max' :
+                                        P.info('File type not supported: %s' % option['ext'])
+                                        item.setFlags( QtCore.Qt.ItemIsEditable )
+                                        item.setForeground(QtGui2.QColor('#666666'))
+                                elif self.app=='Houdini' :
+                                    if option['ext'] !='.hip' :
+                                        P.info('File type not supported: %s' % option['ext'])
+                                        item.setFlags( QtCore.Qt.ItemIsEditable )
+                                        item.setForeground(QtGui2.QColor('#666666'))
+                                #  Select the item :
+                                #self.nim.Input( elem ).setCurrentItem( item )
+                                self.verPath.setText( nimDir )
+                                self.verUser.setText( option['username'] )
+                                self.verDate.setText( option['date'] )
+                                self.verNote.setText( '<note>' )
                                 #self.mk_connections()
                             elif self.nim.mode().lower() in ['open', 'file'] :
                                 item=QtGui.QListWidgetItem( self.nim.Input( elem ) )
@@ -1460,29 +1490,45 @@ class GUI(QtGui.QMainWindow) :
                                 if self.nim.mode().lower() in ['save', 'saveas'] :
                                     item.setFlags( QtCore.Qt.ItemIsEditable )
                                 else :
-                                    item.setFlags( QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEditable \
-                                        | QtCore.Qt.ItemIsEnabled )
+                                    item.setFlags( QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled )
+                                    
+                                #  Filter non-existent files :
+                                filePath=os.path.normpath( os.path.join( option['filepath'], option['filename'] ) )
+                                if not os.path.isfile( filePath ) :
+                                    P.info('File does not exist: %s' % filePath)
+                                    item.setForeground(QtGui2.QColor('#A47000'))
+
                                 #  Filter file types :
                                 if self.app=='Maya' :
                                     ext=F.get_ext( filePath=option['filename'] )
                                     if ext not in ['.ma', '.mb'] :
+                                        P.info('File type not supported: %s' % ext)
                                         item.setFlags( QtCore.Qt.ItemIsEditable )
+                                        item.setForeground(QtGui2.QColor('#666666'))
                                 elif self.app=='Nuke' :
                                     ext=F.get_ext( filePath=option['filename'] )
                                     if ext not in ['.nk', '.nknc'] :
+                                        P.info('File type not supported: %s' % ext)
                                         item.setFlags( QtCore.Qt.ItemIsEditable )
+                                        item.setForeground(QtGui2.QColor('#666666'))
                                 elif self.app=='C4D' :
                                     ext=F.get_ext( filePath=option['filename'] )
                                     if ext !='.c4d' :
+                                        P.info('File type not supported: %s' % ext)
                                         item.setFlags( QtCore.Qt.ItemIsEditable )
+                                        item.setForeground(QtGui2.QColor('#666666'))
                                 elif self.app=='3dsMax' :
                                     ext=F.get_ext( filePath=option['filename'] )
                                     if ext !='.max' :
+                                        P.info('File type not supported: %s' % ext)
                                         item.setFlags( QtCore.Qt.ItemIsEditable )
+                                        item.setForeground(QtGui2.QColor('#666666'))
                                 elif self.app=='Houdini' :
                                     ext=F.get_ext( filePath=option['filename'] )
                                     if ext !='.hip' :
+                                        P.info('File type not supported: %s' % ext)
                                         item.setFlags( QtCore.Qt.ItemIsEditable )
+                                        item.setForeground(QtGui2.QColor('#666666'))
                                 #  Set from preferences :
                                 if option['filename']+' - '+option['note']==self.pref_version and \
                                     self.nim.mode() != 'publish' :
@@ -1502,29 +1548,45 @@ class GUI(QtGui.QMainWindow) :
                             if self.nim.mode().lower() in ['save', 'saveas'] :
                                 item.setFlags( QtCore.Qt.ItemIsEditable )
                             else :
-                                item.setFlags( QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEditable \
-                                    | QtCore.Qt.ItemIsEnabled )
+                                item.setFlags( QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled )
+                            
+                            #  Filter non-existent files :
+                            filePath=os.path.normpath( os.path.join( option['filepath'], option['filename'] ) )
+                            if not os.path.isfile( filePath ) :
+                                P.info('File does not exist: %s' % filePath)
+                                item.setForeground(QtGui2.QColor('#A47000'))
+
                             #  Filter file types :
                             if self.app=='Maya' :
                                 ext=F.get_ext( filePath=option['filename'] )
                                 if ext not in ['.ma', '.mb'] :
+                                    P.info('File type not supported: %s' % ext)
                                     item.setFlags( QtCore.Qt.ItemIsEditable )
+                                    item.setForeground(QtGui2.QColor('#666666'))
                             elif self.app=='Nuke' :
                                 ext=F.get_ext( filePath=option['filename'] )
                                 if ext not in ['.nk', '.nknc'] :
+                                    P.info('File type not supported: %s' % ext)
                                     item.setFlags( QtCore.Qt.ItemIsEditable )
+                                    item.setForeground(QtGui2.QColor('#666666'))
                             elif self.app=='C4D' :
                                 ext=F.get_ext( filePath=option['filename'] )
                                 if ext !='.c4d' :
+                                    P.info('File type not supported: %s' % ext)
                                     item.setFlags( QtCore.Qt.ItemIsEditable )
+                                    item.setForeground(QtGui2.QColor('#666666'))
                             elif self.app=='3dsMax' :
                                 ext=F.get_ext( filePath=option['filename'] )
                                 if ext !='.max' :
+                                    P.info('File type not supported: %s' % ext)
                                     item.setFlags( QtCore.Qt.ItemIsEditable )
+                                    item.setForeground(QtGui2.QColor('#666666'))
                             elif self.app=='Houdini' :
                                 ext=F.get_ext( filePath=option['filename'] )
                                 if ext !='.hip' :
+                                    P.info('File type not supported: %s' % ext)
                                     item.setFlags( QtCore.Qt.ItemIsEditable )
+                                    item.setForeground(QtGui2.QColor('#666666'))
                             #  Set from preferences :
                             if option['filename']+' - '+option['note']==self.pref_version and \
                                 self.nim.mode() != 'publish' :
@@ -1689,20 +1751,34 @@ class GUI(QtGui.QMainWindow) :
                         #  Add item to list view :
                         item=QtGui.QListWidgetItem( self.nim.Input('ver') )
                         item.setText( fileName )
-                        item.setFlags( QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEditable \
-                            | QtCore.Qt.ItemIsEnabled )
+                        item.setFlags( QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled )
                         ext=F.get_ext( fileName )
                         #  Filter file types :
                         if self.app=='Maya' :
-                            if ext not in ['.ma', '.mb'] : item.setFlags( QtCore.Qt.ItemIsEditable )
+                            if ext not in ['.ma', '.mb'] : 
+                                P.info('File type not supported: %s' % ext)
+                                item.setFlags( QtCore.Qt.ItemIsEditable )
+                                item.setForeground(QtGui2.QColor('#666666'))
                         elif self.app=='Nuke' :
-                            if ext not in ['.nk', '.nknc'] : item.setFlags( QtCore.Qt.ItemIsEditable )
+                            if ext not in ['.nk', '.nknc'] : 
+                                P.info('File type not supported: %s' % ext)
+                                item.setFlags( QtCore.Qt.ItemIsEditable )
+                                item.setForeground(QtGui2.QColor('#666666'))
                         elif self.app=='C4D' :
-                            if ext !='.c4d' : item.setFlags( QtCore.Qt.ItemIsEditable )
+                            if ext !='.c4d' : 
+                                P.info('File type not supported: %s' % ext)
+                                item.setFlags( QtCore.Qt.ItemIsEditable )
+                                item.setForeground(QtGui2.QColor('#666666'))
                         elif self.app=='3dsMax' :
-                            if ext !='.max' : item.setFlags( QtCore.Qt.ItemIsEditable )
+                            if ext !='.max' : 
+                                P.info('File type not supported: %s' % ext)
+                                item.setFlags( QtCore.Qt.ItemIsEditable )
+                                item.setForeground(QtGui2.QColor('#666666'))
                         elif self.app=='Houdini' :
-                            if ext !='.hip' : item.setFlags( QtCore.Qt.ItemIsEditable )
+                            if ext !='.hip' : 
+                                P.info('File type not supported: %s' % ext)
+                                item.setFlags( QtCore.Qt.ItemIsEditable )
+                                item.setForeground(QtGui2.QColor('#666666'))
                         #  Select the item :
                         self.nim.Input('ver').setCurrentItem( item )
                         self.verPath.setText( fileDir )
@@ -1755,8 +1831,7 @@ class GUI(QtGui.QMainWindow) :
                 else :
                     #  Enable Basename, if Filter not set to Asset Master :
                     for index in range( self.nim.Input('base').count() ) :
-                        self.nim.Input('base').item( index ).setFlags( QtCore.Qt.ItemIsSelectable \
-                            | QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsEnabled )
+                        self.nim.Input('base').item( index ).setFlags( QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled )
             
             #  Versions :
             elif elem=='ver' :
@@ -1777,19 +1852,33 @@ class GUI(QtGui.QMainWindow) :
                                 #  Add item to list view :
                                 item=QtGui.QListWidgetItem( self.nim.Input( elem ) )
                                 item.setText( fileName )
-                                item.setFlags( QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEditable \
-                                    | QtCore.Qt.ItemIsEnabled )
+                                item.setFlags( QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled )
                                 #  Filter file types :
                                 if self.app=='Maya' :
-                                    if option['ext'] not in ['.ma', '.mb'] : item.setFlags( QtCore.Qt.ItemIsEditable )
+                                    if option['ext'] not in ['.ma', '.mb'] : 
+                                        P.info('File type not supported: %s' % option['ext'])
+                                        item.setFlags( QtCore.Qt.ItemIsEditable )
+                                        item.setForeground(QtGui2.QColor('#666666'))
                                 elif self.app=='Nuke' :
-                                    if option['ext'] not in ['.nk', '.nknc'] : item.setFlags( QtCore.Qt.ItemIsEditable )
+                                    if option['ext'] not in ['.nk', '.nknc'] : 
+                                        P.info('File type not supported: %s' % option['ext'])
+                                        item.setFlags( QtCore.Qt.ItemIsEditable )
+                                        item.setForeground(QtGui2.QColor('#666666'))
                                 elif self.app=='C4D' :
-                                    if option['ext'] !='.c4d' : item.setFlags( QtCore.Qt.ItemIsEditable )
+                                    if option['ext'] !='.c4d' : 
+                                        P.info('File type not supported: %s' % option['ext'])
+                                        item.setFlags( QtCore.Qt.ItemIsEditable )
+                                        item.setForeground(QtGui2.QColor('#666666'))
                                 elif self.app=='3dsMax' :
-                                    if option['ext'] !='.max' : item.setFlags( QtCore.Qt.ItemIsEditable )
+                                    if option['ext'] !='.max' : 
+                                        P.info('File type not supported: %s' % option['ext'])
+                                        item.setFlags( QtCore.Qt.ItemIsEditable )
+                                        item.setForeground(QtGui2.QColor('#666666'))
                                 elif self.app=='Houdini' :
-                                    if option['ext'] !='.hip' : item.setFlags( QtCore.Qt.ItemIsEditable )
+                                    if option['ext'] !='.hip' : 
+                                        P.info('File type not supported: %s' % option['ext'])
+                                        item.setFlags( QtCore.Qt.ItemIsEditable )
+                                        item.setForeground(QtGui2.QColor('#666666'))
                                 #  Select the item :
                                 self.nim.Input( elem ).setCurrentItem( item )
                                 self.verPath.setText( nimDir )
@@ -2057,8 +2146,7 @@ class GUI(QtGui.QMainWindow) :
         else :
             self.nim.Input('base').setEnabled( True )
             for index in range( self.nim.Input('base').count() ) :
-                self.nim.Input('base').item( index ).setFlags( QtCore.Qt.ItemIsSelectable \
-                    | QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsEnabled )
+                self.nim.Input('base').item( index ).setFlags( QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled )
             self.nim.Input('base').setSelectionMode( QtGui.QAbstractItemView.SingleSelection )
         return
     
