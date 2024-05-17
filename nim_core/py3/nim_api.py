@@ -680,7 +680,7 @@ def get_jobs( userID=None, folders=False ) :
         P.error( traceback.print_exc() )
         return False
 
-def add_job( name=None, number=None, numberTemplate=None, description=None, client=None, agency=None, producer=None, agency_producer=None, \
+def add_job( name=None, number=None, numberTemplate=None, description=None, client_details=None, agency=None, producer=None, agency_producer=None, \
     phone=None, email=None, prod_co=None, prod_director=None, prod_contact=None, prod_phone=None, prod_email=None, \
     prod_shoot_date=None, prod_location=None, prod_supervised=None, editorial=None, editor=None, grading=None, colorist=None, \
     music=None, mix=None, sound=None, creative_lead=None, projectStatus=None, folder=None, projectStructureID=None, projectStructure=None, \
@@ -702,7 +702,7 @@ def add_job( name=None, number=None, numberTemplate=None, description=None, clie
         number                  string
         numberTemplate          string
         description             string
-        client                  string
+        client_details          string
         agency                  string
         producer                string
         agency_producer         string
@@ -749,7 +749,7 @@ def add_job( name=None, number=None, numberTemplate=None, description=None, clie
         end_date                date            YYYY-mm-dd
         currency                string          3 digit currency code (DEPRECATED)
                                                 cultureID should be used instead of currency
-                                                If currency is set insead of cultureID, NIM will use the first matching cultureID
+                                                If currency is set instead of cultureID, NIM will use the first matching cultureID
         cultureID               integer         
         customKeys              dictionary      {"Custom Key Name" : "Value"}
         keywords                list            ["keyword1", "keyword2"]
@@ -761,7 +761,7 @@ def add_job( name=None, number=None, numberTemplate=None, description=None, clie
     if number is not None : params['number'] = number
     if numberTemplate is not None : params['numberTemplate'] = numberTemplate
     if description is not None : params['description'] = description
-    if client is not None : params['client'] = client
+    if client_details is not None : params['client_details'] = client_details
     if agency is not None : params['agency'] = agency
     if producer is not None : params['producer'] = producer
     if agency_producer is not None : params['agency_producer'] = agency_producer
@@ -803,7 +803,7 @@ def add_job( name=None, number=None, numberTemplate=None, description=None, clie
     result = connect( method='get', params=params )
     return result
 
-def update_job( jobID=None, name=None, number=None, description=None, client=None, agency=None, producer=None, agency_producer=None, \
+def update_job( jobID=None, name=None, number=None, description=None, client_details=None, agency=None, producer=None, agency_producer=None, \
     phone=None, email=None, prod_co=None, prod_director=None, prod_contact=None, prod_phone=None, prod_email=None, \
     prod_shoot_date=None, prod_location=None, prod_supervised=None, editorial=None, editor=None, grading=None, colorist=None, \
     music=None, mix=None, sound=None, creative_lead=None, projectStatus=None, folder=None, projectStructureID=None, projectStructure=None, \
@@ -828,7 +828,7 @@ def update_job( jobID=None, name=None, number=None, description=None, client=Non
         name                    string
         number                  string
         description             string
-        client                  string
+        client_details          string
         agency                  string
         producer                string
         agency_producer         string
@@ -875,7 +875,7 @@ def update_job( jobID=None, name=None, number=None, description=None, client=Non
         end_date                date            YYYY-mm-dd
         currency                string          3 digit currency code (DEPRECATED)
                                                 cultureID should be used instead of currency
-                                                If currency is set insead of cultureID, NIM will use the first matching cultureID
+                                                If currency is set instead of cultureID, NIM will use the first matching cultureID
         cultureID               integer
         customKeys              dictionary      {"Custom Key Name" : "Value"}
         keywords                list            ["keyword1", "keyword2"]
@@ -886,7 +886,7 @@ def update_job( jobID=None, name=None, number=None, description=None, client=Non
     if name is not None : params['name'] = name
     if number is not None : params['number'] = number
     if description is not None : params['description'] = description
-    if client is not None : params['client'] = client
+    if client_details is not None : params['client_details'] = client_details
     if agency is not None : params['agency'] = agency
     if producer is not None : params['producer'] = producer
     if agency_producer is not None : params['agency_producer'] = agency_producer
