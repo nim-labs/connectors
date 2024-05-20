@@ -990,6 +990,24 @@ def get_jobStatuses( nimURL=None, apiUser=None, apiKey=None ) :
     result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
     return result
 
+def find_jobs( name=None, number=None, activity_status=None, startDate=None, endDate=None, \
+               getData=None, include_deleted=None, limit=None, offset=None, \
+               nimURL=None, apiUser=None, apiKey=None ) :
+    'Returns a list of job IDs or full job data based on the search criteria.'
+    result=False
+    params = {'q': 'findJobs'}
+    if name is not None : params['name'] = name
+    if number is not None : params['number'] = number
+    if activity_status is not None : params['activity_status'] = activity_status
+    if startDate is not None : params['startDate'] = startDate
+    if endDate is not None : params['endDate'] = endDate
+    if getData is not None : params['getData'] = getData
+    if include_deleted is not None : params['include_deleted'] = include_deleted
+    if limit is not None : params['limit'] = limit
+    if offset is not None : params['offset'] = offset
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
+
 #  Servers & Project Structures  #
 
 def get_allServers( locationID=None, nimURL=None, apiUser=None, apiKey=None ) :
