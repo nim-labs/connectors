@@ -660,6 +660,181 @@ def get_userList( nimURL=None, apiUser=None, apiKey=None ) :
     return usrList
 
 
+#  Contacts  #
+
+def get_contacts( nimURL=None, apiUser=None, apiKey=None, **kwargs) :
+    '''
+    Get Contacts based on search parameters
+			
+    Variables
+        Required Fields:
+            none 									    Will return all contacts the requesting user has access to 
+    
+        Optional:
+            ID 					integer 				The ID of a contact item to query
+            first_name 		 	string 		 			Will return all contact items matching the first name
+            last_name 			string					Will return all contact items matching the last name
+            email 				string 					Will return all contact items matching the email
+            title 				string 					Will return all contact items matching the title
+            company 			string 					Will return all contact items matching the company name
+            website 			string 					Will return all contact items matching the website
+            work_phone 			string 					Will return all contact items matching the work phone number
+            work_fax 			string 					Will return all contact items matching the work fax number
+            mobile_phone 		string 					Will return all contact items matching the mobile phone number
+            home_phone 			string 					Will return all contact items matching the home phone number
+            address1 			string 					Will return all contact items matching the address1 field
+            address2 			string 					Will return all contact items matching the address2 field
+            city 				string 					Will return all contact items matching the city
+            state 				string 					Will return all contact items matching the state
+            zip 				string 					Will return all contact items matching the zip
+            description 		string 					Will return all contact items partially matching the description
+            customKeys 	        dictionary 				A dictionary of custom field names and values
+                                                        Will return all contact items matching the custom field value
+            limit  				integer					Specifies the maximum number of rows to return
+                                                        Default 0 (no limit)
+            offset 				integer					Specifies the number of rows to skip before starting to return rows.
+                                                        Default 0
+    Return:
+        Returns a dictionary in the format
+        result->success 		True/False
+        result->error 			Includes any error or security messaging
+        result->total_count	    The total number of rows that match the search criteria
+        result->data 			An array of returned data
+    '''
+
+    params = {'q': 'getContacts'}
+    params.update(kwargs)
+
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
+
+def add_contact( nimURL=None, apiUser=None, apiKey=None, **kwargs ) :
+    '''
+    Add Contact
+    
+    Variables
+    	Required Fields:
+    		none
+    
+    	Optional:
+    		is_company			bool					0/1
+    		first_name 		 	string 		 			The first name of the contact	
+    		last_name 		 	string 		 			The last name of the contact		
+    		email 		 		string 		 			The email of the contact		
+    		title 		 		string 		 			The title of the contact		
+    		company 		 	string 		 			The company name for the contact		
+    		website 		 	string 		 			The website of the contact		
+    		work_phone 		 	string 		 			The work phone number of the contact		
+    		work_fax 		 	string 		 			The fax number of the contact		
+    		mobile_phone 		string 		 			The mobile phone number of the contact		
+    		home_phone 		 	string 		 			The home phone number of the contact		
+    		address1 		 	string 		 			The first address line of the contact		
+    		address2 		 	string 		 			The second address line of the contact		
+    		city 		 		string 		 			The city for the contact		
+    		state 		 		string 		 			The state for the contact		
+    		zip 		 		string 		 			The zip code for the contact		
+    		description 		string 		 			The description for the contact		
+    		keywords 			string 					Format ["keyword1","keyword2"]
+    		groups 				string 					Format ["group1","group2"]
+    		contact_link_IDs 	string 					Format 1,2,3 - a comma separated list of contact IDs
+    													Will replace all linked contacts for this contact
+            customKeys          dictionary              A dictionary of custom field names and values
+                                                        {"My Custom Key Name":"Some text"}
+
+    Return:
+    	Returns a dictionary in the format
+    	result->success 		True/False
+    	result->error 			Includes any error or security messaging	
+    	result->ID 			    The ID of the newly created item
+    '''
+
+    params = {'q': 'addContact'}
+    params.update(kwargs)
+
+    if 'keywords' in params :
+        params['keywords'] = json.dumps(params['keywords'])
+    
+    if 'groups' in params :
+        params['groups'] = json.dumps(params['groups'])
+
+    if 'customKeys' in params :
+        params['customKeys'] = json.dumps(params['customKeys'])
+
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
+
+def update_contact( nimURL=None, apiUser=None, apiKey=None, **kwargs ) :
+    '''
+    Update A Contact
+    
+    Variables
+    	Required Fields:
+    		ID 					integer					The ID of the contact to update
+    
+    	Optional: 										(If an optional field is not passed, the value for that field will remain unchanged)
+    		first_name 		 	string 		 			The first name of the contact	
+    		last_name 		 	string 		 			The last name of the contact		
+    		email 		 		string 		 			The email of the contact		
+    		title 		 		string 		 			The title of the contact		
+    		company 		 	string 		 			The company name for the contact		
+    		website 		 	string 		 			The website of the contact		
+    		work_phone 		 	string 		 			The work phone number of the contact		
+    		work_fax 		 	string 		 			The fax number of the contact		
+    		mobile_phone 		string 		 			The mobile phone number of the contact		
+    		home_phone 		 	string 		 			The home phone number of the contact		
+    		address1 		 	string 		 			The first address line of the contact		
+    		address2 		 	string 		 			The second address line of the contact		
+    		city 		 		string 		 			The city for the contact		
+    		state 		 		string 		 			The state for the contact		
+    		zip 		 		string 		 			The zip code for the contact		
+    		description 		string 		 			The description for the contact		
+    		keywords 			string 					Format ["keyword1","keyword2"]
+    		groups 				string 					Format ["group1","group2"]
+    		contact_link_IDs 	string 					Format 1,2,3 - a comma separated list of contact IDs
+    													Will replace all linked contacts for this contact
+    		customKeys          dictionary              A dictionary of custom field names and values
+                                                        {"My Custom Key Name":"Some text"}
+    Return:
+    	Returns a dictionary in the format
+    	result->success 		True/False
+    	result->error 			Includes any error or security messaging
+    '''
+
+    params = {'q': 'updateContact'}
+    params.update(kwargs)
+
+    if 'keywords' in params :
+        params['keywords'] = json.dumps(params['keywords'])
+    
+    if 'groups' in params :
+        params['groups'] = json.dumps(params['groups'])
+
+    if 'customKeys' in params :
+        params['customKeys'] = json.dumps(params['customKeys'])
+
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
+
+def delete_contact( nimURL=None, apiUser=None, apiKey=None, **kwargs ) :
+    '''
+    Delete Contact
+    
+    Variables
+    	Required Fields:
+    		ID 					integer         The ID of the contact to delete
+    
+    Return:
+    	Returns an dictionary in the format
+    	result->success 		True/False
+    	result->error 			Includes any error or security messaging
+    '''
+
+    params = {'q': 'deleteContact'}
+    params.update(kwargs)
+
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
+
 #  Jobs  #
 
 def get_jobs( userID=None, folders=False, nimURL=None, apiUser=None, apiKey=None ) :
