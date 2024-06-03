@@ -665,8 +665,12 @@ def get_userList( nimURL=None, apiUser=None, apiKey=None ) :
 def get_contacts( nimURL=None, apiUser=None, apiKey=None, **kwargs) :
     '''
     Get Contacts based on search parameters
-			
-    Variables
+    
+    Parameters
+        Parameters need to be passed as keyword arguments
+        Example:
+            get_contacts( first_name='John', last_name='Doe' )
+
         Required Fields:
             none 									    Will return all contacts the requesting user has access to 
     
@@ -712,7 +716,11 @@ def add_contact( nimURL=None, apiUser=None, apiKey=None, **kwargs ) :
     '''
     Add Contact
     
-    Variables
+    Parameters
+        Parameters need to be passed as keyword arguments
+        Example:
+            get_contacts( first_name='John', last_name='Doe' )
+
     	Required Fields:
     		none
     
@@ -767,7 +775,11 @@ def update_contact( nimURL=None, apiUser=None, apiKey=None, **kwargs ) :
     '''
     Update A Contact
     
-    Variables
+    Parameters
+        Parameters need to be passed as keyword arguments
+        Example:
+            update_contact( ID=1, first_name='John', last_name='Doe' )
+
     	Required Fields:
     		ID 					integer					The ID of the contact to update
     
@@ -815,11 +827,11 @@ def update_contact( nimURL=None, apiUser=None, apiKey=None, **kwargs ) :
     result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
     return result
 
-def delete_contact( nimURL=None, apiUser=None, apiKey=None, **kwargs ) :
+def delete_contact( ID=None, nimURL=None, apiUser=None, apiKey=None ) :
     '''
     Delete Contact
     
-    Variables
+    Parameters
     	Required Fields:
     		ID 					integer         The ID of the contact to delete
     
@@ -830,7 +842,7 @@ def delete_contact( nimURL=None, apiUser=None, apiKey=None, **kwargs ) :
     '''
 
     params = {'q': 'deleteContact'}
-    params.update(kwargs)
+    if ID is not None : params['ID'] = ID
 
     result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
     return result
