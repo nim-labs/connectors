@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: nim_file.py
-# Version:  v6.1.13.240517
+# Version:  v6.1.15.240613
 #
 # Copyright (c) 2014-2024 NIM Labs LLC
 # All rights reserved.
@@ -23,7 +23,7 @@ from . import nim as Nim
 
 
 #  Variables :
-version='v6.1.13'
+version='v6.1.15'
 winTitle='NIM '+version
 _os=platform.system().lower()
 #  Compiled REGEX Searches :
@@ -551,10 +551,14 @@ def verUp( nim=None, padding=2, selected=False, win_launch=False, pub=False, sym
                 mc.file( save=True, type='mayaAscii' )
         else :
             P.info( 'Saving selected items as %s \n' % new_filePath )
-            if ext=='.mb' :
-                mc.file( new_filePath, exportSelected=True, type='mayaBinary' )
-            elif ext=='.ma' :
-                mc.file( new_filePath, exportSelected=True, type='mayaAscii' )
+            try:
+                if ext=='.mb' :
+                    mc.file( new_filePath, exportSelected=True, type='mayaBinary' )
+                elif ext=='.ma' :
+                    mc.file( new_filePath, exportSelected=True, type='mayaAscii' )
+            except RuntimeError:
+                P.info( 'Failed to selected items... Possibly no items selected.' )
+                return False
     
     #  Nuke :
     elif nim.app()=='Nuke' :
