@@ -58,7 +58,7 @@ from . import nim_tools
 from . import nim_win as Win
 
 #  Variables :
-version='v6.1.13'
+version='v6.1.15'
 winTitle='NIM '+version
 
 
