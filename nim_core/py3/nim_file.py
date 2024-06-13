@@ -551,10 +551,14 @@ def verUp( nim=None, padding=2, selected=False, win_launch=False, pub=False, sym
                 mc.file( save=True, type='mayaAscii' )
         else :
             P.info( 'Saving selected items as %s \n' % new_filePath )
-            if ext=='.mb' :
-                mc.file( new_filePath, exportSelected=True, type='mayaBinary' )
-            elif ext=='.ma' :
-                mc.file( new_filePath, exportSelected=True, type='mayaAscii' )
+            try:
+                if ext=='.mb' :
+                    mc.file( new_filePath, exportSelected=True, type='mayaBinary' )
+                elif ext=='.ma' :
+                    mc.file( new_filePath, exportSelected=True, type='mayaAscii' )
+            except RuntimeError:
+                P.info( 'Failed to selected items... Possibly no items selected.' )
+                return False
     
     #  Nuke :
     elif nim.app()=='Nuke' :

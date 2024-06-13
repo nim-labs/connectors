@@ -80,9 +80,15 @@ def mk( mode='open', _import=False, _export=False, ref=False, pub=False ) :
                 import maya.OpenMayaUI as omUI
                 import maya.cmds as mc
                 try:
-                    from shiboken2 import wrapInstance
+                    from shiboken6 import wrapInstance
                 except :
-                    from shiboken import wrapInstance
+                    try:
+                        from shiboken2 import wrapInstance
+                    except :
+                        try:
+                            from shiboken import wrapInstance
+                        except :
+                            pass
                 from . import nim_maya as M
                 win_parent=M.get_mainWin()
                 WIN=GUI( parent=win_parent, mode=mode )
@@ -604,7 +610,10 @@ class GUI(QtGui.QMainWindow) :
         #===-------------------------------
         
         userMenu=QtGui.QMenu( 'User', self )
-        self.changeUserAction=QtGui.QAction( 'Change User', self )
+        try:
+            self.changeUserAction=QtGui.QAction( 'Change User', self )
+        except:
+            self.changeUserAction=QtGui2.QAction( 'Change User', self )
         self.changeUser=userMenu.addAction( self.changeUserAction )
 
         #Remove from shared menu in Houdini
@@ -619,13 +628,24 @@ class GUI(QtGui.QMainWindow) :
         #===--------------------------------
         
         modeMenu=QtGui.QMenu( 'Mode', self )
-        modeGroup=QtGui.QActionGroup( self, exclusive=True )
+        try:
+            modeGroup=QtGui.QActionGroup( self, exclusive=True )
+        except:
+            modeGroup=QtGui2.QActionGroup( self, exclusive=True )
+
         #  Make menu items :
-        self.openWin=modeGroup.addAction( QtGui.QAction( 'Open', self, checkable=True ) )
-        self.loadWin=modeGroup.addAction( QtGui.QAction( 'Load', self, checkable=True ) )
-        self.saveWin=modeGroup.addAction( QtGui.QAction( 'Save', self, checkable=True ) )
-        self.verWin=modeGroup.addAction( QtGui.QAction( 'Version Up', self, checkable=True ) )
-        self.pubWin=modeGroup.addAction( QtGui.QAction( 'Publish', self, checkable=True ) )
+        try:
+            self.openWin=modeGroup.addAction( QtGui.QAction( 'Open', self, checkable=True ) )
+            self.loadWin=modeGroup.addAction( QtGui.QAction( 'Load', self, checkable=True ) )
+            self.saveWin=modeGroup.addAction( QtGui.QAction( 'Save', self, checkable=True ) )
+            self.verWin=modeGroup.addAction( QtGui.QAction( 'Version Up', self, checkable=True ) )
+            self.pubWin=modeGroup.addAction( QtGui.QAction( 'Publish', self, checkable=True ) )
+        except:
+            self.openWin=modeGroup.addAction( QtGui2.QAction( 'Open', self, checkable=True ) )
+            self.loadWin=modeGroup.addAction( QtGui2.QAction( 'Load', self, checkable=True ) )
+            self.saveWin=modeGroup.addAction( QtGui2.QAction( 'Save', self, checkable=True ) )
+            self.verWin=modeGroup.addAction( QtGui2.QAction( 'Version Up', self, checkable=True ) )
+            self.pubWin=modeGroup.addAction( QtGui2.QAction( 'Publish', self, checkable=True ) )
         #  Set shortcuts :
         self.openWin.setShortcut('Ctrl+O')
         self.loadWin.setShortcut('Ctrl+L')
@@ -2674,7 +2694,7 @@ class GUI(QtGui.QMainWindow) :
         #  Set Selected flag for saving only the selected objects :
         selected=False
         if self.app in ['Maya', 'Nuke', '3dsMax','Houdini'] :
-            selected=self.checkBox.checkState()
+            selected=self.checkBox.checkState() == QtCore.Qt.Checked
         
        
         #  Variables :
