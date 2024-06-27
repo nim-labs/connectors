@@ -873,7 +873,7 @@ def add_job( name=None, number=None, numberTemplate=None, description=None, clie
     music=None, mix=None, sound=None, creative_lead=None, projectStatus=None, folder=None, projectStructureID=None, projectStructure=None, \
     jobStatusID=None, jobStatus=None, biddingLocationID=None, biddingLocation=None, \
     assignedLocationID=None, assignedLocation=None, startDate=None, endDate=None, currency=None, cultureID=None, customKeys=None, keywords=None, \
-    nimURL=None, apiUser=None, apiKey=None) :
+    contactIDs=None, nimURL=None, apiUser=None, apiKey=None) :
     '''
     Creates a new job. 
 
@@ -941,6 +941,8 @@ def add_job( name=None, number=None, numberTemplate=None, description=None, clie
         cultureID               integer         
         customKeys              dictionary      {"Custom Key Name" : "Value"}
         keywords                list            ["keyword1", "keyword2"]
+        contactIDs 	            string          A comma separated list of contact IDs
+                                                Example: 1,2,3
         
     '''
     params = {'q': 'addJob'}
@@ -987,6 +989,7 @@ def add_job( name=None, number=None, numberTemplate=None, description=None, clie
     if cultureID is not None : params['cultureID'] = cultureID
     if customKeys is not None : params['customKeys'] = json.dumps(customKeys)
     if keywords is not None : params['keywords'] = json.dumps(keywords)
+    if contactIDs is not None : params['contactIDs'] = contactIDs
 
     result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
     return result
@@ -997,7 +1000,7 @@ def update_job( jobID=None, name=None, number=None, description=None, client_det
     music=None, mix=None, sound=None, creative_lead=None, projectStatus=None, folder=None, projectStructureID=None, projectStructure=None, \
     jobStatusID=None, jobStatus=None, biddingLocationID=None, biddingLocation=None, \
     assignedLocationID=None, assignedLocation=None, startDate=None, endDate=None, currency=None, cultureID=None, customKeys=None, keywords=None, \
-    nimURL=None, apiUser=None, apiKey=None) :
+    contactIDs=None, nimURL=None, apiUser=None, apiKey=None) :
     '''
     Updates an existing job based on the jobID.
 
@@ -1068,6 +1071,8 @@ def update_job( jobID=None, name=None, number=None, description=None, client_det
         cultureID               integer
         customKeys              dictionary      {"Custom Key Name" : "Value"}
         keywords                list            ["keyword1", "keyword2"]
+        contactIDs 	            string          A comma separated list of contact IDs
+                                                Example: 1,2,3
     '''
     params = {'q': 'updateJob'}
 
@@ -1113,6 +1118,7 @@ def update_job( jobID=None, name=None, number=None, description=None, client_det
     if cultureID is not None : params['cultureID'] = cultureID
     if customKeys is not None : params['customKeys'] = json.dumps(customKeys)
     if keywords is not None : params['keywords'] = json.dumps(keywords)
+    if contactIDs is not None : params['contactIDs'] = contactIDs
 
     result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
     return result
