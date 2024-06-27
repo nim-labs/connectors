@@ -662,7 +662,7 @@ def get_userList( nimURL=None, apiUser=None, apiKey=None ) :
 
 #  Contacts  #
 
-def get_contacts( nimURL=None, apiUser=None, apiKey=None, **kwargs) :
+def get_contacts( nimURL=None, apiUser=None, apiKey=None, **kwargs ) :
     '''
     Get Contacts based on search parameters
     
@@ -1177,21 +1177,83 @@ def get_jobStatuses( nimURL=None, apiUser=None, apiKey=None ) :
     result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
     return result
 
-def find_jobs( name=None, number=None, activity_status=None, startDate=None, endDate=None, \
-               getData=None, include_deleted=None, limit=None, offset=None, \
-               nimURL=None, apiUser=None, apiKey=None ) :
-    'Returns a list of job IDs or full job data based on the search criteria.'
-    result=False
+def find_jobs( nimURL=None, apiUser=None, apiKey=None, **kwargs ) :
+    '''
+    Returns a dictionary of job IDs or full job data based on the search criteria
+        Optional: 
+        getData    				0 / 1 		- if 0 returns IDs (default)
+                                            - if 1 returns full data for items
+                                            Returns limited data if user does not have permission to view job details
+        ID						int			Allows comma separated list
+        name					string	
+        number					string
+        description				string		Will partially match the job description
+        startDate				date		YYYY-MM-DD
+        endDate 				date		YYYY-MM-DD
+        jobStatusID				int 		Job Status ID
+        jobStatus				string 		Job Status Name
+        folder                  string      The job folder name
+        client_details			string		Will partially match the client details 
+        biddingLocationID		int 		ID of the corresponding locations
+                                            Allows comma separated list
+        biddingLocation			string 		Name of the bidding location
+        assignedLocationID		int 		ID of the corresponding locations
+                                            Allows comma separated list
+        assignedLocation		string 		Name of the assigned location
+        currency				string 		Currency code (USD, EUR, etc)
+        is_private              int         (0, 1)
+        agency					string		Agency
+        agency_producer			string		Agency Producer
+        agency_phone			string		Agency Phone
+        agency_email			string		Agency Email
+        production_company		string		Production Company
+        director				string		Directory
+        prod_contact			string		Production Contact
+        prod_phone				string		Production Phone
+        prod_email				string		Production Email
+        producer				string		Producer
+        creative_lead			string		Creative Lead
+        grading					string		Grading
+        colorist				string		Colorist
+        editorial				string		Editorial
+        editor					string		Editor
+        mix						string		Mix
+        music					string		Music
+        sound_design			string		Sound Design
+        shoot_date				date 		YYYY-MM-DD
+        shoot_location			string		Shoot Location
+        supervised				int 		(0, 1)
+        proj_status				string		(ONLINE, OFFLINE)
+        activity 				string 		(ACTIVE, INACTIVE)
+        keywords 				array 		Allows comma separated list
+                                            Example: keyword1,keyword2
+        customKeys			    dictionary 	A dictionary of custom key names and values
+                                            {"My Custom Key Name":"Some text","Another Custom Key":"Some other text"}
+
+            Example:
+            .../nimAPI.php?q=findJobs&getContacts={"My Custom Key Name":"Some text","Another Custom Key":"Some other text"}
+
+        include_deleted - if 1 includes deleted jobs
+
+        limit   - specifies the maximum number of rows to return
+                - default 0 (no limit)
+        offset  - specifies the number of rows to skip before starting to return rows.
+                - default 0
+
+        Note:
+        This query can return a large amount of data.  
+        Use the limit and offset values to paginate your return data.
+
+    Return :
+        success:        true/false
+        error:          error message
+        total_count:    total number of rows that match the search criteria
+        data:           array of job data
+    '''
+
     params = {'q': 'findJobs'}
-    if name is not None : params['name'] = name
-    if number is not None : params['number'] = number
-    if activity_status is not None : params['activity_status'] = activity_status
-    if startDate is not None : params['startDate'] = startDate
-    if endDate is not None : params['endDate'] = endDate
-    if getData is not None : params['getData'] = getData
-    if include_deleted is not None : params['include_deleted'] = include_deleted
-    if limit is not None : params['limit'] = limit
-    if offset is not None : params['offset'] = offset
+    params.update(kwargs)
+
     result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
     return result
 
