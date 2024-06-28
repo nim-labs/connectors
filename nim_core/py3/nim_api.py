@@ -867,6 +867,20 @@ def get_jobs( userID=None, folders=False, nimURL=None, apiUser=None, apiKey=None
         P.error( traceback.print_exc() )
         return False
 
+def get_crew( jobID=None, getData=None, limit=None, offset=None, \
+              nimURL=None, apiUser=None, apiKey=None ) :
+    'Builds a dictionary of crew members for a given job or list of jobs'
+    params = {}
+    params["q"] = "getCrew"
+    
+    if jobID is not None : params['jobID'] = jobID
+    if getData is not None : params['getData'] = getData
+    if limit is not None : params['limit'] = limit
+    if offset is not None : params['offset'] = offset
+    
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
+
 def add_job( name=None, number=None, numberTemplate=None, description=None, client_details=None, agency=None, producer=None, agency_producer=None, \
     phone=None, email=None, prod_co=None, prod_director=None, prod_contact=None, prod_phone=None, prod_email=None, \
     prod_shoot_date=None, prod_location=None, prod_supervised=None, editorial=None, editor=None, grading=None, colorist=None, \
