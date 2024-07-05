@@ -4,7 +4,7 @@ import datetime
 import copy
 import xml.etree.ElementTree as xml
 
-#print sys.path
+#print(sys.path)
 
 import Draft
 from Draft import *
@@ -169,7 +169,7 @@ for frameNumber in range(0, slateFrames) :
 # encode the video frames
 for frameNumber in range(startFrame, endFrame + 1) :
 
-	print "Processing frame: " + str(frameNumber)
+	print("Processing frame: " + str(frameNumber))
 	#sys.stdout.flush()
 	
 	inFile = ReplaceFilenameHashesWithNumber(inFilePattern, frameNumber)
@@ -178,11 +178,11 @@ for frameNumber in range(startFrame, endFrame + 1) :
 
 	#ext = os.path.splitext(inFile)[1][1:].strip()
 	if nimEncodeSRGB == "True":
-		print "Encoding sRGB"
+		print("Encoding sRGB")
 		displayLut = Draft.LUT.CreateSRGB()
 		displayLut.Apply( inFrame )
 	#else:
-		# print "No LUT Applied"
+		# print("No LUT Applied")
 	
 	sys.stdout.flush()
 	
@@ -233,6 +233,6 @@ Draft.QTFastStart( tempOutFile, params['outFile'] )
 try:
 	os.remove( tempOutFile )
 except:
-	print "Failed Removing tempFile after applying QTFastStart"
+	print("Failed Removing tempFile after applying QTFastStart")
 	traceback( format_exc() )
 '''
