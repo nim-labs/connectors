@@ -671,7 +671,7 @@ def get_contacts( nimURL=None, apiUser=None, apiKey=None, **kwargs ) :
         Example:
             get_contacts( first_name='John', last_name='Doe' )
 
-        Required Fields:
+        Required:
             none 									    Will return all contacts the requesting user has access to 
     
         Optional:
@@ -721,7 +721,7 @@ def add_contact( nimURL=None, apiUser=None, apiKey=None, **kwargs ) :
         Example:
             get_contacts( first_name='John', last_name='Doe' )
 
-    	Required Fields:
+    	Required:
     		none
     
     	Optional:
@@ -780,7 +780,7 @@ def update_contact( nimURL=None, apiUser=None, apiKey=None, **kwargs ) :
         Example:
             update_contact( ID=1, first_name='John', last_name='Doe' )
 
-    	Required Fields:
+    	Required:
     		ID 					integer					The ID of the contact to update
     
     	Optional: 										(If an optional field is not passed, the value for that field will remain unchanged)
@@ -832,11 +832,11 @@ def delete_contact( ID=None, nimURL=None, apiUser=None, apiKey=None ) :
     Delete Contact
     
     Parameters
-    	Required Fields:
+    	Required:
     		ID 					integer         The ID of the contact to delete
     
     Return:
-    	Returns an dictionary in the format
+    	Returns a dictionary in the format
     	result->success 		True/False
     	result->error 			Includes any error or security messaging
     '''
@@ -846,6 +846,364 @@ def delete_contact( ID=None, nimURL=None, apiUser=None, apiKey=None ) :
 
     result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
     return result
+
+
+#  Schedule Events  #
+
+def get_scheduleEvents( nimURL=None, apiUser=None, apiKey=None, **kwargs ) :
+    '''
+    Get Schedule Events based on search parameters
+    
+    Parameters
+        Parameters need to be passed as keyword arguments
+        Example:
+            get_scheduleEvents( statusName='BOOKED', userIDs=1 )
+    
+        Required:
+            none 										Will return all schedule events the requesting user has access to 
+    
+        Optional:
+            ID 							integer 		The ID of a schedule event to query
+            title 						string 			Will return all schedule events matching the title
+            description 				string 			Will return all schedule events partially matching the description
+            statusName 					string 			Will return all schedule events matching the statusName
+            locationName 				string 			Will return all schedule events matching the locationName
+            jobName 					string 			Will return all schedule events matching the jobName
+            jobNumber 					string 			Will return all schedule events matching the jobNumber
+            userIDs 					string 			Will return all schedule events matching the userIDs (comma separated list of IDs)
+            users 						string 			Will return all schedule events matching the users (comma separated list of names)
+            resourceIDs 				string 			Will return all schedule events matching the resourceIDs (comma separated list of IDs)
+            resources 					string 			Will return all schedule events matching the resources (comma separated list of names)
+            start 						datetime 		Will return all schedule events matching the start 
+                                                        (yyyy-mm-ddThh:mm:ss.sssZ or yyyy-mm-dd hh:mm:ss.sss timezone)
+            end 						datetime 		Will return all schedule events matching the end 
+                                                        (yyyy-mm-ddThh:mm:ss.sssZ or yyyy-mm-dd hh:mm:ss.sss timezone)
+            startRange 					datetime 		Will return all schedule events (and event recurrences) AFTER the startRange 
+                                                        (yyyy-mm-ddThh:mm:ss.sssZ or yyyy-mm-dd hh:mm:ss.sss timezone)
+            endRange 					datetime 		Will return all schedule events (and event recurrences) BEFORE the endRange
+                                                        (yyyy-mm-ddThh:mm:ss.sssZ or yyyy-mm-dd hh:mm:ss.sss timezone)
+            startTimezone 				string 			Will return all schedule events matching the startTimezone
+            endTimezone 				string 			Will return all schedule events matching the endTimezone
+            isAllDay 					bool 			Will return all schedule events matching the isAllDay (0/1)
+            recurrenceId 				integer 		Will return all schedule events matching the recurrenceId
+            recurrenceRule 				string 			Will return all schedule events matching the recurrenceRule
+            recurrenceException 		string 			Will return all schedule events matching the recurrenceException
+            userUtilizationTypeID 		integer 		Will return all schedule events matching the userUtilizationTypeID
+            userUtilizationType 		string 			Will return all schedule events matching the userUtilizationType
+            userUtilizationValue 		string 			Will return all schedule events matching the userUtilizationValue
+            resourceUtilizationTypeID 	integer 		Will return all schedule events matching the resourceUtilizationTypeID
+            resourceUtilizationType 	string 			Will return all schedule events matching the resourceUtilizationType
+            resourceUtilizationValue 	string 			Will return all schedule events matching the resourceUtilizationValue
+
+            limit  						integer			Specifies the maximum number of rows to return
+                                                        Default 0 (no limit)
+            offset 						integer			Specifies the number of rows to skip before starting to return rows.
+                                                        Default 0
+    
+    
+    Return:
+    		Returns an associative array in the format
+    		$result->success 		True/False
+    		$result->error 			Includes any error or security messaging
+            $result->total_count	The total number of rows that match the search criteria
+     		$result->data 			An array of returned data
+    			
+    Notes:
+    	yyyy: 4-digit year (2024)
+    	mm: 2-digit month (07 for July)
+    	dd: 2-digit day of the month (10)
+    	T: A delimiter separating the date and time components
+    	hh: 2-digit hour in 24-hour format (07)
+    	mm: 2-digit minutes (00)
+    	ss: 2-digit seconds (00)
+    	.sss: Milliseconds (000), representing fractions of a second
+    	Z: Indicates that the time is in Coordinated Universal Time (UTC)
+    	
+    	Examples of valid datetime strings include: 
+    		2024-07-10T07:00:00.000Z
+    		Represents July 10, 2024, 7:00:00 AM UTC
+    
+    		2024-07-10 07:00:00.000 America/Los_Angeles 
+    		Represents July 10, 2024, 7:00:00 AM in the America/Los_Angeles timezone
+    '''
+
+    params = {'q': 'getScheduleEvents'}
+    params.update(kwargs)
+
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
+
+def add_scheduleEvent( nimURL=None, apiUser=None, apiKey=None, **kwargs ) :
+    '''
+    Add Schedule Event
+        Parameters
+            Parameters need to be passed as keyword arguments
+            Example:
+                add_scheduleEvent( start='2024-07-10 10:00:00.000 America/Los_Angeles',
+                                   end='2024-07-10 19:00:00.000 America/Los_Angeles', 
+                                   statusName='BOOKED', userIDs=1 )
+    	
+        Required:
+    		start 						datetime 			Date if isAllDay = 1; datetime otherwise
+    														(yyyy-mm-ddThh:mm:ss.sssZ or yyyy-mm-dd hh:mm:ss.sss timezone)
+    		end 						datetime 			Date if isAllDay = 1; datetime otherwise
+    														(yyyy-mm-ddThh:mm:ss.sssZ or yyyy-mm-dd hh:mm:ss.sss timezone)
+        	
+        At least one of: 
+            
+            jobID                       integer
+            userIDs                     string				Comma-separated list of user IDs
+            resourceIDs                 string				Comma-separated list of resource IDs
+        	
+        Optional:
+    		title 						string
+    		description 				string
+    		statusID 					integer
+    		statusName 					string
+    		locationID 					integer
+    		jobID 						integer
+    		userIDs 					string				Comma-separated list of user IDs
+    		resourceIDs 				string				Comma-separated list of resource IDs
+    		startTimezone 				string 				A valid timezone identifier; example: America/Los_Angeles
+    		endTimezone 				string 				A valid timezone identifier; example: America/Los_Angeles
+    		isAllDay 					bool 				0 or 1
+    		recurrenceId 				integer 			ID of this schedule event's parent; this should only exist if this event is an EXCEPTION to a recurring event's ruleset
+    		recurrenceRule 				string 				Recurring event ruleset string; see https://datatracker.ietf.org/doc/html/rfc5545
+    		recurrenceException 		string 				A list of comma-separated start datetimes for all exceptions to this recurring event's rules
+    		userUtilizationTypeID 		integer
+    		userUtilizationType 		string
+    		userUtilizationValue 		string
+    		resourceUtilizationTypeID 	integer
+    		resourceUtilizationType 	string
+    		resourceUtilizationValue 	string
+    
+    Return:
+    	Returns a dictionary in the format
+    	result->success 		True/False
+    	result->error 			Includes any error or security messaging	
+    	result->ID 			    The ID of the newly created item
+    '''
+
+    params = {'q': 'addScheduleEvent'}
+    params.update(kwargs)
+
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
+
+def update_scheduleEvent( nimURL=None, apiUser=None, apiKey=None, **kwargs ) :
+    '''
+    Update Schedule Event
+        Parameters
+            Parameters need to be passed as keyword arguments
+            Example:
+                update_scheduleEvent( ID=3391, statusName='1st Hold' )
+
+    	Required:
+    		ID                          integer         The ID of the schedule event to update
+        
+        Optional:
+    		title 						string
+    		description 				string
+    		statusID 					integer
+    		statusName 					string
+    		locationID 					integer
+    		jobID 						integer
+    		userIDs 					string				Comma-separated list of user IDs
+    		resourceIDs 				string				Comma-separated list of resource IDs
+    		start 						datetime 			Date if isAllDay = 1; datetime otherwise
+    														(yyyy-mm-ddThh:mm:ss.sssZ or yyyy-mm-dd hh:mm:ss.sss timezone)
+    		end 						datetime 			Date if isAllDay = 1; datetime otherwise
+    														(yyyy-mm-ddThh:mm:ss.sssZ or yyyy-mm-dd hh:mm:ss.sss timezone)
+    		startTimezone 				string 				A valid timezone identifier; example: America/Los_Angeles
+    		endTimezone 				string 				A valid timezone identifier; example: America/Los_Angeles
+    		isAllDay 					bool 				0 or 1
+    		recurrenceId 				integer 			ID of this schedule event's parent; this should only exist if this event is an EXCEPTION to a recurring event's ruleset
+    		recurrenceRule 				string 				Recurring event ruleset string; see https://datatracker.ietf.org/doc/html/rfc5545
+    		recurrenceException 		string 				A list of comma-separated start datetimes for all exceptions to this recurring event's rules
+    		userUtilizationTypeID 		integer
+    		userUtilizationType 		string
+    		userUtilizationValue 		string
+    		resourceUtilizationTypeID 	integer
+    		resourceUtilizationType 	string
+    		resourceUtilizationValue 	string
+
+    Return:
+    	Returns a dictionary in the format
+    	result->success 		True/False
+    	result->error 			Includes any error or security messaging
+    '''
+
+    params = {'q': 'updateScheduleEvent'}
+    params.update(kwargs)
+
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
+
+def delete_scheduleEvent( ID=None, nimURL=None, apiUser=None, apiKey=None ) :
+    '''
+    Delete Schedule Event
+    
+    Parameters
+    	
+        Required:
+    		ID 					integer         The ID of the schedule event to delete
+    
+    Return:
+    	Returns a dictionary in the format
+    	result->success 		True/False
+    	result->error 			Includes any error or security messaging
+    '''
+
+    params = {'q': 'deleteScheduleEvent'}
+    if ID is not None : params['ID'] = ID
+
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
+
+def get_scheduleEventStatuses( nimURL=None, apiUser=None, apiKey=None ) :
+    '''
+    Get Schedule Statuses
+    
+    Parameters
+    	None
+    
+    Return:
+    	Returns an associative array in the format
+    	result->success 		True/False
+    	result->error 			Includes any error or security messaging
+    '''
+    result=False
+    params = {'q': 'getScheduleEventStatuses'}
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
+
+
+#  Resources  #
+
+def get_resources( nimURL=None, apiUser=None, apiKey=None, **kwargs ) :
+    '''
+    Get Resources based on search parameters
+    
+    Parameters
+        Parameters need to be passed as keyword arguments
+        Example:
+            get_resources( locationName='Los Angeles', resourceGroups='Workstations,Licenses' )
+
+    	Required:
+    		none 										Will return all resources the requesting user has access to 
+    
+    	Optional:
+    		ID 							integer 		The ID of a resource to query
+    		name 						string 			Will return all resources matching the name
+    		description 				string 			Will return all resources partially matching the description
+    		color 						string 			Will return all resources matching the color
+    		locationID 					integer			Will return all resources matching the location ID
+    		locationName 				string 			Will return all resources matching the locationName
+    		keywordIDs 					string 			Will return all resources matching the keywordIDs (comma separated list of IDs)
+    		keywords 					string 			Will return all resources matching the keywords (comma separated list of names)
+    		resourceGroupIDs 			string 			Will return all resources matching the resourceGroupIDs (comma separated list of IDs)
+    		resourceGroups 				string 			Will return all resources matching the resourceGroups (comma separated list of names)
+        	
+            limit  						integer			Specifies the maximum number of rows to return
+    		   											Default 0 (no limit)
+    		offset 						integer			Specifies the number of rows to skip before starting to return rows.
+    		   											Default 0
+    
+    Return:
+    	Returns a dictionary in the format
+    	result->success 		    True/False
+    	result->error 			    Includes any error or security messaging
+        result->total_count	        The total number of rows that match the search criteria
+    	result->data 			    An array of returned data
+    '''
+
+    params = {'q': 'getResources'}
+    params.update(kwargs)
+
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
+
+def add_resource( nimURL=None, apiUser=None, apiKey=None, **kwargs ) :
+    '''
+     Add Resource
+    
+     Parameters
+        Required:
+            name 						string 				The resource name
+
+        Optional:
+            description 				string              The resource description
+            color 						string              The resource color
+            locationID					integer             The location ID
+            keywords 					string 				Comma-separated list of keywords
+            keywordIDs 					string				Comma-separated list of keyword IDs
+            resourceGroups 				string 				Comma-separated list of resource groups
+            resourceGroupIDs 			string 				Comma-separated list of resource group IDs
+
+    Return:
+        Returns a dictionary in the format
+        result->success 		True/False
+        result->error 			Includes any error or security messaging	
+        result->ID 			    The ID of the newly created item
+    '''
+
+    params = {'q': 'addResource'}
+    params.update(kwargs)
+
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
+
+def update_resource( nimURL=None, apiUser=None, apiKey=None, **kwargs ) :
+    '''
+    Update Resource
+        
+    Parameters
+    	Required:
+    		ID                          integer             The ID of the resource to update
+        
+        Optional:
+    		name 						string              The resource name
+    		description 				string              The resource description
+    		color 						string              The resource color
+    		locationID					integer             The location ID
+    		keywords 					string 				Comma-separated list of keywords
+    		keywordIDs 					string				Comma-separated list of keyword IDs
+    		resourceGroups 				string 				Comma-separated list of resource groups
+    		resourceGroupIDs 			string 				Comma-separated list of resource group IDs
+
+    Return:
+    	Returns a dictionary in the format
+    	result->success 		True/False
+    	result->error 			Includes any error or security messaging
+    '''
+
+    params = {'q': 'updateResource'}
+    params.update(kwargs)
+
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
+
+def delete_resource( ID=None, nimURL=None, apiUser=None, apiKey=None ) :
+    '''
+    Delete Resource
+    
+    Parameters
+    	
+        Required:
+    		ID 					integer         The ID of the resource to delete
+    
+    Return:
+    	Returns a dictionary in the format
+    	result->success 		True/False
+    	result->error 			Includes any error or security messaging
+    '''
+
+    params = {'q': 'deleteResource'}
+    if ID is not None : params['ID'] = ID
+
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
+
 
 #  Jobs  #
 
@@ -3463,7 +3821,7 @@ def upload_dailies( taskID=None, renderID=None, renderKey=None, itemID=None, ite
     'Upload Dailies - 2 required fields: (taskID, renderID, or renderKey) and path to movie'
     # nimURL and apiKey are optional for Render API Key overrride
     #
-    #   Required Fields:
+    #   Required:
     #      itemID
     #      itemType - options user, job, asset, show, shot, task, render
     #               - after consolidation group, object
@@ -3563,7 +3921,7 @@ def get_reviewItem( ID=None, nimURL=None, apiUser=None, apiKey=None ) :
 
 def get_reviewItems( parentType=None, parentID=None, allChildren=None, name=None, description=None, date=None, type=None, typeID=None,
                      status=None, statusID=None, keyword=None, keywordID=None, nimURL=None, apiUser=None, apiKey=None ) :
-    'Retrives a dictionary of review items matching the search criteria - 2 required fields: parentType, parentID'
+    'Retrieves a dictionary of review items matching the search criteria - 2 required fields: parentType, parentID'
     #       Parameters          Type            Values                  Note
     # Required Parameters:
     #   parentType              string                                  user, job, dev, asset, show, shot, task, render
@@ -3619,7 +3977,7 @@ def upload_reviewItem( taskID=None, renderID=None, renderKey=None, itemID=None, 
     nimURL=None, apiUser=None, apiKey=None ) :
     # nimURL and apiKey are optional for Render API Key override
     #
-    #   Required Fields:
+    #   Required:
     #      itemID       integer         the ID of the parent to attach the review item
     #      itemType     string          options user, job, asset, show, shot, task, render
     #      path         string          the path of the item to upload
@@ -3695,7 +4053,7 @@ def upload_reviewNote( ID=None, name='', img=None, note='', frame=0, time=-1, us
     'Upload reviewNote'
     # 
     #
-    #   Required Fields:
+    #   Required:
     #       ID                  integer     The ID of the review item to attach the note
     #
     #   Optional Fields: 
