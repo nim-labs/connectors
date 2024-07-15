@@ -692,6 +692,10 @@ def get_contacts( nimURL=None, apiUser=None, apiKey=None, **kwargs ) :
             state 				string 					Will return all contact items matching the state
             zip 				string 					Will return all contact items matching the zip
             description 		string 					Will return all contact items partially matching the description
+            keywords 			string 					A comma separated list of keywords
+                                                        Will return all contact items matching the keywords
+            groups 				string 					A comma separated list of groups
+                                                        Will return all contact items matching the groups
             customKeys 	        dictionary 				A dictionary of custom field names and values
                                                         Will return all contact items matching the custom field value
             limit  				integer					Specifies the maximum number of rows to return
@@ -1571,6 +1575,8 @@ def find_jobs( nimURL=None, apiUser=None, apiKey=None, **kwargs ) :
         jobStatusID				int 		Job Status ID
         jobStatus				string 		Job Status Name
         folder                  string      The job folder name
+        client_contactID		int			The ID of a linked contact
+											Allows comma separated list
         client_details			string		Will partially match the client details 
         biddingLocationID		int 		ID of the corresponding locations
                                             Allows comma separated list
