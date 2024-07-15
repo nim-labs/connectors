@@ -660,7 +660,7 @@ def get_userList( nimURL=None, apiUser=None, apiKey=None ) :
     return usrList
 
 
-#  Users  #
+#  Locations  #
 
 def get_locations( nimURL=None, apiUser=None, apiKey=None ) :
     '''
@@ -670,9 +670,10 @@ def get_locations( nimURL=None, apiUser=None, apiKey=None ) :
     	None
     
     Return:
-    	Returns an associative array in the format
-    	result->success 		True/False
-    	result->error 			Includes any error or security messaging
+    	Returns a list of locations in the format:
+            ID
+            name
+            description
     '''
     result=False
     params = {'q': 'getLocations'}
