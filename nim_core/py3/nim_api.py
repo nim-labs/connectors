@@ -660,6 +660,26 @@ def get_userList( nimURL=None, apiUser=None, apiKey=None ) :
     return usrList
 
 
+#  Users  #
+
+def get_locations( nimURL=None, apiUser=None, apiKey=None ) :
+    '''
+    Get all defined locations
+    
+    Parameters
+    	None
+    
+    Return:
+    	Returns an associative array in the format
+    	result->success 		True/False
+    	result->error 			Includes any error or security messaging
+    '''
+    result=False
+    params = {'q': 'getLocations'}
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
+
+
 #  Contacts  #
 
 def get_contacts( nimURL=None, apiUser=None, apiKey=None, **kwargs ) :
