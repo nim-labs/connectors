@@ -969,44 +969,44 @@ def add_scheduleEvent( nimURL=None, apiUser=None, apiKey=None, **kwargs ) :
                                    statusName='BOOKED', userIDs=1 )
     	
         Required:
-    		start 						datetime 			Date if isAllDay = 1; datetime otherwise
-    														(yyyy-mm-ddThh:mm:ss.sssZ or yyyy-mm-dd hh:mm:ss.sss timezone)
-    		end 						datetime 			Date if isAllDay = 1; datetime otherwise
-    														(yyyy-mm-ddThh:mm:ss.sssZ or yyyy-mm-dd hh:mm:ss.sss timezone)
-        	
-        At least one of: 
-            
-            jobID                       integer
-            userIDs                     string				Comma-separated list of user IDs
-            resourceIDs                 string				Comma-separated list of resource IDs
-        	
+            start 						datetime 			Date if isAllDay = 1; datetime otherwise
+                                                            (yyyy-mm-ddThh:mm:ss.sssZ or yyyy-mm-dd hh:mm:ss.sss timezone)
+            end 						datetime 			Date if isAllDay = 1; datetime otherwise
+                                                            (yyyy-mm-ddThh:mm:ss.sssZ or yyyy-mm-dd hh:mm:ss.sss timezone)
+        At least one of:
+            jobID 					    integer             A job ID to associate with the event
+            userIDs 				    string				Comma-separated list of user IDs
+            resourceIDs 			    string				Comma-separated list of resource IDs
+
         Optional:
-    		title 						string
-    		description 				string
-    		statusID 					integer
-    		statusName 					string
-    		locationID 					integer
-    		jobID 						integer
-    		userIDs 					string				Comma-separated list of user IDs
-    		resourceIDs 				string				Comma-separated list of resource IDs
-    		startTimezone 				string 				A valid timezone identifier; example: America/Los_Angeles
-    		endTimezone 				string 				A valid timezone identifier; example: America/Los_Angeles
-    		isAllDay 					bool 				0 or 1
-    		recurrenceId 				integer 			ID of this schedule event's parent; this should only exist if this event is an EXCEPTION to a recurring event's ruleset
-    		recurrenceRule 				string 				Recurring event ruleset string; see https://datatracker.ietf.org/doc/html/rfc5545
-    		recurrenceException 		string 				A list of comma-separated start datetimes for all exceptions to this recurring event's rules
-    		userUtilizationTypeID 		integer
-    		userUtilizationType 		string
-    		userUtilizationValue 		string
-    		resourceUtilizationTypeID 	integer
-    		resourceUtilizationType 	string
-    		resourceUtilizationValue 	string
-    
-    Return:
-    	Returns a dictionary in the format
-    	result->success 		True/False
-    	result->error 			Includes any error or security messaging	
-    	result->ID 			    The ID of the newly created item
+            title 						string              The title of the event
+            description 				string              The description of the event
+            statusID 					integer             The ID of the status to associate with the event
+            statusName 					string              The name of the status to associate with the event
+            locationID 					integer             The ID of the location to associate with the event         
+            jobID 						integer             The ID of the job to associate with the event
+            userIDs 					string				Comma-separated list of user IDs
+            resourceIDs 				string				Comma-separated list of resource IDs
+            startTimezone 				string 				A valid timezone identifier; example: America/Los_Angeles
+            endTimezone 				string 				A valid timezone identifier; example: America/Los_Angeles
+            isAllDay 					bool 				0 or 1
+            recurrenceId 				integer 			ID of this schedule event's parent; this should only exist if this event is an EXCEPTION to a recurring event's ruleset
+            recurrenceRule 				string 				Recurring event ruleset string; see https://datatracker.ietf.org/doc/html/rfc5545
+            recurrenceException 		string 				A list of comma-separated start datetimes for all exceptions to this recurring event's rules
+            userUtilizationTypeID 		integer             The ID of the user utilization type to associate with the event
+            userUtilizationType 		string              The name of the user utilization type to associate with the event
+                                                            "hours per day", "percent per day", "total hours"
+            userUtilizationValue 		string              The value of the user utilization type to associate with the event
+            resourceUtilizationTypeID 	integer             The ID of the resource utilization type to associate with the event
+            resourceUtilizationType 	string              The name of the resource utilization type to associate with the event
+                                                            "units per day", "percent per day"
+            resourceUtilizationValue 	string              The value of the resource utilization type to associate with the event
+
+        Return:
+            Returns a dictionary in the format
+            result->success 		True/False
+            result->error 			Includes any error or security messaging	
+            result->ID 			    The ID of the newly created item
     '''
 
     params = {'q': 'addScheduleEvent'}
@@ -1090,7 +1090,14 @@ def get_scheduleEventStatuses( nimURL=None, apiUser=None, apiKey=None ) :
     Get Schedule Statuses
     
     Parameters
-    	None
+    	nimURL                  string          Override for nimURL setting in prefs                                                             
+                                                Including nimURL will override the default 
+                                                NIM API url and skip the reading of saved 
+                                                user preferences.
+        apiUser                 string          Required if nimURL is set
+                                                and Require API Keys is enabled in NIM
+        apiKey                  string          Required if nimURL is set
+                                                and Require API Keys is enabled in NIM
     
     Return:
     	Returns an associative array in the format
