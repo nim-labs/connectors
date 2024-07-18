@@ -660,6 +660,583 @@ def get_userList( nimURL=None, apiUser=None, apiKey=None ) :
     return usrList
 
 
+#  Locations  #
+
+def get_locations( nimURL=None, apiUser=None, apiKey=None ) :
+    '''
+    Get all defined locations
+    
+    Parameters
+    	None
+    
+    Return:
+    	Returns a list of locations in the format:
+            ID
+            name
+            description
+    '''
+    result=False
+    params = {'q': 'getLocations'}
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
+
+
+#  Contacts  #
+
+def get_contacts( nimURL=None, apiUser=None, apiKey=None, **kwargs ) :
+    '''
+    Get Contacts based on search parameters
+    
+    Parameters
+        Parameters need to be passed as keyword arguments
+        Example:
+            get_contacts( first_name='John', last_name='Doe' )
+
+        Required:
+            none 									    Will return all contacts the requesting user has access to 
+    
+        Optional:
+            ID 					integer 				The ID of a contact item to query
+            first_name 		 	string 		 			Will return all contact items matching the first name
+            last_name 			string					Will return all contact items matching the last name
+            email 				string 					Will return all contact items matching the email
+            title 				string 					Will return all contact items matching the title
+            company 			string 					Will return all contact items matching the company name
+            website 			string 					Will return all contact items matching the website
+            work_phone 			string 					Will return all contact items matching the work phone number
+            work_fax 			string 					Will return all contact items matching the work fax number
+            mobile_phone 		string 					Will return all contact items matching the mobile phone number
+            home_phone 			string 					Will return all contact items matching the home phone number
+            address1 			string 					Will return all contact items matching the address1 field
+            address2 			string 					Will return all contact items matching the address2 field
+            city 				string 					Will return all contact items matching the city
+            state 				string 					Will return all contact items matching the state
+            zip 				string 					Will return all contact items matching the zip
+            description 		string 					Will return all contact items partially matching the description
+            keywords 			string 					A comma separated list of keywords
+                                                        Will return all contact items matching the keywords
+            groups 				string 					A comma separated list of groups
+                                                        Will return all contact items matching the groups
+            customKeys 	        dictionary 				A dictionary of custom field names and values
+                                                        Will return all contact items matching the custom field value
+            limit  				integer					Specifies the maximum number of rows to return
+                                                        Default 0 (no limit)
+            offset 				integer					Specifies the number of rows to skip before starting to return rows.
+                                                        Default 0
+    Return:
+        Returns a dictionary in the format
+        result->success 		True/False
+        result->error 			Includes any error or security messaging
+        result->total_count	    The total number of rows that match the search criteria
+        result->data 			An array of returned data
+    '''
+
+    params = {'q': 'getContacts'}
+    params.update(kwargs)
+
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
+
+def add_contact( nimURL=None, apiUser=None, apiKey=None, **kwargs ) :
+    '''
+    Add Contact
+    
+    Parameters
+        Parameters need to be passed as keyword arguments
+        Example:
+            get_contacts( first_name='John', last_name='Doe' )
+
+    	Required:
+    		none
+    
+    	Optional:
+    		is_company			bool					0/1
+    		first_name 		 	string 		 			The first name of the contact	
+    		last_name 		 	string 		 			The last name of the contact		
+    		email 		 		string 		 			The email of the contact		
+    		title 		 		string 		 			The title of the contact		
+    		company 		 	string 		 			The company name for the contact		
+    		website 		 	string 		 			The website of the contact		
+    		work_phone 		 	string 		 			The work phone number of the contact		
+    		work_fax 		 	string 		 			The fax number of the contact		
+    		mobile_phone 		string 		 			The mobile phone number of the contact		
+    		home_phone 		 	string 		 			The home phone number of the contact		
+    		address1 		 	string 		 			The first address line of the contact		
+    		address2 		 	string 		 			The second address line of the contact		
+    		city 		 		string 		 			The city for the contact		
+    		state 		 		string 		 			The state for the contact		
+    		zip 		 		string 		 			The zip code for the contact		
+    		description 		string 		 			The description for the contact		
+    		keywords 			string 					Format ["keyword1","keyword2"]
+    		groups 				string 					Format ["group1","group2"]
+    		contact_link_IDs 	string 					Format 1,2,3 - a comma separated list of contact IDs
+    													Will replace all linked contacts for this contact
+            customKeys          dictionary              A dictionary of custom field names and values
+                                                        {"My Custom Key Name":"Some text"}
+
+    Return:
+    	Returns a dictionary in the format
+    	result->success 		True/False
+    	result->error 			Includes any error or security messaging	
+    	result->ID 			    The ID of the newly created item
+    '''
+
+    params = {'q': 'addContact'}
+    params.update(kwargs)
+
+    if 'keywords' in params :
+        params['keywords'] = json.dumps(params['keywords'])
+    
+    if 'groups' in params :
+        params['groups'] = json.dumps(params['groups'])
+
+    if 'customKeys' in params :
+        params['customKeys'] = json.dumps(params['customKeys'])
+
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
+
+def update_contact( nimURL=None, apiUser=None, apiKey=None, **kwargs ) :
+    '''
+    Update A Contact
+    
+    Parameters
+        Parameters need to be passed as keyword arguments
+        Example:
+            update_contact( ID=1, first_name='John', last_name='Doe' )
+
+    	Required:
+    		ID 					integer					The ID of the contact to update
+    
+    	Optional: 										(If an optional field is not passed, the value for that field will remain unchanged)
+    		first_name 		 	string 		 			The first name of the contact	
+    		last_name 		 	string 		 			The last name of the contact		
+    		email 		 		string 		 			The email of the contact		
+    		title 		 		string 		 			The title of the contact		
+    		company 		 	string 		 			The company name for the contact		
+    		website 		 	string 		 			The website of the contact		
+    		work_phone 		 	string 		 			The work phone number of the contact		
+    		work_fax 		 	string 		 			The fax number of the contact		
+    		mobile_phone 		string 		 			The mobile phone number of the contact		
+    		home_phone 		 	string 		 			The home phone number of the contact		
+    		address1 		 	string 		 			The first address line of the contact		
+    		address2 		 	string 		 			The second address line of the contact		
+    		city 		 		string 		 			The city for the contact		
+    		state 		 		string 		 			The state for the contact		
+    		zip 		 		string 		 			The zip code for the contact		
+    		description 		string 		 			The description for the contact		
+    		keywords 			string 					Format ["keyword1","keyword2"]
+    		groups 				string 					Format ["group1","group2"]
+    		contact_link_IDs 	string 					Format 1,2,3 - a comma separated list of contact IDs
+    													Will replace all linked contacts for this contact
+    		customKeys          dictionary              A dictionary of custom field names and values
+                                                        {"My Custom Key Name":"Some text"}
+    Return:
+    	Returns a dictionary in the format
+    	result->success 		True/False
+    	result->error 			Includes any error or security messaging
+    '''
+
+    params = {'q': 'updateContact'}
+    params.update(kwargs)
+
+    if 'keywords' in params :
+        params['keywords'] = json.dumps(params['keywords'])
+    
+    if 'groups' in params :
+        params['groups'] = json.dumps(params['groups'])
+
+    if 'customKeys' in params :
+        params['customKeys'] = json.dumps(params['customKeys'])
+
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
+
+def delete_contact( ID=None, nimURL=None, apiUser=None, apiKey=None ) :
+    '''
+    Delete Contact
+    
+    Parameters
+    	Required:
+    		ID 					integer         The ID of the contact to delete
+    
+    Return:
+    	Returns a dictionary in the format
+    	result->success 		True/False
+    	result->error 			Includes any error or security messaging
+    '''
+
+    params = {'q': 'deleteContact'}
+    if ID is not None : params['ID'] = ID
+
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
+
+
+#  Schedule Events  #
+
+def get_scheduleEvents( nimURL=None, apiUser=None, apiKey=None, **kwargs ) :
+    '''
+    Get Schedule Events based on search parameters
+    
+    Parameters
+        Parameters need to be passed as keyword arguments
+        Example:
+            get_scheduleEvents( statusName='BOOKED', userIDs=1 )
+    
+        Required:
+            none 										Will return all schedule events the requesting user has access to 
+    
+        Optional:
+            ID 							integer 		The ID of a schedule event to query
+            title 						string 			Will return all schedule events matching the title
+            description 				string 			Will return all schedule events partially matching the description
+            statusName 					string 			Will return all schedule events matching the statusName
+            locationName 				string 			Will return all schedule events matching the locationName
+            jobName 					string 			Will return all schedule events matching the jobName
+            jobNumber 					string 			Will return all schedule events matching the jobNumber
+            userIDs 					string 			Will return all schedule events matching the userIDs (comma separated list of IDs)
+            users 						string 			Will return all schedule events matching the users (comma separated list of names)
+            resourceIDs 				string 			Will return all schedule events matching the resourceIDs (comma separated list of IDs)
+            resources 					string 			Will return all schedule events matching the resources (comma separated list of names)
+            start 						datetime 		Will return all schedule events matching the start 
+                                                        (yyyy-mm-ddThh:mm:ss.sssZ or yyyy-mm-dd hh:mm:ss.sss timezone)
+            end 						datetime 		Will return all schedule events matching the end 
+                                                        (yyyy-mm-ddThh:mm:ss.sssZ or yyyy-mm-dd hh:mm:ss.sss timezone)
+            startRange 					datetime 		Will return all schedule events (and event recurrences) AFTER the startRange 
+                                                        (yyyy-mm-ddThh:mm:ss.sssZ or yyyy-mm-dd hh:mm:ss.sss timezone)
+            endRange 					datetime 		Will return all schedule events (and event recurrences) BEFORE the endRange
+                                                        (yyyy-mm-ddThh:mm:ss.sssZ or yyyy-mm-dd hh:mm:ss.sss timezone)
+            startTimezone 				string 			Will return all schedule events matching the startTimezone
+            endTimezone 				string 			Will return all schedule events matching the endTimezone
+            isAllDay 					bool 			Will return all schedule events matching the isAllDay (0/1)
+            recurrenceId 				integer 		Will return all schedule events matching the recurrenceId
+            recurrenceRule 				string 			Will return all schedule events matching the recurrenceRule
+            recurrenceException 		string 			Will return all schedule events matching the recurrenceException
+            userUtilizationTypeID 		integer 		Will return all schedule events matching the userUtilizationTypeID
+            userUtilizationType 		string 			Will return all schedule events matching the userUtilizationType
+            userUtilizationValue 		string 			Will return all schedule events matching the userUtilizationValue
+            resourceUtilizationTypeID 	integer 		Will return all schedule events matching the resourceUtilizationTypeID
+            resourceUtilizationType 	string 			Will return all schedule events matching the resourceUtilizationType
+            resourceUtilizationValue 	string 			Will return all schedule events matching the resourceUtilizationValue
+
+            limit  						integer			Specifies the maximum number of rows to return
+                                                        Default 0 (no limit)
+            offset 						integer			Specifies the number of rows to skip before starting to return rows.
+                                                        Default 0
+    
+    
+    Return:
+    		Returns an associative array in the format
+    		$result->success 		True/False
+    		$result->error 			Includes any error or security messaging
+            $result->total_count	The total number of rows that match the search criteria
+     		$result->data 			An array of returned data
+    			
+    Notes:
+    	yyyy: 4-digit year (2024)
+    	mm: 2-digit month (07 for July)
+    	dd: 2-digit day of the month (10)
+    	T: A delimiter separating the date and time components
+    	hh: 2-digit hour in 24-hour format (07)
+    	mm: 2-digit minutes (00)
+    	ss: 2-digit seconds (00)
+    	.sss: Milliseconds (000), representing fractions of a second
+    	Z: Indicates that the time is in Coordinated Universal Time (UTC)
+    	
+    	Examples of valid datetime strings include: 
+    		2024-07-10T07:00:00.000Z
+    		Represents July 10, 2024, 7:00:00 AM UTC
+    
+    		2024-07-10 07:00:00.000 America/Los_Angeles 
+    		Represents July 10, 2024, 7:00:00 AM in the America/Los_Angeles timezone
+    '''
+
+    params = {'q': 'getScheduleEvents'}
+    params.update(kwargs)
+
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
+
+def add_scheduleEvent( nimURL=None, apiUser=None, apiKey=None, **kwargs ) :
+    '''
+    Add Schedule Event
+        Parameters
+            Parameters need to be passed as keyword arguments
+            Example:
+                add_scheduleEvent( start='2024-07-10 10:00:00.000 America/Los_Angeles',
+                                   end='2024-07-10 19:00:00.000 America/Los_Angeles', 
+                                   statusName='BOOKED', userIDs=1 )
+    	
+        Required:
+            start 						datetime 			Date if isAllDay = 1; datetime otherwise
+                                                            (yyyy-mm-ddThh:mm:ss.sssZ or yyyy-mm-dd hh:mm:ss.sss timezone)
+            end 						datetime 			Date if isAllDay = 1; datetime otherwise
+                                                            (yyyy-mm-ddThh:mm:ss.sssZ or yyyy-mm-dd hh:mm:ss.sss timezone)
+        At least one of:
+            jobID 					    integer             A job ID to associate with the event
+            userIDs 				    string				Comma-separated list of user IDs
+            resourceIDs 			    string				Comma-separated list of resource IDs
+
+        Optional:
+            title 						string              The title of the event
+            description 				string              The description of the event
+            statusID 					integer             The ID of the status to associate with the event
+            statusName 					string              The name of the status to associate with the event
+            locationID 					integer             The ID of the location to associate with the event         
+            jobID 						integer             The ID of the job to associate with the event
+            userIDs 					string				Comma-separated list of user IDs
+            resourceIDs 				string				Comma-separated list of resource IDs
+            startTimezone 				string 				A valid timezone identifier; example: America/Los_Angeles
+            endTimezone 				string 				A valid timezone identifier; example: America/Los_Angeles
+            isAllDay 					bool 				0 or 1
+            recurrenceId 				integer 			ID of this schedule event's parent; this should only exist if this event is an EXCEPTION to a recurring event's ruleset
+            recurrenceRule 				string 				Recurring event ruleset string; see https://datatracker.ietf.org/doc/html/rfc5545
+            recurrenceException 		string 				A list of comma-separated start datetimes for all exceptions to this recurring event's rules
+            userUtilizationTypeID 		integer             The ID of the user utilization type to associate with the event
+            userUtilizationType 		string              The name of the user utilization type to associate with the event
+                                                            "hours per day", "percent per day", "total hours"
+            userUtilizationValue 		string              The value of the user utilization type to associate with the event
+            resourceUtilizationTypeID 	integer             The ID of the resource utilization type to associate with the event
+            resourceUtilizationType 	string              The name of the resource utilization type to associate with the event
+                                                            "units per day", "percent per day"
+            resourceUtilizationValue 	string              The value of the resource utilization type to associate with the event
+
+        Return:
+            Returns a dictionary in the format
+            result->success 		True/False
+            result->error 			Includes any error or security messaging	
+            result->ID 			    The ID of the newly created item
+    '''
+
+    params = {'q': 'addScheduleEvent'}
+    params.update(kwargs)
+
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
+
+def update_scheduleEvent( nimURL=None, apiUser=None, apiKey=None, **kwargs ) :
+    '''
+    Update Schedule Event
+        Parameters
+            Parameters need to be passed as keyword arguments
+            Example:
+                update_scheduleEvent( ID=3391, statusName='1st Hold' )
+
+    	Required:
+    		ID                          integer         The ID of the schedule event to update
+        
+        Optional:
+    		title 						string
+    		description 				string
+    		statusID 					integer
+    		statusName 					string
+    		locationID 					integer
+    		jobID 						integer
+    		userIDs 					string				Comma-separated list of user IDs
+    		resourceIDs 				string				Comma-separated list of resource IDs
+    		start 						datetime 			Date if isAllDay = 1; datetime otherwise
+    														(yyyy-mm-ddThh:mm:ss.sssZ or yyyy-mm-dd hh:mm:ss.sss timezone)
+    		end 						datetime 			Date if isAllDay = 1; datetime otherwise
+    														(yyyy-mm-ddThh:mm:ss.sssZ or yyyy-mm-dd hh:mm:ss.sss timezone)
+    		startTimezone 				string 				A valid timezone identifier; example: America/Los_Angeles
+    		endTimezone 				string 				A valid timezone identifier; example: America/Los_Angeles
+    		isAllDay 					bool 				0 or 1
+    		recurrenceId 				integer 			ID of this schedule event's parent; this should only exist if this event is an EXCEPTION to a recurring event's ruleset
+    		recurrenceRule 				string 				Recurring event ruleset string; see https://datatracker.ietf.org/doc/html/rfc5545
+    		recurrenceException 		string 				A list of comma-separated start datetimes for all exceptions to this recurring event's rules
+    		userUtilizationTypeID 		integer
+    		userUtilizationType 		string
+    		userUtilizationValue 		string
+    		resourceUtilizationTypeID 	integer
+    		resourceUtilizationType 	string
+    		resourceUtilizationValue 	string
+
+    Return:
+    	Returns a dictionary in the format
+    	result->success 		True/False
+    	result->error 			Includes any error or security messaging
+    '''
+
+    params = {'q': 'updateScheduleEvent'}
+    params.update(kwargs)
+
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
+
+def delete_scheduleEvent( ID=None, nimURL=None, apiUser=None, apiKey=None ) :
+    '''
+    Delete Schedule Event
+    
+    Parameters
+    	
+        Required:
+    		ID 					integer         The ID of the schedule event to delete
+    
+    Return:
+    	Returns a dictionary in the format
+    	result->success 		True/False
+    	result->error 			Includes any error or security messaging
+    '''
+
+    params = {'q': 'deleteScheduleEvent'}
+    if ID is not None : params['ID'] = ID
+
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
+
+def get_scheduleEventStatuses( nimURL=None, apiUser=None, apiKey=None ) :
+    '''
+    Get Schedule Statuses
+    
+    Parameters
+    	nimURL                  string          Override for nimURL setting in prefs                                                             
+                                                Including nimURL will override the default 
+                                                NIM API url and skip the reading of saved 
+                                                user preferences.
+        apiUser                 string          Required if nimURL is set
+                                                and Require API Keys is enabled in NIM
+        apiKey                  string          Required if nimURL is set
+                                                and Require API Keys is enabled in NIM
+    
+    Return:
+    	Returns an associative array in the format
+    	result->success 		True/False
+    	result->error 			Includes any error or security messaging
+    '''
+    result=False
+    params = {'q': 'getScheduleEventStatuses'}
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
+
+
+#  Resources  #
+
+def get_resources( nimURL=None, apiUser=None, apiKey=None, **kwargs ) :
+    '''
+    Get Resources based on search parameters
+    
+    Parameters
+        Parameters need to be passed as keyword arguments
+        Example:
+            get_resources( locationName='Los Angeles', resourceGroups='Workstations,Licenses' )
+
+    	Required:
+    		none 										Will return all resources the requesting user has access to 
+    
+    	Optional:
+    		ID 							integer 		The ID of a resource to query
+    		name 						string 			Will return all resources matching the name
+    		description 				string 			Will return all resources partially matching the description
+    		color 						string 			Will return all resources matching the color
+    		locationID 					integer			Will return all resources matching the location ID
+    		locationName 				string 			Will return all resources matching the locationName
+    		keywordIDs 					string 			Will return all resources matching the keywordIDs (comma separated list of IDs)
+    		keywords 					string 			Will return all resources matching the keywords (comma separated list of names)
+    		resourceGroupIDs 			string 			Will return all resources matching the resourceGroupIDs (comma separated list of IDs)
+    		resourceGroups 				string 			Will return all resources matching the resourceGroups (comma separated list of names)
+        	
+            limit  						integer			Specifies the maximum number of rows to return
+    		   											Default 0 (no limit)
+    		offset 						integer			Specifies the number of rows to skip before starting to return rows.
+    		   											Default 0
+    
+    Return:
+    	Returns a dictionary in the format
+    	result->success 		    True/False
+    	result->error 			    Includes any error or security messaging
+        result->total_count	        The total number of rows that match the search criteria
+    	result->data 			    An array of returned data
+    '''
+
+    params = {'q': 'getResources'}
+    params.update(kwargs)
+
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
+
+def add_resource( nimURL=None, apiUser=None, apiKey=None, **kwargs ) :
+    '''
+     Add Resource
+    
+     Parameters
+        Required:
+            name 						string 				The resource name
+
+        Optional:
+            description 				string              The resource description
+            color 						string              The resource color
+            locationID					integer             The location ID
+            keywords 					string 				Comma-separated list of keywords
+            keywordIDs 					string				Comma-separated list of keyword IDs
+            resourceGroups 				string 				Comma-separated list of resource groups
+            resourceGroupIDs 			string 				Comma-separated list of resource group IDs
+
+    Return:
+        Returns a dictionary in the format
+        result->success 		True/False
+        result->error 			Includes any error or security messaging	
+        result->ID 			    The ID of the newly created item
+    '''
+
+    params = {'q': 'addResource'}
+    params.update(kwargs)
+
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
+
+def update_resource( nimURL=None, apiUser=None, apiKey=None, **kwargs ) :
+    '''
+    Update Resource
+        
+    Parameters
+    	Required:
+    		ID                          integer             The ID of the resource to update
+        
+        Optional:
+    		name 						string              The resource name
+    		description 				string              The resource description
+    		color 						string              The resource color
+    		locationID					integer             The location ID
+    		keywords 					string 				Comma-separated list of keywords
+    		keywordIDs 					string				Comma-separated list of keyword IDs
+    		resourceGroups 				string 				Comma-separated list of resource groups
+    		resourceGroupIDs 			string 				Comma-separated list of resource group IDs
+
+    Return:
+    	Returns a dictionary in the format
+    	result->success 		True/False
+    	result->error 			Includes any error or security messaging
+    '''
+
+    params = {'q': 'updateResource'}
+    params.update(kwargs)
+
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
+
+def delete_resource( ID=None, nimURL=None, apiUser=None, apiKey=None ) :
+    '''
+    Delete Resource
+    
+    Parameters
+    	
+        Required:
+    		ID 					integer         The ID of the resource to delete
+    
+    Return:
+    	Returns a dictionary in the format
+    	result->success 		True/False
+    	result->error 			Includes any error or security messaging
+    '''
+
+    params = {'q': 'deleteResource'}
+    if ID is not None : params['ID'] = ID
+
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
+
+
 #  Jobs  #
 
 def get_jobs( userID=None, folders=False, nimURL=None, apiUser=None, apiKey=None ) :
@@ -680,13 +1257,27 @@ def get_jobs( userID=None, folders=False, nimURL=None, apiUser=None, apiKey=None
         P.error( traceback.print_exc() )
         return False
 
+def get_crew( jobID=None, getData=None, limit=None, offset=None, \
+              nimURL=None, apiUser=None, apiKey=None ) :
+    'Builds a dictionary of crew members for a given job or list of jobs'
+    params = {}
+    params["q"] = "getCrew"
+    
+    if jobID is not None : params['jobID'] = jobID
+    if getData is not None : params['getData'] = getData
+    if limit is not None : params['limit'] = limit
+    if offset is not None : params['offset'] = offset
+    
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
+
 def add_job( name=None, number=None, numberTemplate=None, description=None, client_details=None, agency=None, producer=None, agency_producer=None, \
     phone=None, email=None, prod_co=None, prod_director=None, prod_contact=None, prod_phone=None, prod_email=None, \
     prod_shoot_date=None, prod_location=None, prod_supervised=None, editorial=None, editor=None, grading=None, colorist=None, \
     music=None, mix=None, sound=None, creative_lead=None, projectStatus=None, folder=None, projectStructureID=None, projectStructure=None, \
     jobStatusID=None, jobStatus=None, biddingLocationID=None, biddingLocation=None, \
     assignedLocationID=None, assignedLocation=None, startDate=None, endDate=None, currency=None, cultureID=None, customKeys=None, keywords=None, \
-    nimURL=None, apiUser=None, apiKey=None) :
+    contactIDs=None, nimURL=None, apiUser=None, apiKey=None) :
     '''
     Creates a new job. 
 
@@ -754,6 +1345,8 @@ def add_job( name=None, number=None, numberTemplate=None, description=None, clie
         cultureID               integer         
         customKeys              dictionary      {"Custom Key Name" : "Value"}
         keywords                list            ["keyword1", "keyword2"]
+        contactIDs 	            string          A comma separated list of contact IDs
+                                                Example: 1,2,3
         
     '''
     params = {'q': 'addJob'}
@@ -800,6 +1393,7 @@ def add_job( name=None, number=None, numberTemplate=None, description=None, clie
     if cultureID is not None : params['cultureID'] = cultureID
     if customKeys is not None : params['customKeys'] = json.dumps(customKeys)
     if keywords is not None : params['keywords'] = json.dumps(keywords)
+    if contactIDs is not None : params['contactIDs'] = contactIDs
 
     result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
     return result
@@ -810,7 +1404,7 @@ def update_job( jobID=None, name=None, number=None, description=None, client_det
     music=None, mix=None, sound=None, creative_lead=None, projectStatus=None, folder=None, projectStructureID=None, projectStructure=None, \
     jobStatusID=None, jobStatus=None, biddingLocationID=None, biddingLocation=None, \
     assignedLocationID=None, assignedLocation=None, startDate=None, endDate=None, currency=None, cultureID=None, customKeys=None, keywords=None, \
-    nimURL=None, apiUser=None, apiKey=None) :
+    contactIDs=None, nimURL=None, apiUser=None, apiKey=None) :
     '''
     Updates an existing job based on the jobID.
 
@@ -881,6 +1475,8 @@ def update_job( jobID=None, name=None, number=None, description=None, client_det
         cultureID               integer
         customKeys              dictionary      {"Custom Key Name" : "Value"}
         keywords                list            ["keyword1", "keyword2"]
+        contactIDs 	            string          A comma separated list of contact IDs
+                                                Example: 1,2,3
     '''
     params = {'q': 'updateJob'}
 
@@ -926,6 +1522,7 @@ def update_job( jobID=None, name=None, number=None, description=None, client_det
     if cultureID is not None : params['cultureID'] = cultureID
     if customKeys is not None : params['customKeys'] = json.dumps(customKeys)
     if keywords is not None : params['keywords'] = json.dumps(keywords)
+    if contactIDs is not None : params['contactIDs'] = contactIDs
 
     result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
     return result
@@ -987,6 +1584,88 @@ def get_jobStatuses( nimURL=None, apiUser=None, apiKey=None ) :
     'Retrieves the list of available job statuses.'
     result=False
     params = {'q': 'getJobStatuses'}
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
+
+def find_jobs( nimURL=None, apiUser=None, apiKey=None, **kwargs ) :
+    '''
+    Returns a dictionary of job IDs or full job data based on the search criteria
+        Optional: 
+        getData    				0 / 1 		- if 0 returns IDs (default)
+                                            - if 1 returns full data for items
+                                            Returns limited data if user does not have permission to view job details
+        ID						int			Allows comma separated list
+        name					string	
+        number					string
+        description				string		Will partially match the job description
+        startDate				date		YYYY-MM-DD
+        endDate 				date		YYYY-MM-DD
+        jobStatusID				int 		Job Status ID
+        jobStatus				string 		Job Status Name
+        folder                  string      The job folder name
+        client_contactID		int			The ID of a linked contact
+											Allows comma separated list
+        client_details			string		Will partially match the client details 
+        biddingLocationID		int 		ID of the corresponding locations
+                                            Allows comma separated list
+        biddingLocation			string 		Name of the bidding location
+        assignedLocationID		int 		ID of the corresponding locations
+                                            Allows comma separated list
+        assignedLocation		string 		Name of the assigned location
+        currency				string 		Currency code (USD, EUR, etc)
+        is_private              int         (0, 1)
+        agency					string		Agency
+        agency_producer			string		Agency Producer
+        agency_phone			string		Agency Phone
+        agency_email			string		Agency Email
+        production_company		string		Production Company
+        director				string		Directory
+        prod_contact			string		Production Contact
+        prod_phone				string		Production Phone
+        prod_email				string		Production Email
+        producer				string		Producer
+        creative_lead			string		Creative Lead
+        grading					string		Grading
+        colorist				string		Colorist
+        editorial				string		Editorial
+        editor					string		Editor
+        mix						string		Mix
+        music					string		Music
+        sound_design			string		Sound Design
+        shoot_date				date 		YYYY-MM-DD
+        shoot_location			string		Shoot Location
+        supervised				int 		(0, 1)
+        proj_status				string		(ONLINE, OFFLINE)
+        activity 				string 		(ACTIVE, INACTIVE)
+        keywords 				array 		Allows comma separated list
+                                            Example: keyword1,keyword2
+        customKeys			    dictionary 	A dictionary of custom key names and values
+                                            {"My Custom Key Name":"Some text","Another Custom Key":"Some other text"}
+
+            Example:
+            .../nimAPI.php?q=findJobs&getContacts={"My Custom Key Name":"Some text","Another Custom Key":"Some other text"}
+
+        include_deleted - if 1 includes deleted jobs
+
+        limit   - specifies the maximum number of rows to return
+                - default 0 (no limit)
+        offset  - specifies the number of rows to skip before starting to return rows.
+                - default 0
+
+        Note:
+        This query can return a large amount of data.  
+        Use the limit and offset values to paginate your return data.
+
+    Return :
+        success:        true/false
+        error:          error message
+        total_count:    total number of rows that match the search criteria
+        data:           array of job data
+    '''
+
+    params = {'q': 'findJobs'}
+    params.update(kwargs)
+
     result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
     return result
 
@@ -3176,7 +3855,7 @@ def upload_dailies( taskID=None, renderID=None, renderKey=None, itemID=None, ite
     'Upload Dailies - 2 required fields: (taskID, renderID, or renderKey) and path to movie'
     # nimURL and apiKey are optional for Render API Key overrride
     #
-    #   Required Fields:
+    #   Required:
     #      itemID
     #      itemType - options user, job, asset, show, shot, task, render
     #               - after consolidation group, object
@@ -3276,7 +3955,7 @@ def get_reviewItem( ID=None, nimURL=None, apiUser=None, apiKey=None ) :
 
 def get_reviewItems( parentType=None, parentID=None, allChildren=None, name=None, description=None, date=None, type=None, typeID=None,
                      status=None, statusID=None, keyword=None, keywordID=None, nimURL=None, apiUser=None, apiKey=None ) :
-    'Retrives a dictionary of review items matching the search criteria - 2 required fields: parentType, parentID'
+    'Retrieves a dictionary of review items matching the search criteria - 2 required fields: parentType, parentID'
     #       Parameters          Type            Values                  Note
     # Required Parameters:
     #   parentType              string                                  user, job, dev, asset, show, shot, task, render
@@ -3332,7 +4011,7 @@ def upload_reviewItem( taskID=None, renderID=None, renderKey=None, itemID=None, 
     nimURL=None, apiUser=None, apiKey=None ) :
     # nimURL and apiKey are optional for Render API Key override
     #
-    #   Required Fields:
+    #   Required:
     #      itemID       integer         the ID of the parent to attach the review item
     #      itemType     string          options user, job, asset, show, shot, task, render
     #      path         string          the path of the item to upload
@@ -3408,7 +4087,7 @@ def upload_reviewNote( ID=None, name='', img=None, note='', frame=0, time=-1, us
     'Upload reviewNote'
     # 
     #
-    #   Required Fields:
+    #   Required:
     #       ID                  integer     The ID of the review item to attach the note
     #
     #   Optional Fields: 
