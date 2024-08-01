@@ -2,9 +2,9 @@
 #******************************************************************************
 #
 # Filename: Nuke/Python/Startup/nim_hiero_connector/nimHieroConnector.py
-# Version:  v5.2.0.220706
+# Version:  v6.1.16.240801
 #
-# Copyright (c) 2014-2022 NIM Labs LLC
+# Copyright (c) 2014-2024 NIM Labs LLC
 # All rights reserved.
 #
 # Use of this software is subject to the terms of the NIM Labs license
@@ -126,11 +126,11 @@ class NimHieroConnector():
 			nim_sequence_tag = self.getNimTag(sequence)
 			if nim_sequence_tag != False:
 				print("NIM: Updating sequence tag")
-				nim_sequence_tag.metadata().setValue("tag.showID" , showID)
+				nim_sequence_tag.metadata().setValue("tag.showID" , str(showID))
 			else:
 				print("NIM: Adding sequence tag")
 				nim_sequence_tag = hiero.core.Tag("NIM")
-				nim_sequence_tag.metadata().setValue("tag.showID" , showID)
+				nim_sequence_tag.metadata().setValue("tag.showID" , str(showID))
 				nim_script_path = os.path.dirname(__file__)
 				nim_icon_path = os.path.join(nim_script_path,'NIM.png')
 				nim_sequence_tag.setIcon(nim_icon_path)
@@ -163,8 +163,8 @@ class NimHieroConnector():
 						
 				print('		Adding NIM Tag to shot %s' % trackItem.name())
 				nim_tag = hiero.core.Tag("NIM")
-				nim_tag.metadata().setValue("tag.showID" , showID)
-				nim_tag.metadata().setValue("tag.shotID" , shotID)
+				nim_tag.metadata().setValue("tag.showID" , str(showID))
+				nim_tag.metadata().setValue("tag.shotID" , str(shotID))
 				nim_tag.metadata().setValue("tag.shotPath" , nim_shotPath)
 				nim_tag.metadata().setValue("tag.platesPath" , nim_platesPath)
 				nim_tag.metadata().setValue("tag.renderPath" , nim_renderPath)
@@ -233,11 +233,11 @@ class NimHieroConnector():
 				nim_sequence_tag = self.getNimTag(sequence)
 				if nim_sequence_tag != False:
 					print("NIM: Updating sequence tag")
-					nim_sequence_tag.metadata().setValue("tag.showID" , showID)
+					nim_sequence_tag.metadata().setValue("tag.showID" , str(showID))
 				else:
 					print("NIM: Adding sequence tag")
 					nim_sequence_tag = hiero.core.Tag("NIM")
-					nim_sequence_tag.metadata().setValue("tag.showID" , showID)
+					nim_sequence_tag.metadata().setValue("tag.showID" , str(showID))
 					nim_script_path = os.path.dirname(__file__)
 					nim_icon_path = os.path.join(nim_script_path,'NIM.png')
 					nim_sequence_tag.setIcon(nim_icon_path)
@@ -315,7 +315,13 @@ class NimHieroConnector():
 		
 		# Get first track frame for thumbnail
 		trackItem_sourceIn = trackItem.sourceIn()
-		trackItem_thumbnail = trackItem.thumbnail(trackItem_sourceIn)
+		try:
+			trackItem_thumbnail = trackItem.thumbnail(trackItem_sourceIn)
+		except:
+			status_msg = "NIM: Failed to generate icon for %s. Media is not present." % trackItem.name()
+			print(status_msg)
+			self.setStatusMessage(status_msg,0,True)
+			return True
 		 
 		nim_hiero_home = os.path.normpath( os.path.join( nimPrefs.get_home(), 'apps', 'Hiero' ) )
 
@@ -329,7 +335,7 @@ class NimHieroConnector():
 		apiInfo = nimAPI.upload_shotIcon( nim_shotID, image_path )
 
 		#print apiInfo
-		if apiInfo == True:
+		if apiInfo.get('success') == True:
 			status_msg = "NIM: Successfully uploaded icon for %s" % trackItem.name()
 			print(status_msg)
 			self.setStatusMessage(status_msg,0,True)
@@ -338,14 +344,6 @@ class NimHieroConnector():
 			print(status_msg)
 			self.setStatusMessage(status_msg,0,True)
 
-			'''
-			if apiInfo['file_success'] == 'true':
-				if 'error' in apiInfo:
-					print "		WARNING: %s" % apiInfo['error']
-			else:
-				if 'error' in apiInfo:
-					print "		ERROR: %s" % apiInfo['error']
-			'''
 		return True
 		
 	

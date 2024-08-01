@@ -115,7 +115,7 @@ Gizmo {
   addUserKnob {1 nimFolder l "NIM Folder"}
   nimFolder "\[ if \{ !\[string equal \[string trim \[value nimCompPrefix] \" \"] \"\"] \} \{return \[string trim \[value nimCompPrefix]_ \" \"]\} ]\[value root.nim_basename]_v\[format %02d \[value root.nim_version]]\[ if \{ !\[string equal \[string trim \[value nimCompTag] \" \"] \"\"] \} \{return _\[string trim \[value nimCompTag] \" \"]\} ]"
   addUserKnob {1 nimFilename l "NIM Filename"}
-  nimFilename "\[ if \{ !\[string equal \[string trim \[value nimCompPrefix] \" \"] \"\"] \} \{return \[string trim \[value nimCompPrefix]_ \" \"]\} ]\[value root.nim_basename]_v\[format %02d \[value root.nim_version]]\[ if \{ !\[string equal \[string trim \[value nimCompTag] \" \"] \"\"] \} \{return _\[string trim \[value nimCompTag] \" \"]\} ].%04d.\[value file_type]"
+  nimFilename "\[ if \{ !\[string equal \[string trim \[value nimCompPrefix] \" \"] \"\"] \} \{return \[string trim \[value nimCompPrefix]_ \" \"]\} ]\[value root.nim_basename]_v\[format %02d \[value root.nim_version]]\[ if \{ !\[string equal \[string trim \[value nimCompTag] \" \"] \"\"] \} \{return _\[string trim \[value nimCompTag] \" \"]\} ].\[value file_type]"
  }
  Output {
   name Output1

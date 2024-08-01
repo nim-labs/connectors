@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: nim_c4d.py
-# Version:  v6.1.15.240613
+# Version:  v6.1.16.240801
 #
 # Copyright (c) 2014-2024 NIM Labs LLC
 # All rights reserved.
@@ -26,9 +26,10 @@ from . import nim_file as F
 from . import nim_prefs as Prefs
 from . import nim_print as P
 from . import nim_win as Win
+from . import nim_version as V
 
 #  Variables :
-version='v6.1.15'
+version=V.version
 winTitle='NIM '+version+' - '
 _os=platform.system().lower()
 nim_plugin_ID=1032427
