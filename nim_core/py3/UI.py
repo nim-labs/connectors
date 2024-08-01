@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: UI.py
-# Version:  v6.1.15.240613
+# Version:  v6.1.16.240801
 #
 # Copyright (c) 2014-2024 NIM Labs LLC
 # All rights reserved.
@@ -28,6 +28,8 @@ from . import nim_file as F
 from . import nim_prefs as Prefs
 from . import nim_print as P
 from . import nim_win as Win
+from . import nim_version as V
+
 #  Import Python GUI packages :
 try : 
     from PySide6 import QtWidgets as QtGui
@@ -53,7 +55,7 @@ except ImportError :
                     print("NIM UI: Failed to UI Modules")
 
 #  Variables :
-version='v6.1.15'
+version=V.version
 WIN=''
 startTime=''
 winTitle='NIM '+version

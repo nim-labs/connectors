@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: nim_flame.py
-# Version:  v6.1.15.240613
+# Version:  v6.1.16.240801
 #
 # Copyright (c) 2014-2024 NIM Labs LLC
 # All rights reserved.
@@ -18,6 +18,7 @@ import os, sys, traceback
 import nim as Nim
 import nim_file as F
 import nim_print as P
+import nim_version as V
 
 #  Import Python GUI packages :
 try : 
@@ -37,7 +38,7 @@ except ImportError :
 				print "NIM: Failed to load UI Modules - Flame"
 
 #  Variables :
-version='v6.1.15'
+version=V.version
 winTitle='NIM_'+version
 
 

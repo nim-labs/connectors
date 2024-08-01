@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: nim_api.py
-# Version:  v6.1.15.240613
+# Version:  v6.1.16.240801
 #
 # Copyright (c) 2014-2024 NIM Labs LLC
 # All rights reserved.
@@ -54,9 +54,10 @@ import nim_prefs as Prefs
 import nim_print as P
 import nim_tools
 import nim_win as Win
+import nim_version as V
 
 #  Variables :
-version='v6.1.15'
+version=V.version
 winTitle='NIM_'+version
 
 
