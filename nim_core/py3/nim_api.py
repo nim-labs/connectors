@@ -607,7 +607,7 @@ def get_app() :
     except: pass
     return None
 
-def get_cultureCodes() :
+def get_cultureCodes(nimURL=None, apiUser=None, apiKey=None) :
     '''
     Returns a dictionary of active culture codes
 
@@ -620,7 +620,7 @@ def get_cultureCodes() :
     
     '''
     params = {'q': 'getCultureCodes'}
-    result = connect( method='get', params=params )
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
     return result
 
 
@@ -638,12 +638,13 @@ def get_user() :
     else :
         return False
 
-def get_userID( user='' ) :
+def get_userID( user='', nimURL=None, apiUser=None, apiKey=None ) :
     'Retrieves the current user\'s user ID'
     if not user :
         user=get_user()
     try :
-        userID=get( {'q': 'getUserID', 'u': str(user)} )
+        params = {'q': 'getUserID', 'u': str(user)}
+        userID = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
         if type(userID)==type(list()) and len(userID)==1 :
             return userID[0]['ID']
         else :
@@ -652,23 +653,599 @@ def get_userID( user='' ) :
         print((traceback.print_exc()))
         return False
 
-def get_userList( url=None ) :
+def get_userList( nimURL=None, apiUser=None, apiKey=None ) :
     'Retrieves the list of NIM Users from the NIM Preferences.'
     usrList=False
-    if url:
-        usrList=get( sqlCmd={'q': 'getUsers'}, nimURL=url )
-    else:
-        usrList=get( sqlCmd={'q': 'getUsers'} )
+    params = {'q': 'getUsers'}
+    usrList = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
     return usrList
+
+
+#  Locations  #
+
+def get_locations( nimURL=None, apiUser=None, apiKey=None ) :
+    '''
+    Get all defined locations
+    
+    Parameters
+    	None
+    
+    Return:
+    	Returns a list of locations in the format:
+            ID
+            name
+            description
+    '''
+    result=False
+    params = {'q': 'getLocations'}
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
+
+
+#  Contacts  #
+
+def get_contacts( nimURL=None, apiUser=None, apiKey=None, **kwargs ) :
+    '''
+    Get Contacts based on search parameters
+    
+    Parameters
+        Parameters need to be passed as keyword arguments
+        Example:
+            get_contacts( first_name='John', last_name='Doe' )
+
+        Required:
+            none 									    Will return all contacts the requesting user has access to 
+    
+        Optional:
+            ID 					integer 				The ID of a contact item to query
+            first_name 		 	string 		 			Will return all contact items matching the first name
+            last_name 			string					Will return all contact items matching the last name
+            email 				string 					Will return all contact items matching the email
+            title 				string 					Will return all contact items matching the title
+            company 			string 					Will return all contact items matching the company name
+            website 			string 					Will return all contact items matching the website
+            work_phone 			string 					Will return all contact items matching the work phone number
+            work_fax 			string 					Will return all contact items matching the work fax number
+            mobile_phone 		string 					Will return all contact items matching the mobile phone number
+            home_phone 			string 					Will return all contact items matching the home phone number
+            address1 			string 					Will return all contact items matching the address1 field
+            address2 			string 					Will return all contact items matching the address2 field
+            city 				string 					Will return all contact items matching the city
+            state 				string 					Will return all contact items matching the state
+            zip 				string 					Will return all contact items matching the zip
+            description 		string 					Will return all contact items partially matching the description
+            keywords 			string 					A comma separated list of keywords
+                                                        Will return all contact items matching the keywords
+            groups 				string 					A comma separated list of groups
+                                                        Will return all contact items matching the groups
+            customKeys 	        dictionary 				A dictionary of custom field names and values
+                                                        Will return all contact items matching the custom field value
+            limit  				integer					Specifies the maximum number of rows to return
+                                                        Default 0 (no limit)
+            offset 				integer					Specifies the number of rows to skip before starting to return rows.
+                                                        Default 0
+    Return:
+        Returns a dictionary in the format
+        result->success 		True/False
+        result->error 			Includes any error or security messaging
+        result->total_count	    The total number of rows that match the search criteria
+        result->data 			An array of returned data
+    '''
+
+    params = {'q': 'getContacts'}
+    params.update(kwargs)
+
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
+
+def add_contact( nimURL=None, apiUser=None, apiKey=None, **kwargs ) :
+    '''
+    Add Contact
+    
+    Parameters
+        Parameters need to be passed as keyword arguments
+        Example:
+            get_contacts( first_name='John', last_name='Doe' )
+
+    	Required:
+    		none
+    
+    	Optional:
+    		is_company			bool					0/1
+    		first_name 		 	string 		 			The first name of the contact	
+    		last_name 		 	string 		 			The last name of the contact		
+    		email 		 		string 		 			The email of the contact		
+    		title 		 		string 		 			The title of the contact		
+    		company 		 	string 		 			The company name for the contact		
+    		website 		 	string 		 			The website of the contact		
+    		work_phone 		 	string 		 			The work phone number of the contact		
+    		work_fax 		 	string 		 			The fax number of the contact		
+    		mobile_phone 		string 		 			The mobile phone number of the contact		
+    		home_phone 		 	string 		 			The home phone number of the contact		
+    		address1 		 	string 		 			The first address line of the contact		
+    		address2 		 	string 		 			The second address line of the contact		
+    		city 		 		string 		 			The city for the contact		
+    		state 		 		string 		 			The state for the contact		
+    		zip 		 		string 		 			The zip code for the contact		
+    		description 		string 		 			The description for the contact		
+    		keywords 			string 					Format ["keyword1","keyword2"]
+    		groups 				string 					Format ["group1","group2"]
+    		contact_link_IDs 	string 					Format 1,2,3 - a comma separated list of contact IDs
+    													Will replace all linked contacts for this contact
+            customKeys          dictionary              A dictionary of custom field names and values
+                                                        {"My Custom Key Name":"Some text"}
+
+    Return:
+    	Returns a dictionary in the format
+    	result->success 		True/False
+    	result->error 			Includes any error or security messaging	
+    	result->ID 			    The ID of the newly created item
+    '''
+
+    params = {'q': 'addContact'}
+    params.update(kwargs)
+
+    if 'keywords' in params :
+        params['keywords'] = json.dumps(params['keywords'])
+    
+    if 'groups' in params :
+        params['groups'] = json.dumps(params['groups'])
+
+    if 'customKeys' in params :
+        params['customKeys'] = json.dumps(params['customKeys'])
+
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
+
+def update_contact( nimURL=None, apiUser=None, apiKey=None, **kwargs ) :
+    '''
+    Update A Contact
+    
+    Parameters
+        Parameters need to be passed as keyword arguments
+        Example:
+            update_contact( ID=1, first_name='John', last_name='Doe' )
+
+    	Required:
+    		ID 					integer					The ID of the contact to update
+    
+    	Optional: 										(If an optional field is not passed, the value for that field will remain unchanged)
+    		first_name 		 	string 		 			The first name of the contact	
+    		last_name 		 	string 		 			The last name of the contact		
+    		email 		 		string 		 			The email of the contact		
+    		title 		 		string 		 			The title of the contact		
+    		company 		 	string 		 			The company name for the contact		
+    		website 		 	string 		 			The website of the contact		
+    		work_phone 		 	string 		 			The work phone number of the contact		
+    		work_fax 		 	string 		 			The fax number of the contact		
+    		mobile_phone 		string 		 			The mobile phone number of the contact		
+    		home_phone 		 	string 		 			The home phone number of the contact		
+    		address1 		 	string 		 			The first address line of the contact		
+    		address2 		 	string 		 			The second address line of the contact		
+    		city 		 		string 		 			The city for the contact		
+    		state 		 		string 		 			The state for the contact		
+    		zip 		 		string 		 			The zip code for the contact		
+    		description 		string 		 			The description for the contact		
+    		keywords 			string 					Format ["keyword1","keyword2"]
+    		groups 				string 					Format ["group1","group2"]
+    		contact_link_IDs 	string 					Format 1,2,3 - a comma separated list of contact IDs
+    													Will replace all linked contacts for this contact
+    		customKeys          dictionary              A dictionary of custom field names and values
+                                                        {"My Custom Key Name":"Some text"}
+    Return:
+    	Returns a dictionary in the format
+    	result->success 		True/False
+    	result->error 			Includes any error or security messaging
+    '''
+
+    params = {'q': 'updateContact'}
+    params.update(kwargs)
+
+    if 'keywords' in params :
+        params['keywords'] = json.dumps(params['keywords'])
+    
+    if 'groups' in params :
+        params['groups'] = json.dumps(params['groups'])
+
+    if 'customKeys' in params :
+        params['customKeys'] = json.dumps(params['customKeys'])
+
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
+
+def delete_contact( ID=None, nimURL=None, apiUser=None, apiKey=None ) :
+    '''
+    Delete Contact
+    
+    Parameters
+    	Required:
+    		ID 					integer         The ID of the contact to delete
+    
+    Return:
+    	Returns a dictionary in the format
+    	result->success 		True/False
+    	result->error 			Includes any error or security messaging
+    '''
+
+    params = {'q': 'deleteContact'}
+    if ID is not None : params['ID'] = ID
+
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
+
+
+#  Schedule Events  #
+
+def get_scheduleEvents( nimURL=None, apiUser=None, apiKey=None, **kwargs ) :
+    '''
+    Get Schedule Events based on search parameters
+    
+    Parameters
+        Parameters need to be passed as keyword arguments
+        Example:
+            get_scheduleEvents( statusName='BOOKED', userIDs=1 )
+    
+        Required:
+            none 										Will return all schedule events the requesting user has access to 
+    
+        Optional:
+            ID 							integer 		The ID of a schedule event to query
+            title 						string 			Will return all schedule events matching the title
+            description 				string 			Will return all schedule events partially matching the description
+            statusName 					string 			Will return all schedule events matching the statusName
+            locationName 				string 			Will return all schedule events matching the locationName
+            jobName 					string 			Will return all schedule events matching the jobName
+            jobNumber 					string 			Will return all schedule events matching the jobNumber
+            userIDs 					string 			Will return all schedule events matching the userIDs (comma separated list of IDs)
+            users 						string 			Will return all schedule events matching the users (comma separated list of names)
+            resourceIDs 				string 			Will return all schedule events matching the resourceIDs (comma separated list of IDs)
+            resources 					string 			Will return all schedule events matching the resources (comma separated list of names)
+            start 						datetime 		Will return all schedule events matching the start 
+                                                        (yyyy-mm-ddThh:mm:ss.sssZ or yyyy-mm-dd hh:mm:ss.sss timezone)
+            end 						datetime 		Will return all schedule events matching the end 
+                                                        (yyyy-mm-ddThh:mm:ss.sssZ or yyyy-mm-dd hh:mm:ss.sss timezone)
+            startRange 					datetime 		Will return all schedule events (and event recurrences) AFTER the startRange 
+                                                        (yyyy-mm-ddThh:mm:ss.sssZ or yyyy-mm-dd hh:mm:ss.sss timezone)
+            endRange 					datetime 		Will return all schedule events (and event recurrences) BEFORE the endRange
+                                                        (yyyy-mm-ddThh:mm:ss.sssZ or yyyy-mm-dd hh:mm:ss.sss timezone)
+            startTimezone 				string 			Will return all schedule events matching the startTimezone
+            endTimezone 				string 			Will return all schedule events matching the endTimezone
+            isAllDay 					bool 			Will return all schedule events matching the isAllDay (0/1)
+            recurrenceId 				integer 		Will return all schedule events matching the recurrenceId
+            recurrenceRule 				string 			Will return all schedule events matching the recurrenceRule
+            recurrenceException 		string 			Will return all schedule events matching the recurrenceException
+            userUtilizationTypeID 		integer 		Will return all schedule events matching the userUtilizationTypeID
+            userUtilizationType 		string 			Will return all schedule events matching the userUtilizationType
+            userUtilizationValue 		string 			Will return all schedule events matching the userUtilizationValue
+            resourceUtilizationTypeID 	integer 		Will return all schedule events matching the resourceUtilizationTypeID
+            resourceUtilizationType 	string 			Will return all schedule events matching the resourceUtilizationType
+            resourceUtilizationValue 	string 			Will return all schedule events matching the resourceUtilizationValue
+
+            limit  						integer			Specifies the maximum number of rows to return
+                                                        Default 0 (no limit)
+            offset 						integer			Specifies the number of rows to skip before starting to return rows.
+                                                        Default 0
+    
+    
+    Return:
+    		Returns an associative array in the format
+    		$result->success 		True/False
+    		$result->error 			Includes any error or security messaging
+            $result->total_count	The total number of rows that match the search criteria
+     		$result->data 			An array of returned data
+    			
+    Notes:
+    	yyyy: 4-digit year (2024)
+    	mm: 2-digit month (07 for July)
+    	dd: 2-digit day of the month (10)
+    	T: A delimiter separating the date and time components
+    	hh: 2-digit hour in 24-hour format (07)
+    	mm: 2-digit minutes (00)
+    	ss: 2-digit seconds (00)
+    	.sss: Milliseconds (000), representing fractions of a second
+    	Z: Indicates that the time is in Coordinated Universal Time (UTC)
+    	
+    	Examples of valid datetime strings include: 
+    		2024-07-10T07:00:00.000Z
+    		Represents July 10, 2024, 7:00:00 AM UTC
+    
+    		2024-07-10 07:00:00.000 America/Los_Angeles 
+    		Represents July 10, 2024, 7:00:00 AM in the America/Los_Angeles timezone
+    '''
+
+    params = {'q': 'getScheduleEvents'}
+    params.update(kwargs)
+
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
+
+def add_scheduleEvent( nimURL=None, apiUser=None, apiKey=None, **kwargs ) :
+    '''
+    Add Schedule Event
+        Parameters
+            Parameters need to be passed as keyword arguments
+            Example:
+                add_scheduleEvent( start='2024-07-10 10:00:00.000 America/Los_Angeles',
+                                   end='2024-07-10 19:00:00.000 America/Los_Angeles', 
+                                   statusName='BOOKED', userIDs=1 )
+    	
+        Required:
+            start 						datetime 			Date if isAllDay = 1; datetime otherwise
+                                                            (yyyy-mm-ddThh:mm:ss.sssZ or yyyy-mm-dd hh:mm:ss.sss timezone)
+            end 						datetime 			Date if isAllDay = 1; datetime otherwise
+                                                            (yyyy-mm-ddThh:mm:ss.sssZ or yyyy-mm-dd hh:mm:ss.sss timezone)
+        At least one of:
+            jobID 					    integer             A job ID to associate with the event
+            userIDs 				    string				Comma-separated list of user IDs
+            resourceIDs 			    string				Comma-separated list of resource IDs
+
+        Optional:
+            title 						string              The title of the event
+            description 				string              The description of the event
+            statusID 					integer             The ID of the status to associate with the event
+            statusName 					string              The name of the status to associate with the event
+            locationID 					integer             The ID of the location to associate with the event         
+            jobID 						integer             The ID of the job to associate with the event
+            userIDs 					string				Comma-separated list of user IDs
+            resourceIDs 				string				Comma-separated list of resource IDs
+            startTimezone 				string 				A valid timezone identifier; example: America/Los_Angeles
+            endTimezone 				string 				A valid timezone identifier; example: America/Los_Angeles
+            isAllDay 					bool 				0 or 1
+            recurrenceId 				integer 			ID of this schedule event's parent; this should only exist if this event is an EXCEPTION to a recurring event's ruleset
+            recurrenceRule 				string 				Recurring event ruleset string; see https://datatracker.ietf.org/doc/html/rfc5545
+            recurrenceException 		string 				A list of comma-separated start datetimes for all exceptions to this recurring event's rules
+            userUtilizationTypeID 		integer             The ID of the user utilization type to associate with the event
+            userUtilizationType 		string              The name of the user utilization type to associate with the event
+                                                            "hours per day", "percent per day", "total hours"
+            userUtilizationValue 		string              The value of the user utilization type to associate with the event
+            resourceUtilizationTypeID 	integer             The ID of the resource utilization type to associate with the event
+            resourceUtilizationType 	string              The name of the resource utilization type to associate with the event
+                                                            "units per day", "percent per day"
+            resourceUtilizationValue 	string              The value of the resource utilization type to associate with the event
+
+        Return:
+            Returns a dictionary in the format
+            result->success 		True/False
+            result->error 			Includes any error or security messaging	
+            result->ID 			    The ID of the newly created item
+    '''
+
+    params = {'q': 'addScheduleEvent'}
+    params.update(kwargs)
+
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
+
+def update_scheduleEvent( nimURL=None, apiUser=None, apiKey=None, **kwargs ) :
+    '''
+    Update Schedule Event
+        Parameters
+            Parameters need to be passed as keyword arguments
+            Example:
+                update_scheduleEvent( ID=3391, statusName='1st Hold' )
+
+    	Required:
+    		ID                          integer         The ID of the schedule event to update
+        
+        Optional:
+    		title 						string
+    		description 				string
+    		statusID 					integer
+    		statusName 					string
+    		locationID 					integer
+    		jobID 						integer
+    		userIDs 					string				Comma-separated list of user IDs
+    		resourceIDs 				string				Comma-separated list of resource IDs
+    		start 						datetime 			Date if isAllDay = 1; datetime otherwise
+    														(yyyy-mm-ddThh:mm:ss.sssZ or yyyy-mm-dd hh:mm:ss.sss timezone)
+    		end 						datetime 			Date if isAllDay = 1; datetime otherwise
+    														(yyyy-mm-ddThh:mm:ss.sssZ or yyyy-mm-dd hh:mm:ss.sss timezone)
+    		startTimezone 				string 				A valid timezone identifier; example: America/Los_Angeles
+    		endTimezone 				string 				A valid timezone identifier; example: America/Los_Angeles
+    		isAllDay 					bool 				0 or 1
+    		recurrenceId 				integer 			ID of this schedule event's parent; this should only exist if this event is an EXCEPTION to a recurring event's ruleset
+    		recurrenceRule 				string 				Recurring event ruleset string; see https://datatracker.ietf.org/doc/html/rfc5545
+    		recurrenceException 		string 				A list of comma-separated start datetimes for all exceptions to this recurring event's rules
+    		userUtilizationTypeID 		integer
+    		userUtilizationType 		string
+    		userUtilizationValue 		string
+    		resourceUtilizationTypeID 	integer
+    		resourceUtilizationType 	string
+    		resourceUtilizationValue 	string
+
+    Return:
+    	Returns a dictionary in the format
+    	result->success 		True/False
+    	result->error 			Includes any error or security messaging
+    '''
+
+    params = {'q': 'updateScheduleEvent'}
+    params.update(kwargs)
+
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
+
+def delete_scheduleEvent( ID=None, nimURL=None, apiUser=None, apiKey=None ) :
+    '''
+    Delete Schedule Event
+    
+    Parameters
+    	
+        Required:
+    		ID 					integer         The ID of the schedule event to delete
+    
+    Return:
+    	Returns a dictionary in the format
+    	result->success 		True/False
+    	result->error 			Includes any error or security messaging
+    '''
+
+    params = {'q': 'deleteScheduleEvent'}
+    if ID is not None : params['ID'] = ID
+
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
+
+def get_scheduleEventStatuses( nimURL=None, apiUser=None, apiKey=None ) :
+    '''
+    Get Schedule Statuses
+    
+    Parameters
+    	nimURL                  string          Override for nimURL setting in prefs                                                             
+                                                Including nimURL will override the default 
+                                                NIM API url and skip the reading of saved 
+                                                user preferences.
+        apiUser                 string          Required if nimURL is set
+                                                and Require API Keys is enabled in NIM
+        apiKey                  string          Required if nimURL is set
+                                                and Require API Keys is enabled in NIM
+    
+    Return:
+    	Returns an associative array in the format
+    	result->success 		True/False
+    	result->error 			Includes any error or security messaging
+    '''
+    result=False
+    params = {'q': 'getScheduleEventStatuses'}
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
+
+
+#  Resources  #
+
+def get_resources( nimURL=None, apiUser=None, apiKey=None, **kwargs ) :
+    '''
+    Get Resources based on search parameters
+    
+    Parameters
+        Parameters need to be passed as keyword arguments
+        Example:
+            get_resources( locationName='Los Angeles', resourceGroups='Workstations,Licenses' )
+
+    	Required:
+    		none 										Will return all resources the requesting user has access to 
+    
+    	Optional:
+    		ID 							integer 		The ID of a resource to query
+    		name 						string 			Will return all resources matching the name
+    		description 				string 			Will return all resources partially matching the description
+    		color 						string 			Will return all resources matching the color
+    		locationID 					integer			Will return all resources matching the location ID
+    		locationName 				string 			Will return all resources matching the locationName
+    		keywordIDs 					string 			Will return all resources matching the keywordIDs (comma separated list of IDs)
+    		keywords 					string 			Will return all resources matching the keywords (comma separated list of names)
+    		resourceGroupIDs 			string 			Will return all resources matching the resourceGroupIDs (comma separated list of IDs)
+    		resourceGroups 				string 			Will return all resources matching the resourceGroups (comma separated list of names)
+        	
+            limit  						integer			Specifies the maximum number of rows to return
+    		   											Default 0 (no limit)
+    		offset 						integer			Specifies the number of rows to skip before starting to return rows.
+    		   											Default 0
+    
+    Return:
+    	Returns a dictionary in the format
+    	result->success 		    True/False
+    	result->error 			    Includes any error or security messaging
+        result->total_count	        The total number of rows that match the search criteria
+    	result->data 			    An array of returned data
+    '''
+
+    params = {'q': 'getResources'}
+    params.update(kwargs)
+
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
+
+def add_resource( nimURL=None, apiUser=None, apiKey=None, **kwargs ) :
+    '''
+     Add Resource
+    
+     Parameters
+        Required:
+            name 						string 				The resource name
+
+        Optional:
+            description 				string              The resource description
+            color 						string              The resource color
+            locationID					integer             The location ID
+            keywords 					string 				Comma-separated list of keywords
+            keywordIDs 					string				Comma-separated list of keyword IDs
+            resourceGroups 				string 				Comma-separated list of resource groups
+            resourceGroupIDs 			string 				Comma-separated list of resource group IDs
+
+    Return:
+        Returns a dictionary in the format
+        result->success 		True/False
+        result->error 			Includes any error or security messaging	
+        result->ID 			    The ID of the newly created item
+    '''
+
+    params = {'q': 'addResource'}
+    params.update(kwargs)
+
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
+
+def update_resource( nimURL=None, apiUser=None, apiKey=None, **kwargs ) :
+    '''
+    Update Resource
+        
+    Parameters
+    	Required:
+    		ID                          integer             The ID of the resource to update
+        
+        Optional:
+    		name 						string              The resource name
+    		description 				string              The resource description
+    		color 						string              The resource color
+    		locationID					integer             The location ID
+    		keywords 					string 				Comma-separated list of keywords
+    		keywordIDs 					string				Comma-separated list of keyword IDs
+    		resourceGroups 				string 				Comma-separated list of resource groups
+    		resourceGroupIDs 			string 				Comma-separated list of resource group IDs
+
+    Return:
+    	Returns a dictionary in the format
+    	result->success 		True/False
+    	result->error 			Includes any error or security messaging
+    '''
+
+    params = {'q': 'updateResource'}
+    params.update(kwargs)
+
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
+
+def delete_resource( ID=None, nimURL=None, apiUser=None, apiKey=None ) :
+    '''
+    Delete Resource
+    
+    Parameters
+    	
+        Required:
+    		ID 					integer         The ID of the resource to delete
+    
+    Return:
+    	Returns a dictionary in the format
+    	result->success 		True/False
+    	result->error 			Includes any error or security messaging
+    '''
+
+    params = {'q': 'deleteResource'}
+    if ID is not None : params['ID'] = ID
+
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
 
 
 #  Jobs  #
 
-def get_jobs( userID=None, folders=False ) :
+def get_jobs( userID=None, folders=False, nimURL=None, apiUser=None, apiKey=None ) :
     'Builds a dictionary of all jobs for a given user'
     jobDict={}
     #  Build dictionary of jobs :
-    _jobs=get( {'q': 'getUserJobs', 'u': userID} )
+    params = {'q': 'getUserJobs', 'u': userID}
+    _jobs = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
     try:
         for job in _jobs :
             if not folders :
@@ -681,12 +1258,27 @@ def get_jobs( userID=None, folders=False ) :
         P.error( traceback.print_exc() )
         return False
 
+def get_crew( jobID=None, getData=None, limit=None, offset=None, \
+              nimURL=None, apiUser=None, apiKey=None ) :
+    'Builds a dictionary of crew members for a given job or list of jobs'
+    params = {}
+    params["q"] = "getCrew"
+    
+    if jobID is not None : params['jobID'] = jobID
+    if getData is not None : params['getData'] = getData
+    if limit is not None : params['limit'] = limit
+    if offset is not None : params['offset'] = offset
+    
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
+
 def add_job( name=None, number=None, numberTemplate=None, description=None, client_details=None, agency=None, producer=None, agency_producer=None, \
     phone=None, email=None, prod_co=None, prod_director=None, prod_contact=None, prod_phone=None, prod_email=None, \
     prod_shoot_date=None, prod_location=None, prod_supervised=None, editorial=None, editor=None, grading=None, colorist=None, \
     music=None, mix=None, sound=None, creative_lead=None, projectStatus=None, folder=None, projectStructureID=None, projectStructure=None, \
     jobStatusID=None, jobStatus=None, biddingLocationID=None, biddingLocation=None, \
-    assignedLocationID=None, assignedLocation=None, startDate=None, endDate=None, currency=None, cultureID=None, customKeys=None, keywords=None) :
+    assignedLocationID=None, assignedLocation=None, startDate=None, endDate=None, currency=None, cultureID=None, customKeys=None, keywords=None, \
+    contactIDs=None, nimURL=None, apiUser=None, apiKey=None) :
     '''
     Creates a new job. 
 
@@ -754,6 +1346,8 @@ def add_job( name=None, number=None, numberTemplate=None, description=None, clie
         cultureID               integer         
         customKeys              dictionary      {"Custom Key Name" : "Value"}
         keywords                list            ["keyword1", "keyword2"]
+        contactIDs 	            string          A comma separated list of contact IDs
+                                                Example: 1,2,3
         
     '''
     params = {'q': 'addJob'}
@@ -800,8 +1394,9 @@ def add_job( name=None, number=None, numberTemplate=None, description=None, clie
     if cultureID is not None : params['cultureID'] = cultureID
     if customKeys is not None : params['customKeys'] = json.dumps(customKeys)
     if keywords is not None : params['keywords'] = json.dumps(keywords)
+    if contactIDs is not None : params['contactIDs'] = contactIDs
 
-    result = connect( method='get', params=params )
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
     return result
 
 def update_job( jobID=None, name=None, number=None, description=None, client_details=None, agency=None, producer=None, agency_producer=None, \
@@ -809,7 +1404,8 @@ def update_job( jobID=None, name=None, number=None, description=None, client_det
     prod_shoot_date=None, prod_location=None, prod_supervised=None, editorial=None, editor=None, grading=None, colorist=None, \
     music=None, mix=None, sound=None, creative_lead=None, projectStatus=None, folder=None, projectStructureID=None, projectStructure=None, \
     jobStatusID=None, jobStatus=None, biddingLocationID=None, biddingLocation=None, \
-    assignedLocationID=None, assignedLocation=None, startDate=None, endDate=None, currency=None, cultureID=None, customKeys=None, keywords=None) :
+    assignedLocationID=None, assignedLocation=None, startDate=None, endDate=None, currency=None, cultureID=None, customKeys=None, keywords=None, \
+    contactIDs=None, nimURL=None, apiUser=None, apiKey=None) :
     '''
     Updates an existing job based on the jobID.
 
@@ -880,6 +1476,8 @@ def update_job( jobID=None, name=None, number=None, description=None, client_det
         cultureID               integer
         customKeys              dictionary      {"Custom Key Name" : "Value"}
         keywords                list            ["keyword1", "keyword2"]
+        contactIDs 	            string          A comma separated list of contact IDs
+                                                Example: 1,2,3
     '''
     params = {'q': 'updateJob'}
 
@@ -925,11 +1523,12 @@ def update_job( jobID=None, name=None, number=None, description=None, client_det
     if cultureID is not None : params['cultureID'] = cultureID
     if customKeys is not None : params['customKeys'] = json.dumps(customKeys)
     if keywords is not None : params['keywords'] = json.dumps(keywords)
+    if contactIDs is not None : params['contactIDs'] = contactIDs
 
-    result = connect( method='get', params=params )
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
     return result
 
-def delete_job( jobID=None) :
+def delete_job( jobID=None, nimURL=None, apiUser=None, apiKey=None) :
     '''
     Deletes a job based on jobID. This is a soft delete and these jobs can be recovered or permanently deleted from the Admin UI.
 
@@ -943,10 +1542,10 @@ def delete_job( jobID=None) :
 
     if jobID is not None : params['jobID'] = jobID
 
-    result = connect( method='get', params=params )
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
     return result
 
-def upload_jobIcon( jobID=None, img=None, nimURL=None, apiKey=None ) :
+def upload_jobIcon( jobID=None, img=None, nimURL=None, apiUser=None, apiKey=None ) :
     'Upload job icon'
     params = {}
     params["q"] = "uploadJobIcon"
@@ -968,69 +1567,182 @@ def upload_jobIcon( jobID=None, img=None, nimURL=None, apiKey=None ) :
         return result
 
     if img is not None :
-        result = upload(params=params, nimURL=nimURL, apiKey=apiKey)
+        result = upload(params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
     else :
-        result = connect( method='get', params=params, nimURL=nimURL, apiKey=apiKey )
+        result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
 
     return result
 
-def get_jobInfo( jobID=None ) :
+def get_jobInfo( jobID=None, nimURL=None, apiUser=None, apiKey=None ) :
     'Builds a dictionary of job information including ID, number, jobname, and folder'
-    return get( {'q': 'getJobInfo', 'ID': str(jobID)} )
+    params = {}
+    params["q"] = "getJobInfo"
+    if jobID is not None : params['ID'] = jobID
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
 
+def get_jobStatuses( nimURL=None, apiUser=None, apiKey=None ) :
+    'Retrieves the list of available job statuses.'
+    result=False
+    params = {'q': 'getJobStatuses'}
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
 
-#  Servers & Project Stuctures  #
+def find_jobs( nimURL=None, apiUser=None, apiKey=None, **kwargs ) :
+    '''
+    Returns a dictionary of job IDs or full job data based on the search criteria
+        Optional: 
+        getData    				0 / 1 		- if 0 returns IDs (default)
+                                            - if 1 returns full data for items
+                                            Returns limited data if user does not have permission to view job details
+        ID						int			Allows comma separated list
+        name					string	
+        number					string
+        description				string		Will partially match the job description
+        startDate				date		YYYY-MM-DD
+        endDate 				date		YYYY-MM-DD
+        jobStatusID				int 		Job Status ID
+        jobStatus				string 		Job Status Name
+        folder                  string      The job folder name
+        client_contactID		int			The ID of a linked contact
+											Allows comma separated list
+        client_details			string		Will partially match the client details 
+        biddingLocationID		int 		ID of the corresponding locations
+                                            Allows comma separated list
+        biddingLocation			string 		Name of the bidding location
+        assignedLocationID		int 		ID of the corresponding locations
+                                            Allows comma separated list
+        assignedLocation		string 		Name of the assigned location
+        currency				string 		Currency code (USD, EUR, etc)
+        is_private              int         (0, 1)
+        agency					string		Agency
+        agency_producer			string		Agency Producer
+        agency_phone			string		Agency Phone
+        agency_email			string		Agency Email
+        production_company		string		Production Company
+        director				string		Directory
+        prod_contact			string		Production Contact
+        prod_phone				string		Production Phone
+        prod_email				string		Production Email
+        producer				string		Producer
+        creative_lead			string		Creative Lead
+        grading					string		Grading
+        colorist				string		Colorist
+        editorial				string		Editorial
+        editor					string		Editor
+        mix						string		Mix
+        music					string		Music
+        sound_design			string		Sound Design
+        shoot_date				date 		YYYY-MM-DD
+        shoot_location			string		Shoot Location
+        supervised				int 		(0, 1)
+        proj_status				string		(ONLINE, OFFLINE)
+        activity 				string 		(ACTIVE, INACTIVE)
+        keywords 				array 		Allows comma separated list
+                                            Example: keyword1,keyword2
+        customKeys			    dictionary 	A dictionary of custom key names and values
+                                            {"My Custom Key Name":"Some text","Another Custom Key":"Some other text"}
 
-def get_allServers( locationID='' ) :
+            Example:
+            .../nimAPI.php?q=findJobs&getContacts={"My Custom Key Name":"Some text","Another Custom Key":"Some other text"}
+
+        include_deleted - if 1 includes deleted jobs
+
+        limit   - specifies the maximum number of rows to return
+                - default 0 (no limit)
+        offset  - specifies the number of rows to skip before starting to return rows.
+                - default 0
+
+        Note:
+        This query can return a large amount of data.  
+        Use the limit and offset values to paginate your return data.
+
+    Return :
+        success:        true/false
+        error:          error message
+        total_count:    total number of rows that match the search criteria
+        data:           array of job data
+    '''
+
+    params = {'q': 'findJobs'}
+    params.update(kwargs)
+
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
+
+#  Servers & Project Structures  #
+
+def get_allServers( locationID=None, nimURL=None, apiUser=None, apiKey=None ) :
     'Retrieves all servers optionally filtered by locationID'
-    servers=get( {'q':'getServers', 'ID':locationID} )
-    return servers
+    params = {}
+    params["q"] = "getServers"
+    if locationID is not None : params['ID'] = locationID
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
 
-def get_servers( ID=None ) :
+def get_servers( ID=None, nimURL=None, apiUser=None, apiKey=None ) :
     'Retrieves servers associated with a specified job ID - does not match phpAPI'
-    if ID :
-        servers=get( {'q':'getJobServers', 'ID':ID} )
-        return servers
+    params = {}
+    params["q"] = "getJobServers"
+    if ID is not None : params['ID'] = ID
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
 
-def get_jobServers( ID=None ) :
+def get_jobServers( ID=None, nimURL=None, apiUser=None, apiKey=None ) :
     'Retrieves servers associated with a specified job ID - matches phpAPI'
-    if ID :
-        servers=get( {'q':'getJobServers', 'ID':ID} )
-        return servers
+    params = {}
+    params["q"] = "getJobServers"
+    if ID is not None : params['ID'] = ID
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
 
-def get_serverInfo( ID=None ) :
+def get_serverInfo( ID=None, nimURL=None, apiUser=None, apiKey=None ) :
     'Retrieves servers information'
-    if ID :
-        serverInfo=get( {'q':'getServerInfo', 'ID':ID} )
-        return serverInfo
+    params = {}
+    params["q"] = "getServerInfo"
+    if ID is not None : params['ID'] = ID
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
 
-def get_serverOSPath( ID=None, os='' ) :
+def get_serverOSPath( ID=None, os=None, nimURL=None, apiUser=None, apiKey=None ) :
     'Retrieves server path based on OS'
-    if ID :
-        serverOSPath=get( {'q':'get_serverOSPath', 'ID':ID, 'os':os} )
-        return serverOSPath
+    params = {}
+    params["q"] = "get_serverOSPath"
+    if ID is not None : 
+        params['ID'] = ID
     else:
         return "Server ID Missing"
+    if os is not None : params['os'] = os
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
 
-def get_osPath( fileID=None, os='' ) :
+def get_osPath( fileID=None, os=None, nimURL=None, apiUser=None, apiKey=None ) :
     'Retrieves file path based on OS'
-    if fileID :
-        fileOSPath=get( {'q':'getOSPath', 'fileID':fileID, 'os':os} )
-        return fileOSPath
+    params = {}
+    params["q"] = "getOSPath"
+    if fileID is not None : 
+        params['fileID'] = fileID
     else:
-        #return "File ID Missing"
         return False
+    if os is not None : params['os'] = os
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
 
-def get_paths( item='', ID=None) :
+def get_paths( item='', ID=None, nimURL=None, apiUser=None, apiKey=None ) :
     'Retrieves nim path for project structure - items options: job / show / shot / asset'
-    if ID :
-        path=get( {'q':'getPaths', 'type':item, 'ID':ID} )
-        return path
+    params = {}
+    params["q"] = "getPaths"
+    if ID is not None : 
+        params['ID'] = ID
     else:
         P.error ('get_paths: Missing ID')
         return False
+    if item is not None : params['type'] = item
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
 
-def can_bringOnline( item='shot', jobID=0, assetID=0, showID=0, shotID=0 ) :
+def can_bringOnline( item='shot', jobID=0, assetID=0, showID=0, shotID=0, \
+                    nimURL=None, apiUser=None, apiKey=None ) :
     'Tests item against variable based project structure to see if it can be brought online'
     'Item types can be asset or shot'
     '   -if asset, jobID OR assetID must be passed'
@@ -1047,10 +1759,11 @@ def can_bringOnline( item='shot', jobID=0, assetID=0, showID=0, shotID=0 ) :
         params["showID"] = str(showID)
     if int(shotID) > 0 :
         params["shotID"] = str(shotID)
-    result = connect( method='get', params=params )
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
     return result
 
-def bring_online( item='shot', assetID=0, shotID=0 ) :
+def bring_online( item='shot', assetID=0, shotID=0, \
+                  nimURL=None, apiUser=None, apiKey=None ) :
     'Brings assets and shots online creating folders from project structure'
     'Item types can be asset or shot'
     '   -if asset, assetID must be passed'
@@ -1063,17 +1776,22 @@ def bring_online( item='shot', assetID=0, shotID=0 ) :
         params["assetID"] = str(assetID)
     if int(shotID) > 0 :
         params["shotID"] = str(shotID)
-    result = connect( method='get', params=params )
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
     return result
 
 
 #  Assets  #
 
-def get_assets( jobID=None ) :
+def get_assets( jobID=None, nimURL=None, apiUser=None, apiKey=None ) :
     'Builds a dictionary of all assets for a given job'
-    return get( {'q': 'getAssets', 'ID': str(jobID)} )
+    params = {}
+    params["q"] = "getAssets"
+    if jobID is not None : params['ID'] = jobID
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
 
-def add_asset( jobID=None, name=None, assetStatusID=None, assetStatus=None, description=None, customKeys=None ) :
+def add_asset( jobID=None, name=None, assetStatusID=None, assetStatus=None, description=None, customKeys=None, \
+               nimURL=None, apiUser=None, apiKey=None ) :
     '''
     Adds a new asset to a job and returns the new assetID.
 
@@ -1104,10 +1822,11 @@ def add_asset( jobID=None, name=None, assetStatusID=None, assetStatus=None, desc
     if description is not None : params['description'] = description
     if customKeys is not None : params['customKeys'] = json.dumps(customKeys)
 
-    result = connect( method='get', params=params )
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
     return result
 
-def update_asset( assetID=None, assetStatusID=None, assetStatus=None, description=None, customKeys=None ) :
+def update_asset( assetID=None, assetStatusID=None, assetStatus=None, description=None, customKeys=None, \
+                  nimURL=None, apiUser=None, apiKey=None) :
     '''
     Updates an existing asset based on the assetID.
 
@@ -1132,10 +1851,10 @@ def update_asset( assetID=None, assetStatusID=None, assetStatus=None, descriptio
     if description is not None : params['description'] = description
     if customKeys is not None : params['customKeys'] = json.dumps(customKeys)
 
-    result = connect( method='get', params=params )
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
     return result
 
-def delete_asset( assetID=None) :
+def delete_asset( assetID=None, nimURL=None, apiUser=None, apiKey=None) :
     '''
     Deletes an asset based on assetID.
 
@@ -1149,10 +1868,10 @@ def delete_asset( assetID=None) :
     
     if assetID is not None : params['assetID'] = assetID
 
-    result = connect( method='get', params=params )
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey  )
     return result
 
-def upload_assetIcon( assetID=None, img=None, nimURL=None, apiKey=None ) :
+def upload_assetIcon( assetID=None, img=None, nimURL=None, apiUser=None, apiKey=None ) :
     'Upload asset icon'
     params = {}
     params["q"] = "uploadAssetIcon"
@@ -1174,34 +1893,55 @@ def upload_assetIcon( assetID=None, img=None, nimURL=None, apiKey=None ) :
         return result
 
     if img is not None :
-        result = upload(params=params, nimURL=nimURL, apiKey=apiKey)
+        result = upload(params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey)
     else :
-        result = connect( method='get', params=params, nimURL=nimURL, apiKey=apiKey )
+        result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
 
     return result
 
-def get_assetInfo( assetID=None ) :
+def get_assetInfo( assetID=None, nimURL=None, apiUser=None, apiKey=None ) :
     'Retrieves information for a given asset'
-    assetInfo=get( {'q': 'getAssetInfo', 'ID': assetID} )
-    return assetInfo
+    params = {}
+    params["q"] = "getAssetInfo"
+    if assetID is not None : params['ID'] = assetID
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result 
 
-def get_assetIcon( assetID=None ) :
+def get_assetIcon( assetID=None, nimURL=None, apiUser=None, apiKey=None ) :
     'Retrieves information for a given asset'
-    assetIcon=get( {'q': 'getAssetIcon', 'ID': assetID} )
-    return assetIcon
+    params = {}
+    params["q"] = "getAssetIcon"
+    if assetID is not None : params['ID'] = assetID
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result   
 
+def get_assetStatuses( nimURL=None, apiUser=None, apiKey=None ) :
+    'Retrieves the list of available asset statuses.'
+    result=False
+    params = {'q': 'getAssetStatuses'}
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
 
 #  Shows  #
 
-def get_shows( jobID=None ) :
+def get_shows( jobID=None, nimURL=None, apiUser=None, apiKey=None ) :
     'Builds a dictionary of all shows for a given job'
-    return get( {'q': 'getShows', 'ID': str(jobID)} )
+    params = {}
+    params["q"] = "getShows"
+    if jobID is not None : params['ID'] = jobID
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result 
 
-def get_showInfo( showID=None ) :
+def get_showInfo( showID=None, nimURL=None, apiUser=None, apiKey=None ) :
     'Builds a dictionary of all shows for a given show'
-    return get( {'q': 'getShowInfo', 'ID': str(showID)} )
+    params = {}
+    params["q"] = "getShowInfo"
+    if showID is not None : params['ID'] = showID
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result 
 
-def add_show( jobID=None, name=None, trt=None, has_previs=None) :
+def add_show( jobID=None, name=None, trt=None, has_previs=None, \
+              nimURL=None, apiUser=None, apiKey=None ) :
     '''
     Adds a new show to a job and returns the new showID
 
@@ -1222,10 +1962,11 @@ def add_show( jobID=None, name=None, trt=None, has_previs=None) :
     if trt is not None : params['trt'] = trt
     if has_previs is not None : params['has_previs'] = has_previs
 
-    result = connect( method='get', params=params )
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
     return result
 
-def update_show( showID=None, name=None, trt=None) :
+def update_show( showID=None, name=None, trt=None, \
+                 nimURL=None, apiUser=None, apiKey=None ) :
     '''
     Updates an existing show based on the showID.
 
@@ -1244,10 +1985,10 @@ def update_show( showID=None, name=None, trt=None) :
     if name is not None : params['name'] = name
     if trt is not None : params['trt'] = trt
 
-    result = connect( method='get', params=params )
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
     return result
 
-def delete_show( showID=None ) :
+def delete_show( showID=None, nimURL=None, apiUser=None, apiKey=None ) :
     '''
     Deletes an existing show based on the showID.
 
@@ -1260,19 +2001,24 @@ def delete_show( showID=None ) :
 
     if showID is not None : params['showID'] = showID
 
-    result = connect( method='get', params=params )
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey  )
     return result
 
 
 #  Shots  #
 
-def get_shots( showID=None ) :
+def get_shots( showID=None, nimURL=None, apiUser=None, apiKey=None ) :
     'Builds a dictionary of all shots for a given show'
-    return get( {'q': 'getShots', 'ID': showID} )
+    params = {}
+    params["q"] = "getShots"
+    if showID is not None : params['ID'] = showID
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
 
 def add_shot( showID=None, shotName=None, name=None, shotStatusID=None, shotStatus=None, description=None, vfx=None, fps=None, frames=None, \
     shotDuration=None, handles=None, heads=None, tails=None, height=None, pan=None, tilt=None, roll=None, lens=None, fstop=None, filter=None, \
-    dts=None, focus=None, ia=None, convergence=None, cam_roll=None, stock=None, format=None, crop=None, protect=None, customKeys=None ) :
+    dts=None, focus=None, ia=None, convergence=None, cam_roll=None, stock=None, format=None, crop=None, protect=None, customKeys=None, \
+    nimURL=None, apiUser=None, apiKey=None ) :
     '''
     Adds a shot to a show and returns the new ID.
 
@@ -1349,12 +2095,13 @@ def add_shot( showID=None, shotName=None, name=None, shotStatusID=None, shotStat
     if protect is not None : params['protect'] = protect
     if customKeys is not None : params['customKeys'] = json.dumps(customKeys)
 
-    result = connect( method='get', params=params )
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
     return result
 
 def update_shot( shotID=None, shotStatusID=None, shotStatus=None, description=None, vfx=None, fps=None, frames=None, duration=None, \
     handles=None, heads=None, tails=None, height=None, pan=None, tilt=None, roll=None, lens=None, fstop=None, filter=None, \
-    dts=None, focus=None, ia=None, convergence=None, cam_roll=None, stock=None, format=None, crop=None, protect=None, customKeys=None ) :
+    dts=None, focus=None, ia=None, convergence=None, cam_roll=None, stock=None, format=None, crop=None, protect=None, customKeys=None, \
+    nimURL=None, apiUser=None, apiKey=None ) :
     '''
     Updates an existing shot based on the shotID.
 
@@ -1424,10 +2171,10 @@ def update_shot( shotID=None, shotStatusID=None, shotStatus=None, description=No
     if protect is not None : params['protect'] = protect
     if customKeys is not None : params['customKeys'] = json.dumps(customKeys)
 
-    result = connect( method='get', params=params )
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
     return result
 
-def delete_shot( shotID=None) :
+def delete_shot( shotID=None, nimURL=None, apiUser=None, apiKey=None ) :
     '''
     Deletes a shot based on shotID.
 
@@ -1441,10 +2188,10 @@ def delete_shot( shotID=None) :
     
     if shotID is not None : params['shotID'] = shotID
 
-    result = connect( method='get', params=params )
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
     return result
 
-def upload_shotIcon( shotID=None, img=None, nimURL=None, apiKey=None ) :
+def upload_shotIcon( shotID=None, img=None, nimURL=None, apiUser=None, apiKey=None ) :
     'Upload shot icon'
     params = {}
     params["q"] = "uploadShotIcon"
@@ -1466,27 +2213,40 @@ def upload_shotIcon( shotID=None, img=None, nimURL=None, apiKey=None ) :
         return result
 
     if img is not None :
-        result = upload(params=params, nimURL=nimURL, apiKey=apiKey)
+        result = upload(params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey)
     else :
-        result = connect( method='get', params=params, nimURL=nimURL, apiKey=apiKey )
+        result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
 
     return result
 
-def get_shotInfo( shotID=None ) :
+def get_shotInfo( shotID=None, nimURL=None, apiUser=None, apiKey=None ) :
     'Retrieves information for a given shot'
-    shotInfo=get( {'q': 'getShotInfo', 'ID': shotID} )
-    return shotInfo
+    params = {}
+    params["q"] = "getShotInfo"
+    if shotID is not None : params['ID'] = shotID
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result 
 
-def get_shotIcon( shotID=None ) :
+def get_shotIcon( shotID=None, nimURL=None, apiUser=None, apiKey=None ) :
     'Retrieves information for a given shot'
-    shotIcon=get( {'q': 'getShotIcon', 'ID': shotID} )
-    return shotIcon
+    params = {}
+    params["q"] = "getShotIcon"
+    if shotID is not None : params['ID'] = shotID
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result 
 
+def get_shotStatuses( nimURL=None, apiUser=None, apiKey=None ) :
+    'Retrieves the list of available shot statuses.'
+    result=False
+    params = {'q': 'getShotStatuses'}
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
 
 #  Tasks  #
 
 #  get_tasks() DEPRECATED in 2.9 in favor of get_taskTypes() to match REST API
-def get_tasks( app='all', userType='artist', assetID=None, shotID=None, onlyWithFiles=None ) :
+def get_tasks( app='all', userType='artist', assetID=None, shotID=None, onlyWithFiles=None, \
+               nimURL=None, apiUser=None, apiKey=None ) :
     '''
     Retrieves the dictionary of available tasks types.
 
@@ -1522,10 +2282,11 @@ def get_tasks( app='all', userType='artist', assetID=None, shotID=None, onlyWith
         else : onlyWithFiles = 0
         params['onlyWithFiles'] = onlyWithFiles
 
-    result = connect( method='get', params=params )
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
     return result
 
-def get_taskTypes( app='all', userType='artist', assetID=None, shotID=None, onlyWithFiles=None, pub=None ) :
+def get_taskTypes( app='all', userType='artist', assetID=None, shotID=None, onlyWithFiles=None, pub=None, \
+                   nimURL=None, apiUser=None, apiKey=None ) :
     '''
     Retrieves the dictionary of available tasks types.
 
@@ -1565,11 +2326,12 @@ def get_taskTypes( app='all', userType='artist', assetID=None, shotID=None, only
         else : pub = 0
         params['pub'] = pub
 
-    result = connect( method='get', params=params )
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
     return result
 
 def add_task( assetID=None, shotID=None, taskTypeID=None, taskTypeName=None, userID=None, username=None, \
-    taskStatusID=None, taskStatus=None, description=None, estimatedHours=None, startDate=None, endDate=None, customKeys=None ) :
+    taskStatusID=None, taskStatus=None, description=None, estimatedHours=None, startDate=None, endDate=None, customKeys=None, \
+    nimURL=None, apiUser=None, apiKey=None ) :
     '''
     Adds a new task to an asset or shot.
 
@@ -1620,11 +2382,12 @@ def add_task( assetID=None, shotID=None, taskTypeID=None, taskTypeName=None, use
     if endDate is not None : params['endDate'] = endDate
     if customKeys is not None : params['customKeys'] = json.dumps(customKeys)
 
-    result = connect( method='get', params=params )
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
     return result
 
 def update_task( taskID=None, taskTypeID=None, taskTypeName=None, userID=None, username=None, \
-    taskStatusID=None, taskStatus=None, description=None, estimatedHours=None, startDate=None, endDate=None, customKeys=None) :
+    taskStatusID=None, taskStatus=None, description=None, estimatedHours=None, startDate=None, endDate=None, customKeys=None, \
+    nimURL=None, apiUser=None, apiKey=None ) :
     '''
     Updates an existing task based on taskID.
 
@@ -1669,10 +2432,10 @@ def update_task( taskID=None, taskTypeID=None, taskTypeName=None, userID=None, u
     if endDate is not None : params['endDate'] = endDate
     if customKeys is not None : params['customKeys'] = json.dumps(customKeys)
 
-    result = connect( method='get', params=params )
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
     return result
 
-def delete_task( taskID=None) :
+def delete_task( taskID=None, nimURL=None, apiUser=None, apiKey=None) :
     '''
     Deletes a task based on taskID.
 
@@ -1683,13 +2446,11 @@ def delete_task( taskID=None) :
 
     '''
     params = {'q': 'deleteTask'}
-    
     if taskID is not None : params['taskID'] = taskID
-
-    result = connect( method='get', params=params )
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
     return result
 
-def get_taskInfo( ID=None, itemClass=None, itemID=None ) :
+def get_taskInfo( ID=None, itemClass=None, itemID=None, nimURL=None, apiUser=None, apiKey=None ) :
     'Retrieves a dictionary of task information for a given asset or shot item from the API'
 
     params = {'q': 'getTaskInfo'}
@@ -1697,9 +2458,15 @@ def get_taskInfo( ID=None, itemClass=None, itemID=None ) :
     if itemClass is not None : params['class'] = itemClass
     if itemID is not None : params['itemID'] = itemID
 
-    result = connect( method='get', params=params )
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
     return result
 
+def get_taskStatuses( nimURL=None, apiUser=None, apiKey=None ) :
+    'Retrieves the list of available task statuses.'
+    result=False
+    params = {'q': 'getTaskStatuses'}
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
 
 #  Files  #
 
@@ -1900,7 +2667,8 @@ def to_filePath( nim=None, padding=2, pub=False ) :
         return False
 
 
-def get_bases( shotID=None, assetID=None, showID=None, task='', taskType=None, taskID=None, taskTypeID=None, pub=False ) :
+def get_bases( shotID=None, assetID=None, showID=None, task='', taskType=None, taskID=None, taskTypeID=None, pub=False, \
+               nimURL=None, apiUser=None, apiKey=None ) :
     '''
     Retrieves the dictionary of basenames for a show, shot or asset.
 
@@ -1921,7 +2689,7 @@ def get_bases( shotID=None, assetID=None, showID=None, task='', taskType=None, t
         dictionary
     '''
 
-    # Alternative variable name entries for clairity
+    # Alternative variable name entries for clarity
     if taskType is not None : task = taskType
     if taskTypeID is not None : taskID = taskTypeID
 
@@ -1935,23 +2703,26 @@ def get_bases( shotID=None, assetID=None, showID=None, task='', taskType=None, t
         ID=showID
         _type='SHOW'
 
-    if not pub :
-        if task and not taskID :
-            basenameDict=get( {'q': 'getBasenames', 'ID': str(ID), 'class': _type, 'type': task.upper()} )
-        elif not task and taskID :
-            basenameDict=get( {'q': 'getBasenames', 'ID': str(ID), 'class': _type, 'task_type_ID': taskID} )
-        else :
-            basenameDict=get( {'q': 'getBasenames', 'ID': str(ID), 'class': _type} )
-    elif pub :
-        if task and not taskID :
-            basenameDict=get( {'q': 'getBasenameAllPub', 'ID': str(ID), 'class': _type, 'type': task.upper()} )
-        elif not task and taskID :
-            basenameDict=get( {'q': 'getBasenameAllPub', 'ID': str(ID), 'class': _type, 'task_type_ID': taskID} )
-        else :
-            basenameDict=get( {'q': 'getBasenameAllPub', 'ID': str(ID), 'class': _type} )
-    return basenameDict
+    params = {}
 
-def get_basesPub( shotID=None, assetID=None, basename='', username=None ) :
+    if not pub :
+        params["q"] = "getBasenames"
+        if ID is not None : params['ID'] = ID
+    elif pub :
+        params["q"] = "getBasenameAllPub"
+        if ID is not None : params['itemID'] = ID
+
+    if _type is not None : params['class'] = _type
+
+    if task and not taskID :
+        if task.upper() is not None : params['type'] = task.upper()
+    elif not task and taskID :
+        if taskID is not None : params['task_type_ID'] = taskID
+
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
+
+def get_basesPub( shotID=None, assetID=None, basename='', username=None, nimURL=None, apiUser=None, apiKey=None ) :
     '''
     Retrieves the dictionary of the published file for a given basename.
     The optional username is used to return the date information in the users seleted timezone.
@@ -1981,13 +2752,14 @@ def get_basesPub( shotID=None, assetID=None, basename='', username=None ) :
     if basename is not None : params['basename'] = basename
     if username is not None : params['username'] = username
 
-    result = connect( method='get', params=params )
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
     return result
 
-def get_basesAllPub( shotID=None, assetID=None, task=None, taskID=None, username=None ) :
+def get_basesAllPub( shotID=None, assetID=None, task=None, taskID=None, username=None, \
+                     nimURL=None, apiUser=None, apiKey=None ) :
     '''
     Retrieves the dictionary of all available published basenames for a given asset or shot.
-    The optional username is used to return the date information in the users seleted timezone.
+    The optional username is used to return the date information in the users selected timezone.
 
         Parameters              Type
 
@@ -1999,8 +2771,6 @@ def get_basesAllPub( shotID=None, assetID=None, task=None, taskID=None, username
         task OR taskID
             task                string
             taskID              integer
-
-        basename                string
 
     Optional:
         username                string
@@ -2020,10 +2790,11 @@ def get_basesAllPub( shotID=None, assetID=None, task=None, taskID=None, username
     if taskID is not None: params['task_type_ID'] = taskID
     if username is not None : params['username'] = username
 
-    result = connect( method='get', params=params )
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
     return result
 
-def get_baseInfo( shotID=None, assetID=None, showID=None, taskTypeID=None ) :
+def get_baseInfo( shotID=None, assetID=None, showID=None, taskTypeID=None, \
+                  nimURL=None, apiUser=None, apiKey=None ) :
     '''
     Retrieves all basenames and their max version for given asset, shot, or show based on ID
     
@@ -2054,10 +2825,11 @@ def get_baseInfo( shotID=None, assetID=None, showID=None, taskTypeID=None ) :
 
     if taskTypeID is not None : params['task_type_ID'] = taskTypeID
 
-    result = connect( method='get', params=params )
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
     return result
 
-def get_baseVer( shotID=None, assetID=None, showID=None, basename='' ) :
+def get_baseVer( shotID=None, assetID=None, showID=None, basename='', \
+                 nimURL=None, apiUser=None, apiKey=None ) :
     'Retrieves the highest version number for a given basename'
     '''
     if shotID and not assetID :
@@ -2077,11 +2849,17 @@ def get_baseVer( shotID=None, assetID=None, showID=None, basename='' ) :
         ID=showID
         _type='SHOW'
 
-    basenameDict=get( {'q': 'getBasenameVersion', 'class': _type, 'itemID': ID, 'basename': basename} )
-    return basenameDict
+    params = {}
+    params["q"] = "getBasenameVersion"
+    if _type is not None : params['class'] = _type
+    if ID is not None : params['itemID'] = ID
+    if basename is not None : params['basename'] = basename
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result 
 
 
-def get_vers( shotID=None, assetID=None, showID=None, basename=None, pub=False, username=None ) :
+def get_vers( shotID=None, assetID=None, showID=None, basename=None, pub=False, username=None, \
+              nimURL=None, apiUser=None, apiKey=None ) :
     '''
     Retrieves the dictionary of available versions from the API.
     The optional username is used to return the date information in the users selected timezone.
@@ -2124,10 +2902,10 @@ def get_vers( shotID=None, assetID=None, showID=None, basename=None, pub=False, 
 
     if username is not None : params['username'] = username
 
-    result = connect( method='get', params=params )
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
     return result
 
-def get_verInfo( verID=None, username=None ) :
+def get_verInfo( verID=None, username=None, nimURL=None, apiUser=None, apiKey=None ) :
     '''
     Retrieves the information for a given version ID.
     The optional username is used to return the date information in the users selected timezone.
@@ -2147,7 +2925,7 @@ def get_verInfo( verID=None, username=None ) :
     if verID is not None : params['ID'] = verID
     if username is not None : params['username'] = username
 
-    result = connect( method='get', params=params )
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
     return result
 
 def versionUp( nim=None, padding=2, selected=False, win_launch=False, pub=False, symLink=True ) :
@@ -2425,7 +3203,8 @@ def versionUp( nim=None, padding=2, selected=False, win_launch=False, pub=False,
         return False
 
 
-def clear_pubFlags( shotID=None, assetID=None, showID=None, fileID=None, basename='' ) :
+def clear_pubFlags( shotID=None, assetID=None, showID=None, fileID=None, basename='', \
+                    nimURL=None, apiUser=None, apiKey=None ) :
     'Run before publishing to clear previous basename published flags'
     P.info('Clearing Published Flags')
     if shotID :
@@ -2444,21 +3223,31 @@ def clear_pubFlags( shotID=None, assetID=None, showID=None, fileID=None, basenam
         P.error ('clear_pubFlags: Missing ID')
         return False
 
-    pubFlags=get( {'q': 'clearPubFlags', 'class': _type, 'itemID': ID, 'basename': basename} )
-    return pubFlags
+    params = {}
+    params["q"] = "clearPubFlags"
+    if _type is not None : params['class'] = _type
+    if ID is not None : params['itemID'] = ID
+    if basename is not None : params['basename'] = basename
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result 
 
-def publish_symLink( fileID=None, elementID=None, forceLink=1 ) :
+def publish_symLink( fileID=None, elementID=None, forceLink=1, \
+                     nimURL=None, apiUser=None, apiKey=None ) :
     '''Creates the symbolic link for a published file'''
-    result = ''
+    params = {}
+    params["q"] = "publishSymlink"
     if fileID :
         P.info('Creating SymLink for Published File')
-        result=get( {'q': 'publishSymlink', 'fileID': str(fileID), 'forceLink': str(forceLink) } )
+        if fileID is not None : params['fileID'] = fileID
+        if forceLink is not None : params['forceLink'] = forceLink
     elif elementID :
         P.info('Creating SymLink for Published Element')
-        result=get( {'q': 'publishSymlink', 'elementID': str(elementID), 'forceLink': str(forceLink) } )
+        if elementID is not None : params['elementID'] = elementID
+        if forceLink is not None : params['forceLink'] = forceLink
     else :
-        P.error( 'Sorry!  Problem retrieving Item ID.' )
+        P.error( 'Missing Item ID.' )
         return False
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
     return result
 
 
@@ -2617,7 +3406,8 @@ def add_file( nim=None, filePath='', comment='', pub=False ) :
     return True
 
 def save_file( parent='SHOW', parentID=0, task_type_ID=0, task_folder='', userID=0, basename='', filename='', \
-    path='', ext='', version='', comment='', serverID=0, pub=False, forceLink=1, work=True, metadata=None, customKeys=None ) :
+    path='', ext=None, version=None, comment=None, serverID=0, pub=False, forceLink=1, work=True, metadata=None, customKeys=None, \
+    nimURL=None, apiUser=None, apiKey=None) :
     '''General Purpose Save File Function that Adds a File to the NIM Database with brute force data.
 
        Required Parameters:
@@ -2668,15 +3458,15 @@ def save_file( parent='SHOW', parentID=0, task_type_ID=0, task_folder='', userID
         if metadata is not None : params['metadata'] = metadata
         if customKeys is not None : params['customKeys'] = json.dumps(customKeys)
 
-        result = connect( method='get', params=params )
+        result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
 
     elif pub :
         if parent == "SHOW":
-            clear_pubFlags( showID=parentID, basename=basename )
+            clear_pubFlags( showID=parentID, basename=basename, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
         elif parent == 'SHOT':
-            clear_pubFlags( shotID=parentID, basename=basename )
+            clear_pubFlags( shotID=parentID, basename=basename, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
         elif parent == 'ASSET' :
-            clear_pubFlags( assetID=parentID, basename=basename )
+            clear_pubFlags( assetID=parentID, basename=basename, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
         else:
             P.error( 'A parent of proper type was not defined. Available options are SHOW, SHOT, & ASSET.' )
             return False
@@ -2710,7 +3500,7 @@ def save_file( parent='SHOW', parentID=0, task_type_ID=0, task_folder='', userID
         if metadata is not None : params['metadata'] = metadata
         if customKeys is not None : params['customKeys'] = json.dumps(customKeys)
 
-        result = connect( method='get', params=params )
+        result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
         
     if result['success'].lower() == 'false' :
         P.error( 'There was a problem writing to the NIM database.' )
@@ -2724,7 +3514,7 @@ def save_file( parent='SHOW', parentID=0, task_type_ID=0, task_folder='', userID
         if pub:
             ID = result['ID']
             #Create symlink for published files
-            pub_result = publish_symLink(fileID=ID, forceLink=forceLink)
+            pub_result = publish_symLink(fileID=ID, forceLink=forceLink, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey)
             P.error('pub_result: %s' % pub_result)
             if pub_result == True:
                 P.info('...Success')
@@ -2734,70 +3524,39 @@ def save_file( parent='SHOW', parentID=0, task_type_ID=0, task_folder='', userID
     return result
 
 def update_file( ID=None, task_type_ID=None, task_folder=None, userID=None, basename=None, filename=None, path=None, ext=None, \
-    version=None, comment=None, serverID=None, pub=False, forceLink=None, work=None, metadata=None, customKeys=None ) :
+    version=None, comment=None, serverID=None, pub=None, forceLink=None, work=None, metadata=None, customKeys=None, \
+    nimURL=None, apiUser=None, apiKey=None ) :
     '''General Purpose Update File Function that Updates and existing File in the NIM Database'''
-    is_work = 0
-    if work:
-        is_work = 1
     
-    if not pub :
-        #result=get( {'q': 'updateFile', 'ID': str(ID),
-        #            'task_type_ID': str(task_type_ID), 'task_type_folder': task_folder,
-        #            'userID': str(userID), 'basename': basename, 'filename': filename,
-        #            'filepath': path, 'ext': ext, 'version': str(version), 'note': comment,
-        #            'serverID': str(serverID), 'metadata': metadata } )
-
-        params = {'q': 'updateFile'}
-
-        if ID is not None : params['ID'] = ID
-        if task_type_ID is not None : params['task_type_ID'] = task_type_ID
-        if task_folder is not None : params['task_type_folder'] = task_folder
-        if userID is not None : params['userID'] = userID
-        if basename is not None : params['basename'] = basename
-        if filename is not None : params['filename'] = filename
-        if path is not None : params['filepath'] = path
-        if ext is not None : params['ext'] = ext
-        if version is not None : params['version'] = version
-        if comment is not None : params['note'] = comment
-        if serverID is not None : params['serverID'] = serverID
-        if metadata is not None : params['metadata'] = metadata
-        if customKeys is not None : params['customKeys'] = json.dumps(customKeys)
-
-        result = connect( method='get', params=params )
-
-    elif pub :
-        P.info('')
-        clear_pubFlags( fileID=ID, basename=basename )
-
+    is_work = 1
+    if work is not None and work == False:
         is_work = 0
-        if work:
-            is_work = 1
+    
+    is_pub = 0
+    if pub is not None:
+        clear_pubFlags( fileID=ID, basename=basename, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+        if pub == True:
+            is_pub = 1
+    
+    params = {'q': 'updateFile'}
 
-        #result=get( {'q': 'updateFile', 'ID': str(ID),
-        #            'task_type_ID': str(task_type_ID), 'task_type_folder': task_folder,
-        #            'userID': str(userID), 'basename': basename, 'filename': filename,
-        #            'filepath': path, 'ext': ext, 'version': str(version), 'note': comment,
-        #            'serverID': str(serverID), 'isPub': 1, 'isWork': is_work, 'metadata': metadata } )
+    if ID is not None : params['ID'] = ID
+    if task_type_ID is not None : params['task_type_ID'] = task_type_ID
+    if task_folder is not None : params['task_type_folder'] = task_folder
+    if userID is not None : params['userID'] = userID
+    if basename is not None : params['basename'] = basename
+    if filename is not None : params['filename'] = filename
+    if path is not None : params['filepath'] = path
+    if ext is not None : params['ext'] = ext
+    if version is not None : params['version'] = version
+    if comment is not None : params['note'] = comment
+    if serverID is not None : params['serverID'] = serverID
+    if pub is not None : params['isPub'] = is_pub
+    if work is not None : params['isWork'] = is_work
+    if metadata is not None : params['metadata'] = metadata
+    if customKeys is not None : params['customKeys'] = json.dumps(customKeys)
 
-        params = {'q': 'updateFile'}
-
-        if ID is not None : params['ID'] = ID
-        if task_type_ID is not None : params['task_type_ID'] = task_type_ID
-        if task_folder is not None : params['task_type_folder'] = task_folder
-        if userID is not None : params['userID'] = userID
-        if basename is not None : params['basename'] = basename
-        if filename is not None : params['filename'] = filename
-        if path is not None : params['filepath'] = path
-        if ext is not None : params['ext'] = ext
-        if version is not None : params['version'] = version
-        if comment is not None : params['note'] = comment
-        if serverID is not None : params['serverID'] = serverID
-        params['isPub'] = 1
-        params['isWork'] = is_work
-        if metadata is not None : params['metadata'] = metadata
-        if customKeys is not None : params['customKeys'] = json.dumps(customKeys)
-
-        result = connect( method='get', params=params )
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
 
     if result['success'].lower() == 'false' :
         P.error( 'There was a problem writing to the NIM database.' )
@@ -2807,9 +3566,9 @@ def update_file( ID=None, task_type_ID=None, task_folder=None, userID=None, base
     else :
         P.info( 'NIM API updated existing file.' )
         P.info( '      File ID = %s' % result['ID'] )
-        if pub:
+        if pub == True:
             #Create symlink for published files
-            pub_result = publish_symLink(fileID=ID, forceLink=forceLink)
+            pub_result = publish_symLink(fileID=ID, forceLink=forceLink, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey)
             if pub_result == 'true':
                 P.info('...Success')
             else:
@@ -2817,7 +3576,8 @@ def update_file( ID=None, task_type_ID=None, task_folder=None, userID=None, base
                         Please check to make sure the file exists on disk.')
     return result
 
-def find_files( parent='shot', parentID=None, name='', path='', metadata=''):
+def find_files( parent='shot', parentID=None, name='', path='', metadata='', \
+                nimURL=None, apiUser=None, apiKey=None ):
     '''
     Finds files based on the passed parameters
     Returns an array of files found
@@ -2838,47 +3598,89 @@ def find_files( parent='shot', parentID=None, name='', path='', metadata=''):
     if path is not None : params['path'] = path
     if metadata is not None : params['metadata'] = metadata
 
-    result = connect( method='get', params=params )
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
     return result
 
 
 #  Elements  #
 
-def get_elementTypes():
+def get_elementTypes( nimURL=None, apiUser=None, apiKey=None ):
     'Retrieves a dictionary of global element types'
-    elementTypes=get( {'q': 'getElementTypes'} )
-    return elementTypes
+    params = {}
+    params["q"] = "getElementTypes"
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
 
-def get_elementType( ID=None):
+def get_elementType( ID=None, nimURL=None, apiUser=None, apiKey=None ):
     'Retrieves a dictionary of global element types'
-    elementType=get( {'q': 'getElementType', 'ID': ID} )
-    return elementType
+    params = {}
+    params["q"] = "getElementType"
+    if ID is not None : params['ID'] = ID
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
 
-def find_elements( name='', path='', jobID='', showID='', shotID='', assetID='', taskID='', renderID='', elementTypeID='', ext='', metadata='') :
+def find_elements( name=None, path=None, jobID=None, showID=None, shotID=None, assetID=None, \
+                   taskID=None, renderID=None, elementTypeID=None, ext=None, metadata=None, \
+                   nimURL=None, apiUser=None, apiKey=None ) :
     'Retrieves a dictionary of elements matching one of the included IDs plus name, path, elementTypeID, ext, or metadata'
-    elements=get( {'q': 'findElements', 'name': name, 'path': path, 'jobID': jobID, 'showID': showID, 'shotID': shotID, 'assetID': assetID, 'taskID': taskID, 'renderID': renderID, 'elementTypeID': elementTypeID, 'ext': ext, 'metadata': metadata} )
-    return elements
 
-def get_elements( parent='shot', parentID=None, elementTypeID=None, getLastElement=False, isPublished=False):
+    params = {}
+    params["q"] = "findElements"
+    if name is not None : params['name'] = name
+    if path is not None : params['path'] = path
+    if jobID is not None : params['jobID'] = jobID
+    if showID is not None : params['showID'] = showID
+    if shotID is not None : params['shotID'] = shotID
+    if assetID is not None : params['assetID'] = assetID
+    if taskID is not None : params['taskID'] = taskID
+    if renderID is not None : params['renderID'] = renderID
+    if elementTypeID is not None : params['elementTypeID'] = elementTypeID
+    if ext is not None : params['ext'] = ext
+    if metadata is not None : params['metadata'] = metadata
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
+
+def get_elements( parent='shot', parentID=None, elementTypeID=None, getLastElement=False, isPublished=False, \
+                  nimURL=None, apiUser=None, apiKey=None ):
     ''' Retrieves a dictionary of elements for a particular type given parentID.
         If no elementTypeID is given will return elements for all types.
         parent is the parent of the element.  acceptable values are shot, asset, task, render.
         getLastElement will return only the last published element.
         isPublished will return only the published elements.'''
-    publishedElements=get( {'q': 'getElements', 'parent': parent, 'parentID': parentID, 'elementTypeID': elementTypeID, 'getLastElement': getLastElement, 'isPublished': isPublished} )
-    return publishedElements
+
+    params = {}
+    params["q"] = "getElements"
+    if parent is not None : params['parent'] = parent
+    if parentID is not None : params['parentID'] = parentID
+    if elementTypeID is not None : params['elementTypeID'] = elementTypeID
+    if getLastElement is not None : params['getLastElement'] = getLastElement
+    if isPublished is not None : params['isPublished'] = isPublished
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result 
 
 def add_element( parent='shot', parentID=None, userID=None, typeID='', path='', name='', startFrame=None, endFrame=None, \
-    handles=None, isPublished=False, metadata='', nimURL=None, apiKey=None ) :
+    handles=None, isPublished=False, metadata='', nimURL=None, apiUser=None, apiKey=None ) :
     'Adds an element to an asset, shot, task, or render'
-    # nimURL and apiKey are optional for Render API Key overrride
-    params = {'q': 'addElement', 'parent': parent, 'userID':userID, 'typeID': typeID, 'parentID': parentID, 'path': path, \
-                'name': name, 'startFrame': startFrame, 'endFrame': endFrame, 'handles': handles, 'isPublished': isPublished, 'metadata': metadata}
-    result = connect( method='get', params=params, nimURL=nimURL, apiKey=apiKey )
+    # nimURL and apiKey are optional for Render API Key override
+    params = {}
+    params["q"] = "addElement"
+    if parent is not None : params['parent'] = parent
+    if parentID is not None : params['parentID'] = parentID
+    if userID is not None : params['userID'] = userID
+    if typeID is not None : params['typeID'] = typeID
+    if path is not None : params['path'] = path
+    if name is not None : params['name'] = name
+    if startFrame is not None : params['startFrame'] = startFrame
+    if endFrame is not None : params['endFrame'] = endFrame
+    if handles is not None : params['handles'] = handles
+    if isPublished is not None : params['isPublished'] = isPublished
+    if metadata is not None : params['metadata'] = metadata
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
     return result
 
 def update_element(ID=None, userID=None, jobID=None, assetID=None, shotID=None, taskID=None, renderID=None, elementTypeID=None, \
-    name=None, path=None, startFrame=None, endFrame=None, handles=None, isPublished=None, metadata=None, nimURL=None, apiKey=None ) :
+    name=None, path=None, startFrame=None, endFrame=None, handles=None, isPublished=None, metadata=None, \
+    nimURL=None, apiUser=None, apiKey=None ) :
     'Updates an existing element by element ID'
     # nimURL and apiKey are optional for Render API Key override
     params = {'q': 'updateElement'}
@@ -2899,17 +3701,16 @@ def update_element(ID=None, userID=None, jobID=None, assetID=None, shotID=None, 
     if isPublished is not None : params['isPublished'] = isPublished
     if metadata is not None : params['metadata'] = metadata
 
-    result = connect( method='get', params=params, nimURL=nimURL, apiKey=apiKey )
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
     return result
 
-def delete_element(ID=None, nimURL=None, apiKey=None):
+def delete_element(ID=None, nimURL=None, apiUser=None, apiKey=None):
     'Deletes an existing element by element ID'
     # nimURL and apiKey are optional for Render API Key override
 
     params = {'q': 'deleteElement'}
     if ID is not None : params['ID'] = ID
-
-    result = connect( method='get', params=params, nimURL=nimURL, apiKey=apiKey )
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
     return result
 
 
@@ -2937,7 +3738,7 @@ def to_renPath( nim=None ) :
 def add_render( jobID=0, itemType='shot', taskID=0, fileID=0, \
     renderKey='', renderName='', renderType='', renderComment='', \
     outputDirs=None, outputFiles=None, elementTypeID=0, start_datetime=None, end_datetime=None, \
-    avgTime='', totalTime='', frame=0, nimURL=None, apiKey=None ) :
+    avgTime='', totalTime='', frame=0, nimURL=None, apiUser=None, apiKey=None ) :
     'Add a render to a task'
     # nimURL and apiKey are optional for Render API Key overrride
     params = {'q': 'addRender', 'jobID': str(jobID), 'ID': str(itemType), 'taskID': str(taskID), 'fileID': str(fileID), \
@@ -2945,10 +3746,10 @@ def add_render( jobID=0, itemType='shot', taskID=0, fileID=0, \
                 'outputDirs':str(outputDirs), 'outputFiles':str(outputFiles), 'elementTypeID':str(elementTypeID), \
                 'start_datetime':str(start_datetime), 'end_datetime':str(end_datetime), \
                 'avgTime':str(avgTime), 'totalTime':str(totalTime), 'frames':str(frame) }
-    result = connect( method='get', params=params, nimURL=nimURL, apiKey=apiKey )
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
     return result
 
-def upload_renderIcon( renderID=None, renderKey='', img=None, nimURL=None, apiKey=None ) :
+def upload_renderIcon( renderID=None, renderKey='', img=None, nimURL=None, apiUser=None, apiKey=None ) :
     'Upload Render Icon'
     # nimURL and apiKey are optional for Render API Key overrride
     # 2 required fields:
@@ -2976,30 +3777,49 @@ def upload_renderIcon( renderID=None, renderKey='', img=None, nimURL=None, apiKe
         return result
 
     if img is not None :
-        result = upload(params=params, nimURL=nimURL, apiKey=apiKey)
+        result = upload(params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey)
     else :
-        result = connect( method='get', params=params, nimURL=nimURL, apiKey=apiKey )
+        result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
 
     return result
 
-def get_lastShotRender( shotID=None ):
+def get_lastShotRender( shotID=None, nimURL=None, apiUser=None, apiKey=None ):
     'Retrieves the last render added to the shot'
-    lastRender=get( {'q': 'getLastShotRender', 'ID': shotID} )
-    return lastRender
+
+    params = {}
+    params["q"] = "getLastShotRender"
+    if shotID is not None : params['ID'] = shotID
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result 
 
 
 #  Review  #
 
-def get_reviewItemTypes():
+def get_reviewItemTypes( nimURL=None, apiUser=None, apiKey=None ):
     'Retrieves a dictionary of global review item types'
-    reviewItemTypes=get( {'q': 'getReviewItemTypes'} )
-    return reviewItemTypes
+    params = {}
+    params["q"] = "getReviewItemTypes"
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
 
-def get_taskDailies( taskID=None ) :
+def get_taskReviewItems( taskID=None, nimURL=None, apiUser=None, apiKey=None ) :
+    'Retrieves the dictionary of review items for the specified taskID from the API'
+
+    params = {}
+    params["q"] = "getTaskDailies"
+    if taskID is not None : params['taskID'] = taskID
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result 
+
+# DEPRECATED - get_taskDailies() #
+def get_taskDailies( taskID=None, nimURL=None, apiUser=None, apiKey=None ) :
     'Retrieves the dictionary of dailies for the specified taskID from the API'
-    #tasks=get( {'q': 'getTaskTypes', 'type': 'artist'} )
-    dailies=get( {'q': 'getTaskDailies', 'taskID': taskID} )
-    return dailies
+
+    params = {}
+    params["q"] = "getTaskDailies"
+    if taskID is not None : params['taskID'] = taskID
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result  
 
 # DEPRECATED - upload_edit() #
 def upload_edit( showID=None, path=None, nimURL=None, apiKey=None ) :
@@ -3036,7 +3856,7 @@ def upload_dailies( taskID=None, renderID=None, renderKey=None, itemID=None, ite
     'Upload Dailies - 2 required fields: (taskID, renderID, or renderKey) and path to movie'
     # nimURL and apiKey are optional for Render API Key overrride
     #
-    #   Required Fields:
+    #   Required:
     #      itemID
     #      itemType - options user, job, asset, show, shot, task, render
     #               - after consolidation group, object
@@ -3125,14 +3945,18 @@ def upload_dailiesNote( dailiesID=None, name='', img=None, note='', frame=0, tim
 
 
 # Review Items #
-def get_reviewItem( ID=None ) :
+def get_reviewItem( ID=None, nimURL=None, apiUser=None, apiKey=None ) :
     'Retrieves the dictionary of details for the specified review item ID from the API'
-    reviewItem=get( {'q': 'getReviewItem', 'ID': ID} )
-    return reviewItem
+
+    params = {}
+    params["q"] = "getReviewItem"
+    if ID is not None : params['ID'] = ID
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result 
 
 def get_reviewItems( parentType=None, parentID=None, allChildren=None, name=None, description=None, date=None, type=None, typeID=None,
-                     status=None, statusID=None, keyword=None, keywordID=None, nimURL=None, apiKey=None ) :
-    'Retrives a dictionary of review items matching the search criteria - 2 required fields: parentType, parentID'
+                     status=None, statusID=None, keyword=None, keywordID=None, nimURL=None, apiUser=None, apiKey=None ) :
+    'Retrieves a dictionary of review items matching the search criteria - 2 required fields: parentType, parentID'
     #       Parameters          Type            Values                  Note
     # Required Parameters:
     #   parentType              string                                  user, job, dev, asset, show, shot, task, render
@@ -3171,20 +3995,24 @@ def get_reviewItems( parentType=None, parentID=None, allChildren=None, name=None
     if keyword is not None : params['keyword'] = keyword
     if keywordID is not None : params['keywordID'] = keywordID
 
-    result = connect(method='get', params=params, nimURL=nimURL, apiKey=apiKey)
+    result = connect(method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey)
     return result
 
-def get_reviewItemNotes( ID=None ) :
+def get_reviewItemNotes( ID=None, nimURL=None, apiUser=None, apiKey=None ) :
     'Retrieves the dictionary of notes for the specified review item ID from the API'
-    reviewNotes=get( {'q': 'getReviewNotes', 'ID': ID} )
-    return reviewNotes
+
+    params = {}
+    params["q"] = "getReviewNotes"
+    if ID is not None : params['ID'] = ID
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
 
 def upload_reviewItem( taskID=None, renderID=None, renderKey=None, itemID=None, itemType=None, path=None, submit=None, \
     name=None, description=None, reviewItemTypeID=0, reviewItemStatusID=0, keywords=None, username=None, userID=None, \
-    nimURL=None, apiKey=None ) :
-    # nimURL and apiKey are optional for Render API Key overrride
+    nimURL=None, apiUser=None, apiKey=None ) :
+    # nimURL and apiKey are optional for Render API Key override
     #
-    #   Required Fields:
+    #   Required:
     #      itemID       integer         the ID of the parent to attach the review item
     #      itemType     string          options user, job, asset, show, shot, task, render
     #      path         string          the path of the item to upload
@@ -3202,7 +4030,7 @@ def upload_reviewItem( taskID=None, renderID=None, renderKey=None, itemID=None, 
     #
     # # Optional
     #
-    # submit is optional to mark uploaded dailies for review - value is either: 0  or 1 (DEPRICATED)
+    # submit is optional to mark uploaded dailies for review - value is either: 0  or 1 (DEPRECATED)
     # name                string      The NIM name for the review item - if empty will use filename
     # description         string      Description for the review item
     # reviewItemTypeID    integer     The review item type ID
@@ -3250,16 +4078,17 @@ def upload_reviewItem( taskID=None, renderID=None, renderKey=None, itemID=None, 
     if userID is not None : params['userID'] = userID
 
     if path is not None :
-        result = upload(params=params, nimURL=nimURL, apiKey=apiKey)
+        result = upload(params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey)
     else :
-        result = connect( method='get', params=params, nimURL=nimURL, apiKey=apiKey )
+        result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
     return result
 
-def upload_reviewNote( ID=None, name='', img=None, note='', frame=0, time=-1, userID=None, nimURL=None, apiKey=None ) :
+def upload_reviewNote( ID=None, name='', img=None, note='', frame=0, time=-1, userID=None, \
+                       nimURL=None, apiUser=None, apiKey=None ) :
     'Upload reviewNote'
     # 
     #
-    #   Required Fields:
+    #   Required:
     #       ID                  integer     The ID of the review item to attach the note
     #
     #   Optional Fields: 
@@ -3301,16 +4130,24 @@ def upload_reviewNote( ID=None, name='', img=None, note='', frame=0, time=-1, us
     params["userID"] = userID
 
     if img is not None :
-        result = upload(params=params, nimURL=nimURL, apiKey=apiKey)
+        result = upload(params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey)
     else :
-        result = connect( method='get', params=params, nimURL=nimURL, apiKey=apiKey )
+        result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
 
     return result
 
+def get_reviewStatuses( nimURL=None, apiUser=None, apiKey=None ) :
+    'Retrieves the list of available review statuses.'
+    result=False
+    params = {'q': 'getReviewStatuses'}
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
 
 #  Timecards  #
 
-def get_timecards( startDate=None, endDate=None, jobID=None, userID=None, username=None, taskTypeID=None, taskType=None, taskID=None, locationID=None, location=None ):
+def get_timecards( startDate=None, endDate=None, jobID=None, userID=None, username=None, \
+                   taskTypeID=None, taskType=None, taskID=None, locationID=None, location=None, \
+                   nimURL=None, apiUser=None, apiKey=None ):
     '''
     Retrieves a timecard, or array of timecards based on search criteria
 
@@ -3345,12 +4182,13 @@ def get_timecards( startDate=None, endDate=None, jobID=None, userID=None, userna
     if locationID is not None : params['locationID'] = locationID
     if location is not None : params['location'] = location
 
-    result = connect( method='get', params=params )
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
     return result
 
 def add_timecard( date=None, userID=None, username=None, jobID=None, taskTypeID=None, taskType=None, taskID=None, \
     startTime=None, endTime=None, hrs=None, breakHrs=None, ot=None, dt=None, \
-    locationID=None, location=None, description=None, customKeys=None) :
+    locationID=None, location=None, description=None, customKeys=None, \
+    nimURL=None, apiUser=None, apiKey=None ) :
     '''
     Adds a new timecard
     
@@ -3402,12 +4240,13 @@ def add_timecard( date=None, userID=None, username=None, jobID=None, taskTypeID=
     if description is not None : params['description'] = description
     if customKeys is not None : params['customKeys'] = json.dumps(customKeys)
 
-    result = connect( method='get', params=params )
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
     return result
 
 def update_timecard( timecardID=None, date=None, userID=None, username=None, jobID=None, taskTypeID=None, taskType=None, taskID=None, \
     startTime=None, endTime=None, hrs=None, breakHrs=None, ot=None, dt=None, \
-    locationID=None, location=None, description=None, customKeys=None):
+    locationID=None, location=None, description=None, customKeys=None, \
+    nimURL=None, apiUser=None, apiKey=None ):
     '''
     Updates an existing timecard
 
@@ -3461,10 +4300,10 @@ def update_timecard( timecardID=None, date=None, userID=None, username=None, job
     if description is not None : params['description'] = description
     if customKeys is not None : params['customKeys'] = json.dumps(customKeys)
 
-    result = connect( method='get', params=params )
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
     return result
 
-def delete_timecard( timecardID=None ) :
+def delete_timecard( timecardID=None, nimURL=None, apiUser=None, apiKey=None ) :
     '''
     Deletes an existing timecard
 
@@ -3476,10 +4315,10 @@ def delete_timecard( timecardID=None ) :
 
     if timecardID is not None : params['timecardID'] = timecardID
 
-    result = connect( method='get', params=params )
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
     return result
 
-def get_timecardInfo( timecardID=None ) :
+def get_timecardInfo( timecardID=None, nimURL=None, apiUser=None, apiKey=None ) :
     '''
     Retrieves information for an existing timecard
 
@@ -3491,7 +4330,7 @@ def get_timecardInfo( timecardID=None ) :
 
     if timecardID is not None : params['timecardID'] = timecardID
 
-    result = connect( method='get', params=params )
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
     return result
 
 

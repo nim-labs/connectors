@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: nim_version.py
-# Version:  v6.1.16.240801
+# Version:  v7.0.0
 #
 # Copyright (c) 2014-2024 NIM Labs LLC
 # All rights reserved.
@@ -12,4 +12,4 @@
 # otherwise accompanies this software in either electronic or hard copy form.
 # *****************************************************************************
 
-version='v6.1.16'
+version='v7.0.0'

@@ -313,7 +313,7 @@ def os_filePath( path='', nim=None, serverID=None ) :
         P.error('Unable to convert filepath by platform!')
         return False
     
-    return filePath
+
 
 #DEPRICATED
 def task_toAbbrev( task='' ) :
