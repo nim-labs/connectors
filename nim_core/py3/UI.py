@@ -3059,18 +3059,11 @@ class GUI(QtGui.QMainWindow) :
             return False
         
         #  Reference the file :
-        if self.checkBox.checkState() :
-            #GROUPED
-            pass
-        else :
-            #NOT GROUPED
-            result = maxRT.execute("xrefs.addNewXRefFile \""+filePath.replace('\\','/')+"\"")
-            if result:
-                P.info("File Referenced")
-            else:
-                P.error("Filepath: %s" % filePath)
-                print(value)
-            pass
+        result = maxRT.execute("xrefs.addNewXRefFile \""+filePath.replace('\\','/')+"\"")
+        if result:
+            P.info("File Referenced: %s" % filePath)
+        else:
+            P.error("Error Referencing File: %s" % filePath)
 
         #  Close window upon completion :
         self.close()
