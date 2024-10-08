@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: UI.py
-# Version:  v6.1.16.240801
+# Version:  v7.0.2.241007
 #
 # Copyright (c) 2014-2024 NIM Labs LLC
 # All rights reserved.
@@ -3059,18 +3059,11 @@ class GUI(QtGui.QMainWindow) :
             return False
         
         #  Reference the file :
-        if self.checkBox.checkState() :
-            #GROUPED
-            pass
-        else :
-            #NOT GROUPED
-            result = maxRT.execute("xrefs.addNewXRefFile \""+filePath.replace('\\','/')+"\"")
-            if result:
-                P.info("File Referenced")
-            else:
-                P.error("Filepath: %s" % filePath)
-                print(value)
-            pass
+        result = maxRT.execute("xrefs.addNewXRefFile \""+filePath.replace('\\','/')+"\"")
+        if result:
+            P.info("File Referenced: %s" % filePath)
+        else:
+            P.error("Error Referencing File: %s" % filePath)
 
         #  Close window upon completion :
         self.close()
