@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: nim_3dsmax.py
-# Version:  v6.1.16.240801
+# Version:  v7.0.3.241009
 #
 # Copyright (c) 2014-2024 NIM Labs LLC
 # All rights reserved.
@@ -46,391 +46,402 @@ def get_mainWin() :
     maxWin = rt.windows.getMAXHWND()
     return maxWin
 
-def set_vars( nim=None ) :
+def set_vars(nim=None):
     'Add custom attributes to 3dsMax Globals'
-    
-    P.info( '\n3dsMax - Setting Globals Attributes...' )
+
+    # Migrate legacy NIM attributes to nimSceneData root location
+    migrate_root_vars()
+
+    P.info('\n3dsMax - Setting Globals Attributes...')
 
     makeGlobalAttrs = False
     try:
-        #TEST FOR EXISTING NIM DATA
-        rt.execute("rootNodeDataCA.nim_user")
-    except:   
+        # TEST FOR EXISTING NIM DATA
+        rt.execute("rootnode.custAttributes[\"nimSceneData\"].nim_user")
+    except:
         makeGlobalAttrs = True
-    
 
-    if makeGlobalAttrs :
+    if makeGlobalAttrs:
         P.info("NIM data not found...\nAdding Global Attributes")
-
-        # clear custom attributes
-        nimAttrDel = 'z=1 \n\
-                        while z !=undefined do \n\
-                        ( \n\
-                            x = rootnode \n\
-                            z = custattributes.getdef x 1 \n\
-                            custAttributes.delete x z \n\
-                        )'
-        try :
-            rt.execute(nimAttrDel)
-            P.info("Global attributes cleared")
-        except :
-            P.error("Failed to clear global attributes")
-            return
-
-        # add custom attributes
-        nimAttrCmd = 'sceneDataCADef = attributes sceneDataCADef version:1 attribID:#(0x4fb91dfa, 0x73284f9e) \n\
-                        (   \n\
-                            parameters main rollout:params \n\
-                            ( \n\
-                                nim_user type:#string ui:nim_user default:"" \n\
-                                nim_userID type:#string ui:nim_userID default:"" \n\
-                                nim_class type:#string ui:nim_class default:"" \n\
-                                nim_server type:#string ui:nim_server default:"" \n\
-                                nim_serverID type:#string ui:nim_serverID default:"" \n\
-                                nim_jobName type:#string ui:nim_jobName default:"" \n\
-                                nim_jobID type:#string ui:nim_jobID default:"" \n\
-                                nim_showName type:#string ui:nim_showName default:"" \n\
-                                nim_showID type:#string ui:nim_showID default:"" \n\
-                                nim_shot type:#string ui:nim_shot default:"" \n\
-                                nim_shotID type:#string ui:nim_shotID default:"" \n\
-                                nim_asset type:#string ui:nim_asset default:"" \n\
-                                nim_assetID type:#string ui:nim_assetID default:"" \n\
-                                nim_fileID type:#string ui:nim_fileID default:"" \n\
-                                nim_name type:#string ui:nim_name default:"" \n\
-                                nim_basename type:#string ui:nim_basename default:"" \n\
-                                nim_type type:#string ui:nim_type default:"" \n\
-                                nim_typeID type:#string ui:nim_typeID default:"" \n\
-                                nim_typeFolder type:#string ui:nim_typeFolder default:"" \n\
-                                nim_tag type:#string ui:nim_tag default:"" \n\
-                                nim_fileType type:#string ui:nim_fileType default:"" \n\
-                            ) \n\
-                            rollout params "Scene Data Parameters" \n\
-                            (  \n\
-                                edittext nim_user "NIM nim_user" \n\
-                                edittext nim_userID "NIM UserID" \n\
-                                edittext nim_class "NIM nim_class" \n\
-                                edittext nim_server "NIM nim_server" \n\
-                                edittext nim_serverID "NIM ServerID" \n\
-                                edittext nim_jobName "NIM nim_jobName" \n\
-                                edittext nim_jobID "NIM JobID" \n\
-                                edittext nim_showName "NIM nim_showName" \n\
-                                edittext nim_showID "NIM ShowID" \n\
-                                edittext nim_shot "NIM nim_shot" \n\
-                                edittext nim_shotID "NIM nim_shotID" \n\
-                                edittext nim_asset "NIM nim_asset" \n\
-                                edittext nim_assetID "NIM nim_assetID" \n\
-                                edittext nim_fileID "NIM nim_fileID" \n\
-                                edittext nim_name "NIM nim_name" \n\
-                                edittext nim_basename "NIM nim_basename" \n\
-                                edittext nim_type "NIM nim_type" \n\
-                                edittext nim_typeID "NIM nim_typeID" \n\
-                                edittext nim_typeFolder "NIM nim_typeFolder" \n\
-                                edittext nim_tag "NIM nim_tag" \n\
-                                edittext nim_fileType "NIM nim_fileType" \n\
-                            ) \n\
-                        ) \n\
-                        rootNodeDataCA = undefined \n\
-                        if (custattributes.add rootnode sceneDataCADef) do \n\
-                            rootNodeDataCA = rootnode.custAttributes[rootnode.custAttributes.count] \n'
+        
+        # Add custom attributes only if they don't exist
+        nimAttrCmd = '''
+        if (custattributes.getdef rootnode "nimSceneData" == undefined) then (
+            nimSceneData = attributes nimSceneData version:1 attribID:#(0x4748c18c, 0xc74245a1)
+            (
+                parameters main rollout:params
+                (
+                    nim_user type:#string default:""
+                    nim_userID type:#string default:""
+                    nim_class type:#string default:""
+                    nim_server type:#string default:""
+                    nim_serverID type:#string default:""
+                    nim_jobName type:#string default:""
+                    nim_jobID type:#string default:""
+                    nim_showName type:#string default:""
+                    nim_showID type:#string default:""
+                    nim_shot type:#string default:""
+                    nim_shotID type:#string default:""
+                    nim_asset type:#string default:""
+                    nim_assetID type:#string default:""
+                    nim_fileID type:#string default:""
+                    nim_name type:#string default:""
+                    nim_basename type:#string default:""
+                    nim_type type:#string default:""
+                    nim_typeID type:#string default:""
+                    nim_typeFolder type:#string default:""
+                    nim_tag type:#string default:""
+                    nim_fileType type:#string default:""
+                )
+                rollout params "Parameters" (
+                    label ui_label "NIM Attributes"
+                )
+            )
+            custattributes.add rootnode nimSceneData
+        )
+        '''
         try:
             rt.execute(nimAttrCmd)
-            P.info("Global attributes added")
-        except:
-            P.error("Failed to create global attributes")
+            P.info("Global attributes added or updated")
+        except Exception as e:
+            P.error(f"Failed to create or update global attributes - {str(e)}")
             return
-
-    else :
-        P.info("Loading Global Attributes")
-        # load custom attributes
-        nimAttrReadCmd = 'if(rootnode.custAttributes.count != 0) do \n\
-                             rootNodeDataCA = rootnode.custAttributes[rootnode.custAttributes.count] \n'
-        try:
-            rt.execute(nimAttrReadCmd)
-        except:
-            P.error('Failed to read global attributes')
-            return
-
 
     P.info("Setting Global Attributes")
-    
-    #  User :
-    userInfo=nim.userInfo()
-    
-    rt.execute('rootNodeDataCA.nim_user="'+str(userInfo['name'])+'"' )
 
-    #  User ID :
-    rt.execute('rootNodeDataCA.nim_userID="'+str(userInfo['ID'])+'"' )
+    # User:
+    userInfo = nim.userInfo()
+    try:
+        rt.execute('rootnode.custAttributes["nimSceneData"].nim_user="'+str(userInfo['name'])+'"')
+    except:
+        P.error('Failed to set nim_user')
 
-    #  Tab/Class :
-    rt.execute('rootNodeDataCA.nim_class="'+str(nim.tab())+'"' )
+    # User ID:
+    try:
+        rt.execute('rootnode.custAttributes["nimSceneData"].nim_userID="'+str(userInfo['ID'])+'"')
+    except:
+        P.error('Failed to set nim_userID')
 
-    #  Server :
-    rt.execute('rootNodeDataCA.nim_server="'+str(nim.server())+'"' )
+    # Tab/Class:
+    try:
+        rt.execute('rootnode.custAttributes["nimSceneData"].nim_class="'+str(nim.tab())+'"')
+    except:
+        P.error('Failed to set nim_class')
 
-    #  Server ID :
-    rt.execute('rootNodeDataCA.nim_serverID="'+str(nim.ID('server'))+'"' )
+    # Server:
+    try:
+        rt.execute('rootnode.custAttributes["nimSceneData"].nim_server="'+str(nim.server())+'"')
+    except:
+        P.error('Failed to set nim_server')
 
-    #  Job :
-    rt.execute('rootNodeDataCA.nim_jobName="'+str(nim.name('job'))+'"' )
+    # Server ID:
+    try:
+        rt.execute('rootnode.custAttributes["nimSceneData"].nim_serverID="'+str(nim.ID("server"))+'"')
+    except:
+        P.error('Failed to set nim_serverID')
 
-    #  Job ID :
-    rt.execute('rootNodeDataCA.nim_jobID="'+str(nim.ID('job'))+'"' )
+    # Job:
+    try:
+        rt.execute('rootnode.custAttributes["nimSceneData"].nim_jobName="'+str(nim.name("job"))+'"')
+    except:
+        P.error('Failed to set nim_jobName')
 
-    #  Show :
-    rt.execute('rootNodeDataCA.nim_showName="'+str(nim.name('show'))+'"' )
+    # Job ID:
+    try:
+        rt.execute('rootnode.custAttributes["nimSceneData"].nim_jobID="'+str(nim.ID("job"))+'"')
+    except:
+        P.error('Failed to set nim_jobID')
 
-    #  Show ID :
-    rt.execute('rootNodeDataCA.nim_showID="'+str(nim.ID('show'))+'"' )
+    # Show:
+    try:
+        rt.execute('rootnode.custAttributes["nimSceneData"].nim_showName="'+str(nim.name("show"))+'"')
+    except:
+        P.error('Failed to set nim_showName')
 
-    #  Shot :
-    rt.execute('rootNodeDataCA.nim_shot="'+str(nim.name('shot'))+'"' )
+    # Show ID:
+    try:
+        rt.execute('rootnode.custAttributes["nimSceneData"].nim_showID="'+str(nim.ID("show"))+'"')
+    except:
+        P.error('Failed to set nim_showID')
 
-    #  Shot ID :
-    rt.execute('rootNodeDataCA.nim_shotID="'+str(nim.ID('shot'))+'"' )
+    # Shot:
+    try:
+        rt.execute('rootnode.custAttributes["nimSceneData"].nim_shot="'+str(nim.name("shot"))+'"')
+    except:
+        P.error('Failed to set nim_shot')
 
-    #  Asset :
-    rt.execute('rootNodeDataCA.nim_asset="'+str(nim.name('asset'))+'"' )
+    # Shot ID:
+    try:
+        rt.execute('rootnode.custAttributes["nimSceneData"].nim_shotID="'+str(nim.ID("shot"))+'"')
+    except:
+        P.error('Failed to set nim_shotID')
 
-    #  Asset ID :
-    rt.execute('rootNodeDataCA.nim_assetID="'+str(nim.ID('asset'))+'"' )
+    # Asset:
+    try:
+        rt.execute('rootnode.custAttributes["nimSceneData"].nim_asset="'+str(nim.name("asset"))+'"')
+    except:
+        P.error('Failed to set nim_asset')
 
-    #  File ID :
-    P.info("FileID: %s" % str(nim.ID('ver')))
-    rt.execute('rootNodeDataCA.nim_fileID="'+str(nim.ID('ver'))+'"' )
+    # Asset ID:
+    try:
+        rt.execute('rootnode.custAttributes["nimSceneData"].nim_assetID="'+str(nim.ID("asset"))+'"')
+    except:
+        P.error('Failed to set nim_assetID')
 
-    #  Shot/Asset Name :
-    if nim.tab()=='SHOT' :
-        rt.execute('rootNodeDataCA.nim_name="'+str(nim.name('shot'))+'"' )
-    elif nim.tab()=='ASSET' :
-        rt.execute('rootNodeDataCA.nim_name="'+str(nim.name('asset'))+'"' )
-    
-    #  Basename :
-    rt.execute('rootNodeDataCA.nim_basename="'+str(nim.name('base'))+'"' )
+    # File ID:
+    try:
+        rt.execute('rootnode.custAttributes["nimSceneData"].nim_fileID="'+str(nim.ID("ver"))+'"')
+    except:
+        P.error('Failed to set nim_fileID')
 
-    #  Task :
-    rt.execute('rootNodeDataCA.nim_type="'+str(nim.name( elem='task'))+'"' )
+    # Shot/Asset Name:
+    try:
+        if nim.tab() == 'SHOT':
+            rt.execute('rootnode.custAttributes["nimSceneData"].nim_name="'+str(nim.name("shot"))+'"')
+        elif nim.tab() == 'ASSET':
+            rt.execute('rootnode.custAttributes["nimSceneData"].nim_name="'+str(nim.name("asset"))+'"')
+    except:
+        P.error('Failed to set nim_name')
 
-    #  Task ID :
-    rt.execute('rootNodeDataCA.nim_typeID="'+str(nim.ID( elem='task' ))+'"' )
+    # Basename:
+    try:
+        rt.execute('rootnode.custAttributes["nimSceneData"].nim_basename="'+str(nim.name("base"))+'"')
+    except:
+        P.error('Failed to set nim_basename')
 
-    #  Task Folder :
-    rt.execute('rootNodeDataCA.nim_typeFolder="'+str(nim.taskFolder())+'"' )
+    # Task:
+    try:
+        rt.execute('rootnode.custAttributes["nimSceneData"].nim_type="'+str(nim.name(elem="task"))+'"')
+    except:
+        P.error('Failed to set nim_type')
 
-    #  Tag :
-    rt.execute('rootNodeDataCA.nim_tag="'+str(nim.name('tag'))+'"' )
+    # Task ID:
+    try:
+        rt.execute('rootnode.custAttributes["nimSceneData"].nim_typeID="'+str(nim.ID(elem="task"))+'"')
+    except:
+        P.error('Failed to set nim_typeID')
 
-    #  File Type :
-    rt.execute('rootNodeDataCA.nim_fileType="'+str(nim.fileType())+'"' )
+    # Task Folder:
+    try:
+        rt.execute('rootnode.custAttributes["nimSceneData"].nim_typeFolder="'+str(nim.taskFolder())+'"')
+    except:
+        P.error('Failed to set nim_typeFolder')
 
-    P.info('    Completed setting NIM attributes root node.')
-    #nim.Print()
-    
+    # Tag:
+    try:
+        rt.execute('rootnode.custAttributes["nimSceneData"].nim_tag="'+str(nim.name("tag"))+'"')
+    except:
+        P.error('Failed to set nim_tag')
+
+    # File Type:
+    try:
+        rt.execute('rootnode.custAttributes["nimSceneData"].nim_fileType="'+str(nim.fileType())+'"')
+    except:
+        P.error('Failed to set nim_fileType')
+
+    P.info('Completed setting NIM attributes on root node.')
     return
-    
 
-def get_vars( nim=None ) :
+def get_vars(nim=None):
     'Gets NIM settings from the defaultRenderGlobals node in 3dsMax.'
+
+    # Migrate legacy NIM attributes to nimSceneData root location
+    migrate_root_vars()
+
     P.info('3dsMax Getting information from NIM attributes...')
     
-    #  User :
-    try:
-        nim_user = rt.execute("rootNodeDataCA.nim_user")
-        if nim_user:
-            nim.set_user( nim_user )
-            P.info('Reading userName')
-        else:
-            P.error('Failed reading userName')
-    except :
-        P.error('Scene Data Not Found.  Please save the scene using NIM > Save As before updating the version.')
-        return False
+    # Helper function to read attributes safely
+    def read_attr(attr_name):
+        try:
+            return rt.execute(f'rootnode.custAttributes["nimSceneData"].{attr_name}')
+        except:
+            P.error(f'Failed reading {attr_name}')
+            return None
 
-    #  User ID :
-    nim_userID = rt.execute("rootNodeDataCA.nim_userID" )
+    # Read and set user info
+    nim_user = read_attr("nim_user")
+    if nim_user:
+        nim.set_user(nim_user)
+    
+    nim_userID = read_attr("nim_userID")
     if nim_userID:
-        nim.set_userID( nim_userID )
-        P.error('Reading nim_userID')
-    else:
-        P.error('Failed reading nim_userID')
+        nim.set_userID(nim_userID)
 
-
-    #  Tab/Class :
-    nim_class = rt.execute("rootNodeDataCA.nim_class" )
+    # Tab/Class
+    nim_class = read_attr("nim_class")
     if nim_class:
-        nim.set_tab( nim_class )
-        P.error('Reading nim_class')
-    else:
-        P.error('Failed reading nim_class')
+        nim.set_tab(nim_class)
 
-
-    #  Server :
-    nim_server = rt.execute("rootNodeDataCA.nim_server" )
+    # Server Info
+    nim_server = read_attr("nim_server")
     if nim_server:
-        nim.set_server( path=nim_server )
-        P.error('Reading nim_server')
-    else:
-        P.error('Failed reading nim_server')
+        nim.set_server(path=nim_server)
 
-
-    #  Server ID :
-    nim_serverID = rt.execute("rootNodeDataCA.nim_serverID" )
+    nim_serverID = read_attr("nim_serverID")
     if nim_serverID:
-        nim.set_ID( elem='server', ID=nim_serverID )
-        P.error('Reading nim_serverID')
-    else:
-        P.error('Failed reading nim_serverID')
+        nim.set_ID(elem='server', ID=nim_serverID)
 
-
-    #  Job :
-    nim_jobName = rt.execute("rootNodeDataCA.nim_jobName" )
+    # Job Info
+    nim_jobName = read_attr("nim_jobName")
     if nim_jobName:
-        nim.set_name( elem='job', name=nim_jobName )
-        P.error('Reading nim_jobName')
-    else:
-        P.error('Failed reading nim_jobName')
+        nim.set_name(elem='job', name=nim_jobName)
 
-    #  Job ID :
-    nim_jobID = rt.execute("rootNodeDataCA.nim_jobID" )
+    nim_jobID = read_attr("nim_jobID")
     if nim_jobID:
-        nim.set_ID( elem='job', ID=nim_jobID )
-        P.error('Reading nim_jobID')
-    else:
-        P.error('Failed reading nim_jobID')
+        nim.set_ID(elem='job', ID=nim_jobID)
 
-
-    #  Show :
-    nim_showName = rt.execute("rootNodeDataCA.nim_showName" )
+    # Show Info
+    nim_showName = read_attr("nim_showName")
     if nim_showName:
-        nim.set_name( elem='show', name=nim_showName )
-        P.error('Reading nim_showName')
-    else:
-        P.error('Failed reading nim_showName')
+        nim.set_name(elem='show', name=nim_showName)
 
-
-    #  Show ID :
-    nim_showID = rt.execute("rootNodeDataCA.nim_showID" )
+    nim_showID = read_attr("nim_showID")
     if nim_showID:
-        nim.set_ID( elem='show', ID=nim_showID )
-        P.error('Reading nim_showID')
-    else:
-        P.error('Failed reading nim_showID')
+        nim.set_ID(elem='show', ID=nim_showID)
 
-    
-    #  Shot :
-    nim_shot = rt.execute("rootNodeDataCA.nim_shot" )
+    # Shot Info
+    nim_shot = read_attr("nim_shot")
     if nim_shot:
-        nim.set_name( elem='shot', name=nim_shot )
-        P.error('Reading nim_shot')
-    else:
-        P.error('Failed reading nim_shot')
+        nim.set_name(elem='shot', name=nim_shot)
 
-    
-    #  Shot ID :
-    nim_shotID = rt.execute("rootNodeDataCA.nim_shotID" )
+    nim_shotID = read_attr("nim_shotID")
     if nim_shotID:
-        nim.set_ID( elem='shot', ID=nim_shotID )
-        P.error('Reading nim_shotID')
-    else:
-        P.error('Failed reading nim_shotID')
+        nim.set_ID(elem='shot', ID=nim_shotID)
 
-    
-    #  Asset :
-    nim_asset = rt.execute("rootNodeDataCA.nim_asset" )
+    # Asset Info
+    nim_asset = read_attr("nim_asset")
     if nim_asset:
-        nim.set_name( elem='asset', name=nim_asset )
-        P.error('Reading nim_asset')
-    else:
-        P.error('Failed reading nim_asset')
-    
-    #  Asset ID :
-    nim_assetID = rt.execute("rootNodeDataCA.nim_assetID" )
+        nim.set_name(elem='asset', name=nim_asset)
+
+    nim_assetID = read_attr("nim_assetID")
     if nim_assetID:
-        nim.set_ID( elem='asset', ID=nim_assetID )
-        P.error('Reading nim_assetID')
-    else:
-        P.error('Failed reading nim_assetID')
-    
-    #  File ID :
-    nim_fileID = rt.execute("rootNodeDataCA.nim_fileID" )
-    if nim_fileID:
-        #nim.set_ID( elem='file', ID=nim_fileID.Get() )
-        #nim.set_tab( tab=nim_fileID.Get() )
-        #P.error('Reading nim_fileID')
-        pass
-    else:
-        P.error('Failed reading nim_fileID')
+        nim.set_ID(elem='asset', ID=nim_assetID)
 
-    
-    #  Shot/Asset Name :
-    nim_name = rt.execute("rootNodeDataCA.nim_name" )
-    if nim_name:
-        if nim.tab()=='SHOT' :
-            P.debug( 'Shot Name = %s' % nim_name )
-            #nim.set_tab( nim_name.Get() )
-        elif nim.tab()=='ASSET' :
-            P.debug( 'Asset Name = %s' % nim_name )
-            #nim.set_tab( nim_name.Get() )
-    else:
-        P.error('Failed reading nim_name')
-
-
-    #  Basename :
-    nim_basename = rt.execute("rootNodeDataCA.nim_basename" )
+    # Basename
+    nim_basename = read_attr("nim_basename")
     if nim_basename:
-        nim.set_name( elem='base', name=nim_basename )
-        P.error('Reading nim_basename')
-    else:
-        P.error('Failed reading nim_basename')
+        nim.set_name(elem='base', name=nim_basename)
 
-
-    #  Task :
-    nim_type = rt.execute("rootNodeDataCA.nim_type" )
+    # Task Info
+    nim_type = read_attr("nim_type")
     if nim_type:
-        nim.set_name( elem='task', name=nim_type )
-        P.error('Reading nim_type')
-    else:
-        P.error('Failed reading nim_type')
+        nim.set_name(elem='task', name=nim_type)
 
-
-    #  Task ID :
-    nim_typeID = rt.execute("rootNodeDataCA.nim_typeID" )
+    nim_typeID = read_attr("nim_typeID")
     if nim_typeID:
-        nim.set_ID( elem='task', ID=nim_typeID )
-        P.error('Reading nim_typeID')
-    else:
-        P.error('Failed reading nim_typeID')
+        nim.set_ID(elem='task', ID=nim_typeID)
 
-    
-    #  Task Folder :
-    nim_typeFolder = rt.execute("rootNodeDataCA.nim_typeFolder" )
+    # Task Folder
+    nim_typeFolder = read_attr("nim_typeFolder")
     if nim_typeFolder:
-        nim.set_taskFolder( folder=nim_typeFolder )
-        P.error('Reading nim_typeFolder')
-    else:
-        P.error('Failed reading nim_typeFolder')
-    
-    #  Tag :
-    nim_tag = rt.execute("rootNodeDataCA.nim_tag" )
+        nim.set_taskFolder(folder=nim_typeFolder)
+
+    # Tag
+    nim_tag = read_attr("nim_tag")
     if nim_tag:
-        nim.set_name( elem='tag', name=nim_tag )
-        P.error('Reading nim_tag')
-    else:
-        P.error('Failed reading nim_tag')
-    
-    #  File Type :
-    nim_fileType = rt.execute("rootNodeDataCA.nim_fileType" )
+        nim.set_name(elem='tag', name=nim_tag)
+
+    # File Type
+    nim_fileType = read_attr("nim_fileType")
     if nim_fileType:
-        nim.set_name( elem='file', name=nim_fileType )
-        P.error('Reading nim_fileType')
-    else:
-        P.error('Failed reading nim_fileType')
+        nim.set_name(elem='file', name=nim_fileType)
 
-
-    #  Print dictionary :
-    #P.info('\nNIM Dictionary from get vars...')
-    #nim.Print()
-    
     return
-    
+
+def migrate_root_vars():
+    'Migrates old NIM attributes to new NIM attributes on the 3dsMax root node.'
+
+    try:
+        # Check if old NIM attributes (rootNodeDataCA) exist
+        nim_user = None
+        if hasattr(rt.rootnode, "custAttributes"):
+            nim_user = rt.execute('rootnode.custAttributes["sceneDataCADef"].nim_user')
+        
+        if nim_user is not None:
+
+            # Read each attribute from the old location and set it in the new location
+            def migrate_attribute(attr_name):
+                try:
+                    old_value = rt.execute(f'rootnode.custAttributes["sceneDataCADef"].{attr_name}')
+
+                    if old_value is not None and old_value != '':
+                        P.info(f'Found NIM legacy attribute: {attr_name}')
+
+                        # Ensure the new nimSceneData exists before writing to it
+                        nimSceneData = rt.execute(f'rootnode.custAttributes["nimSceneData"]')
+                        
+                        # Define new custom attributes if they don't exist
+                        if nimSceneData is None:
+                            nimSceneDataCmd = '''
+                                    nimSceneData = attributes nimSceneData version:1 attribID:#(0x4748c18c, 0xc74245a1)
+                                    (
+                                        parameters main rollout:params
+                                        (
+                                            nim_user type:#string default:""
+                                            nim_userID type:#string default:""
+                                            nim_class type:#string default:""
+                                            nim_server type:#string default:""
+                                            nim_serverID type:#string default:""
+                                            nim_jobName type:#string default:""
+                                            nim_jobID type:#string default:""
+                                            nim_showName type:#string default:""
+                                            nim_showID type:#string default:""
+                                            nim_shot type:#string default:""
+                                            nim_shotID type:#string default:""
+                                            nim_asset type:#string default:""
+                                            nim_assetID type:#string default:""
+                                            nim_fileID type:#string default:""
+                                            nim_name type:#string default:""
+                                            nim_basename type:#string default:""
+                                            nim_type type:#string default:""
+                                            nim_typeID type:#string default:""
+                                            nim_typeFolder type:#string default:""
+                                            nim_tag type:#string default:""
+                                            nim_fileType type:#string default:""
+                                        )
+                                        rollout params "Parameters" (
+                                            label ui_label "NIM Attributes"
+                                        )
+                                    )
+                                    custattributes.add rootnode nimSceneData
+                                '''
+                            rt.execute(nimSceneDataCmd)
+                        
+                        setattr(rt.rootnode.custAttributes["nimSceneData"], attr_name, old_value)
+                        P.info(f'Migrated legacy attribute: {attr_name}')
+
+                        # Remove old attribute from old location
+                        try:
+                            setattr(rt.rootnode.custAttributes["sceneDataCADef"], attr_name, '')
+                            P.info(f'Removed legacy attribute: {attr_name}')
+                        except Exception as e:
+                            P.error(f'Failed to remove legacy attribute: {attr_name} : {str(e)}')
+
+                except Exception as e:
+                    P.error(f'Failed to migrate legacy attribute: {attr_name}: {str(e)}')
+
+            # List of attributes to migrate
+            attributes = [
+                "nim_user", "nim_userID", "nim_class", "nim_server", "nim_serverID",
+                "nim_jobName", "nim_jobID", "nim_showName", "nim_showID", "nim_shot",
+                "nim_shotID", "nim_asset", "nim_assetID", "nim_fileID", "nim_name",
+                "nim_basename", "nim_type", "nim_typeID", "nim_typeFolder", "nim_tag",
+                "nim_fileType"
+            ]
+
+            # Migrate all attributes
+            for attr in attributes:
+                migrate_attribute(attr)
+
+        else:
+            P.info('NIM legacy attributes not found. Migration not needed.')
+
+    except Exception as e:
+        pass
+
+    return
+
+
 
 def mk_workspace( proj_folder='', renPath='' ) :
     'Creates the NIM Project Workspace'
