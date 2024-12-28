@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: UI.py
-# Version:  v7.0.2.241007
+# Version:  v7.0.4.241228
 #
 # Copyright (c) 2014-2024 NIM Labs LLC
 # All rights reserved.
