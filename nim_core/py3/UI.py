@@ -813,6 +813,25 @@ class GUI(QtGui.QMainWindow) :
         #  Populate the window elements :
         self.nim.set_filePath()
         self.nimPrefs=Nim.NIM().ingest_prefs()
+
+        if self.nim.app()=='Maya' :
+            from . import nim_maya as M
+            M.get_vars( nim=self.nim )
+            M.get_vars( nim=self.nimPrefs )
+        elif self.nim.app()=='Nuke' :
+            from . import nim_nuke as N
+            N.get_vars( nim=self.nim )
+            N.get_vars( nim=self.nimPrefs )
+        if self.nim.app()=='3dsMax' :
+            from . import nim_3dsmax as Max
+            Max.get_vars( nim=self.nim )
+            Max.get_vars( nim=self.nimPrefs )
+        if self.nim.app()=='Houdini' :
+            from . import nim_houdini as Houdini
+            Houdini.get_vars( nim=self.nim )
+            Houdini.get_vars( nim=self.nimPrefs )
+            pass
+
         #  Refresh the window :
         self.del_connections()
         self.update_elem('job')
@@ -824,6 +843,9 @@ class GUI(QtGui.QMainWindow) :
         #  Server :
         self.nim.Input('server').setVisible( True )
         self.jobForm.labelForField( self.nim.Input('server') ).setVisible( True )
+
+        # Set server combo box to currently selected server
+        self.set_server_combobox()
         
         #  Filter :
         self.nim.Input('filter').setVisible( False )
@@ -1079,6 +1101,9 @@ class GUI(QtGui.QMainWindow) :
         #  Server :
         self.nim.Input('server').setVisible( True )
         self.jobForm.labelForField( self.nim.Input('server') ).setVisible( True )
+        
+        # Set server combo box to currently selected server
+        self.set_server_combobox()
         
         #  Filter :
         self.nim.Input('filter').setVisible( False )
@@ -2019,6 +2044,28 @@ class GUI(QtGui.QMainWindow) :
 
         P.debug( 'Server set to - %s' % self.nim.name('server') )
         
+        return
+    
+
+    def set_server_combobox(self) :
+        'Sets the server dropdown to the current server saved to the nim object'
+        server_dict = self.nim.Dict('server')
+        current_name = ''
+
+        for js in server_dict :
+            try : 
+                if int(js['ID']) == int(self.nim.server('ID')):
+                    current_name = js['server']
+                    break
+            except ValueError :
+                P.error('Server ID is not an integer')
+
+        serverTitle = self.nim.server('path')+' - ("'+current_name+'")'
+
+        for index in range(self.nim.Input('server').count()):
+            if self.nim.Input('server').itemText(index) == serverTitle:
+                self.nim.Input('server').setCurrentIndex(index)
+                break
         return
 
     
