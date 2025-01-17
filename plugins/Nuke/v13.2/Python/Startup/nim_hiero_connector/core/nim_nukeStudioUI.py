@@ -2,9 +2,9 @@
 #******************************************************************************
 #
 # Filename: Nuke/Python/Startup/nim_hiero_connector/nim_nukeStudioUI.py
-# Version:  v5.2.0.220706
+# Version:  v7.0.5.250116
 #
-# Copyright (c) 2014-2022 NIM Labs LLC
+# Copyright (c) 2014-2025 NIM Labs LLC
 # All rights reserved.
 #
 # Use of this software is subject to the terms of the NIM Labs license
@@ -170,6 +170,17 @@ def saveDialog():
 				QMessageBox.Ok )
 			return
 		
+		#Append Task Name
+		taskName = dialog.nim_taskName
+		if taskName == '':
+			# Show Error
+			msgBox = QMessageBox()
+			msgBox.setTextFormat(Qt.RichText)
+			result = msgBox.information(None, "Task Info Missing",  \
+				"The task name is missing.\nCheck to make sure the job is online and you have selected a task.", \
+				QMessageBox.Ok )
+			return
+		
 		#Append Task Folder
 		taskFolder = dialog.nim_taskFolder
 		if taskFolder == '':
@@ -223,7 +234,7 @@ def saveDialog():
 			print("New Basename Version: %s" % version)
 			projectBasename = basename
 		else:
-			projectBasename = showName+"_"+taskFolder
+			projectBasename = showName+"_"+taskName
 			if tag != '':
 				print("Tag: %s" % tag)
 				projectBasename = projectBasename+"_"+tag
@@ -282,10 +293,22 @@ def saveDialog():
 		#check if file path exists - create if not
 		try:
 			os.makedirs( projectOutputPath )
-		except OSError:
-			pass
-		currentProject.saveAs(projectOutputFullPath)
-		P.info("Project Saved")
+		except OSError as e:
+			P.error(f"Failed to create directory: {projectOutputPath}")
+			P.error(f"Error: {e}")
+		
+		try:
+			currentProject.saveAs(projectOutputFullPath)
+			P.info("Project Saved")
+		except Exception as e:
+			P.error(f"Failed to save project: {projectOutputFullPath}")
+			P.error(f"Error: {e}")
+			msgBox = QMessageBox()
+			msgBox.setTextFormat(Qt.RichText)
+			result = msgBox.information(None, "Failed to Save Project",  \
+				"The project failed to save. Check the project path to ensure the path is valid.", \
+				QMessageBox.Ok )
+			return
 
 		#log to NIM
 		P.info("Logging to NIM")
@@ -999,6 +1022,7 @@ class NimNS_saveDialog(QDialog):
 		self.nim_tasks = {}
 		self.nim_taskDict = {}
 		self.nim_taskID = None
+		self.nim_taskName = ''
 		self.nim_taskFolder = ''
 		self.nim_taskFolderDict = {}
 		self.nim_taskChooser = QComboBox()
@@ -1388,6 +1412,7 @@ class NimNS_saveDialog(QDialog):
 		self.nim_tasks = {}
 		self.nim_tasks = nimAPI.get_tasks(app='HIERO', userType='all')
 		self.nim_taskID = 0
+		self.nim_taskName = ''
 		self.nim_taskFolder = ''
 		self.nim_taskDict = {}
 		self.nim_taskFolderDict = {}
@@ -1434,6 +1459,7 @@ class NimNS_saveDialog(QDialog):
 				
 				#set vars
 				self.nim_taskID = taskID
+				self.nim_taskName = taskName
 				self.nim_taskFolder = taskFolder
 
 				print("Setting taskID=%s" % taskID)
