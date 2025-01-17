@@ -2,9 +2,9 @@
 #******************************************************************************
 #
 # Filename: nim_version.py
-# Version:  v7.0.4
+# Version:  v7.0.5
 #
-# Copyright (c) 2014-2024 NIM Labs LLC
+# Copyright (c) 2014-2025 NIM Labs LLC
 # All rights reserved.
 #
 # Use of this software is subject to the terms of the NIM Labs license
@@ -12,4 +12,4 @@
 # otherwise accompanies this software in either electronic or hard copy form.
 # *****************************************************************************
 
-version='v7.0.4'
+version='v7.0.5'
