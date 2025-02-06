@@ -2,9 +2,9 @@
 #******************************************************************************
 #
 # Filename: nim_api.py
-# Version:  v6.1.16.240801
+# Version:  v7.1.0.250206
 #
-# Copyright (c) 2014-2024 NIM Labs LLC
+# Copyright (c) 2014-2025 NIM Labs LLC
 # All rights reserved.
 #
 # Use of this software is subject to the terms of the NIM Labs license
@@ -4140,6 +4140,75 @@ def get_reviewStatuses( nimURL=None, apiUser=None, apiKey=None ) :
     'Retrieves the list of available review statuses.'
     result=False
     params = {'q': 'getReviewStatuses'}
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
+
+def get_reviewBins( context=None, contextID=None, limit=None, offset=None, nimURL=None, apiUser=None, apiKey=None ) :
+    'Retrieves the list of available review statuses.'
+    result=False
+    params = {'q': 'getReviewBins'}
+    if context is not None : params['context'] = context
+    if contextID is not None : params['contextID'] = contextID
+    if limit is not None : params['limit'] = limit
+    if offset is not None : params['offset'] = offset
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
+
+def add_reviewBin( context=None, contextID=None, name=None, autoUpdateVersions=None, nimURL=None, apiUser=None, apiKey=None ) :
+    'Retrieves the list of available review statuses.'
+    result=False
+    params = {'q': 'addReviewBin'}
+    if context is not None : params['context'] = context
+    if contextID is not None : params['contextID'] = contextID
+    if name is not None : params['name'] = name
+    if autoUpdateVersions is not None : params['autoUpdateVersions'] = autoUpdateVersions
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
+
+def update_reviewBin( ID=None, name=None, autoUpdateVersions=None, nimURL=None, apiUser=None, apiKey=None ) :
+    'Retrieves the list of available review statuses.'
+    result=False
+    params = {'q': 'updateReviewBin'}
+    if ID is not None : params['ID'] = ID
+    if name is not None : params['name'] = name
+    if autoUpdateVersions is not None : params['autoUpdateVersions'] = autoUpdateVersions
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
+
+def delete_reviewBin( ID=None, nimURL=None, apiUser=None, apiKey=None ) :
+    'Retrieves the list of available review statuses.'
+    result=False
+    params = {'q': 'updateReviewBin'}
+    if ID is not None : params['ID'] = ID
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
+
+def add_reviewBinItem( binID=None, itemID=None, position=None, nimURL=None, apiUser=None, apiKey=None ) :
+    'Retrieves the list of available review statuses.'
+    result=False
+    params = {'q': 'addReviewBinItem'}
+    if binID is not None : params['binID'] = binID
+    if itemID is not None : params['itemID'] = itemID
+    if position is not None : params['position'] = position
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
+
+def remove_reviewBinItem( binID=None, itemID=None, nimURL=None, apiUser=None, apiKey=None ) :
+    'Retrieves the list of available review statuses.'
+    result=False
+    params = {'q': 'removeReviewBinItem'}
+    if binID is not None : params['binID'] = binID
+    if itemID is not None : params['itemID'] = itemID
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
+
+def position_reviewBinItem( binID=None, itemID=None, position=None, nimURL=None, apiUser=None, apiKey=None ) :
+    'Retrieves the list of available review statuses.'
+    result=False
+    params = {'q': 'positionReviewBinItem'}
+    if binID is not None : params['binID'] = binID
+    if itemID is not None : params['itemID'] = itemID
+    if position is not None : params['position'] = position
     result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
     return result
 
