@@ -3502,7 +3502,7 @@ def save_file( parent='SHOW', parentID=0, task_type_ID=0, task_folder='', userID
 
         result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
         
-    if result['success'].lower() == 'false' :
+    if result['success'] == False :
         P.error( 'There was a problem writing to the NIM database.' )
         P.error( '    Database has not been populated with your file.' )
         P.error( result['error'] )
@@ -3558,7 +3558,7 @@ def update_file( ID=None, task_type_ID=None, task_folder=None, userID=None, base
 
     result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
 
-    if result['success'].lower() == 'false' :
+    if result['success'] == False :
         P.error( 'There was a problem writing to the NIM database.' )
         P.error( '    Database has not been updated with your file.' )
         P.error( result['error'] )
