@@ -481,10 +481,10 @@ class NimShotProcessor(hiero.core.ProcessorBase):
 
         #BRING SHOT ONLINE AND CREATE PROJECT STRUCTURE FOLDERS
         bringOnline_result = nimAPI.bring_online( item='shot', shotID=nim_shotID )
-        if bringOnline_result['success'] == 'false':
+        if bringOnline_result['success'] == False:
           print 'NIM: Failed to bring shot online'
           print 'NIM: %s' % bringOnline_result['error']
-        elif bringOnline_result['success'] == 'true':
+        elif bringOnline_result['success'] == True:
           print 'NIM: Shot brought online %s' % name
         else :
           print 'NIM: bringOnline returned and invalid status'

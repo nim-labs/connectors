@@ -596,7 +596,7 @@ class nim_fileUI( gui.GeDialog ) :
         
         if serverDict :
             if 'success' in serverDict :
-                if serverDict['success'] == 'false' :
+                if serverDict['success'] == False :
                     P.warning(serverDict['error'])
                     self.nim.Input('server').clear()
                     self.nim.Input('server').addItem('None')

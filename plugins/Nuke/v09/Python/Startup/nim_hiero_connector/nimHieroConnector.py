@@ -118,7 +118,7 @@ class NimHieroConnector():
 
 			shotInfo = nimAPI.add_shot( showID=showID, name=trackItem.name(), frames=trackItem.duration() )
 			#print shotInfo
-			if shotInfo['success'] == 'true':
+			if shotInfo['success'] == True:
 				shotID = shotInfo['ID']
 				print "		NIM shotID: %s" % shotID
 				
@@ -305,7 +305,7 @@ class NimHieroConnector():
 			self.setStatusMessage(status_msg,0,True)
 
 			'''
-			if apiInfo['file_success'] == 'true':
+			if apiInfo['file_success'] == True:
 				if 'error' in apiInfo:
 					print "		WARNING: %s" % apiInfo['error']
 			else:

@@ -2989,7 +2989,7 @@ def nimCreateShot(nim_showID=None, info=None) :
 		print "NIM - Exporting Shot Info"
 		shotInfo = nimAPI.add_shot( showID=nim_showID, name=nim_shotName, frames=nim_duration )
 
-		if shotInfo['success'] == 'true':
+		if shotInfo['success'] == True:
 			result['success'] = True
 			nim_shotID = shotInfo['ID']
 			print "NIM - nim_shotID: %s" % nim_shotID

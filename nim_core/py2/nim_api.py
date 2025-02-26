@@ -21,7 +21,7 @@
 #
 # import nim_core.nim_api as nimAPI
 # result = nimAPI.add_render(taskID=14941, renderName='myRender')
-# if result['success'] == 'true':
+# if result['success'] == True:
 #    nimAPI.upload_renderIcon(renderID=result['ID'],img='/path/to/icon.jpeg')
 #    nimAPI.upload_reviewItem(renderID=result['ID'],path='/path/to/movie/myImages.mov',submit=0)
 #    nimAPI.add_element( parent='render', parentID=result['ID'], path='/path/to/frames', name='myImage.####.exr', \
@@ -2685,7 +2685,7 @@ def save_file( parent='SHOW', parentID=0, task_type_ID=0, task_folder='', userID
 
         result = connect( method='get', params=params )
         
-    if result['success'].lower() == 'false' :
+    if result['success'] == False :
         P.error( 'There was a problem writing to the NIM database.' )
         P.error( '    Database has not been populated with your file.' )
         P.error( result['error'] )
@@ -2772,7 +2772,7 @@ def update_file( ID=None, task_type_ID=None, task_folder=None, userID=None, base
 
         result = connect( method='get', params=params )
 
-    if result['success'].lower() == 'false' :
+    if result['success'] == False :
         P.error( 'There was a problem writing to the NIM database.' )
         P.error( '    Database has not been updated with your file.' )
         P.error( result['error'] )

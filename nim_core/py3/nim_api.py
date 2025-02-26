@@ -21,7 +21,7 @@
 #
 # import nim_core.nim_api as nimAPI
 # result = nimAPI.add_render(taskID=14941, renderName='myRender')
-# if result['success'] == 'true':
+# if result['success'] == True:
 #    nimAPI.upload_renderIcon(renderID=result['ID'],img='/path/to/icon.jpeg')
 #    nimAPI.upload_reviewItem(renderID=result['ID'],path='/path/to/movie/myImages.mov',submit=0)
 #    nimAPI.add_element( parent='render', parentID=result['ID'], path='/path/to/frames', name='myImage.####.exr', \
@@ -660,6 +660,14 @@ def get_userList( nimURL=None, apiUser=None, apiKey=None ) :
     usrList = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
     return usrList
 
+def get_userInfo( ID=None, username=None, nimURL=None, apiUser=None, apiKey=None ) :
+    'Retrieves information for a given user by userID or username'
+    params = {}
+    params["q"] = "getUserInfo"
+    if ID is not None : params['ID'] = ID
+    if username is not None : params['username'] = username
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result 
 
 #  Locations  #
 
@@ -1707,7 +1715,7 @@ def get_serverInfo( ID=None, nimURL=None, apiUser=None, apiKey=None ) :
 def get_serverOSPath( ID=None, os=None, nimURL=None, apiUser=None, apiKey=None ) :
     'Retrieves server path based on OS'
     params = {}
-    params["q"] = "get_serverOSPath"
+    params["q"] = "getServerOsPath"
     if ID is not None : 
         params['ID'] = ID
     else:
@@ -1738,6 +1746,21 @@ def get_paths( item='', ID=None, nimURL=None, apiUser=None, apiKey=None ) :
         P.error ('get_paths: Missing ID')
         return False
     if item is not None : params['type'] = item
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
+
+def resolve_OsPath( os=None, path=None, nimURL=None, apiUser=None, apiKey=None ) :
+    'Retrieves server path based on OS'
+    params = {}
+    params["q"] = "resolveOsPath"
+    if os is not None : 
+        params['os'] = os
+    else:
+        return "OS Missing"
+    if path is not None : 
+        params['path'] = path
+    else:
+        return "Path Missing"
     result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
     return result
 

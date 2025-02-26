@@ -323,7 +323,7 @@ def saveDialog():
 							comment=dialog.nim_comment, serverID=dialog.nim_serverID )
 
 		#get returned fileID and store globals
-		if nimResult['success'].lower() == 'true':
+		if nimResult['success'] == True:
 			print("Save File Result: %s" % nimResult)
 			print("Storing NIM Globals...")
 			nimHieroConnector.g_nim_versionID = nimResult
@@ -407,7 +407,7 @@ def versionDialog():
 							comment=dialog.nim_comment, serverID=nimHieroConnector.g_nim_serverID )
 
 		#get returned fileID and store in global
-		if nimResult['success'].lower() == 'true':
+		if nimResult['success'] == True:
 			print("Save File Result: %s" % nimResult)
 			print("Storing NIM Globals...")
 			nimHieroConnector.g_nim_versionID = nimResult

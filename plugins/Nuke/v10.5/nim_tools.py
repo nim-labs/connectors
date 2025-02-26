@@ -75,7 +75,7 @@ def logNimRender(writeNode=None):
         # Below commented out till taskID and elementTypeID can be read from node
         '''
         result = nimAPI.add_render(taskID=taskID, renderName=nimFolder)
-        if result['success'] == 'true':
+        if result['success'] == True:
             #nimAPI.upload_renderIcon(renderID=result['ID'],img='/path/to/icon.jpeg')
 
             nimAPI.add_element( parent='render', parentID=result['ID'], \

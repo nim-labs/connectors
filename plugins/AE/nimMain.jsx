@@ -656,7 +656,7 @@ function saveFile(classID, className, serverID, serverPath, taskID, taskName, ta
 			isPub: isPub,
 			isWork: isWork
 		});
-		if (newFileInfo.success == 'false') {
+		if (newFileInfo.success == false) {
 			alert('Error: ' + newFileInfo.error);
 			return false;
 		}
