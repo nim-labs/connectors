@@ -1736,6 +1736,18 @@ def get_osPath( fileID=None, os=None, nimURL=None, apiUser=None, apiKey=None ) :
     result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
     return result
 
+def get_assetMasterOsPath( assetID=None, os=None, nimURL=None, apiUser=None, apiKey=None ) :
+    'Returns the path to the asset master based on asset ID and OS type.'
+    params = {}
+    params["q"] = "getAssetMasterOsPath"
+    if assetID is not None : 
+        params['assetID'] = assetID
+    else:
+        return False
+    if os is not None : params['os'] = os
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
+
 def get_paths( item='', ID=None, nimURL=None, apiUser=None, apiKey=None ) :
     'Retrieves nim path for project structure - items options: job / show / shot / asset'
     params = {}
@@ -2947,6 +2959,22 @@ def get_verInfo( verID=None, username=None, nimURL=None, apiUser=None, apiKey=No
 
     if verID is not None : params['ID'] = verID
     if username is not None : params['username'] = username
+
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
+
+def get_maxVersion( fileID=None, nimURL=None, apiUser=None, apiKey=None ) :
+    '''
+    Retrieves the highest version number in a basename for a given fileID.
+
+        Parameters              Type
+
+    Required:
+        fileID                   integer   
+    '''
+
+    params = {'q': 'getMaxVersion'}
+    if fileID is not None : params['fileID'] = fileID
 
     result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
     return result
