@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: Nuke/Python/Startup/nim_hiero_connector/nimShotProcessor.py
-# Version:  v4.0.67.200319
+# Version:  v7.2.0.250228
 #
 # Nuke 13.0v1
 #

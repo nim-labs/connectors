@@ -2,11 +2,11 @@
 #******************************************************************************
 #
 # Filename:    Flame/python/nimFlameExport.py
-# Version:     v6.1.12.240419
+# Version:     v7.2.0.250228
 # Compatible:  Python 3.x
 #              PySide6
 #
-# Copyright (c) 2014-2024 NIM Labs LLC
+# Copyright (c) 2014-2025 NIM Labs LLC
 # All rights reserved.
 #
 # Use of this software is subject to the terms of the NIM Labs license

@@ -2,9 +2,9 @@
 #******************************************************************************
 #
 # Filename: Nuke/Python/Startup/nim_hiero_connector/nimHieroConnector.py
-# Version:  v6.1.16.240801
+# Version:  v7.2.0.250228
 #
-# Copyright (c) 2014-2024 NIM Labs LLC
+# Copyright (c) 2014-2025 NIM Labs LLC
 # All rights reserved.
 #
 # Use of this software is subject to the terms of the NIM Labs license
