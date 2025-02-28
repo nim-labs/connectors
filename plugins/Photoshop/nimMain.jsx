@@ -1,9 +1,9 @@
 /* ****************************************************************************
 #
 # Filename: Photoshop/nimMain.jsx
-# Version:  v2.6.77.170630
+# Version:  v7.2.0.250228
 #
-# Copyright (c) 2014-2022 NIM Labs LLC
+# Copyright (c) 2014-2025 NIM Labs LLC
 # All rights reserved.
 #
 # Use of this software is subject to the terms of the NIM Labs license
@@ -893,7 +893,7 @@ function saveFile(classID, className, serverID, serverPath, taskID, taskName, ta
 			isPub: isPub,
 			isWork: isWork
 		});
-		if (newFileInfo.success == 'false') {
+		if (newFileInfo.success == false) {
 			alert('Error: ' + newFileInfo.error);
 			return false;
 		}

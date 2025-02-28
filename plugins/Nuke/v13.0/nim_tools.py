@@ -2,9 +2,9 @@
 #******************************************************************************
 #
 # Filename: Nuke/nim_tools.py
-# Version:  v4.0.67.200319
+# Version:  v7.2.0.250228
 #
-# Copyright (c) 2014-2022 NIM Labs LLC
+# Copyright (c) 2014-2025 NIM Labs LLC
 # All rights reserved.
 #
 # Use of this software is subject to the terms of the NIM Labs license
@@ -79,7 +79,7 @@ def logNimRender(writeNode=None):
 		# Below commented out till taskID and elementTypeID can be read from node
 		'''
 		result = nimAPI.add_render(taskID=taskID, renderName=nimFolder)
-		if result['success'] == 'true':
+		if result['success'] == True:
 			#nimAPI.upload_renderIcon(renderID=result['ID'],img='/path/to/icon.jpeg')
 
 			nimAPI.add_element( parent='render', parentID=result['ID'], \

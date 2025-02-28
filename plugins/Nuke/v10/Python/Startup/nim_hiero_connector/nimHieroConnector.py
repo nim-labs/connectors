@@ -2,9 +2,9 @@
 #******************************************************************************
 #
 # Filename: Nuke/Python/Startup/nim_hiero_connector/nimHieroConnector.py
-# Version:  v2.0.0.160510
+# Version:  v7.2.0.250228
 #
-# Copyright (c) 2014-2022 NIM Labs LLC
+# Copyright (c) 2014-2025 NIM Labs LLC
 # All rights reserved.
 #
 # Use of this software is subject to the terms of the NIM Labs license
@@ -118,7 +118,7 @@ class NimHieroConnector():
 
 			shotInfo = nimAPI.add_shot( showID=showID, name=trackItem.name(), frames=trackItem.duration() )
 			#print shotInfo
-			if shotInfo['success'] == 'true':
+			if shotInfo['success'] == True:
 				shotID = shotInfo['ID']
 				print "		NIM shotID: %s" % shotID
 				
@@ -318,7 +318,7 @@ class NimHieroConnector():
 			self.setStatusMessage(status_msg,0,True)
 
 			'''
-			if apiInfo['file_success'] == 'true':
+			if apiInfo['file_success'] == True:
 				if 'error' in apiInfo:
 					print "		WARNING: %s" % apiInfo['error']
 			else:

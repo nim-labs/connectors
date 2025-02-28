@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: Nuke/Python/Startup/nim_hiero_connector/nim_nukeStudioUI.py
-# Version:  v7.0.5.250116
+# Version:  v7.2.0.250228
 #
 # Copyright (c) 2014-2025 NIM Labs LLC
 # All rights reserved.
@@ -323,7 +323,7 @@ def saveDialog():
 							comment=dialog.nim_comment, serverID=dialog.nim_serverID )
 
 		#get returned fileID and store globals
-		if nimResult['success'].lower() == 'true':
+		if nimResult['success'] == True:
 			print("Save File Result: %s" % nimResult)
 			print("Storing NIM Globals...")
 			nimHieroConnector.g_nim_versionID = nimResult
@@ -407,7 +407,7 @@ def versionDialog():
 							comment=dialog.nim_comment, serverID=nimHieroConnector.g_nim_serverID )
 
 		#get returned fileID and store in global
-		if nimResult['success'].lower() == 'true':
+		if nimResult['success'] == True:
 			print("Save File Result: %s" % nimResult)
 			print("Storing NIM Globals...")
 			nimHieroConnector.g_nim_versionID = nimResult

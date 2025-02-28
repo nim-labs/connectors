@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: nim_api.py
-# Version:  v7.1.0.250206
+# Version:  v7.2.0.250228
 #
 # Copyright (c) 2014-2025 NIM Labs LLC
 # All rights reserved.
@@ -21,7 +21,7 @@
 #
 # import nim_core.nim_api as nimAPI
 # result = nimAPI.add_render(taskID=14941, renderName='myRender')
-# if result['success'] == 'true':
+# if result['success'] == True:
 #    nimAPI.upload_renderIcon(renderID=result['ID'],img='/path/to/icon.jpeg')
 #    nimAPI.upload_reviewItem(renderID=result['ID'],path='/path/to/movie/myImages.mov',submit=0)
 #    nimAPI.add_element( parent='render', parentID=result['ID'], path='/path/to/frames', name='myImage.####.exr', \
@@ -660,6 +660,14 @@ def get_userList( nimURL=None, apiUser=None, apiKey=None ) :
     usrList = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
     return usrList
 
+def get_userInfo( ID=None, username=None, nimURL=None, apiUser=None, apiKey=None ) :
+    'Retrieves information for a given user by userID or username'
+    params = {}
+    params["q"] = "getUserInfo"
+    if ID is not None : params['ID'] = ID
+    if username is not None : params['username'] = username
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result 
 
 #  Locations  #
 
@@ -1707,7 +1715,7 @@ def get_serverInfo( ID=None, nimURL=None, apiUser=None, apiKey=None ) :
 def get_serverOSPath( ID=None, os=None, nimURL=None, apiUser=None, apiKey=None ) :
     'Retrieves server path based on OS'
     params = {}
-    params["q"] = "get_serverOSPath"
+    params["q"] = "getServerOsPath"
     if ID is not None : 
         params['ID'] = ID
     else:
@@ -1728,6 +1736,18 @@ def get_osPath( fileID=None, os=None, nimURL=None, apiUser=None, apiKey=None ) :
     result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
     return result
 
+def get_assetMasterOsPath( assetID=None, os=None, nimURL=None, apiUser=None, apiKey=None ) :
+    'Returns the path to the asset master based on asset ID and OS type.'
+    params = {}
+    params["q"] = "getAssetMasterOsPath"
+    if assetID is not None : 
+        params['assetID'] = assetID
+    else:
+        return False
+    if os is not None : params['os'] = os
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
+
 def get_paths( item='', ID=None, nimURL=None, apiUser=None, apiKey=None ) :
     'Retrieves nim path for project structure - items options: job / show / shot / asset'
     params = {}
@@ -1738,6 +1758,21 @@ def get_paths( item='', ID=None, nimURL=None, apiUser=None, apiKey=None ) :
         P.error ('get_paths: Missing ID')
         return False
     if item is not None : params['type'] = item
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
+
+def resolve_OsPath( os=None, path=None, nimURL=None, apiUser=None, apiKey=None ) :
+    'Retrieves server path based on OS'
+    params = {}
+    params["q"] = "resolveOsPath"
+    if os is not None : 
+        params['os'] = os
+    else:
+        return "OS Missing"
+    if path is not None : 
+        params['path'] = path
+    else:
+        return "Path Missing"
     result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
     return result
 
@@ -2928,6 +2963,22 @@ def get_verInfo( verID=None, username=None, nimURL=None, apiUser=None, apiKey=No
     result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
     return result
 
+def get_maxVersion( fileID=None, nimURL=None, apiUser=None, apiKey=None ) :
+    '''
+    Retrieves the highest version number in a basename for a given fileID.
+
+        Parameters              Type
+
+    Required:
+        fileID                   integer   
+    '''
+
+    params = {'q': 'getMaxVersion'}
+    if fileID is not None : params['fileID'] = fileID
+
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
+
 def versionUp( nim=None, padding=2, selected=False, win_launch=False, pub=False, symLink=True ) :
     'NIM Connector Function used to save/publish/version up files'
     user, job, asset, show, shot, basename, task='', '', '', '', '', '', ''
@@ -3502,7 +3553,7 @@ def save_file( parent='SHOW', parentID=0, task_type_ID=0, task_folder='', userID
 
         result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
         
-    if result['success'].lower() == 'false' :
+    if result['success'] == False :
         P.error( 'There was a problem writing to the NIM database.' )
         P.error( '    Database has not been populated with your file.' )
         P.error( result['error'] )
@@ -3558,7 +3609,7 @@ def update_file( ID=None, task_type_ID=None, task_folder=None, userID=None, base
 
     result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
 
-    if result['success'].lower() == 'false' :
+    if result['success'] == False :
         P.error( 'There was a problem writing to the NIM database.' )
         P.error( '    Database has not been updated with your file.' )
         P.error( result['error'] )

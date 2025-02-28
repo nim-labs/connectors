@@ -2,9 +2,9 @@
 #******************************************************************************
 #
 # Filename: UI.py
-# Version:  v6.1.16.240801
+# Version:  v7.2.0.250228
 #
-# Copyright (c) 2014-2024 NIM Labs LLC
+# Copyright (c) 2014-2025 NIM Labs LLC
 # All rights reserved.
 #
 # Use of this software is subject to the terms of the NIM Labs license
@@ -1548,7 +1548,7 @@ class GUI(QtGui.QMainWindow) :
         
         if serverDict :
             if 'success' in serverDict :
-                if serverDict['success'] == 'false' :
+                if serverDict['success'] == False :
                     P.warning(serverDict['error'])
                     self.nim.Input('server').clear()
                     self.nim.Input('server').addItem('None')

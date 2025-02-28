@@ -2,9 +2,9 @@
 #******************************************************************************
 #
 # Filename: Flame/python/nimFlameExport.py
-# Version:  v4.0.57.201016
+# Version:  v7.2.0.250228
 #
-# Copyright (c) 2014-2022 NIM Labs LLC
+# Copyright (c) 2014-2025 NIM Labs LLC
 # All rights reserved.
 #
 # Use of this software is subject to the terms of the NIM Labs license
@@ -2989,7 +2989,7 @@ def nimCreateShot(nim_showID=None, info=None) :
 		print "NIM - Exporting Shot Info"
 		shotInfo = nimAPI.add_shot( showID=nim_showID, name=nim_shotName, frames=nim_duration )
 
-		if shotInfo['success'] == 'true':
+		if shotInfo['success'] == True:
 			result['success'] = True
 			nim_shotID = shotInfo['ID']
 			print "NIM - nim_shotID: %s" % nim_shotID
