@@ -70,6 +70,19 @@ import nimFlameExport
 
 debug = True
 
+# NIM Helper Functions
+# Helper function to find the deepest existing directory in a given path.
+def find_existing_dir(path):
+    """Return the deepest existing directory in the given path."""
+    path = os.path.abspath(path)
+    while not os.path.isdir(path):
+        new_path = os.path.dirname(path)
+        if new_path == path:  # Reached root and didn't find a directory
+            return None
+        path = new_path
+    return path
+
+
 # Hooks in this files are called in the following order:
 #
 # preCustomExport (optional depending on getCustomExportProfiles)
@@ -717,6 +730,20 @@ def pre_export_asset(info, userData, *args, **kwargs):
         print("destinationPath: %s" % info['destinationPath'])
         print("resolvedPath: %s" % info['resolvedPath'])
         #print "shotName: %s" % info['shotName']
+
+    # List the directory to refresh the LucidLink cache
+    # This is a workaround for the LucidLink cache not being updated
+    assetPath = os.path.join(info['destinationPath'], info['resolvedPath'])
+    # Trim the file name from the path
+    assetPath = os.path.dirname(assetPath)
+    print(f"Asset Path: {assetPath}")
+    # Check if the path is a directory
+    existing_dir = find_existing_dir(assetPath)
+    if existing_dir:
+        os.system(f"ls -laR '{existing_dir}' > /dev/null 2>&1")
+        print(f"Listed contents of: {existing_dir}")
+    else:
+        print(f"Error: No existing directory found in path {assetPath}")
 
     print("pre_export_asset - END")
     pass
