@@ -4,3 +4,4 @@
 !resources_rc.pyc
 tests
 .vscode
+*.code-workspace
