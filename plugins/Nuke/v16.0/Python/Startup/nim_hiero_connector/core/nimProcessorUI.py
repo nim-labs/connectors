@@ -2,9 +2,9 @@
 #******************************************************************************
 #
 # Filename: Nuke/Python/Startup/nim_hiero_connector/nimProcessorUI.py
-# Version:  v6.1.4.231110
+# Version:  v7.2.0.250805
 #
-# Nuke 15.0v1
+# Nuke 16.0v4
 #
 # *****************************************************************************
 
@@ -836,7 +836,8 @@ class NimProcessorUIBase(IProcessorUI):
     widget.setLayout(layout)
 
     # Version custom versionSpinBox widget - allows user to specify padding
-    versionToolTip = "Set the version number for files/scripts which include the {version} token in the path.\nThis box sets the version number string (#) in the form: v#, e.g. 01 > v01.\nUse the +/- to control padding e.g. v01 / v0001."
+    versionToolTip = "Set the version number for files/scripts which include the {version} token in the path.\n" \
+      "This box sets the version number string (#) in the form: v#, e.g. 01 > v01."
 
     versionLayout = QtWidgets.QHBoxLayout()
 
@@ -1107,17 +1108,17 @@ class NimProcessorUIBase(IProcessorUI):
 
   def nim_publishElementChanged(self, state):
     '''Action when publish element checkbox is selected'''
-    #global g_nim_publishElement
-    if state == QtCore.Qt.Checked:
+    # In PySide6, checkbox states are passed as integers: 0=Unchecked, 2=Checked
+    if state == 2:  # QtCore.Qt.CheckState.Checked.value == 2
       nimHieroConnector.g_nim_publishElement = True
     else:
       nimHieroConnector.g_nim_publishElement = False
 
 
   def nim_publishCompChanged(self, state):
-    '''Action when publish element checkbox is selected'''
-    #global g_nim_publishComp
-    if state == QtCore.Qt.Checked:
+    '''Action when publish comp checkbox is selected'''
+    # In PySide6, checkbox states are passed as integers: 0=Unchecked, 2=Checked
+    if state == 2:  # QtCore.Qt.CheckState.Checked.value == 2
       nimHieroConnector.g_nim_publishComp = True
     else:
       nimHieroConnector.g_nim_publishComp = False

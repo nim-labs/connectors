@@ -2,9 +2,9 @@
 #******************************************************************************
 #
 # Filename: Nuke/Python/Startup/nim_hiero_connector/nimShotProcessorUI.py
-# Version:  v6.1.4.231110
+# Version:  v7.2.0.250805
 #
-# Nuke 15.0v1
+# Nuke 16.0v4
 #
 # *****************************************************************************
 
@@ -274,11 +274,11 @@ class NimShotProcessorUI(NimProcessorUIBase, QtCore.QObject):
 
 
   def cutUseHandlesChanged (self, checked):
-    self._preset.properties()["cutUseHandles"] = checked == QtCore.Qt.Checked
+    self._preset.properties()["cutUseHandles"] = QtCore.Qt.CheckState(checked) == QtCore.Qt.Checked
 
 
   def retimesChanged(self, checked):
-    self._preset.properties()["includeRetimes"] = checked == QtCore.Qt.Checked
+    self._preset.properties()["includeRetimes"] = QtCore.Qt.CheckState(checked) == QtCore.Qt.Checked
 
 
   def onStartFrameSourceChanged(self, index):
@@ -295,10 +295,8 @@ class NimShotProcessorUI(NimProcessorUIBase, QtCore.QObject):
 
 
   def _tagsSelectionChanged(self, include_subset, exclude_subset):
-
     self._preset.properties()["includeTags"] = [ tag.name() for tag in include_subset ]
     self._preset.properties()["excludeTags"] = [ tag.name() for tag in exclude_subset ]
-
 
 
   def trackSelectionChanged(self, item):
@@ -346,7 +344,7 @@ class NimShotProcessorUI(NimProcessorUIBase, QtCore.QObject):
         # Get the current track object by grabbing the data (track guid) stored on the checkbox
         for sequence in self._sequences:
           currentTrack = [track for track in sequence if track.guid() in [self.trackListModel.itemFromIndex(self.trackListModel.index(row, 0)).data()]][0]
-          if currentTrack.isEnabled() and self._trackHasTrackOrSubTrackItems(track):
+          if currentTrack.isEnabled() and self._trackHasTrackOrSubTrackItems(currentTrack):
             self.trackListModel.itemFromIndex(self.trackListModel.index(row, 0)).setCheckState(QtCore.Qt.Checked)
 
 
@@ -380,11 +378,6 @@ class NimShotProcessorUI(NimProcessorUIBase, QtCore.QObject):
       return True
     else:
       return False
-
-
-  def _tagsSelectionChanged(self, include_subset, exclude_subset):
-    self._preset.properties()["includeTags"] = [ tag.name() for tag in include_subset ]
-    self._preset.properties()["excludeTags"] = [ tag.name() for tag in exclude_subset ]
 
 
   def _checkExistingVersions(self, exportItems):
