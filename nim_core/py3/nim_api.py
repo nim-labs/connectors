@@ -4453,6 +4453,168 @@ def get_timecardInfo( timecardID=None, nimURL=None, apiUser=None, apiKey=None ) 
     result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
     return result
 
+#  Exchange Rates  #
+
+def get_exchangeRates( nimURL=None, apiUser=None, apiKey=None, **kwargs ) :
+    '''
+    Get exchange rates based on ID or date.  
+
+    Parameters
+        Parameters need to be passed as keyword arguments
+        Example:
+            get_exchangeRates( date='2025-8-1' )
+
+    	Required:
+    		ID 							integer		    The ID of the exchange rate row (Required if date is not passed)
+            date                        date            The date of the exchange rate in format: yyyy-mm-dd (Required if ID is not passed)
+                                                        The date does not have to be the date of the row.  
+                                                        The exchange rate row used for the date will be the closest date before or equal to the date passed.
+    
+    	Optional:
+    
+    Return:
+    	Returns a dictionary in the format
+    	result->success 		    True/False
+    	result->error 			    Includes any error or security messaging
+    	result->data 			    An array of returned data
+    '''
+
+    params = {'q': 'getExchangeRates'}
+    params.update(kwargs)
+
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
+
+def add_exchangeRates( nimURL=None, apiUser=None, apiKey=None, **kwargs ) :
+    '''
+     Add an exchange rate row
+
+     Parameters
+        Parameters need to be passed as keyword arguments
+        Example:
+            add_exchangeRates( date='2025-8-1', USD=1.0, EUR=0.85 )
+        Required:
+            date                        date                The date of the exchange rate in format: yyyy-mm-dd
+
+        Optional:                                           Any valid NIM currency code (listed below) mapped to a numeric value
+            USD                         float               The exchange rate for USD
+			EUR                         float               The exchange rate for EUR
+			JPY                         float               The exchange rate for JPY
+			GBP                         float               The exchange rate for GBP
+			AUD                         float               The exchange rate for AUD
+			CHF                         float               The exchange rate for CHF
+			CAD                         float               The exchange rate for CAD
+			MXN                         float               The exchange rate for MXN
+			CNY                         float               The exchange rate for CNY
+			NZD                         float               The exchange rate for NZD
+			SEK                         float               The exchange rate for SEK
+			RUB                         float               The exchange rate for RUB
+			HKD                         float               The exchange rate for HKD
+			NOK                         float               The exchange rate for NOK
+			SGD                         float               The exchange rate for SGD
+			TRY                         float               The exchange rate for TRY
+			KRW                         float               The exchange rate for KRW
+			ZAR                         float               The exchange rate for ZAR
+			BRL                         float               The exchange rate for BRL
+			INR                         float               The exchange rate for INR
+			ARS                         float               The exchange rate for ARS
+			BGN                         float               The exchange rate for BGN
+			CZK                         float               The exchange rate for CZK
+			DKK                         float               The exchange rate for DKK
+			HRK                         float               The exchange rate for HRK
+			HUF                         float               The exchange rate for HUF
+
+    Return:
+        Returns a dictionary in the format
+        result->success 		True/False
+        result->error 			Includes any error or security messaging	
+        result->ID 			    The ID of the newly created item
+    '''
+
+    params = {'q': 'addExchangeRates'}
+    params.update(kwargs)
+
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
+
+def update_exchangeRates( nimURL=None, apiUser=None, apiKey=None, **kwargs ) :
+    '''
+    Update Exchange Rates
+
+    Parameters
+        Parameters need to be passed as keyword arguments
+        Example:
+            update_exchangeRates( ID=123, USD=1.0, EUR=0.85 )
+    	Required:
+    		ID                          integer             The ID of the exchange rate row
+
+        Optional:
+            date 						date			    The date to use for the exchange rate row (format: YYYY-MM-DD)
+                                                       
+            Any valid NIM currency code (listed below) mapped to a numeric value 0 to clear a value
+    		USD                         float               The exchange rate for USD
+			EUR                         float               The exchange rate for EUR
+			JPY                         float               The exchange rate for JPY
+			GBP                         float               The exchange rate for GBP
+			AUD                         float               The exchange rate for AUD
+			CHF                         float               The exchange rate for CHF
+			CAD                         float               The exchange rate for CAD
+			MXN                         float               The exchange rate for MXN
+			CNY                         float               The exchange rate for CNY
+			NZD                         float               The exchange rate for NZD
+			SEK                         float               The exchange rate for SEK
+			RUB                         float               The exchange rate for RUB
+			HKD                         float               The exchange rate for HKD
+			NOK                         float               The exchange rate for NOK
+			SGD                         float               The exchange rate for SGD
+			TRY                         float               The exchange rate for TRY
+			KRW                         float               The exchange rate for KRW
+			ZAR                         float               The exchange rate for ZAR
+			BRL                         float               The exchange rate for BRL
+			INR                         float               The exchange rate for INR
+			ARS                         float               The exchange rate for ARS
+			BGN                         float               The exchange rate for BGN
+			CZK                         float               The exchange rate for CZK
+			DKK                         float               The exchange rate for DKK
+			HRK                         float               The exchange rate for HRK
+			HUF                         float               The exchange rate for HUF
+
+    Return:
+    	Returns a dictionary in the format
+    	result->success 		True/False
+    	result->error 			Includes any error or security messaging
+    '''
+
+    params = {'q': 'updateExchangeRates'}
+    params.update(kwargs)
+
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
+
+def delete_exchangeRates( nimURL=None, apiUser=None, apiKey=None, **kwargs ) :
+    '''
+    Delete Exchange Rates
+
+    Parameters
+        Parameters need to be passed as keyword arguments
+        Example:
+            delete_exchangeRates( ID=123 )
+    	Required:
+    		ID                          integer             The ID of the exchange rate row (Required if date is not passed)
+            date 						date			    The date of the exchange rate to update (format: YYYY-MM-DD) (Required if ID is not passed)
+    
+    Return:
+    	Returns a dictionary in the format
+    	result->success 		True/False
+    	result->error 			Includes any error or security messaging
+    '''
+
+    params = {'q': 'deleteExchangeRates'}
+    params.update(kwargs)
+
+    result = connect( method='get', params=params, nimURL=nimURL, apiUser=apiUser, apiKey=apiKey )
+    return result
+
 
 #  End
 
