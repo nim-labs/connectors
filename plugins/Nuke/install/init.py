@@ -52,9 +52,13 @@ else:
 		# Loading NIM for Nuke 15.0vX
 		nuke.pluginAddPath(nim_root+'/plugins/Nuke/v15.0')
 		nuke.pluginAddPath(nim_root+'/plugins/Nuke/v15.0/gizmos')
+	elif NukeVersionMajor == 16 and NukeVersionMinor >= 0:
+		# Loading NIM for Nuke 16.0vX
+		nuke.pluginAddPath(nim_root+'/plugins/Nuke/v16.0')
+		nuke.pluginAddPath(nim_root+'/plugins/Nuke/v16.0/gizmos')
 	else:
-		# Fall back to loading NIM for Nuke 15.0vX
-		nuke.pluginAddPath(nim_root+'/plugins/Nuke/v15.0')
-		nuke.pluginAddPath(nim_root+'/plugins/Nuke/v15.0/gizmos')
+		# Fall back to loading NIM for Nuke 16.0vX
+		nuke.pluginAddPath(nim_root+'/plugins/Nuke/v16.0')
+		nuke.pluginAddPath(nim_root+'/plugins/Nuke/v16.0/gizmos')
 
 # END NIM Nuke Connector
