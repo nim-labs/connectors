@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename:    Flame/python/nimFlameExport.py
-# Version:     v7.2.0.250228
+# Version:     v7.2.1.250325
 # Compatible:  Python 3.x
 #              PySide6
 #
@@ -3006,7 +3006,7 @@ def nimCreateShot(nim_showID=None, info=None) :
 			result['success'] = True
 			nim_shotID = shotInfo['ID']
 			print("NIM - nim_shotID: %s" % nim_shotID)
-			if 'error' in shotInfo:
+			if shotInfo.get('error'):
 				print("NIM - WARNING: %s" % shotInfo['error'])
 		else:
 			result['success'] = False

@@ -2,7 +2,7 @@
 #******************************************************************************
 #
 # Filename: Nuke/Python/Startup/nim_hiero_connector/nimHieroConnector.py
-# Version:  v7.2.0.250228
+# Version:  v7.2.1.250325
 #
 # Copyright (c) 2014-2025 NIM Labs LLC
 # All rights reserved.
@@ -144,7 +144,7 @@ class NimHieroConnector():
 				shotID = shotInfo['ID']
 				print("		NIM shotID: %s" % shotID)
 				
-				if 'error' in shotInfo:
+				if shotInfo.get('error'):
 					print("		WARNING: %s" % shotInfo['error'])
 
 				''' IF SHOT IS ONLINE GET PATHS '''
