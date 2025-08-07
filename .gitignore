@@ -3,5 +3,6 @@
 !nimDarktheme.pyc
 !resources_rc.pyc
 tests
+.pytest_cache
 .vscode
 *.code-workspace
