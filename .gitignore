@@ -6,3 +6,6 @@ tests
 .pytest_cache
 .vscode
 *.code-workspace
+
+# Coord runner files (attachments, config) - do not commit
+.coord/
